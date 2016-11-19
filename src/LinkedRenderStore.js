@@ -104,6 +104,7 @@ const mapping = {
   },
 
   getRenderClassForType(type, topology = DEFAULT_TOPOLOGY) {
+    debugger;
     return this.getRenderClassForProperty(type, RENDER_CLASS_NAME, topology);
   },
 
