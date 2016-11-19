@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 
-import { expandProperty, schema } from 'helpers/LinkedRenderStore';
-import { normalizePropery, propertyIncludes } from 'helpers/ldutilities';
+import { expandProperty, schema } from '../../LinkedRenderStore';
+import { normalizePropery, propertyIncludes } from '../../utilities';
 
 const LANG_PREF = ['nl', 'en'];
 
