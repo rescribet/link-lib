@@ -1,0 +1,15 @@
+{
+  "name": "link-lib",
+  "version": "1.0.0",
+  "description": "The Link library for creating information based applications",
+  "main": "index.js",
+  "private": true,
+  "url": "git+ssh://git@bitbucket.org/arguweb/link-lib.git",
+  "scripts": {
+    "build": "...",
+    "dev": "...",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fletcher91 <thom@argu.co>",
+  "license": "LGPL-3.0"
+}
