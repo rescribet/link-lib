@@ -1,4 +1,3 @@
-
 export function normalizePropery(obj) {
   if (typeof obj === 'undefined' || obj === false) {
     return undefined;

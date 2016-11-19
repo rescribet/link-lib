@@ -6,7 +6,7 @@
   "private": true,
   "url": "git+ssh://git@bitbucket.org/arguweb/link-lib.git",
   "scripts": {
-    "build": "WEBPACK_ENV=build webpack",
+    "build": "WEBPACK_ENV=build webpack && WEBPACK_ENV=dev webpack",
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

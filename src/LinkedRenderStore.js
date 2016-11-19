@@ -54,6 +54,14 @@ const mineForTypes = (lookupTypes, chain) => {
 const mapping = {
   mapping: {},
 
+  addOntologySchematics(items) {
+    if (Array.isArray(items)) {
+      schema['@graph'].push(...items)
+    } else {
+      schema['@graph'].push(items)
+    }
+  },
+
   getRenderClassForProperty(type, prop, topology = DEFAULT_TOPOLOGY) {
     const props = Array.isArray(prop) ? prop : [prop];
     const possibleClasses = this.possibleClasses(props, topology);

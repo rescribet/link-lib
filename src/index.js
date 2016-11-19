@@ -1,12 +1,7 @@
 export * from './LinkedRenderStore';
+export * as utilities from './utilities';
 
-import PropertyBase from './react/components/PropertyBase';
-import * as utilities from './utilities';
-
-export const react = {
-  PropertyBase,
-  utilities,
-};
+export * as react from './react/components';
 
 import LinkedRenderStore from './LinkedRenderStore';
 export default LinkedRenderStore;
