@@ -5,7 +5,11 @@ var outputFile;
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var env = process.env.WEBPACK_ENV;
 
-var plugins = [], outputFile;
+var plugins = [
+  new webpack.ProvidePlugin({
+    'link-lib': 'link-lib',
+  })
+];
 
 if (env === 'build') {
   plugins.push(new UglifyJsPlugin({ minimize: true }));

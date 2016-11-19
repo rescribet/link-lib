@@ -99,16 +99,16 @@ const mapping = {
     const arrPos = classes.indexOf(
       chain.find(elem => classes.indexOf(elem) >= 0)
     );
-    console.log(`best class for '${types}::${prop}': '${classes[arrPos < 0 ? 0 : arrPos]}'`);
+    console.debug(`best class for '${types}/${prop}': '${classes[arrPos < 0 ? 0 : arrPos]}'`);
     return classes[arrPos < 0 ? 0 : arrPos];
   },
 
   getRenderClassForType(type, topology = DEFAULT_TOPOLOGY) {
-    debugger;
     return this.getRenderClassForProperty(type, RENDER_CLASS_NAME, topology);
   },
 
   registerRenderer(component, type, property, topology = DEFAULT_TOPOLOGY) {
+    console.debug(`Registering renderer ${component.name} for ${type}/${property}::${topology}`);
     if (typeof this.mapping[type] === 'undefined') {
       this.mapping[type] = {};
     }
