@@ -30,6 +30,12 @@ const CI_MATCH_LENGTH = 3;
 const CI_MATCH_PREFIX = 1;
 const CI_MATCH_SUFFIX = 2;
 
+/**
+ * Expands a property if it's in short-form while preserving long-form.
+ * Note: The vocabulary needs to be present in NSContext
+ * @param {string} prop The short- or long-form property
+ * @returns {string} The (expanded) property
+ */
 export function expandProperty(prop) {
   const matches = prop && prop.match(COMPACT_IRI_REGX);
   if (matches === null || matches === undefined || matches.length !== CI_MATCH_LENGTH) {
@@ -54,6 +60,11 @@ const mineForTypes = (lookupTypes, chain) => {
 const mapping = {
   mapping: {},
 
+  /**
+   * Push one or more items onto the graph so it can be used by the render store for class determination.
+   * @summary Pushes one or more item onto the graph.
+   * @param items
+   */
   addOntologySchematics(items) {
     if (Array.isArray(items)) {
       schema['@graph'].push(...items)
@@ -107,6 +118,13 @@ const mapping = {
     return this.getRenderClassForProperty(type, RENDER_CLASS_NAME, topology);
   },
 
+  /**
+   * Register a renderer for a type/property.
+   * @param {object, function} component The class to return for the rendering of the object.
+   * @param {string} type The type's (compact) IRI of the object which the {component} can render.
+   * @param {string} [property] The property's (compact) IRI if the {component} is a subject renderer.
+   * @param {string} [topology] An alternate topology this {component} should render.
+   */
   registerRenderer(component, type, property, topology = DEFAULT_TOPOLOGY) {
     console.debug(`Registering renderer ${component.name} for ${type}/${property}::${topology}`);
     if (typeof this.mapping[type] === 'undefined') {
@@ -129,6 +147,15 @@ const mapping = {
       this.mapping[type][RENDER_CLASS_NAME][topology] = component;
     }
   },
+
+  /**
+   * Resets the render store mappings and the schema graph.
+   */
+  reset() {
+    schema['@context'] = NSContext;
+    schema['@graph'] = [];
+    this.mapping = [];
+  }
 };
 
 export default mapping;
