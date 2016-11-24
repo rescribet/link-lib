@@ -12,11 +12,18 @@ export const NSContext = {
   geo: 'http://www.w3.org/2003/01/geo/wgs84_pos#',
   hydra: 'http://www.w3.org/ns/hydra/core#',
   owl: 'http://www.w3.org/2002/07/owl#',
+  p: 'http://www.wikidata.org/prop/',
   prov: 'http://www.w3.org/ns/prov#',
   rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
   rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
   schema: 'http://schema.org/',
   skos: 'http://www.w3.org/2004/02/skos/core#',
+  wdata: 'https://www.wikidata.org/wiki/Special:EntityData/',
+  wd: 'http://www.wikidata.org/entity/',
+  wds: 'http://www.wikidata.org/entity/statement/',
+  wdref: 'http://www.wikidata.org/reference/',
+  wdv: 'http://www.wikidata.org/value/',
+  wdt: 'http://www.wikidata.org/prop/direct/',
   xsd: 'http://www.w3.org/2001/XMLSchema#',
 };
 
