@@ -2,7 +2,8 @@ import 'babel-polyfill'
 import assert from 'assert';
 import { describe, it } from 'mocha';
 
-import LinkedRenderStore, { expandProperty, NSContext, schema } from '../src/LinkedRenderStore';
+import LinkedRenderStore, { expandProperty, NSContext } from '../src/LinkedRenderStore';
+const schema = LinkedRenderStore.schema;
 
 const Thing = {
   '@id': 'http://schema.org/Thing',

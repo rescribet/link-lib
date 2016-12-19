@@ -1,8 +1,14 @@
 {
+  "extends": [
+    "eslint:recommended",
+    "eslint-config-airbnb/base"
+  ],
   "ecmaFeatures": {
     "globalReturn": true,
     "jsx": true,
-    "modules": true
+    "modules": true,
+    "restParams": true,
+    "spread": true
   },
   "env": {
     "browser": true,
@@ -23,5 +29,7 @@
   },
   "parser": "babel-eslint",
   "plugins": [],
-  "rules": {}
+  "rules": {
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }]
+  }
 }
