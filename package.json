@@ -1,11 +1,9 @@
 {
   "name": "link-lib",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "The Link library for creating information based applications",
   "main": "dist/link-lib.js",
-  "module": "dist/lib/main.js",
-  "private": true,
-  "url": "git+ssh://git@bitbucket.org/arguweb/link-lib.git",
+  "url": "https://github.com/fletcher91/link-lib.git",
   "scripts": {
     "build": "webpack --optimize-minimize",
     "build:dev": "webpack",
