@@ -3,13 +3,6 @@
     "eslint:recommended",
     "eslint-config-airbnb/base"
   ],
-  "ecmaFeatures": {
-    "globalReturn": true,
-    "jsx": true,
-    "modules": true,
-    "restParams": true,
-    "spread": true
-  },
   "env": {
     "browser": true,
     "es6": true,
@@ -27,7 +20,16 @@
     "expect": false,
     "sinon": true
   },
-  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "globalReturn": true,
+      "jsx": true,
+      "modules": true,
+      "restParams": true,
+      "spread": true
+    }
+  },
   "plugins": [],
   "rules": {
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }]

@@ -1,52 +1,31 @@
-var webpack = require('webpack');
-var path = require('path');
+// var path = require('path');
 var libraryName = 'link-lib';
-var outputFile;
-var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
-var env = process.env.WEBPACK_ENV;
-
-var plugins = [
-  new webpack.ProvidePlugin({
-    'link-lib': 'link-lib',
-  })
-];
-
-if (env === 'build') {
-  plugins.push(new UglifyJsPlugin({ minimize: true }));
-  outputFile = libraryName + '.min.js';
-} else {
-  outputFile = libraryName + '.js';
-}
 
 var config = {
-  entry: __dirname + '/src/index.js',
-  devtool: 'source-map',
+  entry: './src/index.js',
   output: {
-    path: __dirname + '/lib',
-    filename: outputFile,
+    path: './dist',
+    filename: libraryName + '.js',
     library: libraryName,
-    libraryTarget: 'umd',
-    umdNamedDefine: true
+    libraryTarget: 'commonjs2'
+  },
+  externals: {
+    'rdf-ext': 'rdf-ext',
+    'rdf-formats-common': 'rdf-formats-common'
   },
   module: {
-    loaders: [
+    rules: [
       {
-        test: /(\.jsx|\.js)$/,
-        loader: 'babel',
+        test: /(\.js|\.jsx)$/,
+        loader: 'babel-loader',
         exclude: /(node_modules|bower_components)/
       },
       {
-        test: /(\.jsx|\.js)$/,
-        loader: "eslint-loader",
-        exclude: /node_modules/
+        test: /.json$/,
+        use: 'json-loader'
       }
     ]
   },
-  resolve: {
-    root: path.resolve('./src'),
-    extensions: ['', '.js', '.jsx']
-  },
-  plugins: plugins,
 };
 
 module.exports = config;
