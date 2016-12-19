@@ -13,6 +13,8 @@ export const F_RDF_XML = 'application/rdf+xml';
 export const F_NTRIPLES_DEP = 'text/ntriples';
 export const F_TURTLE_DEP = 'application/x-turtle';
 
+export const NON_CONTENT_EXTS = ['php', 'asp', 'aspx', 'cgi', 'jsp'];
+
 /**
  * Returns the inner value for a property in JSON-LD structured objects.
  * @param {Object} prop The property to retrieve the value from.
@@ -63,7 +65,9 @@ export function propertyIncludes(obj, include) {
 }
 
 /**
- * Extracts the content type from a request, mainly from .
+ * Extracts the content type from a request.
+ * The content-type value has precedence if it contains a known type.
+ * Otherwise it returns the extension if present, or the content-type without the encoding.
  *
  * @summary Extracts the content type from a request.
  * @access private
@@ -74,7 +78,8 @@ export function getContentType(res) {
   const contentTypeRaw = typeof res.headers.get === 'undefined' ?
     res.headers['Content-Type'] : res.headers.get('Content-Type');
   const contentType = contentTypeRaw.split(';')[0];
-  const ext = new URL(res.url).href.split('.').pop();
+  const urlMatch = new URL(res.url).href.match('\.([a-zA-Z]*)[$|\?|#]');
+  const ext = urlMatch && urlMatch[1];
   if (contentType !== undefined) {
     if (contentType.includes(F_NTRIPLES) || contentType.includes(F_NTRIPLES_DEP)) {
       return F_NTRIPLES;
@@ -96,7 +101,10 @@ export function getContentType(res) {
       }
     }
   }
-  return ext;
+  if (!NON_CONTENT_EXTS.includes(ext)) {
+    return ext;
+  }
+  return contentTypeRaw.split(';')[0];
 }
 
 /**
