@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "description": "The Link library for creating information based applications",
   "main": "dist/link-lib.js",
-  "url": "https://github.com/fletcher91/link-lib.git",
+  "repository": "https://github.com/fletcher91/link-lib.git",
   "scripts": {
     "build": "webpack --optimize-minimize",
     "build:dev": "webpack",
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "doc": "esdoc -c ./esdoc.json",
     "lint": "eslint ./src",
+    "prepublish": "npm run build",
     "test": "mocha --compilers js:babel-core/register test/*.test.js"
   },
   "author": "Fletcher91 <thom@argu.co>",
