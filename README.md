@@ -1,6 +1,8 @@
 # Link Library
 *A Link to the Web*
 
+[![Build Status](https://travis-ci.org/fletcher91/link-lib.svg?branch=master)](https://travis-ci.org/fletcher91/link-lib)
+
 This is the library which powers the Argu Open Data platform. It provides an interface to build data-independent
 semantic applications for the human consumption of linked data.
 
