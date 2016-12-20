@@ -78,7 +78,7 @@ export function getContentType(res) {
   const contentTypeRaw = typeof res.headers.get === 'undefined' ?
     res.headers['Content-Type'] : res.headers.get('Content-Type');
   const contentType = contentTypeRaw.split(';')[0];
-  const urlMatch = new URL(res.url).href.match('\.([a-zA-Z]*)[$|\?|#]');
+  const urlMatch = new URL(res.url).href.match('.([a-zA-Z]*)[$|?|#]');
   const ext = urlMatch && urlMatch[1];
   if (contentType !== undefined) {
     if (contentType.includes(F_NTRIPLES) || contentType.includes(F_NTRIPLES_DEP)) {
@@ -121,6 +121,17 @@ export function isLinkedData(mediaType) {
   return [F_NTRIPLES, F_TURTLE, F_N3, F_JSONLD].includes(mediaType);
 }
 
+/**
+ * Tries to resolve the data extension.
+ * @returns {Object|undefined}
+ */
+export function getExtention() {
+  if (chrome && typeof chrome.runtime.connect !== 'undefined') {
+    return chrome.runtime.connect('kjgnkcpcclnlchifkbbnekmgmcefhagd');
+  }
+  return undefined;
+}
+
 /** @access private */
 export function fetchWithExtension(iri, formats) {
   const c = getExtention();
@@ -138,15 +149,4 @@ export function fetchWithExtension(iri, formats) {
     });
   }
   throw new Error('NoExtensionInstalledError');
-}
-
-/**
- * Tries to resolve the data extension.
- * @returns {Object|undefined}
- */
-export function getExtention() {
-  if (chrome && typeof chrome.runtime.connect !== 'undefined') {
-    return chrome.runtime.connect('kjgnkcpcclnlchifkbbnekmgmcefhagd');
-  }
-  return undefined;
 }

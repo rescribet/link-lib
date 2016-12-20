@@ -8,12 +8,12 @@ import rdf from 'rdf-ext';
  * @param object {null|object|rdf.NamedValue} The value to match on the object.
  * @returns {rdf.Quad|rdf.Triple|undefined} The matched object or {undefined} when not found.
  */
-rdf.Graph.prototype.find = function (subject, predicate, object) {
+rdf.Graph.prototype.find = function find(sub, pred, obj) {
   const arr = this.toArray();
   for (let i = 0; i < arr.length; i++) {
-    const s = subject === null || arr[i].subject === subject || arr[i].subject.equals(subject);
-    const p = predicate === null || arr[i].predicate === predicate || arr[i].predicate.equals(predicate);
-    const o = object === null || arr[i].object === object || arr[i].object.equals(object);
+    const s = sub === null || arr[i].subject === sub || arr[i].subject.equals(sub);
+    const p = pred === null || arr[i].predicate === pred || arr[i].predicate.equals(pred);
+    const o = obj === null || arr[i].object === obj || arr[i].object.equals(obj);
     if (s && p && o) {
       return arr[i];
     }

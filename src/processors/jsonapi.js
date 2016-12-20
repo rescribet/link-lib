@@ -30,19 +30,18 @@ function processExpandedEntity(id, expanded, origin) {
 
   const keys = Object.keys(entity);
   for (let i = 0; i < keys.length; i++) {
-    if (keys[i] && keys[i][0] === '@') {
-      continue;
+    if (keys[i] && keys[i][0] !== '@') {
+      const props = entity[keys[i]] instanceof Array ? entity[keys[i]] : [entity[keys[i]]];
+      graph.addAll(
+        props.map(obj => new rdf.Quad(
+          id,
+          new rdf.NamedNode(keys[i]),
+          obj instanceof Object && obj['@id'] !== undefined ?
+            new rdf.NamedNode(obj) : new rdf.Literal(obj),
+          origin,
+        )),
+      );
     }
-    const props = entity[keys[i]] instanceof Array ? entity[keys[i]] : [entity[keys[i]]];
-    graph.addAll(
-      props.map(obj => new rdf.Quad(
-        id,
-        new rdf.NamedNode(keys[i]),
-        obj instanceof Object && obj['@id'] !== undefined ?
-          new rdf.NamedNode(obj) : new rdf.Literal(obj),
-        origin,
-      )),
-    );
   }
   return graph;
 }
@@ -68,7 +67,7 @@ function processRelation(relation, topID, origin) {
 
   const relationID = new rdf.NamedNode(getIDForRelation(relation, relation.data instanceof Array ? 'self' : 'related'));
   if (relationID.toString()) {
-    const rel = relation.meta && relation.meta['@type'] || relation.links.self.meta['@type'];
+    const rel = (relation.meta && relation.meta['@type']) || relation.links.self.meta['@type'];
     graph.add(new rdf.Quad(
       topID,
       new rdf.NamedNode(expandProperty(rel)),
@@ -90,8 +89,8 @@ function processRelation(relation, topID, origin) {
         relationID,
         origin,
       ));
-      relation.data.forEach((rel) => {
-        graph.add(new rdf.Quad(relationID, member, new rdf.NamedNode(rel.id), origin));
+      relation.data.forEach((datum) => {
+        graph.add(new rdf.Quad(relationID, member, new rdf.NamedNode(datum.id), origin));
       });
     }
   }
@@ -101,17 +100,16 @@ function processRelation(relation, topID, origin) {
     for (let i = 0; i < keys.length; i++) {
       const link = relation.links[keys[i]];
       const type = expandProperty(link.meta['@type'] || `schema:${keys[i]}`);
-      if (link.href === undefined) {
-        continue;
+      if (link.href !== undefined) {
+        graph.add(
+          new rdf.Quad(
+            topID,
+            new rdf.NamedNode(type),
+            new rdf.NamedNode(link.href),
+            origin,
+          ),
+        );
       }
-      graph.add(
-        new rdf.Quad(
-          topID,
-          new rdf.NamedNode(type),
-          new rdf.NamedNode(link.href),
-          origin,
-        ),
-      );
     }
   }
   return graph;

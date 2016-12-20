@@ -32,6 +32,7 @@
   },
   "plugins": [],
   "rules": {
-    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }]
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "import/newline-after-import": "off"
   }
 }

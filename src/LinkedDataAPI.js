@@ -13,13 +13,14 @@ import {
 const formats = require('rdf-formats-common')();
 
 /**
- * Pushes value {v} onto an array under key {k} of Map {map}.
- * @param map The reference to the Map to add the data to.
+ * Pushes in-place value {v} onto an array under key {k} of Map {map}.
+ * @param {object|Map} map The reference to the Map to add the data to.
  * @param {string} k The key on {map}. An array is initialized when it doesn't yet exists.
  * @param {object} v
  */
 function pushToMap(map, k, v) {
   if (typeof map[k] === 'undefined') {
+    /* eslint no-param-reassign: 0 */
     map[k] = [];
   }
   map[k].push(v);
@@ -28,8 +29,8 @@ function pushToMap(map, k, v) {
 /**
  * Serializes an {rdf.Graph} into a specified output format.
  * @param {rdf.Graph} graph The graph to serialize
- * @param {string} output The media type of the output format, which has to have been registered first.
- * which has to have been registered with {registerProcessor}.
+ * @param {string} output The media type of the output format, which has to have been registered
+ * first with {registerProcessor}.
  * @returns {Promise.<string|undefined>} The serialized data or undefined.
  */
 function processGraph(graph, output) {
@@ -52,7 +53,7 @@ function processResponse(res) {
   const trip = new rdf.Triple(
     new rdf.NamedNode(res.url),
     new rdf.NamedNode(rdf.resolve('http:statusCodeValue')),
-    new rdf.Literal(parseInt(res.status)),
+    new rdf.Literal(parseInt(res.status, 10)),
     new URL(res.url).origin,
   );
   graph.add(trip);
@@ -75,7 +76,8 @@ const LDAPI = {
    * Loads a resource from the {iri}.
    * @access public
    * @param iri The IRI of the resource
-   * @return {Promise.<Response|object>} The response from the server, or an response object from the extension
+   * @return {Promise.<Response|object>} The response from the server, or an response object from
+   * the extension
    */
   fetchResource(iri) {
     return new Promise((resolve) => {
@@ -120,9 +122,9 @@ const LDAPI = {
    * @param next A function which handles graph updates
    */
   getEntity(iri, next) {
-    const graph = this.searchStore(iri);
-    if (graph && graph.length > 0) {
-      return graph;
+    const cachedGraph = this.searchStore(iri);
+    if (cachedGraph && cachedGraph.length > 0) {
+      return cachedGraph;
     }
     return this.fetchResource(iri)
       .then((res) => {
@@ -145,13 +147,15 @@ const LDAPI = {
         if (typeof e.res === 'undefined') {
           throw e;
         }
-        this.store.merge(new URL(res.url).origin, processResponse(res));
+        this.store.merge(new URL(e.res.url).origin, processResponse(e.res));
       });
   },
 
   getObject(iri, next) {
     const origin = new URL(iri).origin;
     try {
+      // TODO: replace with proper API to replace the _gpso call
+      /* eslint no-underscore-dangle: 0 */
       return next(this.store.graphs[origin]._gspo[origin][iri]);
     } catch (TypeError) {
       return next;
@@ -177,7 +181,7 @@ const LDAPI = {
   searchStore(iri) {
     const g = this.store.graphs[new URL(iri).origin];
     if (g) {
-      return g.filter(g => g.subject.equals(iri));
+      return g.filter(t => t.subject.equals(iri));
     }
     return undefined;
   },
