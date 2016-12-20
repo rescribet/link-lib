@@ -18,7 +18,7 @@ or open data, send us [a mail](mailto:info@argu.co).
 # Usage
 
 This package is meant primarily for ontology connector developers,
-see the [link-react](https://github.com/fletcher91/link-react) documentation for main usage notes.
+see the [link-redux](https://github.com/fletcher91/link-redux) documentation for main usage notes.
 
 ### Included namespace prefixes
 
