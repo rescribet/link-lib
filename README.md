@@ -15,6 +15,8 @@ or open data, send us [a mail](mailto:info@argu.co).
 
 `yarn add link-lib`
 
+The package externalizes the Promise API, so make sure to include your own.
+
 # Usage
 
 This package is meant primarily for ontology connector developers,

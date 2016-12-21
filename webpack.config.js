@@ -11,7 +11,8 @@ var config = {
   },
   externals: {
     'rdf-ext': 'rdf-ext',
-    'rdf-formats-common': 'rdf-formats-common'
+    'rdf-formats-common': 'rdf-formats-common',
+    'es6-promise': 'es6-promise'
   },
   module: {
     rules: [
