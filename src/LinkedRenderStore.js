@@ -1,6 +1,7 @@
 /* eslint no-console: 0 */
 import rdf from 'rdf-ext';
 
+import LinkDataAPI from './LinkedDataAPI';
 import { flattenProperty } from './utilities';
 
 /**
@@ -11,54 +12,14 @@ export const RENDER_CLASS_NAME = 'TYPE_RENDERER_CLASS';
 
 const DEFAULT_TOPOLOGY = 'DEFAULT_TOPOLOGY';
 
-rdf.prefixes.addAll({
-  argu: 'https://argu.co/ns/core#',
-  bibo: 'http://purl.org/ontology/bibo/',
-  cc: 'http://creativecommons.org/ns#',
-  dbo: 'http://dbpedia.org/ontology/',
-  dc: 'http://purl.org/dc/terms/',
-  dbpedia: 'http://dbpedia.org/resource/',
-  foaf: 'http://xmlns.com/foaf/0.1/',
-  geo: 'http://www.w3.org/2003/01/geo/wgs84_pos#',
-  http: 'http://www.w3.org/2011/http#',
-  hydra: 'http://www.w3.org/ns/hydra/core#',
-  p: 'http://www.wikidata.org/prop/',
-  prov: 'http://www.w3.org/ns/prov#',
-  schema: 'http://schema.org/',
-  skos: 'http://www.w3.org/2004/02/skos/core#',
-  wdata: 'https://www.wikidata.org/wiki/Special:EntityData/',
-  wd: 'http://www.wikidata.org/entity/',
-  wds: 'http://www.wikidata.org/entity/statement/',
-  wdref: 'http://www.wikidata.org/reference/',
-  wdv: 'http://www.wikidata.org/value/',
-  wdt: 'http://www.wikidata.org/prop/direct/',
-});
-export const NSContext = rdf.prefixes;
-
-const COMPACT_IRI_REGX = /^(\w+):(\w+)$/;
-const CI_MATCH_LENGTH = 3;
-const CI_MATCH_PREFIX = 1;
-const CI_MATCH_SUFFIX = 2;
-
-/**
- * Expands a property if it's in short-form while preserving long-form.
- * Note: The vocabulary needs to be present in NSContext
- * @param {string} prop The short- or long-form property
- * @returns {string} The (expanded) property
- */
-export function expandProperty(prop) {
-  const matches = prop && prop.match(COMPACT_IRI_REGX);
-  if (matches === null || matches === undefined || matches.length !== CI_MATCH_LENGTH) {
-    return prop;
-  }
-  return `${NSContext[matches[CI_MATCH_PREFIX]]}${matches[CI_MATCH_SUFFIX]}`;
-}
-
 function convertToCacheKey(type, props, topology) {
   return `${type}[${props.join()}][${topology}]`;
 }
 
 const LinkedRenderStore = {
+  /** @access private */
+  api: LinkDataAPI,
+
   /** @access private */
   mapping: {},
 
@@ -70,9 +31,11 @@ const LinkedRenderStore = {
 
   /** @access private */
   schema: {
-    '@context': NSContext,
     '@graph': [],
   },
+
+  /** @access private */
+  store: rdf.createStore(),
 
   /**
    * Adds a renderer to {this.lookupCache}
@@ -101,6 +64,12 @@ const LinkedRenderStore = {
     }
   },
 
+  /**
+   * Expands the given types and returns the best class to render it with.
+   * @param classes
+   * @param {Array} [types]
+   * @returns {string} The best match for the given classes and types.
+   */
   bestClass(classes, types) {
     const chain = this.mineForTypes(types, types || []);
     const arrPos = classes.indexOf(
@@ -120,26 +89,44 @@ const LinkedRenderStore = {
   },
 
   /**
+   * Gets an entity by its IRI.
    *
+   * When data is already present for the IRI as a subject, the stored data is returned,
+   * otherwise the IRI will be fetched and processed.
    * @access public
-   * @param type
-   * @param prop
-   * @param topology
-   * @returns {*}
+   * @param iri The IRI of the resource
+   * @param next A function which handles graph updates
+   */
+  getEntity(iri, next) {
+    const cachedGraph = this.searchStore(iri);
+    if (cachedGraph && cachedGraph.length > 0) {
+      return cachedGraph;
+    }
+    return this.api.getEntity(this.store, iri, next);
+  },
+
+  /**
+   * Finds the best render class for a given property in respect to a topology.
+   * @access public
+   * @param {String|String[]} type The type(s) of the resource to render.
+   * @param {String|String[]} prop The property(s) to render.
+   * @param {string} [topology] The topology of the resource, if any
+   * @returns {Object|function|undefined} The most appropriate renderer, if any.
    */
   getRenderClassForProperty(type, prop, topology = DEFAULT_TOPOLOGY) {
     if (type === undefined) {
       return undefined;
     }
-    const props = Array.isArray(prop) ? prop : [prop];
-    const key = convertToCacheKey(type, props, topology);
+    const types = type instanceof Array ? type : [type];
+    const props = Array.isArray(prop) ? prop.map(p => expandProperty(p)) : [expandProperty(prop)];
+    const key = convertToCacheKey(types, props, topology);
     const cached = this.getClassFromCache(key);
     if (cached !== undefined) {
       return cached;
     }
 
     try {
-      const exact = this.mapping[type[0]][props[0]][topology];
+      const exact = this.mapping[types[0]][props[0]][topology];
       if (exact !== undefined) {
         return this.addClassToCache(exact, key);
       }
@@ -149,10 +136,10 @@ const LinkedRenderStore = {
     if (possibleClasses.length === 0) {
       return topology === DEFAULT_TOPOLOGY ?
         undefined :
-        this.getRenderClassForProperty(type, props, DEFAULT_TOPOLOGY);
+        this.getRenderClassForProperty(types, props, DEFAULT_TOPOLOGY);
     }
     for (let i = 0; props.length; i++) {
-      const bestClass = this.bestClass(possibleClasses, type);
+      const bestClass = this.bestClass(possibleClasses, types);
       const klass = this.mapping[bestClass][props[i]][topology];
       if (klass) {
         return this.addClassToCache(klass, key);
@@ -161,10 +148,24 @@ const LinkedRenderStore = {
     return undefined;
   },
 
+  /**
+   * Finds the best render class for a type in respect to a topology.
+   * @see {getRenderClassForProperty}
+   * @param {String|String[]} type The type(s) of the resource to render.
+   * @param {string} [topology] The topology of the resource, if any
+   * @returns {*|Object|Function|undefined} The most appropriate renderer, if any.
+   */
   getRenderClassForType(type, topology = DEFAULT_TOPOLOGY) {
     return this.getRenderClassForProperty(type, RENDER_CLASS_NAME, topology);
   },
 
+  /**
+   * Expands the given lookupTypes to include all their equivalent and subclasses.
+   * This is done in multiple iterations until no new types are found.
+   * @param {string[]} lookupTypes The types to look up.
+   * @param {string[]} chain
+   * @returns {string[]}
+   */
   mineForTypes(lookupTypes, chain) {
     if (lookupTypes === undefined) {
       return chain;
@@ -198,16 +199,16 @@ const LinkedRenderStore = {
    * Register a renderer for a type/property.
    * @access public
    * @param {Object|function} component The class to return for the rendering of the object.
-   * @param {String} types The type's (compact) IRI of the object which the {component} can render.
-   * @param {String} [property] The property's (compact) IRI if the {component} is a subject
-   *                            renderer.
+   * @param {String|String[]} types The type's (compact) IRI of the object which the {component} can
+   * render.
+   * @param {String|String[]} [property] The property's (compact) IRI if the {component} is a
+   * subject renderer.
    * @param {String} [topology] An alternate topology this {component} should render.
    */
   registerRenderer(component, types, property, topology = DEFAULT_TOPOLOGY) {
     const arrTypes = types instanceof Array ? types : [types];
     arrTypes.forEach((_type) => {
       const type = expandProperty(_type);
-      console.debug(`Registering renderer ${component.name} for ${type}/${property}::${topology}`);
       if (typeof this.mapping[type] === 'undefined') {
         this.mapping[type] = {};
       }
@@ -236,11 +237,84 @@ const LinkedRenderStore = {
    * @access public
    */
   reset() {
-    this.schema['@context'] = NSContext;
     this.schema['@graph'] = [];
     this.mapping = [];
     this.lookupCache = {};
   },
+
+  /**
+   * Searches the store for all the triples for which {iri} is the subject.
+   * @access private
+   * @param {string} iri The full IRI of the resource.
+   * @return {rdf.Graph|undefined}
+   */
+  searchStore(iri) {
+    const g = this.store.graphs[new URL(iri).origin];
+    if (g) {
+      return g.filter(t => t.subject.equals(iri));
+    }
+    return undefined;
+  },
+
+  /**
+   * Returns an entity from the cache directly.
+   * This won't cause any network requests even if the entity can't be found.
+   * @param {string} iri The IRI of the resource.
+   * @param next
+   * @returns {Object|undefined} The object if found, or undefined.
+   */
+  tryEntity(iri, next) {
+    const origin = new URL(iri).origin;
+    try {
+      // TODO: replace with proper API to replace the _gpso call
+      /* eslint no-underscore-dangle: 0 */
+      return next(this.store.graphs[origin]._gspo[origin][iri]);
+    } catch (TypeError) {
+      return next;
+    }
+  }
 };
+
+LinkedRenderStore.store.rdf.prefixes.addAll({
+  argu: 'https://argu.co/ns/core#',
+  bibo: 'http://purl.org/ontology/bibo/',
+  cc: 'http://creativecommons.org/ns#',
+  dbo: 'http://dbpedia.org/ontology/',
+  dc: 'http://purl.org/dc/terms/',
+  dbpedia: 'http://dbpedia.org/resource/',
+  foaf: 'http://xmlns.com/foaf/0.1/',
+  geo: 'http://www.w3.org/2003/01/geo/wgs84_pos#',
+  http: 'http://www.w3.org/2011/http#',
+  hydra: 'http://www.w3.org/ns/hydra/core#',
+  p: 'http://www.wikidata.org/prop/',
+  prov: 'http://www.w3.org/ns/prov#',
+  schema: 'http://schema.org/',
+  skos: 'http://www.w3.org/2004/02/skos/core#',
+  wdata: 'https://www.wikidata.org/wiki/Special:EntityData/',
+  wd: 'http://www.wikidata.org/entity/',
+  wds: 'http://www.wikidata.org/entity/statement/',
+  wdref: 'http://www.wikidata.org/reference/',
+  wdv: 'http://www.wikidata.org/value/',
+  wdt: 'http://www.wikidata.org/prop/direct/',
+});
+
+const COMPACT_IRI_REGX = /^(\w+):(\w+)$/;
+const CI_MATCH_LENGTH = 3;
+const CI_MATCH_PREFIX = 1;
+const CI_MATCH_SUFFIX = 2;
+
+/**
+ * Expands a property if it's in short-form while preserving long-form.
+ * Note: The vocabulary needs to be present in the store prefix libary
+ * @param {string} prop The short- or long-form property
+ * @returns {string} The (expanded) property
+ */
+export function expandProperty(prop) {
+  const matches = prop && prop.match(COMPACT_IRI_REGX);
+  if (matches === null || matches === undefined || matches.length !== CI_MATCH_LENGTH) {
+    return prop;
+  }
+  return `${LinkedRenderStore.store.rdf.prefixes[matches[CI_MATCH_PREFIX]]}${matches[CI_MATCH_SUFFIX]}`;
+}
 
 export default LinkedRenderStore;

@@ -1,9 +1,9 @@
-import 'babel-polyfill'
+import 'babel-polyfill';
 import assert from 'assert';
 import { describe, it } from 'mocha';
 
-import LinkedRenderStore, { expandProperty, NSContext } from '../src/LinkedRenderStore';
-const schema = LinkedRenderStore.schema;
+import LRS, { expandProperty, RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
+const schema = LRS.schema;
 
 const Thing = {
   '@id': 'http://schema.org/Thing',
@@ -28,13 +28,8 @@ const CreativeWork = {
 
 describe('LinkedRenderStore functions well', function() {
   describe('The schema is available', function () {
-    it('has short notation keys', function() {
-      assert(Object.keys(NSContext).length >= 15);
-      assert(NSContext.owl === 'http://www.w3.org/2002/07/owl#');
-    });
     it('initializes the schema', function () {
       assert(typeof schema === 'object');
-      assert(schema['@context'] === NSContext);
       assert(Array.isArray(schema['@graph']));
     });
   });
@@ -43,6 +38,7 @@ describe('LinkedRenderStore functions well', function() {
     it('expands short to long notation', function() {
       assert(expandProperty('schema:name') === 'http://schema.org/name');
     });
+
     it('preserves long notation', function() {
       assert(expandProperty('http://schema.org/name') === 'http://schema.org/name');
     });
@@ -50,15 +46,115 @@ describe('LinkedRenderStore functions well', function() {
 
   describe('adds new graph items', function() {
     it('add a single graph item', function() {
-      LinkedRenderStore.reset();
-      LinkedRenderStore.addOntologySchematics(Thing);
+      LRS.reset();
+      LRS.addOntologySchematics(Thing);
       assert(schema['@graph'].includes(Thing));
     });
+
     it('adds multiple graph items', function() {
-      LinkedRenderStore.reset();
-      LinkedRenderStore.addOntologySchematics([Thing, CreativeWork]);
+      LRS.reset();
+      LRS.addOntologySchematics([Thing, CreativeWork]);
       assert(schema['@graph'].includes(Thing));
       assert(schema['@graph'].includes(CreativeWork));
+    });
+  });
+
+  describe('type renderer', function() {
+    it('registers with shorthand', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(ident, 'schema:Thing');
+      assert.equal(
+        LRS.mapping['http://schema.org/Thing'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
+        ident
+      );
+    });
+
+    it('registers with full notation', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(ident, 'http://schema.org/Thing');
+      assert.equal(
+        LRS.mapping['http://schema.org/Thing'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
+        ident
+      );
+    });
+
+    it('registers multiple shorthand', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(ident, ['schema:Thing', 'schema:CreativeWork']);
+      assert.equal(
+        LRS.mapping['http://schema.org/Thing'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
+        ident
+      );
+      assert.equal(
+        LRS.mapping['http://schema.org/CreativeWork'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
+        ident
+      );
+    });
+  });
+
+  describe('property renderer', function() {
+    it('registers with shorthand', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(ident, 'schema:Thing', 'schema:name');
+      assert.equal(
+        LRS.mapping['http://schema.org/Thing']['http://schema.org/name']['DEFAULT_TOPOLOGY'],
+        ident
+      );
+    });
+
+    it('registers with full notation', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(ident, 'http://schema.org/Thing', 'http://schema.org/name');
+      assert.equal(
+        LRS.mapping['http://schema.org/Thing']['http://schema.org/name']['DEFAULT_TOPOLOGY'],
+        ident
+      );
+    });
+
+    it('registers multiple shorthand', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(
+        ident,
+        'schema:Thing',
+        ['schema:name', 'rdfs:label']
+      );
+      ['http://schema.org/name', 'http://www.w3.org/2000/01/rdf-schema#label'].map(prop => {
+        assert.equal(
+          LRS.mapping['http://schema.org/Thing'][prop]['DEFAULT_TOPOLOGY'],
+          ident
+        );
+        assert.notEqual(
+          LRS.mapping['http://schema.org/Thing'][prop]['DEFAULT_TOPOLOGY'],
+          b => b
+        );
+      });
+    });
+  });
+
+  describe('returns renderer for', function() {
+    it('class renders', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(ident, 'http://schema.org/Thing');
+      assert.equal(LRS.getRenderClassForType('http://schema.org/Thing'), ident);
+      assert.notEqual(LRS.getRenderClassForType('http://schema.org/Thing'), a => a);
+    });
+
+    it('property renders', function () {
+      LRS.reset();
+      const ident = a => a;
+      LRS.registerRenderer(ident, 'http://schema.org/Thing', 'http://schema.org/name');
+      assert.equal(LRS.getRenderClassForProperty('http://schema.org/Thing', 'schema:name'), ident);
+      assert.notEqual(
+        LRS.getRenderClassForProperty('http://schema.org/Thing', 'schema:name'),
+        a => a
+      );
     });
   });
 });

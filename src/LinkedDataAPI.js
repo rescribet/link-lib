@@ -66,8 +66,6 @@ const LDAPI = {
   /** Set to an IRI to add it as the type for resources which have none */
   defaultType: 'http://schema.org/Thing',
   /** @access private */
-  store: rdf.createStore(),
-  /** @access private */
   mapping: {},
   /** Set the appropriate media-type as the output for the data calls */
   output: F_JSONLD,
@@ -121,14 +119,10 @@ const LDAPI = {
    * @param iri The IRI of the resource
    * @param next A function which handles graph updates
    */
-  getEntity(iri, next) {
-    const cachedGraph = this.searchStore(iri);
-    if (cachedGraph && cachedGraph.length > 0) {
-      return cachedGraph;
-    }
+  getEntity(store, iri, next) {
     return this.fetchResource(iri)
       .then((res) => {
-        this.store.merge(new URL(res.url).origin, processResponse(res));
+        store.merge(new URL(res.url).origin, processResponse(res));
         const format = getContentType(res);
         const processor = this.mapping[format][0];
         return processor(res, (graph) => {
@@ -139,7 +133,7 @@ const LDAPI = {
               new rdf.NamedNode(this.defaultType),
             ));
           }
-          this.store.merge(new URL(res.url).origin, graph);
+          store.merge(new URL(res.url).origin, graph);
           return processGraph(graph, this.output).then(next);
         });
       })
@@ -147,19 +141,8 @@ const LDAPI = {
         if (typeof e.res === 'undefined') {
           throw e;
         }
-        this.store.merge(new URL(e.res.url).origin, processResponse(e.res));
+        store.merge(new URL(e.res.url).origin, processResponse(e.res));
       });
-  },
-
-  getObject(iri, next) {
-    const origin = new URL(iri).origin;
-    try {
-      // TODO: replace with proper API to replace the _gpso call
-      /* eslint no-underscore-dangle: 0 */
-      return next(this.store.graphs[origin]._gspo[origin][iri]);
-    } catch (TypeError) {
-      return next;
-    }
   },
 
   /**
@@ -175,15 +158,6 @@ const LDAPI = {
       pushToMap(this.mapping, mediaType, processor);
       this.accept = [this.accept, [mediaType, acceptValue].join(';')].join();
     });
-  },
-
-  /** @access private */
-  searchStore(iri) {
-    const g = this.store.graphs[new URL(iri).origin];
-    if (g) {
-      return g.filter(t => t.subject.equals(iri));
-    }
-    return undefined;
   },
 };
 
