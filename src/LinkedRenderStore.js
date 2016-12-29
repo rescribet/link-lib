@@ -4,13 +4,17 @@ import rdf from 'rdf-ext';
 import LinkDataAPI from './LinkedDataAPI';
 import { flattenProperty } from './utilities';
 
+const COMPACT_IRI_REGX = /^(\w+):(\w+)$/;
+const CI_MATCH_LENGTH = 3;
+const CI_MATCH_PREFIX = 1;
+const CI_MATCH_SUFFIX = 2;
+const DEFAULT_TOPOLOGY = 'DEFAULT_TOPOLOGY';
+
 /**
  * Constant used to determine that a class is used to render a type rather than a property.
  * @type {string}
  */
 export const RENDER_CLASS_NAME = 'TYPE_RENDERER_CLASS';
-
-const DEFAULT_TOPOLOGY = 'DEFAULT_TOPOLOGY';
 
 function convertToCacheKey(type, props, topology) {
   return `${type}[${props.join()}][${topology}]`;
@@ -79,6 +83,20 @@ const LinkedRenderStore = {
   },
 
   /**
+   * Expands a property if it's in short-form while preserving long-form.
+   * Note: The vocabulary needs to be present in the store prefix libary
+   * @param {string} prop The short- or long-form property
+   * @returns {string} The (expanded) property
+   */
+  expandProperty(prop) {
+    const matches = prop && prop.match(COMPACT_IRI_REGX);
+    if (matches === null || matches === undefined || matches.length !== CI_MATCH_LENGTH) {
+      return prop;
+    }
+    return `${this.store.rdf.prefixes[matches[CI_MATCH_PREFIX]]}${matches[CI_MATCH_SUFFIX]}`;
+  },
+
+  /**
    * Resolves a renderer from the {lookupCache}.
    * @access private
    * @param key The key to look up.
@@ -118,7 +136,9 @@ const LinkedRenderStore = {
       return undefined;
     }
     const types = type instanceof Array ? type : [type];
-    const props = Array.isArray(prop) ? prop.map(p => expandProperty(p)) : [expandProperty(prop)];
+    const props = Array.isArray(prop) ?
+      prop.map(p => this.expandProperty(p)) :
+      [this.expandProperty(prop)];
     const key = convertToCacheKey(types, props, topology);
     const cached = this.getClassFromCache(key);
     if (cached !== undefined) {
@@ -208,7 +228,7 @@ const LinkedRenderStore = {
   registerRenderer(component, types, property, topology = DEFAULT_TOPOLOGY) {
     const arrTypes = types instanceof Array ? types : [types];
     arrTypes.forEach((_type) => {
-      const type = expandProperty(_type);
+      const type = this.expandProperty(_type);
       if (typeof this.mapping[type] === 'undefined') {
         this.mapping[type] = {};
       }
@@ -219,7 +239,7 @@ const LinkedRenderStore = {
       if (property !== undefined) {
         const arr = Array.isArray(property) ? property : [property];
         arr.forEach((p) => {
-          const prop = expandProperty(p);
+          const prop = this.expandProperty(p);
           if (typeof this.mapping[type][prop] === 'undefined') {
             this.mapping[type][prop] = {};
           }
@@ -272,7 +292,7 @@ const LinkedRenderStore = {
     } catch (TypeError) {
       return next;
     }
-  }
+  },
 };
 
 LinkedRenderStore.store.rdf.prefixes.addAll({
@@ -297,24 +317,5 @@ LinkedRenderStore.store.rdf.prefixes.addAll({
   wdv: 'http://www.wikidata.org/value/',
   wdt: 'http://www.wikidata.org/prop/direct/',
 });
-
-const COMPACT_IRI_REGX = /^(\w+):(\w+)$/;
-const CI_MATCH_LENGTH = 3;
-const CI_MATCH_PREFIX = 1;
-const CI_MATCH_SUFFIX = 2;
-
-/**
- * Expands a property if it's in short-form while preserving long-form.
- * Note: The vocabulary needs to be present in the store prefix libary
- * @param {string} prop The short- or long-form property
- * @returns {string} The (expanded) property
- */
-export function expandProperty(prop) {
-  const matches = prop && prop.match(COMPACT_IRI_REGX);
-  if (matches === null || matches === undefined || matches.length !== CI_MATCH_LENGTH) {
-    return prop;
-  }
-  return `${LinkedRenderStore.store.rdf.prefixes[matches[CI_MATCH_PREFIX]]}${matches[CI_MATCH_SUFFIX]}`;
-}
 
 export default LinkedRenderStore;

@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import assert from 'assert';
 import { describe, it } from 'mocha';
 
-import LRS, { expandProperty, RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
+import LRS, { RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
 const schema = LRS.schema;
 
 const Thing = {
@@ -36,11 +36,11 @@ describe('LinkedRenderStore functions well', function() {
 
   describe('expands properties correctly', function() {
     it('expands short to long notation', function() {
-      assert(expandProperty('schema:name') === 'http://schema.org/name');
+      assert(LRS.expandProperty('schema:name') === 'http://schema.org/name');
     });
 
     it('preserves long notation', function() {
-      assert(expandProperty('http://schema.org/name') === 'http://schema.org/name');
+      assert(LRS.expandProperty('http://schema.org/name') === 'http://schema.org/name');
     });
   });
 
@@ -140,6 +140,7 @@ describe('LinkedRenderStore functions well', function() {
   describe('returns renderer for', function() {
     it('class renders', function () {
       LRS.reset();
+      assert.equal(LRS.getRenderClassForType('http://schema.org/Thing'), undefined);
       const ident = a => a;
       LRS.registerRenderer(ident, 'http://schema.org/Thing');
       assert.equal(LRS.getRenderClassForType('http://schema.org/Thing'), ident);
