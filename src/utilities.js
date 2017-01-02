@@ -126,7 +126,7 @@ export function isLinkedData(mediaType) {
  * @returns {Object|undefined}
  */
 export function getExtention() {
-  if (chrome && typeof chrome.runtime.connect !== 'undefined') {
+  if (typeof chrome !== 'undefined' && typeof chrome.runtime.connect !== 'undefined') {
     return chrome.runtime.connect('kjgnkcpcclnlchifkbbnekmgmcefhagd');
   }
   return undefined;
