@@ -3,7 +3,7 @@ import assert from 'assert';
 import rdf from 'rdf-ext';
 import { promises as jsonld } from 'jsonld';
 
-import { expandProperty } from '../LinkedRenderStore';
+import LRS from '../LinkedRenderStore';
 
 function getIDForEntity(resource, entity) {
   const id = (resource.links && resource.links.self) || entity['@id'];
@@ -70,22 +70,22 @@ function processRelation(relation, topID, origin) {
     const rel = (relation.meta && relation.meta['@type']) || relation.links.self.meta['@type'];
     graph.add(new rdf.Quad(
       topID,
-      new rdf.NamedNode(expandProperty(rel)),
+      new rdf.NamedNode(LRS.expandProperty(rel)),
       relationID,
       origin,
     ));
 
     if (relation.data instanceof Array) {
-      const member = new rdf.NamedNode(expandProperty('hydra:member'));
+      const member = new rdf.NamedNode(LRS.expandProperty('hydra:member'));
       graph.add(new rdf.Quad(
         relationID,
         new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-        new rdf.NamedNode(expandProperty('hydra:Collection')),
+        new rdf.NamedNode(LRS.expandProperty('hydra:Collection')),
         origin,
       ));
       graph.add(new rdf.Quad(
         topID,
-        new rdf.NamedNode(expandProperty('argu:collectionAssociation')),
+        new rdf.NamedNode(LRS.expandProperty('argu:collectionAssociation')),
         relationID,
         origin,
       ));
@@ -99,7 +99,7 @@ function processRelation(relation, topID, origin) {
     const keys = Object.keys(relation.links);
     for (let i = 0; i < keys.length; i++) {
       const link = relation.links[keys[i]];
-      const type = expandProperty(link.meta['@type'] || `schema:${keys[i]}`);
+      const type = LRS.expandProperty(link.meta['@type'] || `schema:${keys[i]}`);
       if (link.href !== undefined) {
         graph.add(
           new rdf.Quad(
