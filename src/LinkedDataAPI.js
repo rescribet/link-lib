@@ -65,8 +65,6 @@ const LDAPI = {
   accept: {
     default: '',
   },
-  /** Set to an IRI to add it as the type for resources which have none */
-  defaultType: 'http://schema.org/Thing',
   /** @access private */
   mapping: {},
   /** Set the appropriate media-type as the output for the data calls */
@@ -129,13 +127,6 @@ const LDAPI = {
         const format = getContentType(res);
         const processor = this.mapping[format][0];
         return processor(res, (graph) => {
-          if (this.defaultType && graph.find(iri, 'rdfs:type') === undefined) {
-            graph.add(new rdf.Triple(
-              new rdf.NamedNode(iri),
-              new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-              new rdf.NamedNode(this.defaultType),
-            ));
-          }
           store.merge(new URL(res.url).origin, graph);
           return processGraph(graph, this.output).then(next);
         });

@@ -24,14 +24,20 @@ const LinkedRenderStore = {
   /** @access private */
   api: LinkDataAPI,
 
-  /** @access private */
-  mapping: {},
-
+  /**
+   * Whenever a resource has no type, assume it to be this.
+   * @access public
+   * @type {String|undefined} The full IRI of the type or undefined when disabled.
+   */
+  defaultType: 'http://schema.org/Thing',
   /**
    * @type {Object.<string, Array>}
    * @access private
    */
   lookupCache: {},
+
+  /** @access private */
+  mapping: {},
 
   /** @access private */
   schema: {
@@ -131,7 +137,7 @@ const LinkedRenderStore = {
    * @param {string} [topology] The topology of the resource, if any
    * @returns {Object|function|undefined} The most appropriate renderer, if any.
    */
-  getRenderClassForProperty(type, prop, topology = DEFAULT_TOPOLOGY) {
+  getRenderClassForProperty(type = this.defaultType, prop, topology = DEFAULT_TOPOLOGY) {
     if (type === undefined) {
       return undefined;
     }
