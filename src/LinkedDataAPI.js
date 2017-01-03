@@ -62,7 +62,9 @@ function processResponse(res) {
 
 const LDAPI = {
   /** @access private */
-  accept: '',
+  accept: {
+    default: '',
+  },
   /** Set to an IRI to add it as the type for resources which have none */
   defaultType: 'http://schema.org/Thing',
   /** @access private */
@@ -80,14 +82,15 @@ const LDAPI = {
   fetchResource(iri) {
     return new Promise((resolve) => {
       const ex = getExtention();
+      const accept = this.accept[new URL(iri).origin] || this.accept.default;
       if (isDifferentOrigin(iri) && ex) {
-        resolve(fetchWithExtension(iri, this.accept));
+        resolve(fetchWithExtension(iri, accept));
       } else {
         resolve(fetch(iri, {
           credentials: 'same-origin',
           headers: {
             'Content-Type': 'application/vnd.api+json',
-            Accept: this.accept,
+            Accept: accept,
           },
         }));
       }
@@ -156,8 +159,18 @@ const LDAPI = {
     const types = mediaTypes.constructor === Array ? mediaTypes : [mediaTypes];
     types.forEach((mediaType) => {
       pushToMap(this.mapping, mediaType, processor);
-      this.accept = [this.accept, [mediaType, acceptValue].join(';')].join();
+      this.accept.default = [this.accept.default, [mediaType, acceptValue].join(';')].join();
     });
+  },
+
+  /**
+   * Overrides the `Accept` value for when a certain host doesn't respond well to multiple values.
+   * @access public
+   * @param origin The iri of the origin for the requests.
+   * @param acceptValue The value to use for the `Accept` header.
+   */
+  setAcceptForHost(origin, acceptValue) {
+    this.accept[new URL(origin).origin] = acceptValue;
   },
 };
 
