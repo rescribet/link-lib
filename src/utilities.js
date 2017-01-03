@@ -21,7 +21,13 @@ export const NON_CONTENT_EXTS = ['php', 'asp', 'aspx', 'cgi', 'jsp'];
  * @returns {*} The value of the property if any.
  */
 export function getValueOrID(prop) {
-  return prop && (prop['@value'] || prop['@id'] || prop);
+  if (prop && Object.prototype.hasOwnProperty.call(prop, '@value')) {
+    return prop['@value'];
+  }
+  if (prop && Object.prototype.hasOwnProperty.call(prop, '@id')) {
+    return prop['@id'];
+  }
+  return prop;
 }
 
 /**
