@@ -115,13 +115,23 @@ function processRelation(relation, topID, origin) {
   return graph;
 }
 
-const formatEntity = (resource, next, origin) => {
+const formatEntity = (resource, next, origin, objUrl = undefined) => {
   assert(resource.attributes, 'object has no attributes');
   const id = getIDForEntity(resource, resource.attributes);
   jsonld
     .expand(resource.attributes)
     .then((expanded) => {
       next(processExpandedEntity(id, expanded, origin));
+      if (objUrl !== undefined && id && objUrl !== id.toString()) {
+        next(new rdf.Graph([
+          new rdf.Quad(
+            new rdf.NamedNode(objUrl),
+            new rdf.NamedNode('http://www.w3.org/2002/07/owl#sameAs'),
+            id,
+            origin,
+          ),
+        ]));
+      }
     });
 
   if (resource.relationships instanceof Object) {
@@ -150,7 +160,7 @@ export default function process(response, next) {
   })
   .then((json) => {
     const origin = new URL(response.url).origin;
-    formatEntity(json.data, next, origin);
+    formatEntity(json.data, next, origin, response.url);
     if (json.included instanceof Array) {
       json.included.map(ent => formatEntity(ent, next, origin));
     }
