@@ -45,18 +45,31 @@ function processGraph(graph, output) {
 
 /**
  * Saves response metadata into a graph.
+ * @param {String} iri The original iri that was fetched.
  * @param {Response} res The (fetch) response object from the request.
  * @returns {rdf.Graph} A graph with metadata about the response.
  */
-function processResponse(res) {
+function processResponse(iri, res) {
   const graph = new rdf.Graph();
-  const trip = new rdf.Triple(
-    new rdf.NamedNode(res.url),
-    new rdf.NamedNode(rdf.resolve('http:statusCodeValue')),
-    new rdf.Literal(parseInt(res.status, 10)),
-    new URL(res.url).origin,
+  const origin = new URL(res.url).origin;
+  graph.add(
+    new rdf.Quad(
+      new rdf.NamedNode(res.url),
+      new rdf.NamedNode(rdf.resolve('http:statusCodeValue')),
+      new rdf.Literal(parseInt(res.status, 10)),
+      origin,
+    ),
   );
-  graph.add(trip);
+  if (iri !== res.url) {
+    graph.add(
+      new rdf.Quad(
+        new rdf.NamedNode(iri),
+        new rdf.NamedNode('http://www.w3.org/2002/07/owl#sameAs'),
+        new rdf.NamedNode(res.url),
+        origin,
+      ),
+    );
+  }
   return graph;
 }
 
@@ -123,19 +136,20 @@ const LDAPI = {
   getEntity(store, iri, next) {
     return this.fetchResource(iri)
       .then((res) => {
-        store.merge(new URL(res.url).origin, processResponse(res));
+        const responseQuads = processResponse(iri, res);
+        store.merge(new URL(res.url).origin, responseQuads);
         const format = getContentType(res);
         const processor = this.mapping[format][0];
         return processor(res, (graph) => {
           store.merge(new URL(res.url).origin, graph);
-          return processGraph(graph, this.output).then(next);
+          return processGraph(responseQuads.merge(graph), this.output).then(next);
         });
       })
       .catch((e) => {
         if (typeof e.res === 'undefined') {
           throw e;
         }
-        store.merge(new URL(e.res.url).origin, processResponse(e.res));
+        store.merge(new URL(e.res.url).origin, processResponse(iri, e.res));
       });
   },
 
