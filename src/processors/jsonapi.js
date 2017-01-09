@@ -77,10 +77,13 @@ function processRelation(relation, topID, origin) {
 
     if (relation.data instanceof Array) {
       const member = new rdf.NamedNode(LRS.expandProperty('hydra:member'));
+      const type = relation.links.related &&
+        relation.links.related.meta &&
+        relation.links.related.meta['@type'];
       graph.add(new rdf.Quad(
         relationID,
         new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-        new rdf.NamedNode(LRS.expandProperty('hydra:Collection')),
+        new rdf.NamedNode(LRS.expandProperty(type || 'hydra:Collection')),
         origin,
       ));
       graph.add(new rdf.Quad(
