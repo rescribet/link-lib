@@ -156,3 +156,20 @@ export function fetchWithExtension(iri, formats) {
   }
   throw new Error('NoExtensionInstalledError');
 }
+
+/**
+ * Get a property for an object of which the method to get is unsure.
+ * Currently handles regular and immutable.js objects.
+ * @param obj The object to get the property from.
+ * @param prop The property to get.
+ * @returns {*} Whatever the property's value is, if any.
+ */
+export function getP(obj, prop) {
+  if (obj === undefined || prop === undefined) {
+    return undefined;
+  }
+  if (obj && typeof obj.get === 'function') {
+    return obj.get(prop);
+  }
+  return obj[prop];
+}
