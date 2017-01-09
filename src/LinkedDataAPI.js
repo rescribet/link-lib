@@ -149,7 +149,9 @@ const LDAPI = {
         if (typeof e.res === 'undefined') {
           throw e;
         }
-        store.merge(new URL(e.res.url).origin, processResponse(iri, e.res));
+        const responseQuads = processResponse(iri, e.res);
+        store.merge(new URL(e.res.url).origin, responseQuads);
+        processGraph(responseQuads, this.output).then(next);
       });
   },
 
