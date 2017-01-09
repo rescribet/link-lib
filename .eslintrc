@@ -32,6 +32,7 @@
   },
   "plugins": [],
   "rules": {
+    "no-use-before-define": ["error", "nofunc"],
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "import/newline-after-import": "off"
   }

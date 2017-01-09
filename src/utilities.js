@@ -15,19 +15,23 @@ export const F_TURTLE_DEP = 'application/x-turtle';
 
 export const NON_CONTENT_EXTS = ['php', 'asp', 'aspx', 'cgi', 'jsp'];
 
-/**
- * Returns the inner value for a property in JSON-LD structured objects.
- * @param {Object} prop The property to retrieve the value from.
- * @returns {*} The value of the property if any.
- */
-export function getValueOrID(prop) {
-  if (prop && Object.prototype.hasOwnProperty.call(prop, '@value')) {
-    return prop['@value'];
+/** @access private */
+export function fetchWithExtension(iri, formats) {
+  const c = getExtention();
+  if (c !== undefined) {
+    return new Promise((resolve) => {
+      c.onMessage.addListener((message, port) => {
+        port.disconnect();
+        c.disconnect();
+        resolve(message);
+      });
+      c.postMessage({
+        accept: formats,
+        fetch: iri,
+      });
+    });
   }
-  if (prop && Object.prototype.hasOwnProperty.call(prop, '@id')) {
-    return prop['@id'];
-  }
-  return prop;
+  throw new Error('NoExtensionInstalledError');
 }
 
 /**
@@ -42,30 +46,6 @@ export function flattenProperty(obj) {
     return obj.map(dom => dom['@id']);
   } else if (typeof obj === 'object') {
     return obj['@id'];
-  }
-  throw new Error(typeof obj);
-}
-
-/**
- * Checks if {obj} is present in the property by comparing whether the {include} value is
- * present in any of the {obj} `@id` values or as a literal.
- * @access public
- * @summary Checks if {obj} is present in the property
- * @param obj The property object
- * @param include The value to look for in {obj}
- * @returns {Object|undefined} The found value or undefined.
- */
-export function propertyIncludes(obj, include) {
-  if (obj === undefined) {
-    return undefined;
-  }
-  const includes = Array.isArray(include) ? include : [include];
-  if (obj.constructor === Array) {
-    return obj.find(dom => propertyIncludes(dom['@id'], includes));
-  } else if (typeof obj === 'object') {
-    return includes.find(o => o === obj['@id']);
-  } else if (typeof obj === 'string') {
-    return includes.find(o => o === obj);
   }
   throw new Error(typeof obj);
 }
@@ -114,20 +94,6 @@ export function getContentType(res) {
 }
 
 /**
- * Checks if the origin of {href} matches current origin from {window.location}
- * @access public
- * @returns {boolean} `true` if matches, `false` otherwise.
- */
-export function isDifferentOrigin(href) {
-  return new URL(window.location).origin !== new URL(href).origin;
-}
-
-/** @access private */
-export function isLinkedData(mediaType) {
-  return [F_NTRIPLES, F_TURTLE, F_N3, F_JSONLD].includes(mediaType);
-}
-
-/**
  * Tries to resolve the data extension.
  * @returns {Object|undefined}
  */
@@ -136,25 +102,6 @@ export function getExtention() {
     return chrome.runtime.connect('kjgnkcpcclnlchifkbbnekmgmcefhagd');
   }
   return undefined;
-}
-
-/** @access private */
-export function fetchWithExtension(iri, formats) {
-  const c = getExtention();
-  if (c !== undefined) {
-    return new Promise((resolve) => {
-      c.onMessage.addListener((message, port) => {
-        port.disconnect();
-        c.disconnect();
-        resolve(message);
-      });
-      c.postMessage({
-        accept: formats,
-        fetch: iri,
-      });
-    });
-  }
-  throw new Error('NoExtensionInstalledError');
 }
 
 /**
@@ -172,4 +119,70 @@ export function getP(obj, prop) {
     return obj.get(prop);
   }
   return obj[prop];
+}
+
+/**
+ * Returns the inner value for a property in JSON-LD structured objects.
+ * @param {Object} prop The property to retrieve the value from.
+ * @returns {*} The value of the property if any.
+ */
+export function getValueOrID(prop) {
+  if (hasP(prop, '@value')) {
+    return getP(prop, '@value');
+  }
+  if (hasP(prop, '@id')) {
+    return getP(prop, '@id');
+  }
+  return prop;
+}
+
+/**
+ * Determine whether an object has a certain property.
+ * @param obj The object to check the property on.
+ * @param prop The property name.
+ * @returns {Boolean} Whether the object has the property (even if it's value is falsy).
+ */
+export function hasP(obj, prop) {
+  if (obj && typeof obj.has === 'function') {
+    return obj.has(prop);
+  }
+  return obj && Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+/**
+ * Checks if the origin of {href} matches current origin from {window.location}
+ * @access public
+ * @returns {boolean} `true` if matches, `false` otherwise.
+ */
+export function isDifferentOrigin(href) {
+  return new URL(window.location).origin !== new URL(href).origin;
+}
+
+/** @access private */
+export function isLinkedData(mediaType) {
+  return [F_NTRIPLES, F_TURTLE, F_N3, F_JSONLD].includes(mediaType);
+}
+
+/**
+ * Checks if {obj} is present in the property by comparing whether the {include} value is
+ * present in any of the {obj} `@id` values or as a literal.
+ * @access public
+ * @summary Checks if {obj} is present in the property
+ * @param obj The property object
+ * @param include The value to look for in {obj}
+ * @returns {Object|undefined} The found value or undefined.
+ */
+export function propertyIncludes(obj, include) {
+  if (obj === undefined) {
+    return undefined;
+  }
+  const includes = Array.isArray(include) ? include : [include];
+  if (obj.constructor === Array) {
+    return obj.find(dom => propertyIncludes(dom['@id'], includes));
+  } else if (typeof obj === 'object') {
+    return includes.find(o => o === obj['@id']);
+  } else if (typeof obj === 'string') {
+    return includes.find(o => o === obj);
+  }
+  throw new Error(typeof obj);
 }
