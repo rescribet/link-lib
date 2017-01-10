@@ -169,7 +169,7 @@ const LinkedRenderStore = {
     if (possibleClasses.length === 0) {
       return topology === DEFAULT_TOPOLOGY ?
         undefined :
-        this.getRenderClassForProperty(types, props, DEFAULT_TOPOLOGY);
+        this.addClassToCache(this.getRenderClassForProperty(types, props, DEFAULT_TOPOLOGY), key);
     }
     for (let i = 0; props.length; i++) {
       const bestClass = this.bestClass(possibleClasses, types);
