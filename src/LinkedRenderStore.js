@@ -20,6 +20,13 @@ function convertToCacheKey(type, props, topology) {
   return `${type}[${props.join()}][${topology}]`;
 }
 
+function normalizeType(type) {
+  if (!(type instanceof Array)) {
+    return typeof type.toArray === 'undefined' ? [type] : type.toArray();
+  }
+  return type;
+}
+
 const LinkedRenderStore = {
   /** @access private */
   api: LinkDataAPI,
@@ -141,7 +148,7 @@ const LinkedRenderStore = {
     if (type === undefined) {
       return undefined;
     }
-    const types = type instanceof Array ? type : [type];
+    const types = normalizeType(type);
     const props = Array.isArray(prop) ?
       prop.map(p => this.expandProperty(p)) :
       [this.expandProperty(prop)];
