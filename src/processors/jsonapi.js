@@ -165,7 +165,7 @@ export default function process(response, next) {
     const origin = new URL(response.url).origin;
     formatEntity(json.data, next, origin, response.url);
     if (json.included instanceof Array) {
-      json.included.map(ent => formatEntity(ent, next, origin));
+      json.included.forEach(ent => formatEntity(ent, next, origin));
     }
   });
 }

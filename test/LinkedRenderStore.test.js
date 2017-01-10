@@ -124,7 +124,7 @@ describe('LinkedRenderStore functions well', function() {
         'schema:Thing',
         ['schema:name', 'rdfs:label']
       );
-      ['http://schema.org/name', 'http://www.w3.org/2000/01/rdf-schema#label'].map(prop => {
+      ['http://schema.org/name', 'http://www.w3.org/2000/01/rdf-schema#label'].forEach(prop => {
         assert.equal(
           LRS.mapping['http://schema.org/Thing'][prop]['DEFAULT_TOPOLOGY'],
           ident
