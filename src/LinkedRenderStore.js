@@ -129,11 +129,7 @@ const LinkedRenderStore = {
    * @param next A function which handles graph updates
    */
   getEntity(iri, next) {
-    const cachedGraph = this.searchStore(iri);
-    if (cachedGraph && cachedGraph.length > 0) {
-      return cachedGraph;
-    }
-    return this.api.getEntity(this.store, iri, next);
+    this.api.getEntity(iri, next);
   },
 
   /**
@@ -273,20 +269,6 @@ const LinkedRenderStore = {
     this.schema['@graph'] = [];
     this.mapping = [];
     this.lookupCache = {};
-  },
-
-  /**
-   * Searches the store for all the triples for which {iri} is the subject.
-   * @access private
-   * @param {string} iri The full IRI of the resource.
-   * @return {rdf.Graph|undefined}
-   */
-  searchStore(iri) {
-    const g = this.store.graphs[new URL(iri).origin];
-    if (g) {
-      return g.filter(t => t.subject.equals(iri));
-    }
-    return undefined;
   },
 
   /**

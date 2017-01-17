@@ -66,24 +66,23 @@ function processRelation(relation, topID, origin) {
   const graph = new rdf.Graph();
 
   const relationID = new rdf.NamedNode(getIDForRelation(relation, relation.data instanceof Array ? 'self' : 'related'));
+  const relType = (relation.meta && relation.meta['@type']) || relation.links.self.meta['@type'];
+  const relTypeTriple = new rdf.NamedNode(LRS.expandProperty(relType));
   if (relationID.toString()) {
-    const rel = (relation.meta && relation.meta['@type']) || relation.links.self.meta['@type'];
-    graph.add(new rdf.Quad(
-      topID,
-      new rdf.NamedNode(LRS.expandProperty(rel)),
-      relationID,
-      origin,
-    ));
+    graph.add(new rdf.Quad(topID, relTypeTriple, relationID, origin));
+  }
 
-    if (relation.data instanceof Array) {
-      const member = new rdf.NamedNode(LRS.expandProperty('hydra:member'));
+  if (relation.data instanceof Array) {
+    let member;
+    if (relationID.toString()) {
+      member = new rdf.NamedNode(LRS.expandProperty('argu:members'));
       const type = relation.links.related &&
         relation.links.related.meta &&
         relation.links.related.meta['@type'];
       graph.add(new rdf.Quad(
         relationID,
         new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-        new rdf.NamedNode(LRS.expandProperty(type || 'hydra:Collection')),
+        new rdf.NamedNode(LRS.expandProperty(type || 'argu:Collection')),
         origin,
       ));
       graph.add(new rdf.Quad(
@@ -92,10 +91,14 @@ function processRelation(relation, topID, origin) {
         relationID,
         origin,
       ));
-      relation.data.forEach((datum) => {
-        graph.add(new rdf.Quad(relationID, member, new rdf.NamedNode(datum.id), origin));
-      });
     }
+    const placeOnForeign = !!relationID.toString();
+    relation.data.forEach((datum) => {
+      const t = placeOnForeign
+        ? new rdf.Quad(relationID, member, new rdf.NamedNode(datum.id), origin)
+        : new rdf.Quad(topID, relTypeTriple, new rdf.NamedNode(datum.id), origin);
+      graph.add(t);
+    });
   }
 
   if (relation.links instanceof Object) {
@@ -151,10 +154,9 @@ const formatEntity = (resource, next, origin, objUrl = undefined) => {
  * @access public
  * @param {Response|Object} response The response object to process
  * @param {function} next The function to pass the result to.
- * @returns {Promise.<TResult>}
  */
 export default function process(response, next) {
-  return new Promise((pResolve) => {
+  new Promise((pResolve) => {
     if (typeof response.body !== 'string') {
       pResolve(response.json());
     } else {
@@ -165,7 +167,9 @@ export default function process(response, next) {
     const origin = new URL(response.url).origin;
     formatEntity(json.data, next, origin, response.url);
     if (json.included instanceof Array) {
-      json.included.forEach(ent => formatEntity(ent, next, origin));
+      self.setTimeout(() => {
+        json.included.forEach(ent => formatEntity(ent, next, origin));
+      }, 0);
     }
   });
 }

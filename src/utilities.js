@@ -155,7 +155,7 @@ export function hasP(obj, prop) {
  * @returns {boolean} `true` if matches, `false` otherwise.
  */
 export function isDifferentOrigin(href) {
-  return new URL(window.location).origin !== new URL(href).origin;
+  return self.location.origin !== new URL(href).origin;
 }
 
 /** @access private */

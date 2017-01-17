@@ -1,10 +1,12 @@
 import LinkedRenderStore from './LinkedRenderStore';
-import jsonapi from './processors/jsonapi';
-import rdfFormatsCommon from './processors/rdf-formats-common';
+import jsonapi from './transformers/jsonapi';
+import rdfFormatsCommon from './transformers/rdf-formats-common';
 
 export * from './LinkedRenderStore';
 export * from './utilities';
-export const processors = {
+export { default as DataWorkerLoader } from './worker/DataWorkerLoader';
+export { default as DataWorker } from './worker/DataWorker';
+export const transformers = {
   jsonapi,
   rdfFormatsCommon,
 };

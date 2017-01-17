@@ -10,9 +10,11 @@ var config = {
     libraryTarget: 'commonjs2'
   },
   externals: {
+    jsonld: 'jsonld',
+    'es6-promise': 'es6-promise',
     'rdf-ext': 'rdf-ext',
     'rdf-formats-common': 'rdf-formats-common',
-    'es6-promise': 'es6-promise'
+    'whatwg-fetch': 'whatwg-fetch'
   },
   module: {
     rules: [
