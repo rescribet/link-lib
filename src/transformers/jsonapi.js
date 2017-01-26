@@ -66,7 +66,7 @@ function processRelation(relation, topID, origin) {
   const graph = new rdf.Graph();
 
   const relationID = new rdf.NamedNode(getIDForRelation(relation, relation.data instanceof Array ? 'self' : 'related'));
-  const relType = (relation.meta && relation.meta['@type']) || relation.links.self.meta['@type'];
+  const relType = (relation.meta && relation.meta['@type']) || (relation.links && relation.links.self.meta['@type']);
   const relTypeTriple = new rdf.NamedNode(LRS.expandProperty(relType));
   if (relationID.toString()) {
     graph.add(new rdf.Quad(topID, relTypeTriple, relationID, origin));
