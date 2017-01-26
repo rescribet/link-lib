@@ -87,7 +87,7 @@ export function getContentType(res) {
       }
     }
   }
-  if (!NON_CONTENT_EXTS.includes(ext)) {
+  if (ext && !NON_CONTENT_EXTS.includes(ext)) {
     return ext;
   }
   return contentTypeRaw.split(';')[0];
