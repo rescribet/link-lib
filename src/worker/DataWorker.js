@@ -39,11 +39,13 @@ export default function DataWorker({ transformers }) {
         break;
       case GET_ENTITY:
         if (isDifferentOrigin(params.iri)) {
+          const accept = self.dataProcessor.accept[new URL(params.iri).origin] ||
+            self.dataProcessor.accept.default;
           postMessage({
             method: FETCH_EXT,
             data: {
               params,
-              formats: self.dataProcessor.accept.default,
+              formats: accept,
             },
           });
         } else {
