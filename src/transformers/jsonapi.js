@@ -4,6 +4,7 @@ import rdf from 'rdf-ext';
 import { promises as jsonld } from 'jsonld';
 
 import LRS from '../LinkedRenderStore';
+import { getValueOrID } from '../utilities';
 
 function getIDForEntity(resource, entity) {
   const id = (resource.links && resource.links.self) || entity['@id'];
@@ -37,7 +38,7 @@ function processExpandedEntity(id, expanded, origin) {
           id,
           new rdf.NamedNode(keys[i]),
           obj instanceof Object && obj['@id'] !== undefined ?
-            new rdf.NamedNode(obj) : new rdf.Literal(obj),
+            new rdf.NamedNode(obj) : new rdf.Literal(getValueOrID(obj)),
           origin,
         )),
       );
