@@ -1,5 +1,14 @@
 # Change Log
 
+## [v0.3.1](https://github.com/fletcher91/link-lib/tree/v0.3.1) (2017-06-28)
+**Implemented enhancements:**
+- \[IMP\] Let values from JSON:API contain data directly [[`bf50a2393a`](https://github.com/fletcher91/link-lib/commit/bf50a2393a)] ([Fletcher91](https://github.com/fletcher91))
+
+**Fixed bugs:**
+- \[FIX\] All JSONAPI links with meta @type are processed [[`2b6a72699b`](https://github.com/fletcher91/link-lib/commit/2b6a72699b)] ([Fletcher91](https://github.com/fletcher91))
+
+[Full Changelog](https://github.com/fletcher91/link-lib/compare/v0.3.0...v0.3.1)
+
 ## [v0.3.0](https://github.com/fletcher91/link-lib/tree/v0.3.0) (2017-01-26)
 **Implemented enhancements:**
 - \[FEAT\] Integrated Web Workers to process data with [[`c486d6f932`](https://github.com/fletcher91/link-lib/commit/c486d6f932)] ([Fletcher91](https://github.com/fletcher91))

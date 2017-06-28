@@ -1,6 +1,6 @@
 {
   "name": "link-lib",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The Link library for creating information based applications",
   "main": "dist/link-lib.js",
   "repository": "https://github.com/fletcher91/link-lib.git",
