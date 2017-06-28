@@ -46,6 +46,28 @@ function processExpandedEntity(id, expanded, origin) {
   return graph;
 }
 
+function processLinks(entity, topID, origin, graph) {
+  if (entity.links instanceof Object) {
+    const keys = Object.keys(entity.links);
+    for (let i = 0; i < keys.length; i++) {
+      const link = entity.links[keys[i]];
+      if (typeof link.meta !== 'undefined') {
+        const type = LRS.expandProperty(link.meta['@type'] || `schema:${keys[i]}`);
+        if (link.href !== undefined) {
+          graph.add(
+            new rdf.Quad(
+              topID,
+              new rdf.NamedNode(type),
+              new rdf.NamedNode(link.href),
+              origin,
+            ),
+          );
+        }
+      }
+    }
+  }
+}
+
 function getIDForRelation(relation, link = 'self') {
   if (relation.meta && relation.meta['@id']) {
     return relation.meta && relation.meta['@id'];
@@ -101,23 +123,7 @@ function processRelation(relation, topID, origin) {
     });
   }
 
-  if (relation.links instanceof Object) {
-    const keys = Object.keys(relation.links);
-    for (let i = 0; i < keys.length; i++) {
-      const link = relation.links[keys[i]];
-      const type = LRS.expandProperty(link.meta['@type'] || `schema:${keys[i]}`);
-      if (link.href !== undefined) {
-        graph.add(
-          new rdf.Quad(
-            topID,
-            new rdf.NamedNode(type),
-            new rdf.NamedNode(link.href),
-            origin,
-          ),
-        );
-      }
-    }
-  }
+  processLinks(relation, topID, origin, graph);
   return graph;
 }
 
@@ -146,6 +152,11 @@ const formatEntity = (resource, next, origin, objUrl = undefined) => {
       const relation = resource.relationships[keys[i]];
       next(processRelation(relation, id, origin));
     }
+  }
+  if (resource.links instanceof Object) {
+    const g = new rdf.Graph();
+    processLinks(resource, id, origin, g);
+    next(g);
   }
 };
 
