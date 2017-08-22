@@ -1,5 +1,6 @@
 /* eslint no-console: 0 */
 import rdf from 'rdf-ext';
+import DisjointSet from 'ml-disjoint-set';
 
 import LinkDataAPI from './LinkedDataAPI';
 import { flattenProperty } from './utilities';
@@ -17,14 +18,9 @@ const DEFAULT_TOPOLOGY = 'DEFAULT_TOPOLOGY';
 export const RENDER_CLASS_NAME = 'TYPE_RENDERER_CLASS';
 
 function convertToCacheKey(type, props, topology) {
-  return `${type}[${props.join()}][${topology}]`;
-}
-
-function normalizeType(type) {
-  if (!(type instanceof Array)) {
-    return typeof type.toArray === 'undefined' ? [type] : type.toArray();
-  }
-  return type;
+  return (props.length > 1)
+    ? `${type}[${props.join()}][${topology}]`
+    : `${type}[${props[0]}][${topology}]`;
 }
 
 const LinkedRenderStore = {
@@ -44,11 +40,15 @@ const LinkedRenderStore = {
   lookupCache: {},
 
   /** @access private */
-  mapping: {},
+  mapping: {
+    [RENDER_CLASS_NAME]: {},
+  },
 
   /** @access private */
   schema: {
     '@graph': [],
+    equivalenceSet: new DisjointSet(),
+    superMap: new Map(),
   },
 
   /** @access private */
@@ -74,10 +74,39 @@ const LinkedRenderStore = {
    * @param items
    */
   addOntologySchematics(items) {
+    const process = (item) => {
+      const itemId = this.expandProperty(item['@id']);
+      const sameRel = this.expandProperty(getP(item['owl:sameAs'] || item['http://www.w3.org/2002/07/owl#sameAs'], '@id'));
+      if (typeof sameRel !== 'undefined' && sameRel !== null) {
+        const a = this.schema.equivalenceSet.add(sameRel);
+        const b = this.schema.equivalenceSet.add(itemId);
+        this.schema.equivalenceSet.union(a, b);
+      }
+      const subClass = this.expandProperty(getP(
+        item['rdfs:subClassOf'] || item['http://www.w3.org/2000/01/rdf-schema#subClassOf'],
+        '@id',
+      ));
+      if (typeof subClass !== 'undefined' && subClass !== null) {
+        if (!this.schema.superMap.has(subClass.toString())) {
+          this.schema.superMap.set(subClass.toString(), new Set([subClass]));
+        }
+        const parents = this.schema.superMap.get(subClass.toString());
+        const itemVal = this.schema.superMap.get(itemId.toString()) || new Set([itemId]);
+        parents.forEach(itemVal.add, itemVal);
+        this.schema.superMap.set(itemId.toString(), itemVal);
+        this.schema.superMap.forEach((v, k) => {
+          if (k !== itemId && v.has(itemId.toString())) {
+            itemVal.forEach(v.add, v);
+          }
+        });
+      }
+    };
     if (Array.isArray(items)) {
       this.schema['@graph'].push(...items);
+      items.forEach(process);
     } else {
       this.schema['@graph'].push(items);
+      process(items);
     }
   },
 
@@ -88,7 +117,7 @@ const LinkedRenderStore = {
    * @returns {string} The best match for the given classes and types.
    */
   bestClass(classes, types) {
-    const chain = this.mineForTypes(types, types || []);
+    const chain = this.mineForTypes(types).map(s => s.toString());
     const arrPos = classes.indexOf(
       chain.find(elem => classes.indexOf(elem) >= 0),
     );
@@ -154,12 +183,12 @@ const LinkedRenderStore = {
       return cached;
     }
 
-    try {
-      const exact = this.mapping[types[0]][props[0]][topology];
-      if (exact !== undefined) {
-        return this.addClassToCache(exact, key);
-      }
-    } catch (TypeError) { /* This keeps the mapping chain code short */ }
+    const exact = this.mapping[props[0]] &&
+      this.mapping[props[0]][types[0]] &&
+      this.mapping[props[0]][types[0]][topology];
+    if (exact !== undefined) {
+      return this.addClassToCache(exact, key);
+    }
 
     const possibleClasses = this.possibleClasses(props, topology);
     if (possibleClasses.length === 0) {
@@ -169,7 +198,7 @@ const LinkedRenderStore = {
     }
     for (let i = 0; props.length; i++) {
       const bestClass = this.bestClass(possibleClasses, types);
-      const klass = this.mapping[bestClass][props[i]][topology];
+      const klass = this.mapping[props[i]][bestClass][topology];
       if (klass) {
         return this.addClassToCache(klass, key);
       }
@@ -192,32 +221,34 @@ const LinkedRenderStore = {
    * Expands the given lookupTypes to include all their equivalent and subclasses.
    * This is done in multiple iterations until no new types are found.
    * @param {string[]} lookupTypes The types to look up.
-   * @param {string[]} chain
    * @returns {string[]}
    */
-  mineForTypes(lookupTypes, chain) {
+  mineForTypes(lookupTypes) {
     if (lookupTypes === undefined) {
-      return chain;
+      return [];
     }
-    const ont = this.schema['@graph'].find(e => lookupTypes.includes(flattenProperty(e)));
-    if (ont !== undefined) {
-      chain.push(flattenProperty(ont));
-      const nextSuper = flattenProperty(ont['rdfs:subClassOf']);
-      const sameTypes = flattenProperty(ont['owl:sameAs']);
-      return this.mineForTypes([nextSuper, sameTypes], chain);
-    }
-    return chain;
+
+    return lookupTypes.map(v => this.store.canon(v)).reduce((a, b) => {
+      const superSet = this.schema.superMap.get(b.toString());
+      return typeof superSet === 'undefined' ? a : a.concat(...superSet);
+    }, lookupTypes);
+  },
+
+  normalizeType(type) {
+    return Array.isArray(type) ? type : [type];
   },
 
   possibleClasses(props, topology) {
-    const types = Object.keys(this.mapping);
     const possibleClasses = [];
-    for (let i = 0; i < types.length; i++) {
-      for (let j = 0; j < props.length; j++) {
-        const classType = this.mapping[types[i]][props[j]] &&
-          this.mapping[types[i]][props[j]][topology];
-        if (classType !== undefined) {
-          possibleClasses.push(types[i]);
+    for (let i = 0; i < props.length; i++) {
+      if (typeof this.mapping[props[i]] !== 'undefined') {
+        const types = Object.keys(this.mapping[props[i]]);
+        for (let j = 0; j < types.length; j++) {
+          const classType = this.mapping[props[i]][types[j]] &&
+            this.mapping[props[i]][types[j]][topology];
+          if (classType !== undefined) {
+            possibleClasses.push(types[j]);
+          }
         }
       }
     }
@@ -232,31 +263,23 @@ const LinkedRenderStore = {
    * render.
    * @param {String|String[]} [property] The property's (compact) IRI if the {component} is a
    * subject renderer.
-   * @param {String} [topology] An alternate topology this {component} should render.
+   * @param {String} [_topology] An alternate topology this {component} should render.
    */
-  registerRenderer(component, types, property, topology = DEFAULT_TOPOLOGY) {
+  registerRenderer(component, types, property = RENDER_CLASS_NAME, _topology = DEFAULT_TOPOLOGY) {
+    const topology = hasP(_topology, 'value') ? _topology : this.expandProperty(_topology);
     const arrTypes = types instanceof Array ? types : [types];
     arrTypes.forEach((_type) => {
-      const type = this.expandProperty(_type);
-      if (typeof this.mapping[type] === 'undefined') {
-        this.mapping[type] = {};
-      }
-      if (typeof this.mapping[type][RENDER_CLASS_NAME] === 'undefined') {
-        this.mapping[type][RENDER_CLASS_NAME] = {};
-      }
+      const exType = this.expandProperty(_type);
+      const type = this.schema.equivalenceSet.find(this.schema.equivalenceSet.add(exType)).value;
 
-      if (property !== undefined) {
-        const arr = Array.isArray(property) ? property : [property];
-        arr.forEach((p) => {
-          const prop = this.expandProperty(p);
-          if (typeof this.mapping[type][prop] === 'undefined') {
-            this.mapping[type][prop] = {};
-          }
-          this.mapping[type][prop][topology] = component;
-        });
-      } else {
-        this.mapping[type][RENDER_CLASS_NAME][topology] = component;
-      }
+      const aProp = Array.isArray(property)
+        ? property.map(p => this.expandProperty(p))
+        : [this.expandProperty(property)];
+      aProp.forEach((p) => {
+        if (typeof this.mapping[p] === 'undefined') this.mapping[p] = {};
+        if (typeof this.mapping[p][type] === 'undefined') this.mapping[p][type] = {};
+        this.mapping[p][type][topology] = component;
+      });
       this.lookupCache = {};
     });
   },
@@ -266,8 +289,14 @@ const LinkedRenderStore = {
    * @access public
    */
   reset() {
-    this.schema['@graph'] = [];
-    this.mapping = [];
+    this.schema = {
+      '@graph': [],
+      superMap: new Map(),
+      equivalenceSet: new DisjointSet(),
+    };
+    this.mapping = {
+      [RENDER_CLASS_NAME]: {},
+    };
     this.lookupCache = {};
   },
 
