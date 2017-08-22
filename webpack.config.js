@@ -1,10 +1,10 @@
-// var path = require('path');
+var path = require('path');
 var libraryName = 'link-lib';
 
 var config = {
-  entry: './src/index.js',
+  entry: path.resolve('./src/index.js'),
   output: {
-    path: './dist',
+    path: path.resolve('./dist'),
     filename: libraryName + '.js',
     library: libraryName,
     libraryTarget: 'commonjs2'
@@ -14,7 +14,7 @@ var config = {
     'es6-promise': 'es6-promise',
     rdflib: 'rdflib',
     'rdf-formats-common': 'rdf-formats-common',
-    'whatwg-fetch': 'whatwg-fetch'
+    'whatwg-fetch': 'whatwg-fetch',
     'whatwg-url': 'whatwg-url',
     xmlhttprequest: 'xmlhttprequest'
   },
@@ -23,7 +23,14 @@ var config = {
       {
         test: /(\.js|\.jsx)$/,
         loader: 'babel-loader',
-        exclude: /(node_modules|bower_components)/
+        exclude: /(bower_components)/,
+        options: {
+          presets: [
+            'react',
+            'es2015',
+            'stage-0'
+          ]
+        }
       },
       {
         test: /.json$/,
