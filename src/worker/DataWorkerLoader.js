@@ -1,60 +1,50 @@
 import {
-  DATA_ACQUIRED,
   FETCH_RESOURCE,
-  FETCH_EXT,
   GET_ENTITY,
   SET_ACCEPT_HOST,
-  STORE_UPDATE,
 } from './messages';
-import { fetchWithExtension } from '../utilities';
+
+function sendMessage(worker, message) {
+  return new Promise((resolve, reject) => {
+    const messageChannel = new MessageChannel();
+    messageChannel.port1.onmessage = (event) => {
+      if (event.data.error) {
+        reject(event.data.error);
+      } else {
+        resolve(event.data.data);
+      }
+    };
+    worker.postMessage(message, [messageChannel.port2]);
+  });
+}
 
 export default class DataWorkerLoader {
   constructor(WorkerModel) {
     this.worker = new WorkerModel();
-    this.next = undefined;
-
-    this.worker.onmessage = (event) => {
-      const { data, method } = event.data;
-      switch (method) {
-        case STORE_UPDATE:
-          this.next(data);
-          break;
-        case FETCH_EXT:
-          fetchWithExtension(data.params.iri, data.formats)
-            .then((response) => {
-              this.worker.postMessage({
-                method: DATA_ACQUIRED,
-                params: data.params,
-                data: response,
-              });
-            });
-          break;
-        default:
-          throw new Error('Unknown message sent');
-      }
-      if (method === STORE_UPDATE) {
-        this.next(data);
-      }
-    };
   }
 
   fetchResource(iri) {
-    this.worker.postMessage({
-      method: FETCH_RESOURCE,
-      params: {
-        iri,
+    return sendMessage(
+      this.worker,
+      {
+        method: FETCH_RESOURCE,
+        params: {
+          iri,
+        },
       },
-    });
+    );
   }
 
-  getEntity(iri, next) {
-    this.next = next;
-    this.worker.postMessage({
-      method: GET_ENTITY,
-      params: {
-        iri,
+  getEntity(iri) {
+    return sendMessage(
+      this.worker,
+      {
+        method: GET_ENTITY,
+        params: {
+          iri,
+        },
       },
-    });
+    );
   }
 
   static registerTransformer() {
@@ -62,12 +52,15 @@ export default class DataWorkerLoader {
   }
 
   setAcceptForHost(origin, acceptValue) {
-    this.worker.postMessage({
-      method: SET_ACCEPT_HOST,
-      params: {
-        origin,
-        acceptValue,
+    sendMessage(
+      this.worker,
+      {
+        method: SET_ACCEPT_HOST,
+        params: {
+          origin,
+          acceptValue,
+        },
       },
-    });
+    );
   }
 }

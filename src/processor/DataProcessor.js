@@ -1,24 +1,20 @@
-import rdf from 'rdf-ext';
+import rdf from 'rdflib';
 import { URL } from 'universal-url';
 
 import {
-  F_GRAPH,
-  F_JSONLD,
   fetchWithExtension,
   getContentType,
   getExtention,
   isDifferentOrigin,
 } from '../utilities';
 
-const formats = require('rdf-formats-common')();
-
 function handleStatus(res) {
   if (res.status === 404) {
     return Promise.reject({
       res,
-      message: `404: '${res.url}' could not be found`,
+      message: `404: '${res.responseURL}' could not be found`,
     });
-  } else if (res.status >= 400) {
+  } else if (res.status >= 400 && res.status < 500) {
     if ((res.headers['Content-Type'] || res.headers.get('Content-Type')).includes('json')) {
       return res
       .json()
@@ -29,7 +25,12 @@ function handleStatus(res) {
     }
     return Promise.reject({
       res,
-      message: `404: '${res.url}' could not be found`,
+      message: `404: '${res.responseURL}' could not be found`,
+    });
+  } else if (res.status >= 500) {
+    return Promise.reject({
+      res,
+      message: 'Internal server error',
     });
   }
   return Promise.resolve(res);
@@ -50,22 +51,13 @@ function pushToMap(map, k, v) {
 }
 
 /**
- * Serializes an {rdf.Graph} into a specified output format.
+ * Resolves {rdf.Graph} into an array for transferring.
  * @param {rdf.Graph} graph The graph to serialize
- * @param {string} output The media type of the output format, which has to have been registered
- * first with {registerProcessor}.
- * @returns {Promise.<string|undefined>} The serialized data or undefined.
+ * @returns {Promise.<array|undefined>} The data or undefined.
  */
-function processGraph(graph, output) {
-  if (output === F_GRAPH) {
-    return Promise.resolve(graph);
-  }
-  return formats
-    .serializers[output]
-    .serialize(graph)
-    .then(data => JSON.parse(data));
+function processGraph(graph) {
+  return Promise.resolve(graph.statements);
 }
-
 
 /**
  * Saves response metadata into a graph.
@@ -74,27 +66,19 @@ function processGraph(graph, output) {
  * @returns {rdf.Graph} A graph with metadata about the response.
  */
 function processResponse(iri, res) {
-  const graph = new rdf.Graph();
-  const origin = new URL(res.url).origin;
-  graph.add(
-    new rdf.Quad(
-      new rdf.NamedNode(res.url),
-      new rdf.NamedNode(rdf.resolve('http:statusCodeValue')),
-      new rdf.Literal(parseInt(res.status, 10)),
-      origin,
-    ),
-  );
-  if (iri !== res.url) {
-    graph.add(
+  const origin = new URL(res.responseURL).origin;
+  const statements = [];
+  if (iri !== res.responseURL) {
+    statements.push(
       new rdf.Quad(
         new rdf.NamedNode(iri),
         new rdf.NamedNode('http://www.w3.org/2002/07/owl#sameAs'),
-        new rdf.NamedNode(res.url),
+        new rdf.NamedNode(res.responseURL),
         origin,
       ),
     );
   }
-  return graph;
+  return statements;
 }
 
 export default class DataProcessor {
@@ -103,66 +87,91 @@ export default class DataProcessor {
       default: '',
     };
     this.mapping = {};
-    /** Set the appropriate media-type as the output for the data calls */
-    this.output = F_JSONLD;
-    this.store = rdf.createStore();
+    this.requestMap = {};
+    this.store = rdf.graph();
+    this.fetcher = new rdf.Fetcher(this.store, 10000);
   }
 
-  feedResponse(iri, res, next) {
-    const responseQuads = processResponse(iri, res);
-    this.store.merge(new URL(res.url).origin, responseQuads);
+  feedResponse(iri, res) {
     const format = getContentType(res);
     const processor = this.mapping[format][0];
-    return processor(res, (graph) => {
-      this.store.merge(new URL(res.url).origin, graph);
-      return processGraph(responseQuads.merge(graph), this.output).then(next);
-    });
+    return processor(res);
   }
 
   fetchResource(iri) {
     return new Promise((resolve) => {
-      const accept = this.accept[new URL(iri).origin] || this.accept.default;
+      const iriString = typeof iri === 'string' ? iri : iri.value;
+      const accept = this.accept[new URL(iriString).origin] || this.accept.default;
       if (isDifferentOrigin(iri) && getExtention()) {
         resolve(fetchWithExtension(iri, accept));
       } else {
-        resolve(self.fetch(iri, {
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/vnd.api+json',
-            Accept: accept,
-          },
+        if (typeof self.window === 'undefined') {
+          self.window = self;
+        }
+        resolve(new Promise((resolveReq, rejectReq) => {
+          if (accept) {
+            this.fetcher.mediatypes = { [accept]: { q: 1.0 } };
+          }
+          this.fetcher.nowOrWhenFetched(
+            iri,
+            undefined,
+            (ok, body, xhr) => {
+              if (ok) {
+                resolveReq(xhr);
+              } else {
+                rejectReq(xhr);
+              }
+            },
+            {
+              credentials: 'same-origin',
+              headers: {
+                'Content-Type': 'application/vnd.api+json',
+                Accept: accept,
+              },
+            },
+          );
         }));
       }
     })
     .then(handleStatus);
   }
 
-  getEntity(iri, next) {
-    const cachedGraph = this.searchStore(iri);
-    if (cachedGraph && cachedGraph.length > 0) {
-      processGraph(cachedGraph, this.output).then(next);
+  /**
+   *
+   * @param iri The IRI of the entity
+   * @return {Promise} A promise with the resulting entity
+   */
+  getEntity(iri) {
+    const url = new URL(iri.value);
+    url.hash = '';
+    const requestIRI = url.toString();
+    if (typeof this.requestMap[requestIRI] !== 'undefined') {
+      return Promise.reject();
     }
-    this.fetchResource(iri)
-      .then(res => this.feedResponse(iri, res, next))
+    const dataPromise = this
+      .fetchResource(requestIRI)
+      .then(res => this.feedResponse(iri, res))
       .catch((e) => {
         if (typeof e.res === 'undefined') {
           throw e;
         }
         const responseQuads = processResponse(iri, e.res);
-        this.store.merge(new URL(e.res.url).origin, responseQuads);
-        processGraph(responseQuads, this.output).then(next);
+        this.store.add(responseQuads);
+        return processGraph(responseQuads, this.output);
       });
+    this.requestMap[requestIRI] = dataPromise;
+    return dataPromise;
   }
 
-  processExternalResponse(iri, response, next) {
-    handleStatus(response)
-      .then(res => this.feedResponse(undefined, res, next));
+  processExternalResponse(iri, response) {
+    return handleStatus(response)
+      .then(res => this.feedResponse(undefined, res));
   }
 
   /**
    * Register a transformer so it can be used to interact with API's.
    * @access public
-   * @param {function} processor
+   * @param {function} transformer
    * @param {String|Array.<String>} mediaType
    * @param {number} acceptValue
    */
@@ -181,11 +190,7 @@ export default class DataProcessor {
    * @return {rdf.Graph|undefined}
    */
   searchStore(iri) {
-    const g = this.store.graphs[new URL(iri).origin];
-    if (g) {
-      return g.filter(t => t.subject.equals(iri));
-    }
-    return undefined;
+    return this.store.match(iri, undefined, undefined, new URL(iri).origin);
   }
 
   setAcceptForHost(origin, acceptValue) {
