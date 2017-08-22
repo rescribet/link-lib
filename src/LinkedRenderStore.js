@@ -1,21 +1,20 @@
 /* eslint no-console: 0 */
-import rdf from 'rdf-ext';
 import DisjointSet from 'ml-disjoint-set';
+import rdf from 'rdflib';
 
 import LinkDataAPI from './LinkedDataAPI';
-import { flattenProperty } from './utilities';
+import { defaultNS, getP, hasP } from './utilities';
 
-const COMPACT_IRI_REGX = /^(\w+):(\w+)$/;
-const CI_MATCH_LENGTH = 3;
-const CI_MATCH_PREFIX = 1;
-const CI_MATCH_SUFFIX = 2;
-const DEFAULT_TOPOLOGY = 'DEFAULT_TOPOLOGY';
+const CI_MATCH_PREFIX = 0;
+const CI_MATCH_SUFFIX = 1;
+
+export const DEFAULT_TOPOLOGY = defaultNS.ll('defaultTopology');
 
 /**
  * Constant used to determine that a class is used to render a type rather than a property.
  * @type {string}
  */
-export const RENDER_CLASS_NAME = 'TYPE_RENDERER_CLASS';
+export const RENDER_CLASS_NAME = defaultNS.ll('typeRenderClass');
 
 function convertToCacheKey(type, props, topology) {
   return (props.length > 1)
@@ -30,14 +29,17 @@ const LinkedRenderStore = {
   /**
    * Whenever a resource has no type, assume it to be this.
    * @access public
-   * @type {String|undefined} The full IRI of the type or undefined when disabled.
+   * @type {rdf.NamedNode|undefined} The full IRI of the type or undefined when disabled.
    */
-  defaultType: 'http://schema.org/Thing',
+  defaultType: defaultNS.schema('Thing'),
+
   /**
    * @type {Object.<string, Array>}
    * @access private
    */
   lookupCache: {},
+
+  namespaces: Object.assign({}, defaultNS),
 
   /** @access private */
   mapping: {
@@ -52,7 +54,7 @@ const LinkedRenderStore = {
   },
 
   /** @access private */
-  store: rdf.createStore(),
+  store: rdf.graph(),
 
   /**
    * Adds a renderer to {this.lookupCache}
@@ -111,6 +113,56 @@ const LinkedRenderStore = {
   },
 
   /**
+   * RDF-like object for passing constructorless data.
+   * @typedef {Object} RDFIsh
+   * @property {('NamedNode'|'Literal')} termType The type of the statement.
+   * @property {string} value The value of the statement.
+   * @property {string} language The language of the literal contents.
+   * @property {object} datatype The datatype of the literal.
+   */
+
+
+  /**
+   * Add triple-formed data to the store
+   * @access private
+   * @param data [Array<RDFIsh>] Data to parse and add to the store.
+   * @returns {Promise}
+   */
+  addStatements(data) {
+    function parseNode(n) {
+      if (typeof n === 'undefined') return undefined;
+      switch (n.termType) {
+        case 'NamedNode':
+          return new rdf.NamedNode(n.value);
+        case 'Literal':
+          return new rdf.Literal(n.value, n.language, parseNode(n.datatype));
+        default:
+          return undefined;
+      }
+    }
+
+    return new Promise((resolve) => {
+      let statements;
+      if (data[0] && data[0].constructor !== rdf.Statement) {
+        statements = data.map(s =>
+          new rdf.Statement(
+            parseNode(s.subject),
+            parseNode(s.predicate),
+            parseNode(s.object),
+            undefined, // parseNode(s.why),
+          ),
+        );
+      } else if (data && data[0].constructor === rdf.Statement) {
+        statements = data;
+      }
+      if (Array.isArray(statements)) {
+        this.store.add(statements);
+      }
+      resolve();
+    });
+  },
+
+  /**
    * Expands the given types and returns the best class to render it with.
    * @param classes
    * @param {Array} [types]
@@ -131,11 +183,15 @@ const LinkedRenderStore = {
    * @returns {string} The (expanded) property
    */
   expandProperty(prop) {
-    const matches = prop && prop.match(COMPACT_IRI_REGX);
-    if (matches === null || matches === undefined || matches.length !== CI_MATCH_LENGTH) {
+    if (typeof prop === 'undefined' || typeof prop.termType !== 'undefined') {
       return prop;
     }
-    return `${this.store.rdf.prefixes[matches[CI_MATCH_PREFIX]]}${matches[CI_MATCH_SUFFIX]}`;
+
+    if (prop.indexOf('/') >= 1) {
+      return new rdf.NamedNode(prop);
+    }
+    const matches = prop.split(':');
+    return this.namespaces[matches[CI_MATCH_PREFIX]](matches[CI_MATCH_SUFFIX]);
   },
 
   /**
@@ -155,10 +211,17 @@ const LinkedRenderStore = {
    * otherwise the IRI will be fetched and processed.
    * @access public
    * @param iri The IRI of the resource
-   * @param next A function which handles graph updates
+   * @return {Promise} A promise with the resulting entity
    */
-  getEntity(iri, next) {
-    this.api.getEntity(iri, next);
+  getEntity(iri) {
+    const cachedEntity = this.searchStore(iri);
+    if (typeof cachedEntity !== 'undefined' && cachedEntity.length > 0) {
+      return Promise.resolve(cachedEntity);
+    }
+
+    return this.api.getEntity(iri)
+      .then(this.addStatements.bind(this))
+      .then(() => this.store.subjectIndex[this.store.canon(iri)]);
   },
 
   /**
@@ -166,14 +229,15 @@ const LinkedRenderStore = {
    * @access public
    * @param {String|String[]} type The type(s) of the resource to render.
    * @param {String|String[]} prop The property(s) to render.
-   * @param {string} [topology] The topology of the resource, if any
+   * @param {string} [_topology] The topology of the resource, if any
    * @returns {Object|function|undefined} The most appropriate renderer, if any.
    */
-  getRenderClassForProperty(type = this.defaultType, prop, topology = DEFAULT_TOPOLOGY) {
+  getRenderClassForProperty(type = this.defaultType, prop, _topology = DEFAULT_TOPOLOGY) {
     if (type === undefined) {
       return undefined;
     }
-    const types = normalizeType(type);
+    const topology = hasP(_topology, 'value') ? _topology : this.expandProperty(_topology);
+    const types = this.normalizeType(type);
     const props = Array.isArray(prop) ?
       prop.map(p => this.expandProperty(p)) :
       [this.expandProperty(prop)];
@@ -304,42 +368,24 @@ const LinkedRenderStore = {
    * Returns an entity from the cache directly.
    * This won't cause any network requests even if the entity can't be found.
    * @param {string} iri The IRI of the resource.
-   * @param next
    * @returns {Object|undefined} The object if found, or undefined.
    */
-  tryEntity(iri, next) {
-    const origin = new URL(iri).origin;
-    try {
-      // TODO: replace with proper API to replace the _gpso call
-      /* eslint no-underscore-dangle: 0 */
-      return next(this.store.graphs[origin]._gspo[origin][iri]);
-    } catch (TypeError) {
-      return next;
-    }
+  tryEntity(iri) {
+    return this.searchStore(iri);
+  },
+
+  /**
+   * Searches the store for all the triples for which {iri} is the subject.
+   * @access private
+   * @param {string} iri The full IRI of the resource.
+   * @return {Object|undefined}
+   */
+  searchStore(iri) {
+    const canon = this.store.canon(iri);
+    return typeof this.store.subjectIndex[canon] !== 'undefined'
+      ? this.store.subjectIndex[canon]
+      : undefined;
   },
 };
-
-LinkedRenderStore.store.rdf.prefixes.addAll({
-  argu: 'https://argu.co/ns/core#',
-  bibo: 'http://purl.org/ontology/bibo/',
-  cc: 'http://creativecommons.org/ns#',
-  dbo: 'http://dbpedia.org/ontology/',
-  dc: 'http://purl.org/dc/terms/',
-  dbpedia: 'http://dbpedia.org/resource/',
-  foaf: 'http://xmlns.com/foaf/0.1/',
-  geo: 'http://www.w3.org/2003/01/geo/wgs84_pos#',
-  http: 'http://www.w3.org/2011/http#',
-  hydra: 'http://www.w3.org/ns/hydra/core#',
-  p: 'http://www.wikidata.org/prop/',
-  prov: 'http://www.w3.org/ns/prov#',
-  schema: 'http://schema.org/',
-  skos: 'http://www.w3.org/2004/02/skos/core#',
-  wdata: 'https://www.wikidata.org/wiki/Special:EntityData/',
-  wd: 'http://www.wikidata.org/entity/',
-  wds: 'http://www.wikidata.org/entity/statement/',
-  wdref: 'http://www.wikidata.org/reference/',
-  wdv: 'http://www.wikidata.org/value/',
-  wdt: 'http://www.wikidata.org/prop/direct/',
-});
 
 export default LinkedRenderStore;

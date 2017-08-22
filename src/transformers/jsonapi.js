@@ -1,7 +1,7 @@
 /* eslint no-param-reassign: 0 */
 import assert from 'assert';
-import rdf from 'rdf-ext';
 import { promises as jsonld } from 'jsonld';
+import rdf from 'rdflib';
 import { URL } from 'universal-url';
 
 import LRS from '../LinkedRenderStore';
@@ -16,16 +16,18 @@ function getIDForEntity(resource, entity) {
  * Turns an expanded jsonld object into a graph
  * @returns {rdf.Graph}
  */
-function processExpandedEntity(id, expanded, origin) {
+function processExpandedEntity(statements, id, expanded, origin) {
   const entity = expanded[0];
-  const type = entity['@type'] instanceof Array ? entity['@type'][0] : entity['@type'];
-  const graph = new rdf.Graph();
+  let type = entity['@type'] || entity['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'];
+  if (type instanceof Array) {
+    type = type[0];
+  }
 
-  graph.add(
-    new rdf.Quad(
+  statements.push(
+    new rdf.Statement(
       id,
-      new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-      new rdf.NamedNode(type),
+      LRS.namespaces.rdf('type'),
+      new rdf.NamedNode(type['@value'] || type),
       origin,
     ),
   );
@@ -34,32 +36,48 @@ function processExpandedEntity(id, expanded, origin) {
   for (let i = 0; i < keys.length; i++) {
     if (keys[i] && keys[i][0] !== '@') {
       const props = entity[keys[i]] instanceof Array ? entity[keys[i]] : [entity[keys[i]]];
-      graph.addAll(
-        props.map(obj => new rdf.Quad(
-          id,
-          new rdf.NamedNode(keys[i]),
-          obj instanceof Object && obj['@id'] !== undefined ?
-            new rdf.NamedNode(obj) : new rdf.Literal(getValueOrID(obj)),
-          origin,
-        )),
+      statements.push(
+        ...props.map((obj) => {
+          let value;
+          if (obj instanceof Object && obj['@id'] !== undefined) {
+            value = new rdf.NamedNode(obj);
+          } else {
+            const raw = getValueOrID(obj);
+            let datatype;
+            switch (typeof raw) {
+              case 'boolean':
+                datatype = LRS.namespaces.xsd('boolean');
+                break;
+              default:
+                datatype = LRS.namespaces.xsd('string');
+            }
+            value = new rdf.Literal(raw.toString(), undefined, datatype);
+          }
+          return new rdf.Statement(
+            id,
+            new rdf.NamedNode(keys[i]),
+            value,
+            origin,
+          );
+        }),
       );
     }
   }
-  return graph;
+  return statements;
 }
 
-function processLinks(entity, topID, origin, graph) {
+function processLinks(statements, entity, topID, origin) {
   if (entity.links instanceof Object) {
     const keys = Object.keys(entity.links);
     for (let i = 0; i < keys.length; i++) {
       const link = entity.links[keys[i]];
       if (typeof link.meta !== 'undefined') {
         const type = LRS.expandProperty(link.meta['@type'] || `schema:${keys[i]}`);
-        if (link.href !== undefined) {
-          graph.add(
-            new rdf.Quad(
+        if (link.href !== undefined && link.href !== null) {
+          statements.push(
+            new rdf.Statement(
               topID,
-              new rdf.NamedNode(type),
+              type,
               new rdf.NamedNode(link.href),
               origin,
             ),
@@ -84,82 +102,86 @@ function getIDForRelation(relation, link = 'self') {
  * @param {Object} relation An [relationship object](http://jsonapi.org/format/#document-resource-object-relationships)
  * @param topID The ID of the parent object.
  * @param {String} origin The graph to serialize the data into.
- * @returns {rdf.Graph} RDF representation of the given relation.
+ * @returns {Promise} RDF representation of the given relation.
  */
-function processRelation(relation, topID, origin) {
-  const graph = new rdf.Graph();
-
-  const relationID = new rdf.NamedNode(getIDForRelation(relation, relation.data instanceof Array ? 'self' : 'related'));
-  const relType = (relation.meta && relation.meta['@type']) || (relation.links && relation.links.self.meta['@type']);
-  const relTypeTriple = new rdf.NamedNode(LRS.expandProperty(relType));
-  if (relationID.toString()) {
-    graph.add(new rdf.Quad(topID, relTypeTriple, relationID, origin));
-  }
-
-  if (relation.data instanceof Array) {
-    let member;
-    if (relationID.toString()) {
-      member = new rdf.NamedNode(LRS.expandProperty('argu:members'));
-      const type = relation.links.related &&
-        relation.links.related.meta &&
-        relation.links.related.meta['@type'];
-      graph.add(new rdf.Quad(
-        relationID,
-        new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-        new rdf.NamedNode(LRS.expandProperty(type || 'argu:Collection')),
-        origin,
-      ));
-      graph.add(new rdf.Quad(
-        topID,
-        new rdf.NamedNode(LRS.expandProperty('argu:collectionAssociation')),
-        relationID,
-        origin,
-      ));
+function processRelation(statements, relation, topID, origin) {
+  return new Promise((resolve) => {
+    const relIDString = getIDForRelation(relation, relation.data instanceof Array ? 'self' : 'related');
+    const relationID = relIDString && new rdf.NamedNode(relIDString);
+    const relType = (relation.meta && relation.meta['@type']) || (relation.links && relation.links.self.meta['@type']);
+    const relTypeTriple = LRS.expandProperty(relType);
+    if (typeof relationID !== 'undefined') {
+      statements.push(new rdf.Statement(topID, relTypeTriple, relationID, origin));
     }
-    const placeOnForeign = !!relationID.toString();
-    relation.data.forEach((datum) => {
-      const t = placeOnForeign
-        ? new rdf.Quad(relationID, member, new rdf.NamedNode(datum.id), origin)
-        : new rdf.Quad(topID, relTypeTriple, new rdf.NamedNode(datum.id), origin);
-      graph.add(t);
-    });
-  }
 
-  processLinks(relation, topID, origin, graph);
-  return graph;
+    if (relation.data instanceof Array) {
+      let member;
+      if (typeof relationID !== 'undefined') {
+        member = LRS.expandProperty('argu:members');
+        const type = relation.links.related &&
+          relation.links.related.meta &&
+          relation.links.related.meta['@type'];
+        statements.push(new rdf.Statement(
+          relationID,
+          new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
+          LRS.expandProperty(type || 'argu:Collection'),
+          origin,
+        ));
+        statements.push(new rdf.Statement(
+          topID,
+          LRS.expandProperty('argu:collectionAssociation'),
+          relationID,
+          origin,
+        ));
+      }
+      const placeOnForeign = !(typeof relationID === 'undefined');
+      relation.data.forEach((datum) => {
+        const t = placeOnForeign
+          ? new rdf.Statement(relationID, member, new rdf.NamedNode(datum.id), origin)
+          : new rdf.Statement(topID, relTypeTriple, new rdf.NamedNode(datum.id), origin);
+        statements.push(t);
+      });
+    }
+
+    processLinks(statements, relation, topID, origin);
+    resolve();
+  });
 }
 
-const formatEntity = (resource, next, origin, objUrl = undefined) => {
   assert(resource.attributes, 'object has no attributes');
+const formatEntity = (statements, resource, origin, objUrl = undefined) => {
+  const promises = [];
   const id = getIDForEntity(resource, resource.attributes);
-  jsonld
-    .expand(resource.attributes)
-    .then((expanded) => {
-      next(processExpandedEntity(id, expanded, origin));
-      if (objUrl !== undefined && id && objUrl !== id.toString()) {
-        next(new rdf.Graph([
-          new rdf.Quad(
-            new rdf.NamedNode(objUrl),
-            new rdf.NamedNode('http://www.w3.org/2002/07/owl#sameAs'),
-            id,
-            origin,
-          ),
-        ]));
-      }
-    });
+  promises.push(
+    jsonld
+      .expand(resource.attributes)
+      .then((expanded) => {
+        processExpandedEntity(statements, id, expanded, origin);
+        if (objUrl !== undefined && id && objUrl !== id.toString()) {
+          statements.push(
+            new rdf.Statement(
+              new rdf.NamedNode(objUrl),
+              new rdf.NamedNode('http://www.w3.org/2002/07/owl#sameAs'),
+              id,
+              origin,
+            ),
+          );
+        }
+        return Promise.resolve();
+      }),
+  );
 
   if (resource.relationships instanceof Object) {
     const keys = Object.keys(resource.relationships);
     for (let i = 0; i < keys.length; i++) {
       const relation = resource.relationships[keys[i]];
-      next(processRelation(relation, id, origin));
+      promises.push(processRelation(statements, relation, id, origin));
     }
   }
   if (resource.links instanceof Object) {
-    const g = new rdf.Graph();
-    processLinks(resource, id, origin, g);
-    next(g);
+    processLinks(statements, resource, id, origin);
   }
+  return Promise.all(promises).then(() => statements);
 };
 
 /**
@@ -168,21 +190,27 @@ const formatEntity = (resource, next, origin, objUrl = undefined) => {
  * @param {Response|Object} response The response object to process
  * @param {function} next The function to pass the result to.
  */
-export default function process(response, next) {
-  new Promise((pResolve) => {
-    if (typeof response.body !== 'string') {
+export default function process(response) {
+  return new Promise((pResolve) => {
+    if (typeof response.response === 'string') {
+      pResolve(JSON.parse(response.response));
+    } else if (typeof response.body !== 'string') {
       pResolve(response.json());
     } else {
       pResolve(JSON.parse(response.body));
     }
   })
   .then((json) => {
-    const origin = new URL(response.url).origin;
-    formatEntity(json.data, next, origin, response.url);
+    const origin = new URL(response.responseURL).origin;
+    const promises = [];
+    // const graph = rdf.graph();
+    const statements = [];
+    promises.push(formatEntity(statements, json.data, origin, response.responseURL));
     if (json.included instanceof Array) {
-      self.setTimeout(() => {
-        json.included.forEach(ent => formatEntity(ent, next, origin));
-      }, 0);
+      promises.push(...json.included.map(ent => formatEntity(statements, ent, origin)));
     }
+    return Promise
+      .all(promises)
+      .then(() => statements);
   });
 }

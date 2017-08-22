@@ -1,5 +1,3 @@
-import './rdf';
-
 import DataProcessor from './processor/DataProcessor';
 // import DataWorkerLoader from './worker/DataWorkerLoader';
 
@@ -25,10 +23,10 @@ const LDAPI = {
    * otherwise the IRI will be fetched and processed.
    * @access public
    * @param iri The IRI of the resource
-   * @param next A function which handles graph updates
+   * @return {Promise} A promise with the resulting entity
    */
-  getEntity(store, iri, next) {
-    this.processor.getEntity(store, iri, next);
+  getEntity(iri) {
+    return this.processor.getEntity(iri);
   },
 
   /**

@@ -1,32 +1,30 @@
+import rdf from 'rdflib';
+
 import { getContentType } from '../utilities';
-const formats = require('rdf-formats-common')();
 
 /**
  * Processes a range of media types with parsers from the
  * [rdf-formats-common package](https://www.npmjs.com/package/rdf-formats-common).
  * @param response
- * @param next
  * @returns {Promise.<TResult>}
  */
-export default function process(response, next) {
+export default function process(response) {
   return new Promise((pResolve) => {
-    if (typeof response.body !== 'string') {
+    if (typeof response.responseText === 'string') {
+      pResolve(response.responseText);
+    } else if (typeof response.body !== 'string') {
       pResolve(response.text());
     } else {
       pResolve(response.body);
     }
   })
-  .then((data) => {
-    const format = getContentType(response);
-    if (!formats.parsers[format]) {
-      throw new Error(`Unknown Format: ${format}`);
-    }
-    return formats
-      .parsers[format]
-      .parse(data, undefined, response.url)
-      .then(next)
-      .catch((e) => {
-        throw e;
-      });
-  });
+    .then((data) => {
+      const format = getContentType(response);
+      const g = rdf.graph();
+      rdf.parse(data, g, response.responseURL, format);
+      return g.statements;
+    })
+    .catch((e) => {
+      throw e;
+    });
 }

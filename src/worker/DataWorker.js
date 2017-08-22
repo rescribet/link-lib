@@ -21,29 +21,32 @@ export default function DataWorker({ transformers }) {
     });
   }
 
-  self.addEventListener('message', ({ data }) => {
+  self.addEventListener('message', ({ data, ports }) => {
     const { method, params } = data;
+
+    if (!ports[0]) {
+      return;
+    }
     switch (method) {
       case DATA_ACQUIRED:
-        dataProcessor.processExternalResponse(
-          params.iri,
-          data.data,
-          (graph) => {
-            postMessage({
+        dataProcessor
+          .processExternalResponse(params.iri, data.data)
+          .then((graph) => {
+            ports[0].postMessage({
               method: STORE_UPDATE,
               data: graph,
             });
-          },
-        );
+          });
         break;
       case FETCH_RESOURCE:
-        dataProcessor.fetchResource(params.iri);
+        dataProcessor
+          .fetchResource(params.iri);
         break;
       case GET_ENTITY:
-        if (isDifferentOrigin(params.iri)) {
+        if (isDifferentOrigin(params.iri.value)) {
           const accept = self.dataProcessor.accept[new URL(params.iri).origin] ||
             self.dataProcessor.accept.default;
-          postMessage({
+          ports[0].postMessage({
             method: FETCH_EXT,
             data: {
               params,
@@ -51,15 +54,14 @@ export default function DataWorker({ transformers }) {
             },
           });
         } else {
-          dataProcessor.getEntity(
-            params.iri,
-            (graph) => {
-              postMessage({
+          dataProcessor
+            .getEntity(params.iri)
+            .then((graph) => {
+              ports[0].postMessage({
                 method: STORE_UPDATE,
                 data: graph,
               });
-            },
-          );
+            });
         }
         break;
       case SET_ACCEPT_HOST:

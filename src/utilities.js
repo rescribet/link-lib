@@ -1,7 +1,7 @@
 /* global chrome */
+import rdf, { Statement } from 'rdflib';
 import { URL } from 'universal-url';
 
-export const F_GRAPH = 'F_GRAPH';
 export const F_NTRIPLES = 'application/n-triples';
 export const F_TURTLE = 'text/turtle';
 export const F_N3 = 'text/n3';
@@ -15,6 +15,81 @@ export const F_NTRIPLES_DEP = 'text/ntriples';
 export const F_TURTLE_DEP = 'application/x-turtle';
 
 export const NON_CONTENT_EXTS = ['php', 'asp', 'aspx', 'cgi', 'jsp'];
+
+export const defaultNS = Object.freeze({
+  argu: rdf.Namespace('https://argu.co/ns/core#'),
+  bibo: rdf.Namespace('http://purl.org/ontology/bibo/'),
+  cc: rdf.Namespace('http://creativecommons.org/ns#'),
+  dbo: rdf.Namespace('http://dbpedia.org/ontology/'),
+  dc: rdf.Namespace('http://purl.org/dc/terms/'),
+  dbpedia: rdf.Namespace('http://dbpedia.org/resource/'),
+  foaf: rdf.Namespace('http://xmlns.com/foaf/0.1/'),
+  geo: rdf.Namespace('http://www.w3.org/2003/01/geo/wgs84_pos#'),
+  http: rdf.Namespace('http://www.w3.org/2011/http#'),
+  hydra: rdf.Namespace('http://www.w3.org/ns/hydra/core#'),
+  ll: rdf.Namespace('http://purl.org/link-lib/'),
+  owl: rdf.Namespace('http://www.w3.org/2002/07/owl#'),
+  p: rdf.Namespace('http://www.wikidata.org/prop/'),
+  prov: rdf.Namespace('http://www.w3.org/ns/prov#'),
+  rdf: rdf.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
+  rdfs: rdf.Namespace('http://www.w3.org/2000/01/rdf-schema#'),
+  schema: rdf.Namespace('http://schema.org/'),
+  skos: rdf.Namespace('http://www.w3.org/2004/02/skos/core#'),
+  wdata: rdf.Namespace('https://www.wikidata.org/wiki/Special:EntityData/'),
+  wd: rdf.Namespace('http://www.wikidata.org/entity/'),
+  wds: rdf.Namespace('http://www.wikidata.org/entity/statement/'),
+  wdref: rdf.Namespace('http://www.wikidata.org/reference/'),
+  wdv: rdf.Namespace('http://www.wikidata.org/value/'),
+  wdt: rdf.Namespace('http://www.wikidata.org/prop/direct/'),
+  xmlns: rdf.Namespace('http://www.w3.org/2000/xmlns/'),
+  xsd: rdf.Namespace('http://www.w3.org/2001/XMLSchema#'),
+});
+
+
+export function allRDFPropertyTriples(obj, prop) {
+  if (typeof obj === 'undefined') return undefined;
+
+  const props = obj.filter(s => s.predicate.equals(prop));
+  return (props.length === 0) ? undefined : props;
+}
+
+export function allRDFValues(obj, prop, term = false) {
+  const props = allRDFPropertyTriples(obj, prop);
+  if (typeof props === 'undefined') return undefined;
+
+  const terms = props.map(s => s.object);
+  if (term) return terms;
+  return terms.map(s => s.value);
+}
+
+export function allObjectValues(obj, prop, term = false) {
+  if (typeof obj === 'undefined' || typeof obj[prop] === 'undefined') return undefined;
+
+  if (term) return obj[prop];
+
+  return Array.isArray(obj[prop])
+    ? obj[prop].map(val => val.value)
+    : obj[prop].value;
+}
+
+export function anyRDFValue(obj, prop, term = true) {
+  if (typeof obj === 'undefined') return undefined;
+
+  const match = obj.find(s => s.predicate.equals(prop));
+  if (typeof match === 'undefined') return undefined;
+  return term
+    ? match.object
+    : match.object.value;
+}
+
+export function anyObjectValue(obj, prop, term = false) {
+  if (typeof obj === 'undefined' || typeof obj[prop] === 'undefined') return undefined;
+
+  if (typeof obj[prop] === 'undefined') return undefined;
+
+  return term ? obj[prop] : obj[prop].value;
+}
+
 
 /** @access private */
 export function fetchWithExtension(iri, formats) {
@@ -62,10 +137,9 @@ export function flattenProperty(obj) {
  * @returns {*}
  */
 export function getContentType(res) {
-  const contentTypeRaw = typeof res.headers.get === 'undefined' ?
-    res.headers['Content-Type'] : res.headers.get('Content-Type');
+  const contentTypeRaw = getHeader(res, 'Content-Type');
   const contentType = contentTypeRaw.split(';')[0];
-  const urlMatch = new URL(res.url).href.match('.([a-zA-Z]*)[$|?|#]');
+  const urlMatch = new URL(res.requestedURI).href.match('.([a-zA-Z]*)[$|?|#]');
   const ext = urlMatch && urlMatch[1];
   if (contentType !== undefined) {
     if (contentType.includes(F_NTRIPLES) || contentType.includes(F_NTRIPLES_DEP)) {
@@ -105,6 +179,15 @@ export function getExtention() {
   return undefined;
 }
 
+export function getHeader(res, header) {
+  if (typeof res.headers.get === 'function') {
+    return res.headers.get(header);
+  } else if (typeof res.getResponseHeader === 'function') {
+    return res.getResponseHeader(header);
+  }
+  return res.headers[header];
+}
+
 /**
  * Get a property for an object of which the method to get is unsure.
  * Currently handles regular and immutable.js objects.
@@ -127,7 +210,7 @@ export function getP(obj, prop) {
  * @param {Object} prop The property to retrieve the value from.
  * @returns {*} The value of the property if any.
  */
-export function getValueOrID(prop) {
+export function getValueOrIDJSONLD(prop) {
   if (hasP(prop, '@value')) {
     return getP(prop, '@value');
   }
@@ -135,6 +218,24 @@ export function getValueOrID(prop) {
     return getP(prop, '@id');
   }
   return prop;
+}
+
+/**
+ * Returns the inner value for a property in triple structured objects.
+ * @param {Object} prop The property to retrieve the value from.
+ * @returns {*} The value of the property if any.
+ */
+export function getValueOrID(prop) {
+  if (prop.constructor === Statement) {
+    return prop.object.value;
+  }
+  if (typeof prop === 'object') {
+    if (prop.value) {
+      return prop.value;
+    }
+    return getValueOrIDJSONLD(prop);
+  }
+  return typeof prop.first === 'function' ? prop.first() : prop;
 }
 
 /**

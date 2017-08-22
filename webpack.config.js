@@ -12,10 +12,11 @@ var config = {
   externals: {
     jsonld: 'jsonld',
     'es6-promise': 'es6-promise',
-    'rdf-ext': 'rdf-ext',
+    rdflib: 'rdflib',
     'rdf-formats-common': 'rdf-formats-common',
     'whatwg-fetch': 'whatwg-fetch'
     'whatwg-url': 'whatwg-url',
+    xmlhttprequest: 'xmlhttprequest'
   },
   module: {
     rules: [
