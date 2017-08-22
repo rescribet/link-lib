@@ -1,5 +1,4 @@
 /* eslint no-param-reassign: 0 */
-import assert from 'assert';
 import { promises as jsonld } from 'jsonld';
 import rdf from 'rdflib';
 import { URL } from 'universal-url';
@@ -148,9 +147,12 @@ function processRelation(statements, relation, topID, origin) {
   });
 }
 
-  assert(resource.attributes, 'object has no attributes');
 const formatEntity = (statements, resource, origin, objUrl = undefined) => {
   const promises = [];
+
+  if (typeof resource.attributes === 'undefined' || resource.attributes === {}) {
+    throw new Error('object has no attributes');
+  }
   const id = getIDForEntity(resource, resource.attributes);
   promises.push(
     jsonld

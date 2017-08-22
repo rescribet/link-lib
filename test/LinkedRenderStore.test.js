@@ -1,46 +1,53 @@
 import 'babel-polyfill';
-import assert from 'assert';
 import { describe, it } from 'mocha';
 
-import LRS, { RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
-const schema = LRS.schema;
+import * as ctx from './fixtures';
+import { chai } from './utilities';
+
+import LRS, { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
+import { defaultNS as NS } from '../src/utilities';
+
+const { expect } = chai;
+const sDT = DEFAULT_TOPOLOGY.toString();
+const sRCN = RENDER_CLASS_NAME.toString();
 
 const Thing = {
-  '@id': 'http://schema.org/Thing',
-  '@type': 'rdfs:Class',
-  'rdfs:comment': 'The most generic type of item.',
-  'rdfs:label': 'Thing',
+  '@id': NS.schema('Thing').value,
+  '@type': NS.rdfs('Class').value,
+  [NS.rdfs('comment').value]: 'The most generic type of item.',
+  [NS.rdfs('label').value]: 'Thing',
 };
 
 const CreativeWork = {
-  '@id': 'http://schema.org/CreativeWork',
-  '@type': 'rdfs:Class',
+  '@id': NS.schema('CreativeWork').value,
+  '@type': NS.rdfs('Class').value,
   'http://purl.org/dc/terms/source': {
     '@id': 'http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_rNews',
   },
-  'rdfs:comment': 'The most generic kind of creative work, including books, movies, photographs, software programs, etc.',
-  'rdfs:label': 'CreativeWork',
-  'rdfs:subClassOf': {
-    '@id': 'http://schema.org/Thing',
+  [NS.rdfs('comment').value]: 'The most generic kind of creative work, including books, movies, photographs, software programs, etc.',
+  [NS.rdfs('label').value]: 'CreativeWork',
+  [NS.rdfs('subClassOf').value]: {
+    '@id': NS.schema('Thing').value,
   },
 };
 
-
-describe('LinkedRenderStore functions well', function() {
+describe('LinkedRenderStore', function() {
   describe('The schema is available', function () {
     it('initializes the schema', function () {
-      assert(typeof schema === 'object');
-      assert(Array.isArray(schema['@graph']));
+      expect(LRS.schema).to.be.an('object');
+      expect(LRS.schema['@graph']).to.be.an('array');
     });
   });
 
   describe('expands properties correctly', function() {
     it('expands short to long notation', function() {
-      assert(LRS.expandProperty('schema:name') === 'http://schema.org/name');
+      const nameShort = LRS.expandProperty('schema:name');
+      expect(NS.schema('name').sameTerm(nameShort)).to.be.true;
     });
 
     it('preserves long notation', function() {
-      assert(LRS.expandProperty('http://schema.org/name') === 'http://schema.org/name');
+      const nameLong = LRS.expandProperty('http://schema.org/name');
+      expect(NS.schema('name').sameTerm(nameLong)).to.be.true;
     });
   });
 
@@ -48,14 +55,14 @@ describe('LinkedRenderStore functions well', function() {
     it('add a single graph item', function() {
       LRS.reset();
       LRS.addOntologySchematics(Thing);
-      assert(schema['@graph'].includes(Thing));
+      expect(LRS.schema['@graph']).to.include(Thing);
     });
 
     it('adds multiple graph items', function() {
       LRS.reset();
       LRS.addOntologySchematics([Thing, CreativeWork]);
-      assert(schema['@graph'].includes(Thing));
-      assert(schema['@graph'].includes(CreativeWork));
+      expect(LRS.schema['@graph']).to.include(Thing);
+      expect(LRS.schema['@graph']).to.include(CreativeWork);
     });
   });
 
@@ -63,35 +70,27 @@ describe('LinkedRenderStore functions well', function() {
     it('registers with shorthand', function () {
       LRS.reset();
       const ident = a => a;
-      LRS.registerRenderer(ident, 'schema:Thing');
-      assert.equal(
-        LRS.mapping['http://schema.org/Thing'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
-        ident
-      );
+      LRS.registerRenderer(ident, NS.schema('Thing'));
+      const thingComp = LRS.mapping[sRCN][NS.schema('Thing').toString()][sDT];
+      expect(thingComp).to.equal(ident);
     });
 
     it('registers with full notation', function () {
       LRS.reset();
       const ident = a => a;
-      LRS.registerRenderer(ident, 'http://schema.org/Thing');
-      assert.equal(
-        LRS.mapping['http://schema.org/Thing'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
-        ident
-      );
+      LRS.registerRenderer(ident, NS.schema('Thing'));
+      const thingComp = LRS.mapping[sRCN][NS.schema('Thing').toString()][sDT];
+      expect(thingComp).to.equal(ident);
     });
 
     it('registers multiple shorthand', function () {
       LRS.reset();
       const ident = a => a;
-      LRS.registerRenderer(ident, ['schema:Thing', 'schema:CreativeWork']);
-      assert.equal(
-        LRS.mapping['http://schema.org/Thing'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
-        ident
-      );
-      assert.equal(
-        LRS.mapping['http://schema.org/CreativeWork'][RENDER_CLASS_NAME]['DEFAULT_TOPOLOGY'],
-        ident
-      );
+      LRS.registerRenderer(ident, [NS.schema('Thing'), NS.schema('CreativeWork')]);
+      const thingComp = LRS.mapping[sRCN][NS.schema('Thing').toString()][sDT];
+      expect(thingComp).to.equal(ident);
+      const cwComp = LRS.mapping[sRCN][NS.schema('CreativeWork').toString()][sDT];
+      expect(cwComp).to.equal(ident);
     });
   });
 
@@ -99,21 +98,17 @@ describe('LinkedRenderStore functions well', function() {
     it('registers with shorthand', function () {
       LRS.reset();
       const ident = a => a;
-      LRS.registerRenderer(ident, 'schema:Thing', 'schema:name');
-      assert.equal(
-        LRS.mapping['http://schema.org/Thing']['http://schema.org/name']['DEFAULT_TOPOLOGY'],
-        ident
-      );
+      LRS.registerRenderer(ident, NS.schema('Thing'), NS.schema('name'));
+      const nameComp = LRS.mapping[NS.schema('name')][NS.schema('Thing').toString()][sDT];
+      expect(nameComp).to.equal(ident);
     });
 
     it('registers with full notation', function () {
       LRS.reset();
       const ident = a => a;
-      LRS.registerRenderer(ident, 'http://schema.org/Thing', 'http://schema.org/name');
-      assert.equal(
-        LRS.mapping['http://schema.org/Thing']['http://schema.org/name']['DEFAULT_TOPOLOGY'],
-        ident
-      );
+      LRS.registerRenderer(ident, NS.schema('Thing'), NS.schema('name'));
+      const nameComp = LRS.mapping[NS.schema('name')][NS.schema('Thing').toString()][sDT];
+      expect(nameComp).to.equal(ident);
     });
 
     it('registers multiple shorthand', function () {
@@ -121,18 +116,13 @@ describe('LinkedRenderStore functions well', function() {
       const ident = a => a;
       LRS.registerRenderer(
         ident,
-        'schema:Thing',
-        ['schema:name', 'rdfs:label']
+        NS.schema('Thing'),
+        [NS.schema('name'), NS.rdfs('label')],
       );
-      ['http://schema.org/name', 'http://www.w3.org/2000/01/rdf-schema#label'].forEach(prop => {
-        assert.equal(
-          LRS.mapping['http://schema.org/Thing'][prop]['DEFAULT_TOPOLOGY'],
-          ident
-        );
-        assert.notEqual(
-          LRS.mapping['http://schema.org/Thing'][prop]['DEFAULT_TOPOLOGY'],
-          b => b
-        );
+      [NS.schema('name').toString(), NS.rdfs('label')].forEach((prop) => {
+        const nameComp = LRS.mapping[prop][NS.schema('Thing').toString()][sDT];
+        expect(nameComp).to.equal(ident);
+        expect(nameComp).to.not.equal(b => b);
       });
     });
   });
@@ -140,22 +130,29 @@ describe('LinkedRenderStore functions well', function() {
   describe('returns renderer for', function() {
     it('class renders', function () {
       LRS.reset();
-      assert.equal(LRS.getRenderClassForType('http://schema.org/Thing'), undefined);
+      expect(LRS.getRenderClassForType(NS.schema('Thing'))).to.be.undefined;
       const ident = a => a;
-      LRS.registerRenderer(ident, 'http://schema.org/Thing');
-      assert.equal(LRS.getRenderClassForType('http://schema.org/Thing'), ident);
-      assert.notEqual(LRS.getRenderClassForType('http://schema.org/Thing'), a => a);
+      LRS.registerRenderer(ident, NS.schema('Thing'));
+      const klass = LRS.getRenderClassForType(NS.schema('Thing'));
+      expect(klass).to.equal(ident);
+      expect(klass).to.not.equal(a => a);
     });
 
     it('property renders', function () {
       LRS.reset();
       const ident = a => a;
-      LRS.registerRenderer(ident, 'http://schema.org/Thing', 'http://schema.org/name');
-      assert.equal(LRS.getRenderClassForProperty('http://schema.org/Thing', 'schema:name'), ident);
-      assert.notEqual(
-        LRS.getRenderClassForProperty('http://schema.org/Thing', 'schema:name'),
-        a => a
-      );
+      LRS.registerRenderer(ident, NS.schema('Thing'), NS.schema('name'));
+      const klass = LRS.getRenderClassForProperty(NS.schema('Thing'), NS.schema('name'));
+      expect(klass).to.equal(ident);
+      expect(klass).to.not.equal(a => a);
+    });
+  });
+
+  describe('reasons correctly', function() {
+    it('combines sameAs declarations', () => {
+      const opts = ctx.sameRel('sameFirst', { second: { id: 'sameSecond', title: 'other' } });
+      const entity = opts.context.linkedRenderStore.tryEntity(ctx.exNS('sameFirst'));
+      expect(entity.map(s => s.object.toString())).to.include('other');
     });
   });
 });
