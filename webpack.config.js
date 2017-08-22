@@ -15,6 +15,7 @@ var config = {
     'rdf-ext': 'rdf-ext',
     'rdf-formats-common': 'rdf-formats-common',
     'whatwg-fetch': 'whatwg-fetch'
+    'whatwg-url': 'whatwg-url',
   },
   module: {
     rules: [

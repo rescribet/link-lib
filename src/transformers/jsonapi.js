@@ -2,6 +2,7 @@
 import assert from 'assert';
 import rdf from 'rdf-ext';
 import { promises as jsonld } from 'jsonld';
+import { URL } from 'universal-url';
 
 import LRS from '../LinkedRenderStore';
 import { getValueOrID } from '../utilities';

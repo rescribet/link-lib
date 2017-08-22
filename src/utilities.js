@@ -1,4 +1,5 @@
 /* global chrome */
+import { URL } from 'universal-url';
 
 export const F_GRAPH = 'F_GRAPH';
 export const F_NTRIPLES = 'application/n-triples';

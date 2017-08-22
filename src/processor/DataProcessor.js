@@ -1,4 +1,5 @@
 import rdf from 'rdf-ext';
+import { URL } from 'universal-url';
 
 import {
   F_GRAPH,
