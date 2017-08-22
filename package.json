@@ -20,6 +20,7 @@
     "jsonld": "^0.4.11",
     "rdf-ext": "^0.3.0",
     "rdf-formats-common": "^0.3.1",
+    "ml-disjoint-set": "^1.0.0",
     "universal-url": "^1.0.0",
     "whatwg-url": "6.1.0"
   },
