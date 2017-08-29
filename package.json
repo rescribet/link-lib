@@ -6,8 +6,8 @@
   "module": "dist/module/index.js",
   "repository": "https://github.com/fletcher91/link-lib.git",
   "scripts": {
-    "build": "webpack -p --optimize-minimize && babel -d dist/module/ src/ && babel -d dist/module/ test/fixtures.js",
-    "build:dev": "webpack",
+    "build": "webpack -p --optimize-minimize && babel --no-babelrc --presets es2015-native-modules,stage-0 -d dist/module/ src/ && babel --no-babelrc --presets es2015-native-modules,stage-0 -d dist/module/ test/fixtures.js",
+    "build:dev": "webpack  && babel --no-babelrc --presets es2015-native-modules,stage-0 -d dist/module/ src/ && babel --no-babelrc --presets es2015-native-modules,stage-0 -d dist/module/ test/fixtures.js",
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "doc": "esdoc -c ./esdoc.json",
     "lint": "eslint ./src",
@@ -32,6 +32,7 @@
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-new-target": "^7.0.0-alpha.14",
     "babel-preset-es2015": "^6.18.0",
+    "babel-preset-es2015-native-modules": "^6.9.4",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-0": "^6.16.0",
     "chai": "^4.1.1",
