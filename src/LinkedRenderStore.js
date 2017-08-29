@@ -353,6 +353,7 @@ const LinkedRenderStore = {
    * @access public
    */
   reset() {
+    this.store = rdf.graph();
     this.schema = {
       '@graph': [],
       superMap: new Map(),
