@@ -32,8 +32,7 @@ const sFull = (id, attrs) => {
 };
 
 function chargeLRS(id, obj, store) {
-  const lrs = Object.assign({}, LinkedRenderStore);
-  lrs.reset();
+  const lrs = new LinkedRenderStore();
   lrs.store.add(obj);
   return context(exNS(id), lrs, store);
 }

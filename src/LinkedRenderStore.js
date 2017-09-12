@@ -12,7 +12,7 @@ export const DEFAULT_TOPOLOGY = defaultNS.ll('defaultTopology');
 
 /**
  * Constant used to determine that a class is used to render a type rather than a property.
- * @type {string}
+ * @type {rdf.NamedNode}
  */
 export const RENDER_CLASS_NAME = defaultNS.ll('typeRenderClass');
 
@@ -22,39 +22,36 @@ function convertToCacheKey(type, props, topology) {
     : `${type}[${props[0]}][${topology}]`;
 }
 
-const LinkedRenderStore = {
-  /** @access private */
-  api: LinkDataAPI,
+class LinkedRenderStore {
+  constructor(opts = {}) {
+    /** @access private */
+    this.store = opts.store || rdf.graph();
+    /** @access private */
+    this.api = opts.api || new LinkDataAPI({ dataProcessorOpts: { store: this.store } });
+    /**
+     * Whenever a resource has no type, assume it to be this.
+     * @access public
+     * @type {rdf.NamedNode|undefined} The full IRI of the type or undefined when disabled.
+     */
+    this.defaultType = opts.defaultType || defaultNS.schema('Thing');
+    /**
+     * @type {Object.<string, Array>}
+     * @access private
+     */
+    this.lookupCache = opts.lookupCache || {};
+    this.namespaces = opts.namespaces || Object.assign({}, defaultNS);
+    /** @access private */
+    this.mapping = opts.mapping || {
+      [RENDER_CLASS_NAME]: {},
+    };
 
-  /**
-   * Whenever a resource has no type, assume it to be this.
-   * @access public
-   * @type {rdf.NamedNode|undefined} The full IRI of the type or undefined when disabled.
-   */
-  defaultType: defaultNS.schema('Thing'),
-
-  /**
-   * @type {Object.<string, Array>}
-   * @access private
-   */
-  lookupCache: {},
-
-  namespaces: Object.assign({}, defaultNS),
-
-  /** @access private */
-  mapping: {
-    [RENDER_CLASS_NAME]: {},
-  },
-
-  /** @access private */
-  schema: {
-    '@graph': [],
-    equivalenceSet: new DisjointSet(),
-    superMap: new Map(),
-  },
-
-  /** @access private */
-  store: rdf.graph(),
+    /** @access private */
+    this.schema = opts.schema || {
+      '@graph': [],
+      equivalenceSet: new DisjointSet(),
+      superMap: new Map(),
+    };
+  }
 
   /**
    * Adds a renderer to {this.lookupCache}
@@ -66,7 +63,7 @@ const LinkedRenderStore = {
   addClassToCache(klass, key) {
     this.lookupCache[key] = klass;
     return this.lookupCache[key];
-  },
+  }
 
   /**
    * Push one or more items onto the graph so it can be used by the render store
@@ -110,7 +107,7 @@ const LinkedRenderStore = {
       this.schema['@graph'].push(items);
       process(items);
     }
-  },
+  }
 
   /**
    * RDF-like object for passing constructorless data.
@@ -160,7 +157,7 @@ const LinkedRenderStore = {
       }
       resolve();
     });
-  },
+  }
 
   /**
    * Expands the given types and returns the best class to render it with.
@@ -174,15 +171,16 @@ const LinkedRenderStore = {
       chain.find(elem => classes.indexOf(elem) >= 0),
     );
     return classes[arrPos < 0 ? 0 : arrPos];
-  },
+  }
 
   /**
    * Expands a property if it's in short-form while preserving long-form.
-   * Note: The vocabulary needs to be present in the store prefix libary
-   * @param {string} prop The short- or long-form property
-   * @returns {string} The (expanded) property
+   * Note: The vocabulary needs to be present in the store prefix library
+   * @param {string|rdf.NamedNode|undefined} prop The short- or long-form property
+   * @param {Object} namespaces Object of namespaces by their abbreviation.
+   * @returns {rdf.NamedNode|undefined} The (expanded) property
    */
-  expandProperty(prop) {
+  static expandProperty(prop, namespaces) {
     if (typeof prop === 'undefined' || typeof prop.termType !== 'undefined') {
       return prop;
     }
@@ -191,8 +189,15 @@ const LinkedRenderStore = {
       return new rdf.NamedNode(prop);
     }
     const matches = prop.split(':');
-    return this.namespaces[matches[CI_MATCH_PREFIX]](matches[CI_MATCH_SUFFIX]);
-  },
+    return namespaces[matches[CI_MATCH_PREFIX]](matches[CI_MATCH_SUFFIX]);
+  }
+
+  /**
+   * @see {LinkedRenderStore.expandProperty}
+   */
+  expandProperty(prop) {
+    return this.constructor.expandProperty(prop, this.namespaces);
+  }
 
   /**
    * Resolves a renderer from the {lookupCache}.
@@ -202,7 +207,7 @@ const LinkedRenderStore = {
    */
   getClassFromCache(key) {
     return this.lookupCache[key];
-  },
+  }
 
   /**
    * Gets an entity by its IRI.
@@ -227,9 +232,9 @@ const LinkedRenderStore = {
   /**
    * Finds the best render class for a given property in respect to a topology.
    * @access public
-   * @param {String|String[]} type The type(s) of the resource to render.
-   * @param {String|String[]} prop The property(s) to render.
-   * @param {string} [_topology] The topology of the resource, if any
+   * @param {rdf.NamedNode|rdf.NamedNode[]} type The type(s) of the resource to render.
+   * @param {rdf.NamedNode|rdf.NamedNode[]} prop The property(s) to render.
+   * @param {rdf.NamedNode} [_topology] The topology of the resource, if any
    * @returns {Object|function|undefined} The most appropriate renderer, if any.
    */
   getRenderClassForProperty(type = this.defaultType, prop, _topology = DEFAULT_TOPOLOGY) {
@@ -237,7 +242,7 @@ const LinkedRenderStore = {
       return undefined;
     }
     const topology = hasP(_topology, 'value') ? _topology : this.expandProperty(_topology);
-    const types = this.normalizeType(type);
+    const types = this.constructor.normalizeType(type);
     const props = Array.isArray(prop) ?
       prop.map(p => this.expandProperty(p)) :
       [this.expandProperty(prop)];
@@ -247,9 +252,7 @@ const LinkedRenderStore = {
       return cached;
     }
 
-    const exact = this.mapping[props[0]] &&
-      this.mapping[props[0]][types[0]] &&
-      this.mapping[props[0]][types[0]][topology];
+    const exact = this.lookup(props[0], types[0], topology);
     if (exact !== undefined) {
       return this.addClassToCache(exact, key);
     }
@@ -260,26 +263,41 @@ const LinkedRenderStore = {
         undefined :
         this.addClassToCache(this.getRenderClassForProperty(types, props, DEFAULT_TOPOLOGY), key);
     }
-    for (let i = 0; props.length; i++) {
+    for (let i = 0; i < props.length; i++) {
       const bestClass = this.bestClass(possibleClasses, types);
-      const klass = this.mapping[props[i]][bestClass][topology];
+      const klass = this.lookup(props[i], bestClass, topology);
       if (klass) {
         return this.addClassToCache(klass, key);
       }
     }
     return undefined;
-  },
+  }
 
   /**
    * Finds the best render class for a type in respect to a topology.
    * @see {getRenderClassForProperty}
-   * @param {String|String[]} type The type(s) of the resource to render.
-   * @param {string} [topology] The topology of the resource, if any
+   * @param {rdf.NamedNode|rdf.NamedNode[]} type The type(s) of the resource to render.
+   * @param {rdf.NamedNode} [topology] The topology of the resource, if any
    * @returns {*|Object|Function|undefined} The most appropriate renderer, if any.
    */
   getRenderClassForType(type, topology = DEFAULT_TOPOLOGY) {
     return this.getRenderClassForProperty(type, RENDER_CLASS_NAME, topology);
-  },
+  }
+
+  /**
+   * Find a class from the mapping.
+   * @access private
+   * @param {rdf.NamedNode} prop The IRI of the property (or {RENDER_CLASS_NAME})
+   * @param {rdf.NamedNode} type The IRI of the resource type
+   * @param {rdf.NamedNode} topology The IRI of the topology
+   * @returns {function|undefined} The appropriate class if any
+   */
+  lookup(prop, type, topology) {
+    if (!this.mapping[prop] || !this.mapping[prop][type]) {
+      return undefined;
+    }
+    return this.mapping[prop][type][topology];
+  }
 
   /**
    * Expands the given lookupTypes to include all their equivalent and subclasses.
@@ -288,19 +306,17 @@ const LinkedRenderStore = {
    * @returns {string[]}
    */
   mineForTypes(lookupTypes) {
-    if (lookupTypes === undefined) {
-      return [];
-    }
+    const types = lookupTypes !== undefined ? lookupTypes : [];
 
-    return lookupTypes.map(v => this.store.canon(v)).reduce((a, b) => {
+    return types.map(v => this.store.canon(v)).reduce((a, b) => {
       const superSet = this.schema.superMap.get(b.toString());
       return typeof superSet === 'undefined' ? a : a.concat(...superSet);
-    }, lookupTypes);
-  },
+    }, types);
+  }
 
-  normalizeType(type) {
+  static normalizeType(type) {
     return Array.isArray(type) ? type : [type];
-  },
+  }
 
   possibleClasses(props, topology) {
     const possibleClasses = [];
@@ -308,8 +324,7 @@ const LinkedRenderStore = {
       if (typeof this.mapping[props[i]] !== 'undefined') {
         const types = Object.keys(this.mapping[props[i]]);
         for (let j = 0; j < types.length; j++) {
-          const classType = this.mapping[props[i]][types[j]] &&
-            this.mapping[props[i]][types[j]][topology];
+          const classType = this.lookup(props[i], types[j], topology);
           if (classType !== undefined) {
             possibleClasses.push(types[j]);
           }
@@ -317,7 +332,7 @@ const LinkedRenderStore = {
       }
     }
     return possibleClasses;
-  },
+  }
 
   /**
    * Register a renderer for a type/property.
@@ -346,7 +361,7 @@ const LinkedRenderStore = {
       });
       this.lookupCache = {};
     });
-  },
+  }
 
   /**
    * Resets the render store mappings and the schema graph.
@@ -363,7 +378,7 @@ const LinkedRenderStore = {
       [RENDER_CLASS_NAME]: {},
     };
     this.lookupCache = {};
-  },
+  }
 
   /**
    * Returns an entity from the cache directly.
@@ -373,7 +388,7 @@ const LinkedRenderStore = {
    */
   tryEntity(iri) {
     return this.searchStore(iri);
-  },
+  }
 
   /**
    * Searches the store for all the triples for which {iri} is the subject.
@@ -386,7 +401,7 @@ const LinkedRenderStore = {
     return typeof this.store.subjectIndex[canon] !== 'undefined'
       ? this.store.subjectIndex[canon]
       : undefined;
-  },
-};
+  }
+}
 
 export default LinkedRenderStore;

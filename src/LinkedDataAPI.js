@@ -2,8 +2,10 @@ import DataProcessor from './processor/DataProcessor';
 // import DataWorkerLoader from './worker/DataWorkerLoader';
 
 
-const LDAPI = {
-  processor: new DataProcessor(),
+class LinkedDataAPI {
+  constructor(opts = { dataProcessorOpts: {} }) {
+    this.processor = opts.processor || new DataProcessor(opts.dataProcessorOpts);
+  }
 
   /**
    * Loads a resource from the {iri}.
@@ -14,7 +16,7 @@ const LDAPI = {
    */
   fetchResource(iri) {
     return this.processor.fetchResource(iri);
-  },
+  }
 
   /**
    * Gets an entity by its IRI.
@@ -27,7 +29,7 @@ const LDAPI = {
    */
   getEntity(iri) {
     return this.processor.getEntity(iri);
-  },
+  }
 
   /**
    * Register a transformer so it can be used to interact with API's.
@@ -39,7 +41,7 @@ const LDAPI = {
   registerTransformer(processor, mediaType, acceptValue) {
     const mediaTypes = mediaType.constructor === Array ? mediaType : [mediaType];
     this.processor.registerTransformer(processor, mediaTypes, acceptValue);
-  },
+  }
 
   /**
    * Overrides the `Accept` value for when a certain host doesn't respond well to multiple values.
@@ -49,7 +51,7 @@ const LDAPI = {
    */
   setAcceptForHost(origin, acceptValue) {
     this.processor.setAcceptForHost(origin, acceptValue);
-  },
-};
+  }
+}
 
-export default LDAPI;
+export default LinkedDataAPI;

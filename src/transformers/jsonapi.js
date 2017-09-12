@@ -4,7 +4,7 @@ import rdf from 'rdflib';
 import { URL } from 'universal-url';
 
 import LRS from '../LinkedRenderStore';
-import { getValueOrID } from '../utilities';
+import { defaultNS, getValueOrID } from '../utilities';
 
 function getIDForEntity(resource, entity) {
   const id = (resource.links && resource.links.self) || entity['@id'];
@@ -25,7 +25,7 @@ function processExpandedEntity(statements, id, expanded, origin) {
   statements.push(
     new rdf.Statement(
       id,
-      LRS.namespaces.rdf('type'),
+      defaultNS.rdf('type'),
       new rdf.NamedNode(type['@value'] || type),
       origin,
     ),
@@ -45,10 +45,10 @@ function processExpandedEntity(statements, id, expanded, origin) {
             let datatype;
             switch (typeof raw) {
               case 'boolean':
-                datatype = LRS.namespaces.xsd('boolean');
+                datatype = defaultNS.xsd('boolean');
                 break;
               default:
-                datatype = LRS.namespaces.xsd('string');
+                datatype = defaultNS.xsd('string');
             }
             value = new rdf.Literal(raw.toString(), undefined, datatype);
           }
@@ -71,7 +71,7 @@ function processLinks(statements, entity, topID, origin) {
     for (let i = 0; i < keys.length; i++) {
       const link = entity.links[keys[i]];
       if (typeof link.meta !== 'undefined') {
-        const type = LRS.expandProperty(link.meta['@type'] || `schema:${keys[i]}`);
+        const type = LRS.expandProperty(link.meta['@type'] || `schema:${keys[i]}`, defaultNS);
         if (link.href !== undefined && link.href !== null) {
           statements.push(
             new rdf.Statement(
@@ -108,7 +108,7 @@ function processRelation(statements, relation, topID, origin) {
     const relIDString = getIDForRelation(relation, relation.data instanceof Array ? 'self' : 'related');
     const relationID = relIDString && new rdf.NamedNode(relIDString);
     const relType = (relation.meta && relation.meta['@type']) || (relation.links && relation.links.self.meta['@type']);
-    const relTypeTriple = LRS.expandProperty(relType);
+    const relTypeTriple = LRS.expandProperty(relType, defaultNS);
     if (typeof relationID !== 'undefined') {
       statements.push(new rdf.Statement(topID, relTypeTriple, relationID, origin));
     }
@@ -116,19 +116,19 @@ function processRelation(statements, relation, topID, origin) {
     if (relation.data instanceof Array) {
       let member;
       if (typeof relationID !== 'undefined') {
-        member = LRS.expandProperty('argu:members');
+        member = LRS.expandProperty('argu:members', defaultNS);
         const type = relation.links.related &&
           relation.links.related.meta &&
           relation.links.related.meta['@type'];
         statements.push(new rdf.Statement(
           relationID,
           new rdf.NamedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-          LRS.expandProperty(type || 'argu:Collection'),
+          LRS.expandProperty(type || 'argu:Collection', defaultNS),
           origin,
         ));
         statements.push(new rdf.Statement(
           topID,
-          LRS.expandProperty('argu:collectionAssociation'),
+          LRS.expandProperty('argu:collectionAssociation', defaultNS),
           relationID,
           origin,
         ));

@@ -4,7 +4,7 @@ import { describe, it } from 'mocha';
 import * as ctx from './fixtures';
 import { chai } from './utilities';
 
-import LRS, { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
+import LinkedRenderStore, { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
 import { defaultNS as NS } from '../src/utilities';
 
 const { expect } = chai;
@@ -33,6 +33,7 @@ const CreativeWork = {
 
 describe('LinkedRenderStore', function() {
   describe('The schema is available', function () {
+    const LRS = new LinkedRenderStore();
     it('initializes the schema', function () {
       expect(LRS.schema).to.be.an('object');
       expect(LRS.schema['@graph']).to.be.an('array');
@@ -40,6 +41,7 @@ describe('LinkedRenderStore', function() {
   });
 
   describe('expands properties correctly', function() {
+    const LRS = new LinkedRenderStore();
     it('expands short to long notation', function() {
       const nameShort = LRS.expandProperty('schema:name');
       expect(NS.schema('name').sameTerm(nameShort)).to.be.true;
@@ -53,13 +55,13 @@ describe('LinkedRenderStore', function() {
 
   describe('adds new graph items', function() {
     it('add a single graph item', function() {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       LRS.addOntologySchematics(Thing);
       expect(LRS.schema['@graph']).to.include(Thing);
     });
 
     it('adds multiple graph items', function() {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       LRS.addOntologySchematics([Thing, CreativeWork]);
       expect(LRS.schema['@graph']).to.include(Thing);
       expect(LRS.schema['@graph']).to.include(CreativeWork);
@@ -68,7 +70,7 @@ describe('LinkedRenderStore', function() {
 
   describe('type renderer', function() {
     it('registers with shorthand', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       const ident = a => a;
       LRS.registerRenderer(ident, NS.schema('Thing'));
       const thingComp = LRS.mapping[sRCN][NS.schema('Thing').toString()][sDT];
@@ -76,7 +78,7 @@ describe('LinkedRenderStore', function() {
     });
 
     it('registers with full notation', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       const ident = a => a;
       LRS.registerRenderer(ident, NS.schema('Thing'));
       const thingComp = LRS.mapping[sRCN][NS.schema('Thing').toString()][sDT];
@@ -84,7 +86,7 @@ describe('LinkedRenderStore', function() {
     });
 
     it('registers multiple shorthand', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       const ident = a => a;
       LRS.registerRenderer(ident, [NS.schema('Thing'), NS.schema('CreativeWork')]);
       const thingComp = LRS.mapping[sRCN][NS.schema('Thing').toString()][sDT];
@@ -96,7 +98,7 @@ describe('LinkedRenderStore', function() {
 
   describe('property renderer', function() {
     it('registers with shorthand', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       const ident = a => a;
       LRS.registerRenderer(ident, NS.schema('Thing'), NS.schema('name'));
       const nameComp = LRS.mapping[NS.schema('name')][NS.schema('Thing').toString()][sDT];
@@ -104,7 +106,7 @@ describe('LinkedRenderStore', function() {
     });
 
     it('registers with full notation', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       const ident = a => a;
       LRS.registerRenderer(ident, NS.schema('Thing'), NS.schema('name'));
       const nameComp = LRS.mapping[NS.schema('name')][NS.schema('Thing').toString()][sDT];
@@ -112,7 +114,7 @@ describe('LinkedRenderStore', function() {
     });
 
     it('registers multiple shorthand', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       const ident = a => a;
       LRS.registerRenderer(
         ident,
@@ -129,7 +131,7 @@ describe('LinkedRenderStore', function() {
 
   describe('returns renderer for', function() {
     it('class renders', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       expect(LRS.getRenderClassForType(NS.schema('Thing'))).to.be.undefined;
       const ident = a => a;
       LRS.registerRenderer(ident, NS.schema('Thing'));
@@ -139,7 +141,7 @@ describe('LinkedRenderStore', function() {
     });
 
     it('property renders', function () {
-      LRS.reset();
+      const LRS = new LinkedRenderStore();
       const ident = a => a;
       LRS.registerRenderer(ident, NS.schema('Thing'), NS.schema('name'));
       const klass = LRS.getRenderClassForProperty(NS.schema('Thing'), NS.schema('name'));

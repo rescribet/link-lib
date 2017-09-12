@@ -82,14 +82,14 @@ function processResponse(iri, res) {
 }
 
 export default class DataProcessor {
-  constructor() {
-    this.accept = {
+  constructor(opts = {}) {
+    this.accept = opts.accept || {
       default: '',
     };
-    this.mapping = {};
-    this.requestMap = {};
-    this.store = rdf.graph();
-    this.fetcher = new rdf.Fetcher(this.store, 10000);
+    this.mapping = opts.mapping || {};
+    this.requestMap = opts.requestMap || {};
+    this.store = opts.store || rdf.graph();
+    this.fetcher = opts.fetcher || new rdf.Fetcher(this.store, 30000);
   }
 
   feedResponse(iri, res) {
