@@ -146,7 +146,7 @@ export default class DataProcessor {
     url.hash = '';
     const requestIRI = url.toString();
     if (typeof this.requestMap[requestIRI] !== 'undefined') {
-      return Promise.reject();
+      return this.requestMap[requestIRI];
     }
     const dataPromise = this
       .fetchResource(requestIRI)
@@ -157,7 +157,11 @@ export default class DataProcessor {
         }
         const responseQuads = processResponse(iri, e.res);
         this.store.add(responseQuads);
-        return processGraph(responseQuads, this.output);
+        return processGraph(responseQuads);
+      })
+      .finally(() => {
+        this.requestMap[requestIRI] = undefined;
+        delete this.requestMap[requestIRI];
       });
     this.requestMap[requestIRI] = dataPromise;
     return dataPromise;
