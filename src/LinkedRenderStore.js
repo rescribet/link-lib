@@ -163,14 +163,11 @@ class LinkedRenderStore {
    * Expands the given types and returns the best class to render it with.
    * @param classes
    * @param {Array} [types]
-   * @returns {string} The best match for the given classes and types.
+   * @returns {rdf.NamedNode|undefined} The best match for the given classes and types.
    */
   bestClass(classes, types) {
-    const chain = this.mineForTypes(types).map(s => s.toString());
-    const arrPos = classes.indexOf(
-      chain.find(elem => classes.indexOf(elem) >= 0),
-    );
-    return classes[arrPos < 0 ? 0 : arrPos];
+    const chain = this.mineForTypes(types);
+    return classes.find(c => chain.find(elem => c.sameTerm(elem)));
   }
 
   /**
@@ -218,16 +215,21 @@ class LinkedRenderStore {
    * @param iri The IRI of the resource
    * @return {Promise} A promise with the resulting entity
    */
-  getEntity(iri) {
+  getEntity(iri, onlySubjects = false) {
     const cachedEntity = this.searchStore(iri);
     if (typeof cachedEntity !== 'undefined' && cachedEntity.length > 0) {
       return Promise.resolve(cachedEntity);
     }
 
     return this.api.getEntity(iri)
-      .then(this.addStatements.bind(this))
-      .then(() => this.store.subjectIndex[this.store.canon(iri)]);
-  },
+      .then((data) => {
+        this.addStatements(data);
+        if (onlySubjects) {
+          return data.map(s => s.subject);
+        }
+        return this.store.subjectIndex[this.store.canon(iri)];
+      });
+  }
 
   /**
    * Finds the best render class for a given property in respect to a topology.
@@ -266,6 +268,12 @@ class LinkedRenderStore {
     for (let i = 0; i < props.length; i++) {
       const bestClass = this.bestClass(possibleClasses, types);
       const klass = this.lookup(props[i], bestClass, topology);
+      if (klass) {
+        return this.addClassToCache(klass, key);
+      }
+    }
+    for (let i = 0; i < props.length; i++) {
+      const klass = this.lookup(props[i], this.defaultType, topology);
       if (klass) {
         return this.addClassToCache(klass, key);
       }
@@ -319,14 +327,14 @@ class LinkedRenderStore {
   }
 
   possibleClasses(props, topology) {
-    const possibleClasses = [];
+    const possibleClasses = [this.namespaces.rdfs('Resource')];
     for (let i = 0; i < props.length; i++) {
       if (typeof this.mapping[props[i]] !== 'undefined') {
         const types = Object.keys(this.mapping[props[i]]);
         for (let j = 0; j < types.length; j++) {
           const classType = this.lookup(props[i], types[j], topology);
           if (classType !== undefined) {
-            possibleClasses.push(types[j]);
+            possibleClasses.push(new rdf.NamedNode(types[j].slice(1, -1)));
           }
         }
       }

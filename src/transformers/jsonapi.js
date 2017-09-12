@@ -39,7 +39,7 @@ function processExpandedEntity(statements, id, expanded, origin) {
         ...props.map((obj) => {
           let value;
           if (obj instanceof Object && obj['@id'] !== undefined) {
-            value = new rdf.NamedNode(obj);
+            value = new rdf.NamedNode(obj['@id']);
           } else {
             const raw = getValueOrID(obj);
             let datatype;
