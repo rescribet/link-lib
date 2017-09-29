@@ -1,9 +1,10 @@
 /* eslint no-console: 0 */
-import DisjointSet from 'ml-disjoint-set';
 import rdf from 'rdflib';
 
 import LinkDataAPI from './LinkedDataAPI';
 import { defaultNS, getP, hasP } from './utilities';
+
+const DisjointSet = require('ml-disjoint-set');
 
 const CI_MATCH_PREFIX = 0;
 const CI_MATCH_SUFFIX = 1;
