@@ -1,6 +1,6 @@
 {
   "name": "link-lib",
-  "version": "1.0.0-beta2",
+  "version": "1.0.0-beta3",
   "description": "The Link library for creating information based applications",
   "main": "dist/link-lib.js",
   "module": "dist/module/index.js",
