@@ -20,7 +20,7 @@
     "babel-polyfill": "^6.16.0",
     "jsonld": "^0.4.11",
     "ml-disjoint-set": "^1.0.0",
-    "rdflib": "^0.15.0",
+    "rdflib": "^0.16.3",
     "universal-url": "^1.0.0",
     "whatwg-fetch": "^2.0.1",
     "whatwg-url": "6.1.0"

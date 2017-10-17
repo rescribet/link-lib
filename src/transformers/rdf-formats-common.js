@@ -21,7 +21,7 @@ export default function process(response) {
     .then((data) => {
       const format = getContentType(response);
       const g = rdf.graph();
-      rdf.parse(data, g, response.responseURL, format);
+      rdf.parse(data, g, response.responseURL || response.url, format);
       return g.statements;
     })
     .catch((e) => {

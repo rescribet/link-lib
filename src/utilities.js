@@ -139,7 +139,7 @@ export function flattenProperty(obj) {
 export function getContentType(res) {
   const contentTypeRaw = getHeader(res, 'Content-Type');
   const contentType = contentTypeRaw.split(';')[0];
-  const urlMatch = new URL(res.requestedURI).href.match('.([a-zA-Z]*)[$|?|#]');
+  const urlMatch = new URL(res.url || res.requestedURI).href.match(/\.([a-zA-Z0-9]{1,8})($|\?|#)/);
   const ext = urlMatch && urlMatch[1];
   if (contentType !== undefined) {
     if (contentType.includes(F_NTRIPLES) || contentType.includes(F_NTRIPLES_DEP)) {

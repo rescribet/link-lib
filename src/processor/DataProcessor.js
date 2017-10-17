@@ -66,9 +66,9 @@ function processGraph(graph) {
  * @returns {rdf.Graph} A graph with metadata about the response.
  */
 function processResponse(iri, res) {
-  const origin = new URL(res.responseURL).origin;
+  const origin = new URL(res.responseURL || iri.uri).origin;
   const statements = [];
-  if (iri !== res.responseURL) {
+  if (res.responseURL && iri !== res.responseURL) {
     statements.push(
       new rdf.Quad(
         new rdf.NamedNode(iri),
@@ -116,7 +116,7 @@ export default class DataProcessor {
             iri,
             undefined,
             (ok, body, xhr) => {
-              if (ok) {
+              if (xhr.ok || (xhr.status >= 200 && xhr.status < 400)) {
                 resolveReq(xhr);
               } else {
                 rejectReq(xhr);
