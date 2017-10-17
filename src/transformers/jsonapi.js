@@ -1,7 +1,6 @@
 /* eslint no-param-reassign: 0 */
 import { promises as jsonld } from 'jsonld';
 import rdf from 'rdflib';
-import { URL } from 'universal-url';
 
 import LRS from '../LinkedRenderStore';
 import { defaultNS, getValueOrID } from '../utilities';

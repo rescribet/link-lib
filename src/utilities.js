@@ -1,6 +1,5 @@
 /* global chrome */
 import rdf, { Statement } from 'rdflib';
-import { URL } from 'universal-url';
 
 export const F_NTRIPLES = 'application/n-triples';
 export const F_TURTLE = 'text/turtle';

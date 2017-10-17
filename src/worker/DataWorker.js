@@ -1,5 +1,3 @@
-import { URL } from 'universal-url';
-
 import DataProcessor from '../processor/DataProcessor';
 import {
   DATA_ACQUIRED,

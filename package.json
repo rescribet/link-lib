@@ -17,13 +17,9 @@
   "author": "Fletcher91 <thom@argu.co>",
   "license": "LGPL-3.0",
   "dependencies": {
-    "babel-polyfill": "^6.16.0",
     "jsonld": "^0.4.11",
     "ml-disjoint-set": "^1.0.0",
-    "rdflib": "^0.16.3",
-    "universal-url": "^1.0.0",
-    "whatwg-fetch": "^2.0.1",
-    "whatwg-url": "6.1.0"
+    "rdflib": "^0.16.3"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -31,6 +27,7 @@
     "babel-loader": "^7.1.1",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-new-target": "^7.0.0-alpha.14",
+    "babel-polyfill": "^6.16.0",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-es2015-native-modules": "^6.9.4",
     "babel-preset-react": "^6.16.0",

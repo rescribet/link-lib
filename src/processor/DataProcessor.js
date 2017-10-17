@@ -1,5 +1,4 @@
 import rdf from 'rdflib';
-import { URL } from 'universal-url';
 
 import {
   fetchWithExtension,
@@ -151,17 +150,20 @@ export default class DataProcessor {
     const dataPromise = this
       .fetchResource(requestIRI)
       .then(res => this.feedResponse(iri, res))
+      .then((s) => {
+        this.requestMap[requestIRI] = undefined;
+        delete this.requestMap[requestIRI];
+        return s;
+      })
       .catch((e) => {
+        this.requestMap[requestIRI] = undefined;
+        delete this.requestMap[requestIRI];
         if (typeof e.res === 'undefined') {
           throw e;
         }
         const responseQuads = processResponse(iri, e.res);
         this.store.add(responseQuads);
         return processGraph(responseQuads);
-      })
-      .finally(() => {
-        this.requestMap[requestIRI] = undefined;
-        delete this.requestMap[requestIRI];
       });
     this.requestMap[requestIRI] = dataPromise;
     return dataPromise;
