@@ -140,7 +140,7 @@ export function getContentType(res) {
   const contentType = contentTypeRaw.split(';')[0];
   const urlMatch = new URL(res.url || res.requestedURI).href.match(/\.([a-zA-Z0-9]{1,8})($|\?|#)/);
   const ext = urlMatch && urlMatch[1];
-  if (contentType !== undefined) {
+  if (contentType) {
     if (contentType.includes(F_NTRIPLES) || contentType.includes(F_NTRIPLES_DEP)) {
       return F_NTRIPLES;
     } else if (contentType.includes(F_PLAIN) && ['ntriples', 'nt'].indexOf(ext) >= 0) {
@@ -162,6 +162,15 @@ export function getContentType(res) {
     }
   }
   if (ext && !NON_CONTENT_EXTS.includes(ext)) {
+    if (['ttl'].includes(ext)) {
+      return F_TURTLE;
+    } else if (['ntriples', 'nt'].includes(ext)) {
+      return F_NTRIPLES;
+    } else if (['jsonld'].includes(ext)) {
+      return F_JSONLD;
+    } else if (['n3'].includes(ext)) {
+      return F_N3;
+    }
     return ext;
   }
   return contentTypeRaw.split(';')[0];
