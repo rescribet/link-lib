@@ -202,11 +202,12 @@ export default function process(response) {
     }
   })
   .then((json) => {
-    const origin = new URL(response.responseURL).origin;
+    const rawURL = response.responseURL || response.url;
+    const origin = new URL(rawURL).origin;
     const promises = [];
     // const graph = rdf.graph();
     const statements = [];
-    promises.push(formatEntity(statements, json.data, origin, response.responseURL));
+    promises.push(formatEntity(statements, json.data, origin, rawURL));
     if (json.included instanceof Array) {
       promises.push(...json.included.map(ent => formatEntity(statements, ent, origin)));
     }

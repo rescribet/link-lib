@@ -11,7 +11,7 @@ function handleStatus(res) {
   if (res.status === 404) {
     return Promise.reject({
       res,
-      message: `404: '${res.responseURL}' could not be found`,
+      message: `404: '${res.responseURL || res.url}' could not be found`,
     });
   } else if (res.status >= 400 && res.status < 500) {
     if ((res.headers['Content-Type'] || res.headers.get('Content-Type')).includes('json')) {
@@ -24,7 +24,7 @@ function handleStatus(res) {
     }
     return Promise.reject({
       res,
-      message: `404: '${res.responseURL}' could not be found`,
+      message: `404: '${res.responseURL || res.url}' could not be found`,
     });
   } else if (res.status >= 500) {
     return Promise.reject({
@@ -65,14 +65,15 @@ function processGraph(graph) {
  * @returns {rdf.Graph} A graph with metadata about the response.
  */
 function processResponse(iri, res) {
-  const origin = new URL(res.responseURL || iri.uri).origin;
+  const rawURL = res.responseURL || res.url;
+  const origin = new URL(rawURL || iri.uri).origin;
   const statements = [];
-  if (res.responseURL && iri !== res.responseURL) {
+  if (rawURL && iri !== rawURL) {
     statements.push(
       new rdf.Quad(
         new rdf.NamedNode(iri),
         new rdf.NamedNode('http://www.w3.org/2002/07/owl#sameAs'),
-        new rdf.NamedNode(res.responseURL),
+        new rdf.NamedNode(rawURL),
         origin,
       ),
     );
