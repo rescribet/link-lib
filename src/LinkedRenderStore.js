@@ -52,6 +52,7 @@ class LinkedRenderStore {
       equivalenceSet: new DisjointSet(),
       superMap: new Map(),
     };
+    this.subscriptions = [];
   }
 
   /**
@@ -155,6 +156,7 @@ class LinkedRenderStore {
       }
       if (Array.isArray(statements)) {
         this.store.add(statements);
+        this.broadcast(statements);
       }
       resolve();
     });
@@ -169,6 +171,21 @@ class LinkedRenderStore {
   bestClass(classes, types) {
     const chain = this.mineForTypes(types);
     return classes.find(c => chain.find(elem => c.sameTerm(elem)));
+  }
+
+  /**
+   * Broadcasts statements to all subscribers.
+   * @param statements {rdf.Statement[]} Array of changed data.
+   */
+  broadcast(statements) {
+    const subjects = statements.map(s => s.subject);
+    this.subscriptions.forEach(([subscriber, opts]) => {
+      if (opts.onlySubjects) {
+        subscriber(subjects);
+      } else {
+        subscriber(statements);
+      }
+    });
   }
 
   /**
@@ -341,6 +358,16 @@ class LinkedRenderStore {
       }
     }
     return possibleClasses;
+  }
+
+  /**
+   * Listen for data changes by subscribing to store changes.
+   * @param callback {function} Will be called with the new statements as its argument.
+   * @param opts {object} Options for the callback.
+   * @param opts.onlySubjects {boolean} Only the subjects are passed when true.
+   */
+  subscribe(callback, opts) {
+    this.subscriptions.push([callback, opts]);
   }
 
   /**
