@@ -361,6 +361,31 @@ class LinkedRenderStore {
   }
 
   /**
+   * Removes an array of statements and inserts another.
+   * Note: Be sure that the replacement contains the same subjects as the original to let the
+   *  broadcast work correctly.
+   * @param original The statements to remove from the store.
+   * @param replacement The statements to add to the store.
+   */
+  replaceStatements(original, replacement) {
+    const uniqueStatements = replacement
+      .filter(s => !original.some(
+        o => o.subject.sameTerm(s.subject) && o.predicate.sameTerm(s.predicate),
+      ));
+
+    // FIXME: There seems to be a bug in rdf which doesn't remove all statements on the try,
+    //         but an additional call to `remove` seems to do the job.
+    this
+      .store
+      .remove(original)
+      .remove(original);
+    // Remove statements not in the old object. Useful for replacing data loosely related to the
+    //  main resource.
+    uniqueStatements.forEach(s => this.store.removeMatches(s.subject, s.predicate));
+    this.addStatements(replacement);
+  }
+
+  /**
    * Listen for data changes by subscribing to store changes.
    * @param callback {function} Will be called with the new statements as its argument.
    * @param opts {object} Options for the callback.
