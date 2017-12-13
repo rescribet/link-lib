@@ -120,6 +120,14 @@ class LinkedRenderStore {
    * @property {object} datatype The datatype of the literal.
    */
 
+  /**
+   * A singular registration object. Use a separate object for each variant.
+   * @typedef {Object} ComponentRegistration
+   * @property {function} component The render component.
+   * @property {rdf.NamedNode} type The IRI of the type which the {component} can render.
+   * @property {rdf.NamedNode} property The IRI of the property which the {component} can render.
+   * @property {rdf.NamedNode} topology The IRI of the topology which the {component} can render.
+   */
 
   /**
    * Add triple-formed data to the store
@@ -405,70 +413,68 @@ class LinkedRenderStore {
    * @param {rdf.NamedNode|rdf.NamedNode[]} type
    * @param {rdf.NamedNode|rdf.NamedNode[]} prop
    * @param {rdf.NamedNode|rdf.NamedNode[]} topology
-   * @return {{component: *, types: *, properties: *[], topologies: *[]}}
+   * @return {ComponentRegistration[]}
    */
   static registerRenderer(component, type, prop = RENDER_CLASS_NAME, topology = DEFAULT_TOPOLOGY) {
+    if (typeof component === 'undefined') {
+      throw new Error(`Undefined component was given for (${type}, ${prop}, ${topology}).`);
+    }
     const types = type instanceof Array ? type : [type];
     const properties = Array.isArray(prop)
       ? prop.map(p => this.expandProperty(p))
       : [this.expandProperty(prop)];
     const topologies = Array.isArray(topology)
-      ? topology.map(t => this.expandProperty(t))
+      ? topology.map(t => this.expandProperty(t || DEFAULT_TOPOLOGY))
       : [this.expandProperty(topology || DEFAULT_TOPOLOGY)];
 
-    return {
-      component,
-      types,
-      properties,
-      topologies,
-    };
+    const registrations = [];
+
+    types.forEach((t) => {
+      properties.forEach((p) => {
+        topologies.forEach((top) => {
+          registrations.push({
+            component,
+            type: t,
+            property: p,
+            topology: top,
+          });
+        });
+      });
+    });
+
+    return registrations;
   }
 
   /**
    * Register a renderer for a type/property.
    * @access public
    * @param {Object|function} component The class to return for the rendering of the object.
-   * @param {String|String[]} type The type's (compact) IRI of the object which the {component}
-   * can render.
-   * @param {String|String[]} [property] The property's (compact) IRI if the {component} is a
-   * subject renderer.
-   * @param {String|String[]} [topology] An alternate topology this {component} should render.
+   * @param {rdf.NamedNode} type The type's IRI of the object which the {component} can render.
+   * @param {rdf.NamedNode} [property] The property's IRI if the {component} is a subject renderer.
+   * @param {rdf.NamedNode} [topology] An alternate topology this {component} should render.
    */
   registerRenderer(component, type, property = RENDER_CLASS_NAME, topology = DEFAULT_TOPOLOGY) {
-    const types = type instanceof Array ? type : [type];
-    const properties = Array.isArray(property)
-      ? property.map(p => this.expandProperty(p))
-      : [this.expandProperty(property)];
-    const topologies = Array.isArray(topology)
-      ? topology.map(t => this.expandProperty(t || DEFAULT_TOPOLOGY))
-      : [this.expandProperty(topology || DEFAULT_TOPOLOGY)];
-
-    if (properties.length > 0 && types.length > 0) {
-      properties.forEach((p) => {
-        if (typeof this.mapping[p] === 'undefined') this.mapping[p] = {};
-        types.forEach((t) => {
-          if (typeof this.mapping[p][t] === 'undefined') this.mapping[p][t] = {};
-          topologies.forEach((top) => {
-            this.mapping[p][t][top] = component;
-          });
-        });
-      });
-      this.lookupCache = {};
+    if (!property || !type) {
+      return;
     }
+    if (typeof this.mapping[property] === 'undefined') this.mapping[property] = {};
+    if (typeof this.mapping[property][type] === 'undefined') this.mapping[property][type] = {};
+    this.mapping[property][type][topology] = component;
+    this.lookupCache = {};
   }
 
   /**
-   * Bulk register components formated with {LinkedRenderStore.registerRenderer}.
+   * Bulk register components formatted with {LinkedRenderStore.registerRenderer}.
    * @access public
-   * @param {function[][]|function[]} components
+   * @param {ComponentRegistration[][]|ComponentRegistration[]} components
    * @see {LinkedRenderStore.registerRenderer}
    */
   registerAll(...components) {
     components.forEach((c) => {
       if (Array.isArray(c)) {
-        c.forEach(i => this.registerRenderer(i.component, i.types, i.properties, i.topologies));
+        c.forEach(i => this.registerRenderer(i.component, i.type, i.property, i.topology));
       } else {
-        this.registerRenderer(c.component, c.types, c.properties, c.topologies);
+        this.registerRenderer(c.component, c.type, c.property, c.topology);
       }
     });
   }

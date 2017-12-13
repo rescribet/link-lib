@@ -86,9 +86,13 @@ describe('LinkedRenderStore', function() {
     });
 
     it('registers multiple shorthand', function () {
-      const LRS = new LinkedRenderStore();
       const ident = a => a;
-      LRS.registerRenderer(ident, [NS.schema('Thing'), NS.schema('CreativeWork')]);
+      const registrations = LinkedRenderStore.registerRenderer(
+        ident,
+        [NS.schema('Thing'), NS.schema('CreativeWork')]
+      );
+      const LRS = new LinkedRenderStore();
+      LRS.registerAll(registrations);
       const thingComp = LRS.mapping[sRCN][NS.schema('Thing').toString()][sDT];
       expect(thingComp).to.equal(ident);
       const cwComp = LRS.mapping[sRCN][NS.schema('CreativeWork').toString()][sDT];
@@ -114,13 +118,14 @@ describe('LinkedRenderStore', function() {
     });
 
     it('registers multiple shorthand', function () {
-      const LRS = new LinkedRenderStore();
       const ident = a => a;
-      LRS.registerRenderer(
+      const registrations = LinkedRenderStore.registerRenderer(
         ident,
         NS.schema('Thing'),
         [NS.schema('name'), NS.rdfs('label')],
       );
+      const LRS = new LinkedRenderStore();
+      LRS.registerAll(registrations);
       [NS.schema('name').toString(), NS.rdfs('label')].forEach((prop) => {
         const nameComp = LRS.mapping[prop][NS.schema('Thing').toString()][sDT];
         expect(nameComp).to.equal(ident);
@@ -134,7 +139,8 @@ describe('LinkedRenderStore', function() {
       const LRS = new LinkedRenderStore();
       expect(LRS.getRenderClassForType(NS.schema('Thing'))).to.be.undefined;
       const ident = a => a;
-      LRS.registerRenderer(ident, NS.schema('Thing'));
+      const registrations = LinkedRenderStore.registerRenderer(ident, NS.schema('Thing'));
+      LRS.registerAll(registrations);
       const klass = LRS.getRenderClassForType(NS.schema('Thing'));
       expect(klass).to.equal(ident);
       expect(klass).to.not.equal(a => a);
@@ -143,7 +149,12 @@ describe('LinkedRenderStore', function() {
     it('property renders', function () {
       const LRS = new LinkedRenderStore();
       const ident = a => a;
-      LRS.registerRenderer(ident, NS.schema('Thing'), NS.schema('name'));
+      const registrations = LinkedRenderStore.registerRenderer(
+        ident,
+        NS.schema('Thing'),
+        NS.schema('name')
+      );
+      LRS.registerAll(registrations);
       const klass = LRS.getRenderClassForProperty(NS.schema('Thing'), NS.schema('name'));
       expect(klass).to.equal(ident);
       expect(klass).to.not.equal(a => a);
