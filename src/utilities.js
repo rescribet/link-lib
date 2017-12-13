@@ -1,5 +1,5 @@
 /* global chrome */
-import rdf, { Statement } from 'rdflib';
+import rdf from 'rdflib';
 
 export const F_NTRIPLES = 'application/n-triples';
 export const F_TURTLE = 'text/turtle';
@@ -234,7 +234,7 @@ export function getValueOrIDJSONLD(prop) {
  * @returns {*} The value of the property if any.
  */
 export function getValueOrID(prop) {
-  if (prop.constructor === Statement) {
+  if (prop.constructor.name === 'Statement') {
     return prop.object.value;
   }
   if (typeof prop === 'object') {
