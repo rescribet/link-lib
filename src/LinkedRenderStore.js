@@ -141,6 +141,8 @@ class LinkedRenderStore {
       switch (n.termType) {
         case 'NamedNode':
           return new rdf.NamedNode(n.value);
+        case 'BlankNode':
+          return new rdf.BlankNode(n.value);
         case 'Literal':
           return new rdf.Literal(n.value, n.language, parseNode(n.datatype));
         default:
