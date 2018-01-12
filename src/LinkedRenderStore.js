@@ -23,6 +23,20 @@ function convertToCacheKey(type, props, topology) {
     : `${type}[${props[0]}][${topology}]`;
 }
 
+export function parseNode(n) {
+  if (typeof n === 'undefined') return undefined;
+  switch (n.termType) {
+    case 'NamedNode':
+      return new rdf.NamedNode(n.value);
+    case 'BlankNode':
+      return new rdf.BlankNode(n.value);
+    case 'Literal':
+      return new rdf.Literal(n.value, n.language, parseNode(n.datatype));
+    default:
+      return undefined;
+  }
+}
+
 class LinkedRenderStore {
   constructor(opts = {}) {
     /** @access private */
@@ -136,20 +150,6 @@ class LinkedRenderStore {
    * @returns {Promise}
    */
   addStatements(data) {
-    function parseNode(n) {
-      if (typeof n === 'undefined') return undefined;
-      switch (n.termType) {
-        case 'NamedNode':
-          return new rdf.NamedNode(n.value);
-        case 'BlankNode':
-          return new rdf.BlankNode(n.value);
-        case 'Literal':
-          return new rdf.Literal(n.value, n.language, parseNode(n.datatype));
-        default:
-          return undefined;
-      }
-    }
-
     return new Promise((resolve) => {
       let statements;
       if (data[0] && data[0].constructor !== rdf.Statement) {
