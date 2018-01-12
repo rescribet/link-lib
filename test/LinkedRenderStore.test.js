@@ -174,6 +174,114 @@ describe('LinkedRenderStore', function() {
     });
   });
 
+  describe('#registerAll', function () {
+    const reg1 = {
+      component: () => '1',
+      type: NS.schema('Thing'),
+      property: NS.schema('text'),
+      topology: DEFAULT_TOPOLOGY,
+    };
+    const reg2 = {
+      component: () => '2',
+      type: NS.schema('Person'),
+      property: NS.schema('name'),
+      topology: NS.argu('collection'),
+    };
+
+    it('stores multiple ComponentRegistration objects', function() {
+      const lrs = new LinkedRenderStore();
+      lrs.registerAll(reg1, reg2);
+      expect(lrs.lookup(reg1.property, reg1.type, reg1.topology)).to.equal(reg1.component);
+      expect(lrs.lookup(reg2.property, reg2.type, reg2.topology)).to.equal(reg2.component);
+    });
+
+    it('stores ComponentRegistration array', function() {
+      const lrs = new LinkedRenderStore();
+      lrs.registerAll([reg1, reg2]);
+      expect(lrs.lookup(reg1.property, reg1.type, reg1.topology)).to.equal(reg1.component);
+      expect(lrs.lookup(reg2.property, reg2.type, reg2.topology)).to.equal(reg2.component);
+    });
+
+    it('stores a single ComponentRegistration object', function() {
+      const lrs = new LinkedRenderStore();
+      lrs.registerAll(reg1);
+      expect(lrs.lookup(reg1.property, reg1.type, reg1.topology)).to.equal(reg1.component);
+      expect(lrs.lookup(reg2.property, reg2.type, reg2.topology)).not.to.equal(reg2.component);
+    });
+  });
+
+  describe('::registerRenderer', function () {
+    const func = () => {};
+    const type = NS.schema('Thing');
+    const types = [NS.schema('Thing'), NS.schema('Person')];
+    const prop = NS.schema('name');
+    const props = [NS.schema('name'), NS.schema('text'), NS.schema('dateCreated')];
+    const topology = NS.argu('collection');
+    const topologies = [NS.argu('collection'), NS.argu('collection')];
+
+    function checkRegistration(r, c, t, p, top) {
+      expect(r.component).to.equal(c);
+      expect(r.type).to.equal(t);
+      expect(r.property).to.equal(p);
+      expect(r.topology).to.equal(top);
+    }
+
+    it('does not register without component', () => {
+      const defaultMsg = `Undefined component was given for (${type}, ${RENDER_CLASS_NAME}, ${DEFAULT_TOPOLOGY}).`;
+      try {
+        LinkedRenderStore.registerRenderer(undefined, type);
+        expect(true).to.be.false;
+      } catch(e) {
+        expect(e.message).to.equal(defaultMsg);
+      }
+    });
+
+    it('registers function type', () => {
+      const r = LinkedRenderStore.registerRenderer(func, type);
+      expect(r.length).to.equal(1);
+      checkRegistration(r[0], func, type, RENDER_CLASS_NAME, DEFAULT_TOPOLOGY);
+    });
+
+    it('registers multiple types', () => {
+      const r = LinkedRenderStore.registerRenderer(func, types);
+      expect(r.length).to.equal(2);
+      checkRegistration(r[0], func, types[0], RENDER_CLASS_NAME, DEFAULT_TOPOLOGY);
+      checkRegistration(r[1], func, types[1], RENDER_CLASS_NAME, DEFAULT_TOPOLOGY);
+    });
+
+    it('registers a prop', () => {
+      const r = LinkedRenderStore.registerRenderer(func, type, prop);
+      expect(r.length).to.equal(1);
+      checkRegistration(r[0], func, type, prop, DEFAULT_TOPOLOGY);
+    });
+
+    it('registers mutliple props', () => {
+      const r = LinkedRenderStore.registerRenderer(func, type, props);
+      expect(r.length).to.equal(3);
+      checkRegistration(r[0], func, type, props[0], DEFAULT_TOPOLOGY);
+      checkRegistration(r[1], func, type, props[1], DEFAULT_TOPOLOGY);
+      checkRegistration(r[2], func, type, props[2], DEFAULT_TOPOLOGY);
+    });
+
+    it('registers a topology', () => {
+      const r = LinkedRenderStore.registerRenderer(func, type, prop, topology);
+      expect(r.length).to.equal(1);
+      checkRegistration(r[0], func, type, prop, topology);
+    });
+
+    it('registers multiple topologies', () => {
+      const r = LinkedRenderStore.registerRenderer(func, type, prop, topologies);
+      expect(r.length).to.equal(2);
+      checkRegistration(r[0], func, type, prop, topologies[0]);
+      checkRegistration(r[1], func, type, prop, topologies[1]);
+    });
+
+    it('registers combinations', () => {
+      const r = LinkedRenderStore.registerRenderer(func, types, props, topologies);
+      expect(r.length).to.equal(12);
+    });
+  });
+
   describe('parseNode', function () {
     it('parses named nodes', () => {
       const input = new rdf.NamedNode('http://example.org/p/1');
