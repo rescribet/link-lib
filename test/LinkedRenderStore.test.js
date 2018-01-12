@@ -1,10 +1,15 @@
 import 'babel-polyfill';
 import { describe, it } from 'mocha';
+import rdf from 'rdflib';
 
 import * as ctx from './fixtures';
 import { chai } from './utilities';
 
-import LinkedRenderStore, { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from '../src/LinkedRenderStore';
+import LinkedRenderStore, {
+  DEFAULT_TOPOLOGY,
+  RENDER_CLASS_NAME,
+  parseNode,
+} from '../src/LinkedRenderStore';
 import { defaultNS as NS } from '../src/utilities';
 
 const { expect } = chai;
@@ -166,6 +171,35 @@ describe('LinkedRenderStore', function() {
       const opts = ctx.sameRel('sameFirst', { second: { id: 'sameSecond', title: 'other' } });
       const entity = opts.context.linkedRenderStore.tryEntity(ctx.exNS('sameFirst'));
       expect(entity.map(s => s.object.toString())).to.include('other');
+    });
+  });
+
+  describe('parseNode', function () {
+    it('parses named nodes', () => {
+      const input = new rdf.NamedNode('http://example.org/p/1');
+      const parsed = parseNode(Object.assign({}, input));
+      expect(input.equals(parsed)).to.be.true;
+      expect(parsed.constructor).to.equal(rdf.NamedNode);
+    });
+
+    it('parses blank nodes', () => {
+      const input = new rdf.BlankNode();
+      const parsed = parseNode(Object.assign({}, input));
+      expect(input.equals(parsed)).to.be.true;
+      expect(parsed.constructor).to.equal(rdf.BlankNode);
+    });
+
+    it('parses literals', () => {
+      const input = new rdf.Literal();
+      const parsed = parseNode(Object.assign({}, input));
+      expect(input.equals(parsed)).to.be.true;
+      expect(parsed.constructor).to.equal(rdf.Literal);
+    });
+
+    it('discards others', () => {
+      const input = [];
+      const parsed = parseNode(input);
+      expect(parsed).to.be.undefined;
     });
   });
 });
