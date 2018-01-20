@@ -1,6 +1,0 @@
-{
-  "source": "./src",
-  "destination": "./doc",
-  "unexportIdentifier": true,
-  "title": "Link"
-}
