@@ -1,0 +1,326 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>&quot;schema/rdfs&quot; | link-lib</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">link-lib</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="_schema_rdfs_.html">&quot;schema/rdfs&quot;</a>
+				</li>
+			</ul>
+			<h1>External module &quot;schema/rdfs&quot;</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Variables</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_schema_rdfs_.html#rdfs" class="tsd-kind-icon">RDFS</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_schema_rdfs_.html#nsrdfsclass" class="tsd-kind-icon">nsRDFSClass</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_schema_rdfs_.html#nsrdfsresource" class="tsd-kind-icon">nsRDFSResource</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_schema_rdfs_.html#nsrdfsdomain" class="tsd-kind-icon">nsRDFSdomain</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_schema_rdfs_.html#nsrdfsrange" class="tsd-kind-icon">nsRDFSrange</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_schema_rdfs_.html#nsrdfssubclassof" class="tsd-kind-icon">nsRDFSsub<wbr>Class<wbr>Of</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_schema_rdfs_.html#nsrdfssubpropertyof" class="tsd-kind-icon">nsRDFSsub<wbr>Property<wbr>Of</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Variables</h2>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+					<a name="rdfs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> RDFS</h3>
+					<div class="tsd-signature tsd-kind-icon">RDFS<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_types_.vocabularyprocessor.html" class="tsd-signature-type">VocabularyProcessor</a><span class="tsd-signature-symbol"> =&nbsp;{axioms: [new Statement(NS.rdf(&quot;type&quot;), nsRDFSdomain, nsRDFSResource),new Statement(nsRDFSdomain, nsRDFSdomain, NS.rdf(&quot;Property&quot;)),new Statement(nsRDFSrange, nsRDFSdomain, NS.rdf(&quot;Property&quot;)),new Statement(nsRDFSsubPropertyOf, nsRDFSdomain, NS.rdf(&quot;Property&quot;)),new Statement(nsRDFSsubClassOf, nsRDFSdomain, nsRDFSClass),new Statement(NS.rdf(&quot;subject&quot;), nsRDFSdomain, NS.rdf(&quot;Statement&quot;)),new Statement(NS.rdf(&quot;predicate&quot;), nsRDFSdomain, NS.rdf(&quot;Statement&quot;)),new Statement(NS.rdf(&quot;object&quot;), nsRDFSdomain, NS.rdf(&quot;Statement&quot;)),new Statement(NS.rdfs(&quot;member&quot;), nsRDFSdomain, nsRDFSResource),new Statement(NS.rdf(&quot;first&quot;), nsRDFSdomain, NS.rdf(&quot;List&quot;)),new Statement(NS.rdf(&quot;rest&quot;), nsRDFSdomain, NS.rdf(&quot;List&quot;)),new Statement(NS.rdfs(&quot;seeAlso&quot;), nsRDFSdomain, nsRDFSResource),new Statement(NS.rdfs(&quot;isDefinedBy&quot;), nsRDFSdomain, nsRDFSResource),new Statement(NS.rdfs(&quot;comment&quot;), nsRDFSdomain, nsRDFSResource),new Statement(NS.rdfs(&quot;label&quot;), nsRDFSdomain, nsRDFSResource),new Statement(NS.rdf(&quot;value&quot;), nsRDFSdomain, nsRDFSResource),new Statement(NS.rdf(&quot;type&quot;), nsRDFSrange, nsRDFSClass),new Statement(nsRDFSdomain, nsRDFSrange, nsRDFSClass),new Statement(nsRDFSrange, nsRDFSrange, nsRDFSClass),new Statement(nsRDFSsubPropertyOf, nsRDFSrange, NS.rdf(&quot;Property&quot;)),new Statement(nsRDFSsubClassOf, nsRDFSrange, nsRDFSClass),new Statement(NS.rdf(&quot;subject&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdf(&quot;predicate&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdf(&quot;object&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdfs(&quot;member&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdf(&quot;first&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdf(&quot;rest&quot;), nsRDFSrange, NS.rdf(&quot;List&quot;)),new Statement(NS.rdfs(&quot;seeAlso&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdfs(&quot;isDefinedBy&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdfs(&quot;comment&quot;), nsRDFSrange, NS.rdfs(&quot;Literal&quot;)),new Statement(NS.rdfs(&quot;label&quot;), nsRDFSrange, NS.rdfs(&quot;Literal&quot;)),new Statement(NS.rdf(&quot;value&quot;), nsRDFSrange, nsRDFSResource),new Statement(NS.rdf(&quot;Alt&quot;), nsRDFSsubClassOf, NS.rdfs(&quot;Container&quot;)),new Statement(NS.rdf(&quot;Bag&quot;), nsRDFSsubClassOf, NS.rdfs(&quot;Container&quot;)),new Statement(NS.rdf(&quot;Seq&quot;), nsRDFSsubClassOf, NS.rdfs(&quot;Container&quot;)),new Statement(NS.rdfs(&quot;ContainerMembershipProperty&quot;), nsRDFSsubClassOf, NS.rdf(&quot;Property&quot;)),new Statement(NS.rdfs(&quot;isDefinedBy&quot;), nsRDFSsubPropertyOf, NS.rdfs(&quot;seeAlso&quot;)),new Statement(NS.rdfs(&quot;Datatype&quot;), nsRDFSsubClassOf, nsRDFSClass),new Statement(nsRDFSResource, NS.rdf(&quot;type&quot;), nsRDFSClass),new Statement(nsRDFSClass, NS.rdf(&quot;type&quot;), nsRDFSClass),],processStatement(item: Statement, ctx: VocabularyProcessingContext): Statement[] | null {const result &#x3D; [item];const domainStatements &#x3D; ctx.store.statementsMatching(item.predicate, nsRDFSdomain);if (domainStatements.length &gt; 0) {domainStatements.forEach(({ object }) &#x3D;&gt; {result.push(new Statement(item.subject as NamedNode, NS.rdf(&quot;type&quot;), object));});}const rangeStatements &#x3D; ctx.store.statementsMatching(item.predicate, nsRDFSrange);if (rangeStatements.length &gt; 0) {                                                     // P rdfs:range C..CnrangeStatements.forEach(({ object }) &#x3D;&gt; {result.push(new Statement(item.object as NamedNode, NS.rdf(&quot;type&quot;), object));});}if (nsRDFSdomain.equals(item.predicate)) {if (!(item.object instanceof NamedNode)) {throw new TypeError(&#x60;A non IRI was passed as object to rdfs:domain (was: ${item.object}).&#x60;);}result.push(new Statement(item.subject, NS.rdf(&quot;type&quot;), NS.rdf(&quot;Property&quot;)));     // P rdf:type rdf:Propertyresult.push(new Statement(item.object, NS.rdf(&quot;type&quot;), NS.rdfs(&quot;Class&quot;)));        // C rdf:type rdfs:Classconst dereferences &#x3D; ctx.store.statementsMatching(item.subject);for (const { object } of dereferences) {result.push(new Statement(item.subject as NamedNode, NS.rdf(&quot;type&quot;), object));}} else if (nsRDFSrange.equals(item.predicate)) {if (!(item.object instanceof NamedNode)) {throw new TypeError(&#x60;A non IRI was passed as object to rdfs:domain (was: ${item.object}).&#x60;);}result.push(new Statement(item.subject, NS.rdf(&quot;type&quot;), NS.rdf(&quot;Property&quot;)));     // P rdf:type rdf:Propertyresult.push(new Statement(item.object, NS.rdf(&quot;type&quot;), NS.rdfs(&quot;Class&quot;)));        // C rdf:type rdfs:Classconst dereferences &#x3D; ctx.store.statementsMatching(undefined, undefined, item.subject);for (const { subject } of dereferences) {result.push(new Statement(subject, NS.rdf(&quot;type&quot;), item.object));}} else if (nsRDFSsubClassOf.equals(item.predicate)) {                                   // C1 rdfs:subClassOf C2if (!(item.object instanceof NamedNode || item.object instanceof BlankNode)) {throw new Error(&quot;Object of subClassOf statement must be a NamedNode&quot;);}const sSubject &#x3D; item.subject.value;const sObject &#x3D; item.object.value;if (!ctx.superMap.has(sObject)) {ctx.superMap.set(sObject, new Set([nsRDFSResource.value]));}const parents &#x3D; ctx.superMap.get(sObject) || new Set&lt;string&gt;([item.object.value]);const itemVal &#x3D; ctx.superMap.get(sSubject) || new Set&lt;string&gt;([item.subject.value]);parents.forEach((i) &#x3D;&gt; itemVal.add(i));ctx.superMap.set(sSubject, itemVal);ctx.superMap.forEach((v, k) &#x3D;&gt; {if (k !&#x3D;&#x3D; sSubject &amp;&amp; v.has(item.subject.value)) {itemVal.forEach(v.add, v);}});} else if (nsRDFSsubPropertyOf.equals(item.predicate)) {// TODO: Implementreturn result;}return result.length &#x3D;&#x3D;&#x3D; 1 ? null : result;},processType(_: NamedNode, __: VocabularyProcessingContext): boolean {// RDFS.processStatement(new Statement(type, nsRDFSsubClassOf, nsRDFSResource), _, superMap);// RDFS.processStatement(new Statement(type, nsRDFSsubClassOf, nsRDFSClass), _, superMap);return false;},} as VocabularyProcessor</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2388a11/src/schema/rdfs.ts#L18">schema/rdfs.ts:18</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Implements the RDF/RDFS axioms and rules.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{VocabularyProcessor}</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="nsrdfsclass" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> nsRDFSClass</h3>
+					<div class="tsd-signature tsd-kind-icon">nsRDFSClass<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;NS.rdfs(&quot;Class&quot;)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2388a11/src/schema/rdfs.ts#L6">schema/rdfs.ts:6</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="nsrdfsresource" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> nsRDFSResource</h3>
+					<div class="tsd-signature tsd-kind-icon">nsRDFSResource<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;NS.rdfs(&quot;Resource&quot;)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2388a11/src/schema/rdfs.ts#L7">schema/rdfs.ts:7</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="nsrdfsdomain" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> nsRDFSdomain</h3>
+					<div class="tsd-signature tsd-kind-icon">nsRDFSdomain<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;NS.rdfs(&quot;domain&quot;)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2388a11/src/schema/rdfs.ts#L10">schema/rdfs.ts:10</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="nsrdfsrange" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> nsRDFSrange</h3>
+					<div class="tsd-signature tsd-kind-icon">nsRDFSrange<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;NS.rdfs(&quot;range&quot;)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2388a11/src/schema/rdfs.ts#L11">schema/rdfs.ts:11</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="nsrdfssubclassof" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> nsRDFSsub<wbr>Class<wbr>Of</h3>
+					<div class="tsd-signature tsd-kind-icon">nsRDFSsub<wbr>Class<wbr>Of<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;NS.rdfs(&quot;subClassOf&quot;)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2388a11/src/schema/rdfs.ts#L9">schema/rdfs.ts:9</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="nsrdfssubpropertyof" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> nsRDFSsub<wbr>Property<wbr>Of</h3>
+					<div class="tsd-signature tsd-kind-icon">nsRDFSsub<wbr>Property<wbr>Of<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;NS.rdfs(&quot;subPropertyOf&quot;)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2388a11/src/schema/rdfs.ts#L12">schema/rdfs.ts:12</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_componentstore_.html">"<wbr>Component<wbr>Store"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_linkeddataapi_.html">"<wbr>Linked<wbr>DataAPI"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_linkedrenderstore_.html">"<wbr>Linked<wbr>Render<wbr>Store"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_rdfstore_.html">"RDFStore"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_schema_.html">"<wbr>Schema"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_link_lib_.html">"link-<wbr>lib"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_processor_dataprocessor_.html">"processor/<wbr>Data<wbr>Processor"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_schema_owl_.html">"schema/owl"</a>
+					</li>
+					<li class="current tsd-kind-external-module">
+						<a href="_schema_rdfs_.html">"schema/rdfs"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_testutilities_.html">"test<wbr>Utilities"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_transformers_index_.html">"transformers/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_transformers_rdf_formats_common_.html">"transformers/rdf-<wbr>formats-<wbr>common"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_types_.html">"types"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_utilities_.html">"utilities"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_utilities_disjointset_.html">"utilities/<wbr>Disjoint<wbr>Set"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_utilities_responses_.html">"utilities/responses"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_worker_dataworkerloader_.html">"worker/<wbr>Data<wbr>Worker<wbr>Loader"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_worker_messages_.html">"worker/messages"</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="_schema_rdfs_.html#rdfs" class="tsd-kind-icon">RDFS</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_schema_rdfs_.html#nsrdfsclass" class="tsd-kind-icon">nsRDFSClass</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_schema_rdfs_.html#nsrdfsresource" class="tsd-kind-icon">nsRDFSResource</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_schema_rdfs_.html#nsrdfsdomain" class="tsd-kind-icon">nsRDFSdomain</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_schema_rdfs_.html#nsrdfsrange" class="tsd-kind-icon">nsRDFSrange</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_schema_rdfs_.html#nsrdfssubclassof" class="tsd-kind-icon">nsRDFSsub<wbr>Class<wbr>Of</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_schema_rdfs_.html#nsrdfssubpropertyof" class="tsd-kind-icon">nsRDFSsub<wbr>Property<wbr>Of</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
