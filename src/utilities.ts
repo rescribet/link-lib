@@ -33,6 +33,7 @@ export function memoizedNamespace(nsIRI: string): (ns: string) => NamedNode {
         }
         const actual = ns(ln);
         actual.sI = ++termIndex;
+        actual.term = ln;
         termMap[actual.sI] = nsMap[fullIRI] = actual;
 
         return actual;

@@ -62,6 +62,8 @@ declare module "rdflib" {
 
         public sI: number;
 
+        public term: string;
+
         public constructor(iri: NamedNode | string)
 
         public dir(): string;
