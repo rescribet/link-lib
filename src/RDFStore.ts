@@ -20,7 +20,7 @@ import {
 const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
 
 function normalizeTerm(term: SomeTerm | undefined): SomeTerm | undefined {
-    if (term && term.termType === "NamedNode") {
+    if (term && term.termType === "NamedNode" && term.sI === undefined) {
         return namedNodeByIRI(term.value) || term;
     }
     return term;
@@ -44,7 +44,15 @@ export class RDFStore {
                     return (subj: NamedNode | BlankNode, pred: NamedNode, obj: SomeTerm, why: Node):
                         IndexedFormula | null | Statement => {
                         if (Array.isArray(subj)) {
-                            return target.add(subj);
+                            if (subj[0] && subj[0].predicate.sI !== undefined) {
+                                return target.add(subj);
+                            }
+                            return target.add(subj.map((s) => new Statement(
+                                normalizeTerm(s.subject) as SomeNode,
+                                normalizeTerm(s.predicate) as NamedNode,
+                                normalizeTerm(s.object) as SomeTerm,
+                                s.why,
+                            )));
                         }
 
                         return target.add(
@@ -84,7 +92,7 @@ export class RDFStore {
     }
 
     /**
-     * Add statements to the store
+     * Add statements to the store.
      * @param data Data to parse and add to the store.
      */
     public addStatements(data: Statement[]): void {
