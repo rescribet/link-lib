@@ -103,5 +103,9 @@ export interface VocabularyProcessor {
 
     processStatement: (item: Statement, ctx: VocabularyProcessingContext) => Statement[] | null;
 
-    processType: (item: NamedNode, ctx: VocabularyProcessingContext) => boolean;
+    /**
+     * Processes class instances (object to rdf:type). If an IRI is given, processors must assume the resource to be an
+     * instance of rdfs:Class.
+     */
+    processType: (type: NamedNode, ctx: VocabularyProcessingContext) => boolean;
 }

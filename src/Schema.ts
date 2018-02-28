@@ -2,10 +2,10 @@ import { IndexedFormula, NamedNode, SomeTerm, Statement } from "rdflib";
 import { RDFStore } from "./RDFStore";
 
 import { OWL } from "./schema/owl";
-import { RDFS } from "./schema/rdfs";
+import { nsRDFSResource, RDFS } from "./schema/rdfs";
 
 import { VocabularyProcessingContext, VocabularyProcessor } from "./types";
-import { defaultNS as NS } from "./utilities";
+import { defaultNS as NS, namedNodeByIRI } from "./utilities";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 /**
@@ -62,16 +62,22 @@ export class Schema extends IndexedFormula {
     public isSubclassOf(resource: NamedNode, superClass: NamedNode): boolean {
         const resourceMap = this.superMap.get(resource.value);
 
-        return !!(resourceMap && resourceMap.has(superClass.value));
+        if (resourceMap) {
+            return resourceMap.has(superClass.value);
+        }
+        return false;
     }
 
     /**
      * Expands the given lookupTypes to include all their equivalent and subclasses.
      * This is done in multiple iterations until no new types are found.
-     * @param lookupTypes The types to look up.
+     * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
      */
     public mineForTypes(lookupTypes: NamedNode[]): NamedNode[] {
-        const reduced = lookupTypes
+        if (lookupTypes.length === 0) {
+            return [nsRDFSResource];
+        }
+        return lookupTypes
             .map((v) => {
                 const canon = this.liveStore.canon(v) as NamedNode;
                 if (!this.processedTypes.includes(canon)) {
@@ -90,12 +96,17 @@ export class Schema extends IndexedFormula {
                         return a;
                     }
 
-                    return a.concat(Array.from(superSet).map((s) => new NamedNode(s)));
+                    superSet.forEach((s) => {
+                        const nn = namedNodeByIRI(s) || new NamedNode(s);
+                        if (!a.includes(nn)) {
+                            a.push(nn);
+                        }
+                    });
+
+                    return a;
                 },
                 lookupTypes,
             );
-
-        return reduced.concat([NS.rdfs("Resource")]);
     }
 
     private process(item: Statement): Statement[] | null {

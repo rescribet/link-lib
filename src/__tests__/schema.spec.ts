@@ -1,6 +1,6 @@
 import "jest";
 import {
-    Literal,
+    Literal, NamedNode,
     Statement,
 } from "rdflib";
 
@@ -85,7 +85,7 @@ describe("Schema", () => {
                     .toEqual([NS.rdfs("Resource")]);
             });
 
-            it("returns self when empty", () => {
+            it("ensures all have rdfs:Resource as base class", () => {
                 const schema = blankSchema();
                 const result = [
                     NS.schema("CreativeWork"),
@@ -96,9 +96,23 @@ describe("Schema", () => {
                     .toEqual(result);
             });
 
-            // it("returns self when nothing matches", () => {
-            //
-            // });
+            it("adds superclasses", () => {
+                const schema = blankSchema();
+                const result = [
+                    NS.schema("BlogPost"),
+                    NS.schema("CreativeWork"),
+                    NS.rdfs("Resource"),
+                    NS.schema("Thing"),
+                ];
+
+                schema.addStatements([
+                    new Statement(NS.schema("CreativeWork"), NS.rdfs("subClassOf"), NS.schema("Thing")),
+                    new Statement(NS.schema("BlogPost"), NS.rdfs("subClassOf"), NS.schema("CreativeWork")),
+                ]);
+
+                expect(schema.mineForTypes([NS.schema("BlogPost")]))
+                    .toEqual(result);
+            });
         });
     });
 });
