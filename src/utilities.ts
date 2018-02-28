@@ -19,8 +19,22 @@ export function namedNodeByStoreIndex(un: number): NamedNode | undefined {
     return termMap[un];
 }
 
-export function namedNodeByIRI(iri: string): NamedNode | undefined {
-    return nsMap[iri];
+export function namedNodeByIRI(iri: string): NamedNode {
+    const fromMap = nsMap[iri];
+    if (fromMap !== undefined) {
+        return fromMap;
+    }
+    const ln = iri.split(/[\/#]/).pop()!.split("?").shift() || "";
+
+    return add(new NamedNode(iri), ln);
+}
+
+function add(nn: NamedNode, ln: string): NamedNode {
+    nn.sI = ++termIndex;
+    nn.term = ln;
+    termMap[nn.sI] = nsMap[nn.value] = nn;
+
+    return nn;
 }
 
 export function memoizedNamespace(nsIRI: string): (ns: string) => NamedNode {
@@ -31,12 +45,8 @@ export function memoizedNamespace(nsIRI: string): (ns: string) => NamedNode {
         if (nsMap[fullIRI] !== undefined) {
             return nsMap[fullIRI];
         }
-        const actual = ns(ln);
-        actual.sI = ++termIndex;
-        actual.term = ln;
-        termMap[actual.sI] = nsMap[fullIRI] = actual;
 
-        return actual;
+        return add(ns(ln), ln);
     };
 }
 

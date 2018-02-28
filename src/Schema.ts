@@ -97,7 +97,7 @@ export class Schema extends IndexedFormula {
                     }
 
                     superSet.forEach((s) => {
-                        const nn = namedNodeByIRI(s) || new NamedNode(s);
+                        const nn = namedNodeByIRI(s);
                         if (!a.includes(nn)) {
                             a.push(nn);
                         }
