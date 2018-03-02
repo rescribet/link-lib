@@ -5,6 +5,7 @@ import {
 } from "http-status-codes";
 import {
     Fetcher,
+    FetchOpts,
     NamedNode,
     Statement,
 } from "rdflib";
@@ -131,7 +132,7 @@ export class DataProcessor {
         }
     }
 
-    public async fetchResource(iri: NamedNode): Promise<ResponseAndFallbacks> {
+    public async fetchResource(iri: NamedNode, opts?: FetchOpts): Promise<ResponseAndFallbacks> {
         const iriString = typeof iri === "string" ? iri : iri.value;
         const accept = this.accept[new URL(iriString).origin] || this.accept.default;
         if (isDifferentOrigin(iri) && getExtention()) {
@@ -141,13 +142,17 @@ export class DataProcessor {
             this.fetcher.mediatypes = {[accept]: {q: 1.0}};
         }
 
-        const options = {
-            credentials: "same-origin",
-            headers: {
-                "Accept": accept,
-                "Content-Type": "application/vnd.api+json",
+        const options = Object.assign (
+            {},
+            {
+                credentials: "same-origin",
+                headers: {
+                    "Accept": accept,
+                    "Content-Type": "application/vnd.api+json",
+                },
             },
-        } as RequestInit;
+            opts,
+        );
 
         return this.fetcher.fetch(iri, options);
     }
@@ -155,9 +160,11 @@ export class DataProcessor {
     /**
      *
      * @param iri The SomeNode of the entity
+     * @param opts The options for fetch-/processing the resource.
+     * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public async getEntity(iri: NamedNode): Promise<Statement[]> {
+    public async getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Statement[]> {
         const url = new URL(iri.value);
         url.hash = "";
         const requestIRI = new NamedNode(url.toString());
@@ -167,7 +174,7 @@ export class DataProcessor {
 
         try {
             return this.requestMap[requestIRI.toString()] = this
-                .fetchResource(requestIRI)
+                .fetchResource(requestIRI, opts)
                 .then((res) => this.feedResponse(res)); // TODO: feedResponse is only necessary for external requests.
         } catch (e) {
             if (typeof e.res === "undefined") {

@@ -109,6 +109,20 @@ declare module "rdflib" {
         timeout?: number;
     }
 
+    export interface FetchOpts {
+        fetch?: GlobalFetch["fetch"];
+        referringTerm?: NamedNode;
+        contentType?: string;
+        forceContentType?: string;
+        force?: boolean;
+        baseURI?: Node | string;
+        proxyUsed?: boolean;
+        withCredentials?: boolean;
+        clearPreviousData?: boolean;
+        noMeta?: boolean;
+        noRDFa?: boolean;
+    }
+
     export type FetchSuccessCallback = (success: true, error: null, result: Response) => void;
     export type FetchFailureCallback = (success: false, error: string, result: undefined) => void;
 
@@ -118,7 +132,7 @@ declare module "rdflib" {
         public constructor(store: Formula, options: FetcherOpts)
 
         // tslint:disable-next-line no-any
-        public fetch(url: NamedNode[] | string[] | NamedNode | string, options: object): Promise<any>;
+        public fetch(url: NamedNode[] | string[] | NamedNode | string, options: FetchOpts): Promise<any>;
 
         public nowOrWhenFetched(uri: string | NamedNode,
                                 options: RequestInit,

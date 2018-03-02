@@ -45,6 +45,11 @@ export interface FailedResponse {
     res: Response | undefined;
 }
 
+export interface FetchOpts {
+    /** Force-reload the resource discarding any previously held data. */
+    reload: boolean;
+}
+
 export type SomeNode = NamedNode | BlankNode;
 
 export interface LinkedRenderStoreOptions<T> {

@@ -1,6 +1,7 @@
 /* eslint no-console: 0 */
 
 import {
+    FetchOpts as RDFFetchOpts, Literal,
     NamedNamespace,
     NamedNode,
     SomeTerm,
@@ -14,6 +15,7 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import {
     ComponentRegistration,
+    FetchOpts,
     LazyNNArgument,
     LinkedRenderStoreOptions,
     NamespaceMap,
@@ -166,10 +168,19 @@ export class LinkedRenderStore<T> {
      *
      * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
      * @param iri The SomeNode of the resource
+     * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public async getEntity(iri: NamedNode): Promise<void> {
-        const data = await this.api.getEntity(iri);
+    public async getEntity(iri: NamedNode, opts?: FetchOpts): Promise<void> {
+        this.touch(iri);
+
+        const apiOpts: RDFFetchOpts = {};
+        if (opts && opts.reload) {
+            apiOpts.force = true;
+            apiOpts.clearPreviousData = true;
+            this.store.removeStatements(this.tryEntity(iri));
+        }
+        const data = await this.api.getEntity(iri, apiOpts);
 
         await this.store.addStatements(data);
         this.broadcast();
@@ -343,5 +354,10 @@ export class LinkedRenderStore<T> {
                 registration.callback(processingBuffer);
             }
         });
+    }
+
+    private touch(iri: SomeNode): void {
+        this.store.addStatements([new Statement(iri, defaultNS.ll("nop"), Literal.fromValue(0))]);
+        this.broadcast();
     }
 }

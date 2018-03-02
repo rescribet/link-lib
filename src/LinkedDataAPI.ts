@@ -1,5 +1,7 @@
 import {
-    NamedNode, Statement,
+    FetchOpts,
+    NamedNode,
+    Statement,
 } from "rdflib";
 
 import { DataProcessor, DataProcessorOpts } from "./processor/DataProcessor";
@@ -33,10 +35,11 @@ export class LinkedDataAPI {
      * When data is already present for the SomeNode as a subject, the stored data is returned,
      * otherwise the SomeNode will be fetched and processed.
      * @param iri The SomeNode of the resource
+     * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public getEntity(iri: NamedNode): Promise<Statement[]> {
-        return this.processor.getEntity(iri);
+    public getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Statement[]> {
+        return this.processor.getEntity(iri, opts);
     }
 
     /** Register a transformer so it can be used to interact with API's. */
