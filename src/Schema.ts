@@ -105,7 +105,7 @@ export class Schema extends IndexedFormula {
 
                     return a;
                 },
-                lookupTypes,
+                [...lookupTypes],
             );
     }
 
