@@ -188,10 +188,17 @@ export class ComponentStore<T> {
      * @param [types] The types to expand on.
      * @returns The best match for the given components and types.
      */
-    private bestComponent(components: NamedNode[], types?: NamedNode[]): NamedNode | undefined {
+    private bestComponent(components: NamedNode[], types: NamedNode[]): NamedNode | undefined {
+        if (types.length > 0) {
+            const direct = types.find((c) => components.indexOf(c) >= 0);
+            if (direct) {
+                return direct;
+            }
+        }
+
         const chain = this.schema.mineForTypes(types || []);
 
-        return components.find((c) => !!chain.find((elem) => c.sameTerm(elem)));
+        return components.find((c) => chain.indexOf(c) > 0);
     }
 
     /**
