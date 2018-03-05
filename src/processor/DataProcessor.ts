@@ -7,6 +7,7 @@ import {
     Fetcher,
     FetchOpts,
     NamedNode,
+    RequestCallbackHandler,
     Statement,
 } from "rdflib";
 import { RDFStore } from "../RDFStore";
@@ -97,6 +98,7 @@ export interface DataProcessorOpts {
     accept?: { [k: string]: string };
     fetcher?: Fetcher;
     mapping?: { [k: string]: ResponseTransformer[] };
+    requestNotifier?: RequestCallbackHandler;
     store: RDFStore;
 }
 
@@ -107,11 +109,17 @@ export class DataProcessor {
     private _fetcher: Fetcher | undefined;
     private mapping: { [k: string]: ResponseTransformer[] };
     private requestMap: { [k: string]: Promise<Statement[]> | undefined };
+    private requestNotifier?: RequestCallbackHandler;
     private store: RDFStore;
 
     private get fetcher(): Fetcher {
         if (typeof this._fetcher === "undefined") {
             this._fetcher = new Fetcher(this.store.getInternalStore(), {timeout: this.timeout});
+            if (typeof this.requestNotifier !== "undefined") {
+                ["done", "fail", "refresh", "request", "retract"].forEach((hook) => {
+                    this._fetcher!.addCallback(hook, this.requestNotifier!);
+                });
+            }
         }
         return this._fetcher;
     }
@@ -127,6 +135,7 @@ export class DataProcessor {
         this.mapping = opts.mapping || {};
         this.requestMap = {};
         this.store = opts.store;
+        this.requestNotifier = opts.requestNotifier;
         if (opts.fetcher) {
             this.fetcher = opts.fetcher;
         }

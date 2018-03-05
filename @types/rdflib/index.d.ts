@@ -18,6 +18,11 @@ declare module "rdflib" {
         value: string;
     }
 
+    /**
+     * Should return a truthy value to be kept as a callback.
+     */
+    export type RequestCallbackHandler = (uri: string | NamedNode, error?: Error) => boolean | undefined;
+
     export type TermIsh = NamedNodeIsh | BlankNodeIsh | LiteralIsh;
     export type StatementIsh = StatementLike | Statement;
 
@@ -130,6 +135,8 @@ declare module "rdflib" {
         public mediatypes: { [k: string]: { [k: string]: number } };
 
         public constructor(store: Formula, options: FetcherOpts)
+
+        public addCallback(hook: string, callback: RequestCallbackHandler): void;
 
         // tslint:disable-next-line no-any
         public fetch(url: NamedNode[] | string[] | NamedNode | string, options: FetchOpts): Promise<any>;

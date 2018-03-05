@@ -24,6 +24,7 @@ import {
 } from "./types";
 import {
     defaultNS,
+    namedNodeByIRI,
     normalizeType,
 } from "./utilities";
 
@@ -101,7 +102,12 @@ export class LinkedRenderStore<T> {
             this.store = opts.store;
         }
 
-        this.api = opts.api || new LinkedDataAPI({dataProcessorOpts: {store: this.store}});
+        this.api = opts.api || new LinkedDataAPI({
+            dataProcessorOpts: {
+                requestNotifier: this.touch.bind(this),
+                store: this.store,
+            },
+        });
         this.defaultType = opts.defaultType || defaultNS.schema("Thing");
         this.namespaces = opts.namespaces || {...defaultNS};
         this.schema = opts.schema || new Schema(this.store);
@@ -172,8 +178,6 @@ export class LinkedRenderStore<T> {
      * @return A promise with the resulting entity
      */
     public async getEntity(iri: NamedNode, opts?: FetchOpts): Promise<void> {
-        this.touch(iri);
-
         const apiOpts: RDFFetchOpts = {};
         if (opts && opts.reload) {
             apiOpts.force = true;
@@ -356,8 +360,10 @@ export class LinkedRenderStore<T> {
         });
     }
 
-    private touch(iri: SomeNode): void {
-        this.store.addStatements([new Statement(iri, defaultNS.ll("nop"), Literal.fromValue(0))]);
+    private touch(iri: string | NamedNode, _err?: Error): boolean {
+        const resource = typeof iri === "string" ? namedNodeByIRI(iri) : iri;
+        this.store.addStatements([new Statement(resource, defaultNS.ll("nop"), Literal.fromValue(0))]);
         this.broadcast();
+        return true;
     }
 }
