@@ -990,7 +990,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L120">processor/DataProcessor.ts:120</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L121">processor/DataProcessor.ts:121</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1012,7 +1012,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L103">processor/DataProcessor.ts:103</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L104">processor/DataProcessor.ts:104</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -1030,7 +1030,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">timeout<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;30000</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L104">processor/DataProcessor.ts:104</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L105">processor/DataProcessor.ts:105</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1041,19 +1041,22 @@ img { max-width: 100%; }
 				<a name="fetchresource" class="tsd-anchor"></a>
 				<h3>fetch<wbr>Resource</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">fetch<wbr>Resource<span class="tsd-signature-symbol">(</span>iri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#responseandfallbacks" class="tsd-signature-type">ResponseAndFallbacks</a><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">fetch<wbr>Resource<span class="tsd-signature-symbol">(</span>iri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span>, opts<span class="tsd-signature-symbol">?: </span><a href="../interfaces/fetchopts.html" class="tsd-signature-type">FetchOpts</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#responseandfallbacks" class="tsd-signature-type">ResponseAndFallbacks</a><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L134">processor/DataProcessor.ts:134</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L135">processor/DataProcessor.ts:135</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
 								<h5>iri: <span class="tsd-signature-type">NamedNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> opts: <a href="../interfaces/fetchopts.html" class="tsd-signature-type">FetchOpts</a></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#responseandfallbacks" class="tsd-signature-type">ResponseAndFallbacks</a><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -1064,13 +1067,13 @@ img { max-width: 100%; }
 				<a name="getentity" class="tsd-anchor"></a>
 				<h3>get<wbr>Entity</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Entity<span class="tsd-signature-symbol">(</span>iri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Entity<span class="tsd-signature-symbol">(</span>iri<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span>, opts<span class="tsd-signature-symbol">?: </span><a href="../interfaces/fetchopts.html" class="tsd-signature-type">FetchOpts</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L160">processor/DataProcessor.ts:160</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L167">processor/DataProcessor.ts:167</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1081,6 +1084,14 @@ img { max-width: 100%; }
 								<h5>iri: <span class="tsd-signature-type">NamedNode</span></h5>
 								<div class="tsd-comment tsd-typography">
 									<p>The SomeNode of the entity</p>
+								</div>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> opts: <a href="../interfaces/fetchopts.html" class="tsd-signature-type">FetchOpts</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The options for fetch-/processing the resource.</p>
+									</div>
 								</div>
 							</li>
 						</ul>
@@ -1099,7 +1110,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L185">processor/DataProcessor.ts:185</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L192">processor/DataProcessor.ts:192</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1122,7 +1133,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L191">processor/DataProcessor.ts:191</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L198">processor/DataProcessor.ts:198</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1156,7 +1167,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1511bbc/src/processor/DataProcessor.ts#L201">processor/DataProcessor.ts:201</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/processor/DataProcessor.ts#L208">processor/DataProcessor.ts:208</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
