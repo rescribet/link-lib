@@ -4,8 +4,10 @@ import {
     NOT_FOUND,
 } from "http-status-codes";
 import {
+    BlankNode,
     Fetcher,
     FetchOpts,
+    Literal,
     NamedNode,
     RequestCallbackHandler,
     Statement,
@@ -13,11 +15,14 @@ import {
 import { RDFStore } from "../RDFStore";
 
 import {
-    FailedResponse,
+    EmptyRequestStatus,
+    FailedResponse, FulfilledRequestStatus,
     ResponseAndFallbacks,
     ResponseTransformer,
 } from "../types";
 import {
+    anyRDFValue,
+    defaultNS,
     fetchWithExtension,
     getExtention,
     isDifferentOrigin,
@@ -101,6 +106,13 @@ export interface DataProcessorOpts {
     requestNotifier?: RequestCallbackHandler;
     store: RDFStore;
 }
+
+export const emptyRequest = Object.freeze({
+    lastRequested: null,
+    requested: false,
+    status: null,
+    timesRequested: 0,
+});
 
 export class DataProcessor {
     public accept: { [k: string]: string };
@@ -196,6 +208,53 @@ export class DataProcessor {
         } finally {
             this.requestMap[requestIRI.toString()] = undefined;
         }
+    }
+
+    public getStatus(iri: NamedNode): EmptyRequestStatus | FulfilledRequestStatus {
+        const fetcherStatus = this.fetcher.requested[iri.value];
+
+        if (fetcherStatus === undefined) {
+            return emptyRequest as EmptyRequestStatus;
+        }
+
+        const requests = this.store.match(
+            null,
+            defaultNS.link("requestedURI"),
+            new Literal(iri.value),
+        );
+        const totalRequested = requests.length;
+        if (requests.length === 0) {
+            return emptyRequest as EmptyRequestStatus;
+        }
+        const requestIRI = requests.pop()!.subject as BlankNode;
+        const requestObj = anyRDFValue(
+            this.store.statementsFor(requestIRI),
+            defaultNS.link("response"),
+        );
+
+        if (!requestObj) {
+            return emptyRequest as EmptyRequestStatus;
+        }
+
+        const requestStatus = anyRDFValue(
+            this.store.statementsFor(requestObj as BlankNode),
+            defaultNS.httph("status"),
+        );
+        const requestDate = anyRDFValue(
+            this.store.statementsFor(requestObj as BlankNode),
+            defaultNS.httph("date"),
+        );
+
+        if (!requestDate || !requestStatus) {
+            return emptyRequest as EmptyRequestStatus;
+        }
+
+        return {
+            lastRequested: new Date(requestDate.value),
+            requested: true,
+            status: Number.parseInt(requestStatus.value, 10),
+            timesRequested: totalRequested,
+        };
     }
 
     public processExternalResponse(response: Response): Promise<Statement[] | undefined> {

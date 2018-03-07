@@ -5,6 +5,7 @@ import {
     IndexedFormula,
     NamedNode,
     Node,
+    OptionalNode,
     SomeTerm,
     Statement,
 } from "rdflib";
@@ -103,6 +104,24 @@ export class RDFStore {
         }
     }
 
+    public any(subj: OptionalNode, pred?: OptionalNode, obj?: OptionalNode, why?: OptionalNode): SomeTerm | undefined {
+        return this.store.any(subj, pred, obj, why);
+    }
+
+    public anyStatementMatching(subj: OptionalNode,
+                                pred?: OptionalNode,
+                                obj?: OptionalNode,
+                                why?: OptionalNode): Statement | undefined {
+        return this.store.anyStatementMatching(subj, pred, obj, why);
+    }
+
+    public anyValue(subj: OptionalNode,
+                    pred?: OptionalNode,
+                    obj?: OptionalNode,
+                    why?: OptionalNode): string | undefined {
+        return this.store.anyValue(subj, pred, obj, why);
+    }
+
     public canon(term: Node): Node {
         return this.store.canon(term);
     }
@@ -123,6 +142,13 @@ export class RDFStore {
 
     public getInternalStore(): IndexedFormula {
         return this.store;
+    }
+
+    public match(subj: OptionalNode,
+                 pred?: OptionalNode,
+                 obj?: OptionalNode,
+                 why?: OptionalNode): Statement[] {
+        return this.store.match(subj, pred, obj, why) || [];
     }
 
     public removeStatements(statements: Statement[]): void {

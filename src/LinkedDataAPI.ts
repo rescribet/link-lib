@@ -4,8 +4,13 @@ import {
     Statement,
 } from "rdflib";
 
-import { DataProcessor, DataProcessorOpts } from "./processor/DataProcessor";
-import { ResponseTransformer } from "./types";
+import { DataProcessor, DataProcessorOpts, emptyRequest } from "./processor/DataProcessor";
+import {
+    EmptyRequestStatus,
+    FulfilledRequestStatus,
+    ResponseTransformer,
+    SomeNode,
+} from "./types";
 
 export interface LinkedDataAPIOpts {
     dataProcessorOpts?: DataProcessorOpts;
@@ -40,6 +45,14 @@ export class LinkedDataAPI {
      */
     public getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Statement[]> {
         return this.processor.getEntity(iri, opts);
+    }
+
+    public getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus {
+        if (iri.termType === "BlankNode") {
+            return emptyRequest as EmptyRequestStatus;
+        }
+
+        return this.processor.getStatus(iri);
     }
 
     /** Register a transformer so it can be used to interact with API's. */

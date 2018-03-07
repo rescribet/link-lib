@@ -35,6 +35,8 @@ declare module "rdflib" {
 
     export type SomeTerm = NamedNode | BlankNode | Literal | Collection;
 
+    export type OptionalNode = Node | null | undefined;
+
     export type ActionFunction = (formula: Formula,
                                   subj: NamedNode | BlankNode,
                                   pred: NamedNode,
@@ -134,6 +136,8 @@ declare module "rdflib" {
     export class Fetcher {
         public mediatypes: { [k: string]: { [k: string]: number } };
 
+        public requested: { [k: string]: string | number };
+
         public constructor(store: Formula, options: FetcherOpts)
 
         public addCallback(hook: string, callback: RequestCallbackHandler): void;
@@ -153,7 +157,6 @@ declare module "rdflib" {
     }
 
     export class IndexedFormula extends Formula {
-
         public classActions: ActionFunction[];
 
         public features: string[];
@@ -176,9 +179,27 @@ declare module "rdflib" {
 
         public addAll(statements: Statement[]): void;
 
+        public any(subj: OptionalNode,
+                   pred?: OptionalNode,
+                   obj?: OptionalNode,
+                   why?: OptionalNode): SomeTerm | undefined;
+
+        public anyStatementMatching(subj: OptionalNode,
+                                    pred?: OptionalNode,
+                                    obj?: OptionalNode,
+                                    why?: OptionalNode): Statement | undefined;
+
+        public anyValue(subj: OptionalNode,
+                        pred?: OptionalNode,
+                        obj?: OptionalNode,
+                        why?: OptionalNode): string | undefined;
+
         public canon(term: Node): Node;
 
-        public match(subject: Node | string | TermIsh): Statement[];
+        public match(subj: OptionalNode,
+                     pred?: OptionalNode,
+                     obj?: OptionalNode,
+                     why?: OptionalNode): Statement[];
 
         public newPropertyAction(pred: NamedNode, action: ActionFunction): boolean;
 

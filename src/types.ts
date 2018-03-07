@@ -83,6 +83,26 @@ export interface RDFLibFetcherRequest {
     status: number;
 }
 
+export interface RequestStatus {
+    lastRequested: Date | null;
+    requested: boolean;
+    status: number | null;
+    timesRequested: number;
+}
+
+export interface EmptyRequestStatus extends RequestStatus {
+    lastRequested: null;
+    requested: false;
+    status: null;
+    timesRequested: 0;
+}
+
+export interface FulfilledRequestStatus extends RequestStatus {
+    lastRequested: Date;
+    requested: true;
+    status: number;
+}
+
 export type ResponseAndFallbacks = Response | XMLHttpRequest | ExtensionResponse | RDFLibFetcherRequest;
 
 export interface WorkerMessageBase {
