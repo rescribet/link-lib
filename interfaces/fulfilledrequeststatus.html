@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>DisjointSet | link-lib</title>
+	<title>FulfilledRequestStatus | link-lib</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -907,23 +907,20 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class="current tsd-kind-class tsd-has-type-parameter">
-			<a href="disjointset.html" class="tsd-kind-icon">Disjoint<wbr>Set</a>
+		<li class="current tsd-kind-interface">
+			<a href="fulfilledrequeststatus.html" class="tsd-kind-icon">Fulfilled<wbr>Request<wbr>Status</a>
 			<ul>
-				<li class=" tsd-kind-constructor tsd-parent-kind-class">
-					<a href="disjointset.html#constructor" class="tsd-kind-icon">constructor</a>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a href="fulfilledrequeststatus.html#lastrequested" class="tsd-kind-icon">last<wbr>Requested</a>
 				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-class">
-					<a href="disjointset.html#add" class="tsd-kind-icon">add</a>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a href="fulfilledrequeststatus.html#requested" class="tsd-kind-icon">requested</a>
 				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-class">
-					<a href="disjointset.html#connected" class="tsd-kind-icon">connected</a>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a href="fulfilledrequeststatus.html#status" class="tsd-kind-icon">status</a>
 				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-class">
-					<a href="disjointset.html#find" class="tsd-kind-icon">find</a>
-				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-class">
-					<a href="disjointset.html#union" class="tsd-kind-icon">union</a>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="fulfilledrequeststatus.html#timesrequested" class="tsd-kind-icon">times<wbr>Requested</a>
 				</li>
 			</ul>
 		</li>
@@ -931,28 +928,16 @@ img { max-width: 100%; }
 </nav>
 <div class="container container-main">
 	<div class="content-wrap">
-		<section class="tsd-panel tsd-comment">
-			<div class="tsd-comment tsd-typography">
-				<dl class="tsd-comment-tags">
-					<dt>class</dt>
-					<dd><p>DisjointSet</p>
-					</dd>
-				</dl>
-			</div>
-		</section>
-		<section class="tsd-panel tsd-type-parameters">
-			<h3>Type parameters</h3>
-			<ul class="tsd-type-parameters">
-				<li>
-					<h4>T</h4>
-				</li>
-			</ul>
-		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">DisjointSet</span>
+					<a href="requeststatus.html" class="tsd-signature-type">RequestStatus</a>
+					<ul class="tsd-hierarchy">
+						<li>
+							<span class="target">FulfilledRequestStatus</span>
+						</li>
+					</ul>
 				</li>
 			</ul>
 		</section>
@@ -961,167 +946,62 @@ img { max-width: 100%; }
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
-						<h3>Constructors</h3>
+						<h3>Properties</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="disjointset.html#constructor" class="tsd-kind-icon">constructor</a></li>
-						</ul>
-					</section>
-					<section class="tsd-index-section ">
-						<h3>Methods</h3>
-						<ul class="tsd-index-list">
-							<li class="tsd-kind-method tsd-parent-kind-class"><a href="disjointset.html#add" class="tsd-kind-icon">add</a></li>
-							<li class="tsd-kind-method tsd-parent-kind-class"><a href="disjointset.html#connected" class="tsd-kind-icon">connected</a></li>
-							<li class="tsd-kind-method tsd-parent-kind-class"><a href="disjointset.html#find" class="tsd-kind-icon">find</a></li>
-							<li class="tsd-kind-method tsd-parent-kind-class"><a href="disjointset.html#union" class="tsd-kind-icon">union</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="fulfilledrequeststatus.html#lastrequested" class="tsd-kind-icon">last<wbr>Requested</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="fulfilledrequeststatus.html#requested" class="tsd-kind-icon">requested</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="fulfilledrequeststatus.html#status" class="tsd-kind-icon">status</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="fulfilledrequeststatus.html#timesrequested" class="tsd-kind-icon">times<wbr>Requested</a></li>
 						</ul>
 					</section>
 				</div>
 			</section>
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
-			<h2>Constructors</h2>
-			<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
-				<a name="constructor" class="tsd-anchor"></a>
-				<h3>constructor</h3>
-				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">new <wbr>Disjoint<wbr>Set<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="disjointset.html" class="tsd-signature-type">DisjointSet</a></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/utilities/DisjointSet.ts#L10">utilities/DisjointSet.ts:10</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-returns-title">Returns <a href="disjointset.html" class="tsd-signature-type">DisjointSet</a></h4>
-					</li>
-				</ul>
+			<h2>Properties</h2>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+				<a name="lastrequested" class="tsd-anchor"></a>
+				<h3>last<wbr>Requested</h3>
+				<div class="tsd-signature tsd-kind-icon">last<wbr>Requested<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span></div>
+				<aside class="tsd-sources">
+					<p>Overrides <a href="requeststatus.html">RequestStatus</a>.<a href="requeststatus.html#lastrequested">lastRequested</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/types.ts#L101">types.ts:101</a></li>
+					</ul>
+				</aside>
 			</section>
-		</section>
-		<section class="tsd-panel-group tsd-member-group ">
-			<h2>Methods</h2>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-				<a name="add" class="tsd-anchor"></a>
-				<h3>add</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/utilities/DisjointSet.ts#L21">utilities/DisjointSet.ts:21</a></li>
-							</ul>
-						</aside>
-						<div class="tsd-comment tsd-typography">
-							<div class="lead">
-								<p>Adds an element as a new set</p>
-							</div>
-						</div>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>value: <span class="tsd-signature-type">T</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						<p>Object holding the element</p>
-					</li>
-				</ul>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+				<a name="requested" class="tsd-anchor"></a>
+				<h3>requested</h3>
+				<div class="tsd-signature tsd-kind-icon">requested<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span></div>
+				<aside class="tsd-sources">
+					<p>Overrides <a href="requeststatus.html">RequestStatus</a>.<a href="requeststatus.html#requested">requested</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/types.ts#L102">types.ts:102</a></li>
+					</ul>
+				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-				<a name="connected" class="tsd-anchor"></a>
-				<h3>connected</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">connected<span class="tsd-signature-symbol">(</span>x<span class="tsd-signature-symbol">: </span><a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span>, y<span class="tsd-signature-symbol">: </span><a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/utilities/DisjointSet.ts#L77">utilities/DisjointSet.ts:77</a></li>
-							</ul>
-						</aside>
-						<div class="tsd-comment tsd-typography">
-							<div class="lead">
-								<p>Returns true if x and y belong to the same set</p>
-							</div>
-						</div>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>x: <a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-							</li>
-							<li>
-								<h5>y: <a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-								<div class="tsd-comment tsd-typography">
-								</div>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
-					</li>
-				</ul>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+				<a name="status" class="tsd-anchor"></a>
+				<h3>status</h3>
+				<div class="tsd-signature tsd-kind-icon">status<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+				<aside class="tsd-sources">
+					<p>Overrides <a href="requeststatus.html">RequestStatus</a>.<a href="requeststatus.html#status">status</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/types.ts#L103">types.ts:103</a></li>
+					</ul>
+				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-				<a name="find" class="tsd-anchor"></a>
-				<h3>find</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">find<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/utilities/DisjointSet.ts#L57">utilities/DisjointSet.ts:57</a></li>
-							</ul>
-						</aside>
-						<div class="tsd-comment tsd-typography">
-							<div class="lead">
-								<p>Finds and returns the root node of the set that contains node</p>
-							</div>
-						</div>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>node: <a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-				<a name="union" class="tsd-anchor"></a>
-				<h3>union</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">union<span class="tsd-signature-symbol">(</span>x<span class="tsd-signature-symbol">: </span><a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span>, y<span class="tsd-signature-symbol">: </span><a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/utilities/DisjointSet.ts#L36">utilities/DisjointSet.ts:36</a></li>
-							</ul>
-						</aside>
-						<div class="tsd-comment tsd-typography">
-							<div class="lead">
-								<p>Merges the sets that contain x and y</p>
-							</div>
-						</div>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>x: <a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-							</li>
-							<li>
-								<h5>y: <a href="disjointsetnode.html" class="tsd-signature-type">DisjointSetNode</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
-								<div class="tsd-comment tsd-typography">
-								</div>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-					</li>
-				</ul>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="timesrequested" class="tsd-anchor"></a>
+				<h3>times<wbr>Requested</h3>
+				<div class="tsd-signature tsd-kind-icon">times<wbr>Requested<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from <a href="requeststatus.html">RequestStatus</a>.<a href="requeststatus.html#timesrequested">timesRequested</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/types.ts#L90">types.ts:90</a></li>
+					</ul>
+				</aside>
 			</section>
 		</section>
 		<footer class="with-border-bottom">

@@ -917,6 +917,15 @@ img { max-width: 100%; }
 					<a href="rdfstore.html#addstatements" class="tsd-kind-icon">add<wbr>Statements</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="rdfstore.html#any" class="tsd-kind-icon">any</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="rdfstore.html#anystatementmatching" class="tsd-kind-icon">any<wbr>Statement<wbr>Matching</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="rdfstore.html#anyvalue" class="tsd-kind-icon">any<wbr>Value</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="rdfstore.html#canon" class="tsd-kind-icon">canon</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -933,6 +942,9 @@ img { max-width: 100%; }
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="rdfstore.html#getresourcepropertyraw" class="tsd-kind-icon">get<wbr>Resource<wbr>Property<wbr>Raw</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="rdfstore.html#match" class="tsd-kind-icon">match</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="rdfstore.html#removestatements" class="tsd-kind-icon">remove<wbr>Statements</a>
@@ -981,12 +993,16 @@ img { max-width: 100%; }
 						<h3>Methods</h3>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#addstatements" class="tsd-kind-icon">add<wbr>Statements</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#any" class="tsd-kind-icon">any</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#anystatementmatching" class="tsd-kind-icon">any<wbr>Statement<wbr>Matching</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#anyvalue" class="tsd-kind-icon">any<wbr>Value</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#canon" class="tsd-kind-icon">canon</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#flush" class="tsd-kind-icon">flush</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#getinternalstore" class="tsd-kind-icon">get<wbr>Internal<wbr>Store</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#getresourceproperties" class="tsd-kind-icon">get<wbr>Resource<wbr>Properties</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#getresourceproperty" class="tsd-kind-icon">get<wbr>Resource<wbr>Property</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#getresourcepropertyraw" class="tsd-kind-icon">get<wbr>Resource<wbr>Property<wbr>Raw</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#match" class="tsd-kind-icon">match</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#removestatements" class="tsd-kind-icon">remove<wbr>Statements</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#replacestatements" class="tsd-kind-icon">replace<wbr>Statements</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#statementsfor" class="tsd-kind-icon">statements<wbr>For</a></li>
@@ -1008,7 +1024,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L37">RDFStore.ts:37</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L38">RDFStore.ts:38</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <a href="rdfstore.html" class="tsd-signature-type">RDFStore</a></h4>
@@ -1028,7 +1044,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L98">RDFStore.ts:98</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L99">RDFStore.ts:99</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1050,6 +1066,111 @@ img { max-width: 100%; }
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="any" class="tsd-anchor"></a>
+				<h3>any</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">any<span class="tsd-signature-symbol">(</span>subj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">OptionalNode</span>, pred<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, obj<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, why<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">SomeTerm</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L107">RDFStore.ts:107</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>subj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> pred: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> obj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> why: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">SomeTerm</span>
+							<span class="tsd-signature-symbol"> | </span>
+							<span class="tsd-signature-type">undefined</span>
+						</h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="anystatementmatching" class="tsd-anchor"></a>
+				<h3>any<wbr>Statement<wbr>Matching</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">any<wbr>Statement<wbr>Matching<span class="tsd-signature-symbol">(</span>subj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">OptionalNode</span>, pred<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, obj<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, why<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L111">RDFStore.ts:111</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>subj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> pred: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> obj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> why: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Statement</span>
+							<span class="tsd-signature-symbol"> | </span>
+							<span class="tsd-signature-type">undefined</span>
+						</h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="anyvalue" class="tsd-anchor"></a>
+				<h3>any<wbr>Value</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">any<wbr>Value<span class="tsd-signature-symbol">(</span>subj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">OptionalNode</span>, pred<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, obj<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, why<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L118">RDFStore.ts:118</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>subj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> pred: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> obj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> why: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span>
+							<span class="tsd-signature-symbol"> | </span>
+							<span class="tsd-signature-type">undefined</span>
+						</h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 				<a name="canon" class="tsd-anchor"></a>
 				<h3>canon</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -1059,7 +1180,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L106">RDFStore.ts:106</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L125">RDFStore.ts:125</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1082,7 +1203,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L114">RDFStore.ts:114</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L133">RDFStore.ts:133</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1105,7 +1226,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L124">RDFStore.ts:124</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L143">RDFStore.ts:143</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">IndexedFormula</span></h4>
@@ -1122,7 +1243,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L175">RDFStore.ts:175</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L201">RDFStore.ts:201</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1148,7 +1269,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L185">RDFStore.ts:185</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L211">RDFStore.ts:211</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1177,7 +1298,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L159">RDFStore.ts:159</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L185">RDFStore.ts:185</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1194,6 +1315,38 @@ img { max-width: 100%; }
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="match" class="tsd-anchor"></a>
+				<h3>match</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">match<span class="tsd-signature-symbol">(</span>subj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">OptionalNode</span>, pred<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, obj<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span>, why<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionalNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L147">RDFStore.ts:147</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>subj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> pred: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> obj: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> why: <span class="tsd-signature-type">OptionalNode</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 				<a name="removestatements" class="tsd-anchor"></a>
 				<h3>remove<wbr>Statements</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -1203,7 +1356,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L128">RDFStore.ts:128</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L154">RDFStore.ts:154</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1226,7 +1379,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L146">RDFStore.ts:146</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L172">RDFStore.ts:172</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1271,7 +1424,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L201">RDFStore.ts:201</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L227">RDFStore.ts:227</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1302,7 +1455,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/RDFStore.ts#L209">RDFStore.ts:209</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/RDFStore.ts#L235">RDFStore.ts:235</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>

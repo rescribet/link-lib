@@ -920,6 +920,9 @@ img { max-width: 100%; }
 					<a href="linkeddataapi.html#getentity" class="tsd-kind-icon">get<wbr>Entity</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="linkeddataapi.html#getstatus" class="tsd-kind-icon">get<wbr>Status</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="linkeddataapi.html#registertransformer" class="tsd-kind-icon">register<wbr>Transformer</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -954,6 +957,7 @@ img { max-width: 100%; }
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="linkeddataapi.html#fetchresource" class="tsd-kind-icon">fetch<wbr>Resource</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="linkeddataapi.html#getentity" class="tsd-kind-icon">get<wbr>Entity</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="linkeddataapi.html#getstatus" class="tsd-kind-icon">get<wbr>Status</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="linkeddataapi.html#registertransformer" class="tsd-kind-icon">register<wbr>Transformer</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="linkeddataapi.html#setacceptforhost" class="tsd-kind-icon">set<wbr>Accept<wbr>For<wbr>Host</a></li>
 						</ul>
@@ -973,7 +977,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/LinkedDataAPI.ts#L16">LinkedDataAPI.ts:16</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L21">LinkedDataAPI.ts:21</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -999,7 +1003,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/LinkedDataAPI.ts#L28">LinkedDataAPI.ts:28</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L33">LinkedDataAPI.ts:33</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1032,7 +1036,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/LinkedDataAPI.ts#L41">LinkedDataAPI.ts:41</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L46">LinkedDataAPI.ts:46</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1063,6 +1067,32 @@ img { max-width: 100%; }
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="getstatus" class="tsd-anchor"></a>
+				<h3>get<wbr>Status</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Status<span class="tsd-signature-symbol">(</span>iri<span class="tsd-signature-symbol">: </span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/emptyrequeststatus.html" class="tsd-signature-type">EmptyRequestStatus</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/fulfilledrequeststatus.html" class="tsd-signature-type">FulfilledRequestStatus</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L50">LinkedDataAPI.ts:50</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>iri: <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/emptyrequeststatus.html" class="tsd-signature-type">EmptyRequestStatus</a>
+							<span class="tsd-signature-symbol"> | </span>
+							<a href="../interfaces/fulfilledrequeststatus.html" class="tsd-signature-type">FulfilledRequestStatus</a>
+						</h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 				<a name="registertransformer" class="tsd-anchor"></a>
 				<h3>register<wbr>Transformer</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -1072,7 +1102,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/LinkedDataAPI.ts#L46">LinkedDataAPI.ts:46</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L59">LinkedDataAPI.ts:59</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1106,7 +1136,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/2af3254/src/LinkedDataAPI.ts#L58">LinkedDataAPI.ts:58</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L71">LinkedDataAPI.ts:71</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
