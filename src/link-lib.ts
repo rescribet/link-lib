@@ -16,6 +16,8 @@ export {
     defaultNS,
     isDifferentOrigin,
     memoizedNamespace,
+    namedNodeByStoreIndex,
+    namedNodeByIRI,
     normalizeType,
 } from "./utilities";
 
