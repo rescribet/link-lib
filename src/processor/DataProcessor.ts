@@ -238,7 +238,7 @@ export class DataProcessor {
 
         const requestStatus = anyRDFValue(
             this.store.statementsFor(requestObj as BlankNode),
-            defaultNS.httph("status"),
+            defaultNS.http("status"),
         );
         const requestDate = anyRDFValue(
             this.store.statementsFor(requestObj as BlankNode),
