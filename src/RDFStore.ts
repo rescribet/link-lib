@@ -152,12 +152,7 @@ export class RDFStore {
     }
 
     public removeStatements(statements: Statement[]): void {
-        /* FIXME: There seems to be a bug in rdf which doesn't remove all statements on the try, but an additional call
-           to `remove` seems to do the job. */
-        this
-            .store
-            .remove(statements)
-            .remove(statements);
+        this.store.remove(statements);
     }
 
     /**
