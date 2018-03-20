@@ -113,6 +113,7 @@ declare module "rdflib" {
 
     export interface FetcherOpts {
         fetch?: GlobalFetch["fetch"];
+        headers?: { [k: string]: string };
         timeout?: number;
     }
 
@@ -136,7 +137,7 @@ declare module "rdflib" {
     export class Fetcher {
         public mediatypes: { [k: string]: { [k: string]: number } };
 
-        public requested: { [k: string]: string | number };
+        public requested: { [k: string]: string | number | boolean };
 
         public constructor(store: Formula, options: FetcherOpts)
 
