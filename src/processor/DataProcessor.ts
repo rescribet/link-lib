@@ -315,10 +315,12 @@ export class DataProcessor {
 
     private feedResponse(res: ResponseAndFallbacks): Promise<Statement[]> {
         const format = getContentType(res);
-        if (format === "") {
+        const formatProcessors = this.mapping[format];
+        const processor = formatProcessors && formatProcessors[0];
+
+        if (processor === undefined) {
             return Promise.resolve([]);
         }
-        const processor = this.mapping[format][0];
 
         return processor(res);
     }
