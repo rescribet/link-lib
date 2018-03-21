@@ -977,7 +977,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L21">LinkedDataAPI.ts:21</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/3d1397d/src/LinkedDataAPI.ts#L21">LinkedDataAPI.ts:21</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1003,7 +1003,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L33">LinkedDataAPI.ts:33</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/3d1397d/src/LinkedDataAPI.ts#L33">LinkedDataAPI.ts:33</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1036,7 +1036,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L46">LinkedDataAPI.ts:46</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/3d1397d/src/LinkedDataAPI.ts#L46">LinkedDataAPI.ts:46</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1076,13 +1076,31 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L50">LinkedDataAPI.ts:50</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/3d1397d/src/LinkedDataAPI.ts#L67">LinkedDataAPI.ts:67</a></li>
 							</ul>
 						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Retrieve the (network) status for a resource.</p>
+							</div>
+							<p>This API is still unstable, but only the latest status should be taken into account. So if a resource was
+							successfully fetched at some point, but a retry failed, the result will be failed.</p>
+							<p>Some cases don&#39;t have proper HTTP status codes, but some (unstandardized) codes are very close.</p>
+							<p>Special errors:</p>
+							<ul>
+								<li>Resources which are still loading are given status <code>202 Accepted</code>.</li>
+								<li>Resources where fetching timed out are given status <code>408 - Request Timeout</code>.</li>
+								<li>Resources where fetching failed due to browser and OS errors are given status <code>499 - Client Closed Request</code>.</li>
+								<li>Resources which haven&#39;t been requested and aren&#39;t scheduled to be requested currently have no status code.</li>
+							</ul>
+						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
 								<h5>iri: <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<p>The resource to get the status on.</p>
+								</div>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <a href="../interfaces/emptyrequeststatus.html" class="tsd-signature-type">EmptyRequestStatus</a>
@@ -1102,7 +1120,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L59">LinkedDataAPI.ts:59</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/3d1397d/src/LinkedDataAPI.ts#L76">LinkedDataAPI.ts:76</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1136,7 +1154,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/761c3b2/src/LinkedDataAPI.ts#L71">LinkedDataAPI.ts:71</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/3d1397d/src/LinkedDataAPI.ts#L88">LinkedDataAPI.ts:88</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
