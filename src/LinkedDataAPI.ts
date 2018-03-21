@@ -47,6 +47,23 @@ export class LinkedDataAPI {
         return this.processor.getEntity(iri, opts);
     }
 
+    /**
+     * Retrieve the (network) status for a resource.
+     *
+     * This API is still unstable, but only the latest status should be taken into account. So if a resource was
+     * successfully fetched at some point, but a retry failed, the result will be failed.
+     *
+     * Some cases don't have proper HTTP status codes, but some (unstandardized) codes are very close.
+     *
+     * Special errors:
+     * - Resources which are still loading are given status `202 Accepted`.
+     * - Resources where fetching timed out are given status `408 - Request Timeout`.
+     * - Resources where fetching failed due to browser and OS errors are given status `499 - Client Closed Request`.
+     * - Resources which haven't been requested and aren't scheduled to be requested currently have no status code.
+     *
+     * @param {SomeNode} iri The resource to get the status on.
+     * @return {EmptyRequestStatus | FulfilledRequestStatus}
+     */
     public getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus {
         if (iri.termType === "BlankNode") {
             return emptyRequest as EmptyRequestStatus;

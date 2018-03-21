@@ -114,6 +114,23 @@ export const emptyRequest = Object.freeze({
     timesRequested: 0,
 });
 
+/**
+ * The client (User Agent) has closed the connection, e.g. due to CORS or going offline.
+ */
+export const failedRequest = (): FulfilledRequestStatus => Object.freeze({
+    lastRequested: new Date(),
+    requested: true,
+    status: 499,
+    timesRequested: 0,
+}) as FulfilledRequestStatus;
+
+const timedOutRequest = (totalRequested: number): FulfilledRequestStatus => Object.freeze({
+    lastRequested: new Date(),
+    requested: true,
+    status: 408,
+    timesRequested: totalRequested,
+}) as FulfilledRequestStatus;
+
 export class DataProcessor {
     public accept: { [k: string]: string };
     public timeout: number = 30000;
@@ -179,7 +196,7 @@ export class DataProcessor {
     }
 
     /**
-     *
+     * @see LinkedDataAPI#getEntity
      * @param iri The SomeNode of the entity
      * @param opts The options for fetch-/processing the resource.
      * @param opts The options for fetch-/processing the resource.
@@ -210,10 +227,16 @@ export class DataProcessor {
         }
     }
 
+    /**
+     * @see LinkedDataAPI#getStatus for documentation
+     */
     public getStatus(iri: NamedNode): EmptyRequestStatus | FulfilledRequestStatus {
         const fetcherStatus = this.fetcher.requested[iri.value];
 
         if (fetcherStatus === undefined) {
+            if (iri.value in this.fetcher.requested) {
+                return failedRequest();
+            }
             return emptyRequest as EmptyRequestStatus;
         }
 
@@ -226,6 +249,17 @@ export class DataProcessor {
         if (requests.length === 0) {
             return emptyRequest as EmptyRequestStatus;
         }
+        if (fetcherStatus === true) {
+            return {
+                lastRequested: new Date(),
+                requested: true,
+                status: 202,
+                timesRequested: totalRequested,
+            };
+        }
+        if (fetcherStatus === "timeout") {
+            return timedOutRequest(totalRequested);
+        }
         const requestIRI = requests.pop()!.subject as BlankNode;
         const requestObj = anyRDFValue(
             this.store.statementsFor(requestIRI),
@@ -236,16 +270,18 @@ export class DataProcessor {
             return emptyRequest as EmptyRequestStatus;
         }
 
-        const requestStatus = anyRDFValue(
-            this.store.statementsFor(requestObj as BlankNode),
-            defaultNS.http("status"),
-        );
-        const requestDate = anyRDFValue(
-            this.store.statementsFor(requestObj as BlankNode),
-            defaultNS.httph("date"),
-        );
+        const requestObjData = this.store.statementsFor(requestObj as BlankNode);
+
+        // RDFLib has different behaviour across browsers and code-paths, so we must check for multiple properties.
+        const requestStatus = anyRDFValue(requestObjData, defaultNS.http("status"))
+            || anyRDFValue(requestObjData, defaultNS.http07("status"))
+            || anyRDFValue(requestObjData, defaultNS.httph("status"));
+        const requestDate = anyRDFValue(requestObjData, defaultNS.httph("date"));
 
         if (!requestDate || !requestStatus) {
+            if (fetcherStatus === "done") {
+                return timedOutRequest(totalRequested);
+            }
             return emptyRequest as EmptyRequestStatus;
         }
 

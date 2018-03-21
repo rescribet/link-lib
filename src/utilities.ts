@@ -64,6 +64,7 @@ export const defaultNS: Readonly<NamespaceMap> = Object.freeze({
     foaf: memoizedNamespace("http://xmlns.com/foaf/0.1/"),
     geo: memoizedNamespace("http://www.w3.org/2003/01/geo/wgs84_pos#"),
     http: memoizedNamespace("http://www.w3.org/2011/http#"),
+    http07: memoizedNamespace("http://www.w3.org/2007/ont/http#"),
     httph: memoizedNamespace("http://www.w3.org/2007/ont/httph#"),
     hydra: memoizedNamespace("http://www.w3.org/ns/hydra/core#"),
     link: memoizedNamespace("http://www.w3.org/2007/ont/link#"),
