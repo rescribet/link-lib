@@ -143,7 +143,10 @@ export class DataProcessor {
 
     private get fetcher(): Fetcher {
         if (typeof this._fetcher === "undefined") {
-            this._fetcher = new Fetcher(this.store.getInternalStore(), {timeout: this.timeout});
+            this._fetcher = new Fetcher(this.store.getInternalStore(), {
+                fetch: window && window.fetch.bind(window),
+                timeout: this.timeout,
+            });
             if (typeof this.requestNotifier !== "undefined") {
                 ["done", "fail", "refresh", "request", "retract"].forEach((hook) => {
                     this._fetcher!.addCallback(hook, this.requestNotifier!);
