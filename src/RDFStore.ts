@@ -152,7 +152,7 @@ export class RDFStore {
     }
 
     public removeStatements(statements: Statement[]): void {
-        this.store.remove(statements);
+        this.store.remove(statements.slice());
     }
 
     /**
