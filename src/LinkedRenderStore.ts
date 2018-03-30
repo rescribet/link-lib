@@ -57,14 +57,14 @@ export class LinkedRenderStore<T> {
         }
         if (typeof prop === "object") {
             if (prop.termType === "NamedNode") {
-                return new NamedNode(prop.value);
+                return namedNodeByIRI(prop.value);
             }
 
             return undefined;
         }
 
         if (prop.indexOf("/") >= 1) {
-            return new NamedNode(prop);
+            return namedNodeByIRI(prop);
         }
         const matches = prop.split(":");
         const constructor: NamedNamespace | undefined = namespaces[matches[CI_MATCH_PREFIX]];
