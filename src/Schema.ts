@@ -77,7 +77,7 @@ export class Schema extends IndexedFormula {
         if (lookupTypes.length === 0) {
             return [nsRDFSResource];
         }
-        return lookupTypes
+        const allTypes = lookupTypes
             .map((v) => {
                 const canon = this.liveStore.canon(v) as NamedNode;
                 if (!this.processedTypes.includes(canon)) {
@@ -107,6 +107,19 @@ export class Schema extends IndexedFormula {
                 },
                 [...lookupTypes],
             );
+
+        return this.sort(allTypes);
+    }
+
+    public sort(types: NamedNode[]): NamedNode[] {
+        return types.sort((a, b) => {
+            if (this.isSubclassOf(a, b)) {
+                return -1;
+            } else if (this.isSubclassOf(b, a)) {
+                return 1;
+            }
+            return 0;
+        });
     }
 
     private process(item: Statement): Statement[] | null {

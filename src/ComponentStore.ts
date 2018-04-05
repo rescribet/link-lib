@@ -76,13 +76,14 @@ export class ComponentStore<T> {
                               predicates: NamedNode[],
                               topology: NamedNode,
                               defaultType: NamedNode): T | undefined {
-        const key = convertToCacheKey(types, predicates, topology);
+        const oTypes = this.schema.sort(types);
+        const key = convertToCacheKey(oTypes, predicates, topology);
         const cached = this.getComponentFromCache(key);
         if (cached !== undefined) {
             return cached;
         }
 
-        for (const lookupType of types) {
+        for (const lookupType of oTypes) {
             const exact = this.lookup(predicates[0].sI, lookupType.sI, topology.sI);
             if (exact !== undefined) {
                 return this.addComponentToCache(exact, key);
@@ -94,7 +95,7 @@ export class ComponentStore<T> {
             if (topology === DEFAULT_TOPOLOGY) {
                 return undefined;
             }
-            const foundComponent = this.getRenderComponent(types, predicates, DEFAULT_TOPOLOGY, defaultType);
+            const foundComponent = this.getRenderComponent(oTypes, predicates, DEFAULT_TOPOLOGY, defaultType);
             if (!foundComponent) {
                 return undefined;
             }
@@ -102,7 +103,7 @@ export class ComponentStore<T> {
             return this.addComponentToCache(foundComponent, key);
         }
         for (const lookupProp of predicates) {
-            const bestComponent = this.bestComponent(possibleComponents, types);
+            const bestComponent = this.bestComponent(possibleComponents, oTypes);
             const component = bestComponent && this.lookup(
                 lookupProp.sI,
                 bestComponent.sI,
@@ -190,7 +191,7 @@ export class ComponentStore<T> {
      */
     private bestComponent(components: NamedNode[], types: NamedNode[]): NamedNode | undefined {
         if (types.length > 0) {
-            const direct = types.find((c) => components.indexOf(c) >= 0);
+            const direct = this.schema.sort(types).find((c) => components.indexOf(c) >= 0);
             if (direct) {
                 return direct;
             }

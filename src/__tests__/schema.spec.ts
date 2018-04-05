@@ -101,8 +101,8 @@ describe("Schema", () => {
                 const result = [
                     NS.schema("BlogPost"),
                     NS.schema("CreativeWork"),
-                    NS.rdfs("Resource"),
                     NS.schema("Thing"),
+                    NS.rdfs("Resource"),
                 ];
 
                 schema.addStatements([
