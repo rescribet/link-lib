@@ -319,23 +319,25 @@ export class LinkedRenderStore<T> {
      *
      * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
      */
-    private broadcast(): void {
-        if (this.store.workAvailable() < 100) {
-            if (this.lastPostponed === undefined) {
-                this.lastPostponed = Date.now();
-                window.setTimeout(this.broadcast.bind(this), 100);
-                return;
-            } else if (Date.now() - this.lastPostponed <= 500) {
-                window.setTimeout(this.broadcast.bind(this), 100);
+    private broadcast(buffer = true, maxTimeout = 500): void {
+        if (buffer) {
+            if (this.store.workAvailable() < 100) {
+                if (this.lastPostponed === undefined) {
+                    this.lastPostponed = Date.now();
+                    window.setTimeout(this.broadcast.bind(this), 100);
+                    return;
+                } else if (Date.now() - this.lastPostponed <= maxTimeout) {
+                    window.setTimeout(this.broadcast.bind(this), 100);
+                    return;
+                }
+            }
+            this.lastPostponed = undefined;
+            if (this.store.workAvailable() === 0) {
                 return;
             }
         }
-        this.lastPostponed = undefined;
-        if (this.store.workAvailable() === 0) {
-            return;
-        }
         if ("requestIdleCallback" in window) {
-            window.requestIdleCallback(this.processBroadcast.bind(this), {timeout: 500});
+            window.requestIdleCallback(this.processBroadcast.bind(this), {timeout: maxTimeout});
         } else {
             this.processBroadcast();
         }
