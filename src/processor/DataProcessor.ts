@@ -189,7 +189,7 @@ export class DataProcessor {
                 credentials: "same-origin",
                 headers: {
                     "Accept": accept,
-                    "Content-Type": "application/vnd.api+json",
+                    "Content-Type": "application/n-quads",
                 },
             },
             opts,
