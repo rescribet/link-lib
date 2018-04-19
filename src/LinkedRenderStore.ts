@@ -1,7 +1,8 @@
 /* eslint no-console: 0 */
 
 import {
-    FetchOpts as RDFFetchOpts, Literal,
+    FetchOpts as RDFFetchOpts,
+    Literal,
     NamedNamespace,
     NamedNode,
     SomeTerm,
@@ -11,12 +12,15 @@ import {
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
+import { dataToGraphTuple } from "./processor/DataToGraph";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import {
     ComponentRegistration,
+    DataObject,
     FetchOpts,
     LazyNNArgument,
+    LinkedActionResponse,
     LinkedRenderStoreOptions,
     NamespaceMap,
     SomeNode,
@@ -123,6 +127,25 @@ export class LinkedRenderStore<T> {
      */
     public addOntologySchematics(items: Statement[]): void {
         this.schema.addStatements(items);
+    }
+
+    /**
+     * Execute an Action by its IRI. This will result in an HTTP request being done and probably some state changes.
+     * @param {module:rdflib.NamedNode} subject The resource to execute. Generally a schema:Action derivative with a
+     *   schema:EntryPoint to describe the request. Currently schema:url is used over schema:urlTemplate
+     *   to acquire the request URL, since template processing isn't implemented (yet).
+     * @param {DataObject} data An object to send in the body when a non-safe method is used.
+     * @return {Promise<LinkedActionResponse>}
+     */
+    public execActionByIRI(subject: NamedNode, data?: DataObject): Promise<LinkedActionResponse> {
+        const preparedData = dataToGraphTuple(data || {});
+        return this
+            .api
+            .execActionByIRI(subject, preparedData)
+            .then((res: LinkedActionResponse) => {
+                this.broadcast(false, 100);
+                return res;
+            });
     }
 
     /**
@@ -317,7 +340,7 @@ export class LinkedRenderStore<T> {
      * Broadcasts buffered to all subscribers.
      * The actual broadcast might be executed asynchronously to prevent lag.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * Note: This should only be used by render-libraries (e.g. link-redux), not by application code.
      */
     private broadcast(buffer = true, maxTimeout = 500): void {
         if (buffer) {

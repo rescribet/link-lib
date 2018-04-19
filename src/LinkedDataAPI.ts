@@ -4,10 +4,16 @@ import {
     Statement,
 } from "rdflib";
 
-import { DataProcessor, DataProcessorOpts, emptyRequest } from "./processor/DataProcessor";
 import {
+    DataProcessor,
+    DataProcessorOpts,
+    emptyRequest,
+} from "./processor/DataProcessor";
+import {
+    DataTuple,
     EmptyRequestStatus,
     FulfilledRequestStatus,
+    LinkedActionResponse,
     ResponseTransformer,
     SomeNode,
 } from "./types";
@@ -22,6 +28,10 @@ export class LinkedDataAPI {
 
     public constructor(opts: LinkedDataAPIOpts) {
         this.processor = opts.processor || new DataProcessor(opts.dataProcessorOpts);
+    }
+
+    public execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse> {
+        return this.processor.execActionByIRI(subject, dataTuple);
     }
 
     /**

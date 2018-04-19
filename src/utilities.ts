@@ -92,7 +92,7 @@ export const defaultNS: Readonly<NamespaceMap> = Object.freeze({
  * @param predicate The subject to filter for.
  * @return A possibly empty filtered array of statements.
  */
-export function allRDFPropertyStatements(obj: Statement[], predicate: SomeNode): Statement[] {
+export function allRDFPropertyStatements(obj: Statement[] | undefined, predicate: SomeNode): Statement[] {
     if (typeof obj === "undefined") {
         return [];
     }
@@ -116,8 +116,8 @@ export function allRDFValues(obj: Statement[], predicate: SomeNode): SomeTerm[] 
 /**
  * Resolve {predicate} to any value, if any. If present, additional values are ignored.
  */
-export function anyRDFValue(obj: Statement[], predicate: SomeNode): SomeTerm | undefined {
-    if (typeof obj === "undefined" || !Array.isArray(obj)) {
+export function anyRDFValue(obj: Statement[] | undefined, predicate: SomeNode): SomeTerm | undefined {
+    if (!Array.isArray(obj)) {
         return undefined;
     }
 
@@ -146,7 +146,7 @@ export function getPropBestLang(rawProp: Statement | Statement[], langPrefs: str
     return rawProp[0].object;
 }
 
-export function fetchWithExtension(iri: SomeNode, formats: string): Promise<ExtensionResponse> {
+export function fetchWithExtension(iri: SomeNode | string, formats: string): Promise<ExtensionResponse> {
     const c = getExtention();
     if (c !== undefined) {
         return new Promise((resolve): void => {

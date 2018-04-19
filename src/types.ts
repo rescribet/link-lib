@@ -69,6 +69,24 @@ export type LazyNNArgument = NamedNode | NamedNode[];
 
 export type LazyIRIArgument = SomeNode | SomeNode[];
 
+export type NamedBlobTuple = [SomeNode, File];
+
+export type SerializablePrimitives = boolean | DataObject | Date | File | number | string;
+
+export type SerializableDataTypes = SerializablePrimitives | SerializablePrimitives[];
+
+export interface DataObject {
+    [k: string]: SerializableDataTypes;
+}
+
+export type DataTuple = [IndexedFormula, NamedBlobTuple[]];
+
+export interface LinkedActionResponse {
+    /** The IRI of the created resource, based from the Location header. */
+    iri: NamedNode | null;
+    data: Statement[];
+}
+
 export interface ExtensionResponse {
     body: string;
     headers: { string: string };
@@ -78,7 +96,7 @@ export interface ExtensionResponse {
 
 export interface RDFLibFetcherRequest {
     body: string;
-    headers: { string: string };
+    headers: { [k: string]: string };
     requestedURI: string;
     status: number;
 }

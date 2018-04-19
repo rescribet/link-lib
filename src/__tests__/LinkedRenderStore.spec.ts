@@ -204,6 +204,40 @@ describe("LinkedRenderStore", () => {
         });
     });
 
+    describe("#execActionByIRI", () => {
+        const store = getBasicStore();
+        const action = NS.example("location/everest/pictures/create");
+        const entryPoint = NS.example("location/everest/pictures/create#entrypoint");
+        const actionStatements = [
+            new Statement(action, NS.rdf("type"), NS.schema("CreateAction")),
+            new Statement(action, NS.schema("name"), new Literal("Upload a picture of Mt. Everest!")),
+            new Statement(action, NS.schema("object"), NS.example("location/everest")),
+            new Statement(action, NS.schema("result"), NS.schema("ImageObject")),
+            new Statement(action, NS.schema("target"), NS.example("location/everest/pictures/create#entrypoint")),
+
+            new Statement(entryPoint, NS.rdf("type"), NS.schema("Entrypoint")),
+            new Statement(entryPoint, NS.schema("httpMethod"), new Literal("POST")),
+            new Statement(entryPoint, NS.schema("url"), NS.example("location/everest/pictures")),
+            new Statement(entryPoint, NS.schema("image"), new NamedNode("http://fontawesome.io/icon/plus")),
+            new Statement(entryPoint, NS.schema("name"), new Literal("Add a picture")),
+        ];
+        store.store.addStatements(actionStatements);
+
+        it("sends the described request", async () => {
+            fetch.mockResponseOnce("", {});
+            const sub = jest.fn();
+            store.lrs.subscribe({ callback: sub, onlySubjects: false });
+
+            const response = await store.lrs.execActionByIRI(action);
+
+            expect(response).toEqual({
+                data: [],
+                iri: null,
+            });
+            expect(sub).toHaveBeenCalledTimes(1);
+        });
+    });
+
     describe("#registerAll", () => {
         const reg1 = {
             component: (): string => "1",

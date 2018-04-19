@@ -7,16 +7,19 @@ import {
     BlankNode,
     Fetcher,
     FetchOpts,
+    IndexedFormula,
     Literal,
     NamedNode,
     RequestCallbackHandler,
+    Serializer,
     Statement,
 } from "rdflib";
 import { RDFStore } from "../RDFStore";
 
 import {
+    DataTuple,
     EmptyRequestStatus,
-    FailedResponse, FulfilledRequestStatus,
+    FailedResponse, FulfilledRequestStatus, LinkedActionResponse,
     ResponseAndFallbacks,
     ResponseTransformer,
 } from "../types";
@@ -26,6 +29,7 @@ import {
     fetchWithExtension,
     getExtention,
     isDifferentOrigin,
+    namedNodeByIRI,
 } from "../utilities";
 import {
     getContentType,
@@ -33,6 +37,10 @@ import {
     getJSON,
     getURL,
 } from "../utilities/responses";
+import { ProcessorError } from "./ProcessorError";
+import { RequestInitGenerator } from "./RequestInitGenerator";
+
+const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
 
 async function handleStatus(res: ResponseAndFallbacks): Promise<ResponseAndFallbacks> {
     if (res.status === NOT_FOUND) {
@@ -101,6 +109,7 @@ function processResponse(iri: string | NamedNode, res: Response): Statement[] {
 
 export interface DataProcessorOpts {
     accept?: { [k: string]: string };
+    requestInitGenerator?: RequestInitGenerator;
     fetcher?: Fetcher;
     mapping?: { [k: string]: ResponseTransformer[] };
     requestNotifier?: RequestCallbackHandler;
@@ -136,10 +145,11 @@ export class DataProcessor {
     public timeout: number = 30000;
 
     private _fetcher: Fetcher | undefined;
-    private mapping: { [k: string]: ResponseTransformer[] };
-    private requestMap: { [k: string]: Promise<Statement[]> | undefined };
-    private requestNotifier?: RequestCallbackHandler;
-    private store: RDFStore;
+    private readonly requestInitGenerator: RequestInitGenerator;
+    private readonly mapping: { [k: string]: ResponseTransformer[] };
+    private readonly requestMap: { [k: string]: Promise<Statement[]> | undefined };
+    private readonly requestNotifier?: RequestCallbackHandler;
+    private readonly store: RDFStore;
 
     private get fetcher(): Fetcher {
         if (typeof this._fetcher === "undefined") {
@@ -164,6 +174,7 @@ export class DataProcessor {
         this.accept = opts.accept || {
             default: "",
         };
+        this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
         this.requestMap = {};
         this.store = opts.store;
@@ -173,7 +184,83 @@ export class DataProcessor {
         }
     }
 
-    public async fetchResource(iri: NamedNode, opts?: FetchOpts): Promise<ResponseAndFallbacks> {
+    public async execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse> {
+        const [graph, blobs = []] = dataTuple;
+
+        await this.store.statementsFor(subject).length > 0 ? Promise.resolve() : this.getEntity(subject);
+
+        const object = this.store.getResourceProperty(subject, defaultNS.schema("object"));
+        if (!object || object.termType !== "BlankNode" && object.termType !== "NamedNode") {
+            throw new ProcessorError("Action object property must be an IRI.");
+        }
+        const target = this.store.getResourceProperty(subject, defaultNS.schema("target"));
+
+        if (!target || target.termType === "Collection" || target.termType === "Literal") {
+            throw new Error();
+        }
+
+        const urls = this.store.getResourceProperty(target, defaultNS.schema("url"));
+        const url = Array.isArray(urls) ? urls[0] : urls;
+        if (!url) {
+            throw new Error("No url given with action.");
+        }
+        if (url.termType !== "NamedNode") {
+            throw new Error("Can't execute action with non-named-node url.");
+        }
+        const targetMethod = this.store.getResourceProperty(target, defaultNS.schema("httpMethod"));
+        const method = typeof targetMethod !== "undefined" ? targetMethod.toString() : "GET";
+        const opts = this.requestInitGenerator.generate(method, this.accept[new URL(url.value).origin]);
+
+        if (!SAFE_METHODS.includes(method) && graph && graph !== null) {
+            if (opts.headers instanceof Headers) {
+                opts.headers.delete("Content-Type");
+            } else if (opts.headers && !Array.isArray(opts.headers)) {
+                delete opts.headers["Content-Type"];
+            }
+            const data = new FormData();
+            const s = new Serializer(new IndexedFormula());
+            const rdfSerialization = s.toN3(graph);
+            data.append(
+                defaultNS.ll("graph").toString(),
+                new Blob([rdfSerialization],
+                    { type: "text/n3" }),
+            );
+            blobs.forEach(([blobIRI, blob]) => {
+                data.append(blobIRI.toString(), blob);
+            });
+            opts.body = data;
+        }
+
+        const resp = await fetch(url.value, opts);
+
+        if (resp.status > BAD_REQUEST) {
+            // TODO: process responses with a correct content-type.
+            throw new ProcessorError("Request failed with bad status code", resp);
+        }
+
+        const statements = await this.feedResponse(resp);
+
+        this.store.replaceStatements(this.store.statementsFor(object), statements);
+        const removables = this
+            .store
+            .match(null, null, null, defaultNS.ll("remove"))
+            .reduce((tot: Statement[], cur) => {
+                const matches = this.store.match(cur.subject, cur.predicate, cur.object, null);
+
+                return tot.concat(matches);
+            }, []);
+        this.store.removeStatements(removables);
+
+        const location = getHeader(resp, "Location");
+        const iri = location && namedNodeByIRI(location) || null;
+
+        return {
+            data: statements,
+            iri,
+        };
+    }
+
+    public async fetchResource(iri: NamedNode | string, opts?: FetchOpts): Promise<ResponseAndFallbacks> {
         const iriString = typeof iri === "string" ? iri : iri.value;
         const accept = this.accept[new URL(iriString).origin] || this.accept.default;
         if (isDifferentOrigin(iri) && getExtention()) {

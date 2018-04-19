@@ -105,7 +105,17 @@ declare module "rdflib" {
     }
 
     export class Collection extends Node {
+        public readonly closed: boolean;
+        public readonly elements: SomeTerm[];
         public readonly termType: "Collection";
+
+        public close(): boolean;
+
+        public append(...elements: SomeTerm[]): number;
+
+        public shift(): SomeTerm | undefined;
+
+        public unshift(...elements: SomeTerm[]): number;
     }
 
     export class DefaultGraph extends Node {
@@ -174,7 +184,7 @@ declare module "rdflib" {
 
         public whyIndex: { [k: string]: Statement[] };
 
-        public add(subj: NamedNode | BlankNode, pred: NamedNode, obj: SomeTerm, why: Node): this | null | Statement;
+        public add(subj: NamedNode | BlankNode, pred: NamedNode, obj: SomeTerm, why?: Node): this | null | Statement;
 
         public add(subj: Statement | Statement[] | IndexedFormula | IndexedFormula[]): this;
 
@@ -224,6 +234,31 @@ declare module "rdflib" {
     }
 
     export class Variable extends Node {
+    }
+
+    export class Serializer {
+        private flags: string;
+        private base: string | null;
+        private store: IndexedFormula;
+
+        constructor(store: IndexedFormula);
+
+        public fromStr(s: string): IndexedFormula;
+
+        public setBase(base: string): this;
+
+        public setFlags(flags: string): this;
+
+        public toStr(): string;
+
+        public toN3(f: IndexedFormula): string;
+
+        public statementsToNTriples(sts: Statement[]): string;
+
+        public statementsToN3(sts: Statement[]): string;
+
+        public statementsToXML(sts: Statement[]): string;
+
     }
 
     export class Statement {

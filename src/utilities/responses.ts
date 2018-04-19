@@ -6,7 +6,6 @@ export const F_N3 = "text/n3";
 export const F_PLAIN = "text/plain";
 export const F_JSON = "application/json";
 export const F_JSONLD = "application/ld+json";
-export const F_JSONAPI = "application/vnd.api+json";
 export const F_RDF_XML = "application/rdf+xml";
 
 export const F_NTRIPLES_DEP = "text/ntriples";
@@ -75,7 +74,7 @@ export function getURL(res: ResponseAndFallbacks): string {
     return res.url;
 }
 
-function contentTypeByExtention(ext: string): string {
+export function contentTypeByExtention(ext: string): string {
     if (["ttl"].includes(ext)) {
         return F_TURTLE;
     } else if (["ntriples", "nt"].includes(ext)) {
@@ -89,7 +88,7 @@ function contentTypeByExtention(ext: string): string {
     return ext;
 }
 
-function contentTypeByMimeString(contentType: string, ext: string): string | undefined {
+export function contentTypeByMimeString(contentType: string, ext: string): string | undefined {
     if (contentType.includes(F_NTRIPLES) || contentType.includes(F_NTRIPLES_DEP)) {
         return F_NTRIPLES;
     } else if (contentType.includes(F_PLAIN) && ["ntriples", "nt"].indexOf(ext) >= 0) {
@@ -100,8 +99,6 @@ function contentTypeByMimeString(contentType: string, ext: string): string | und
         return F_N3;
     } else if (contentType.includes(F_JSONLD)) {
         return F_JSONLD;
-    } else if (contentType.includes(F_JSONAPI)) {
-        return F_JSONAPI;
     } else if (contentType.includes(F_RDF_XML)) {
         return F_RDF_XML;
     }
