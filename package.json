@@ -4,6 +4,7 @@
   "description": "The Link library for creating information based applications",
   "main": "dist/link-lib.umd.js",
   "module": "dist/link-lib.es6.js",
+  "sideEffects": false,
   "typings": "dist/typings/link-lib.d.ts",
   "files": [
     "@types",
