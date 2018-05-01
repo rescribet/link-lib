@@ -154,7 +154,7 @@ declare module "rdflib" {
         public addCallback(hook: string, callback: RequestCallbackHandler): void;
 
         // tslint:disable-next-line no-any
-        public fetch(url: NamedNode[] | string[] | NamedNode | string, options: FetchOpts): Promise<any>;
+        public load(url: NamedNode[] | string[] | NamedNode | string, options: FetchOpts): Promise<any>;
 
         public nowOrWhenFetched(uri: string | NamedNode,
                                 options: RequestInit,
@@ -168,6 +168,8 @@ declare module "rdflib" {
     }
 
     export class IndexedFormula extends Formula {
+        public length: number;
+
         public classActions: ActionFunction[];
 
         public features: string[];
@@ -218,7 +220,7 @@ declare module "rdflib" {
 
         public removeMany(sub: Node, pred: Node, obj: Node, why: Node, limit: number): void;
 
-        public removeMatches(sub?: Node, pred?: Node, obj?: Node, why?: Node): this;
+        public removeMatches(sub?: Node | null, pred?: Node | null, obj?: Node | null, why?: Node | null): this;
 
         public removeStatement(st: Statement): this;
 
