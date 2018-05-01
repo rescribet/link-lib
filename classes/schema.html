@@ -923,6 +923,9 @@ img { max-width: 100%; }
 					<a href="schema.html#index" class="tsd-kind-icon">index</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a href="schema.html#length" class="tsd-kind-icon">length</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a href="schema.html#objectindex" class="tsd-kind-icon">object<wbr>Index</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
@@ -1021,6 +1024,9 @@ img { max-width: 100%; }
 				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a href="schema.html#sameterm" class="tsd-kind-icon">same<wbr>Term</a>
 				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="schema.html#sort" class="tsd-kind-icon">sort</a>
+				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a href="schema.html#statementsmatching" class="tsd-kind-icon">statements<wbr>Matching</a>
 				</li>
@@ -1080,6 +1086,7 @@ img { max-width: 100%; }
 							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#classactions" class="tsd-kind-icon">class<wbr>Actions</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#features" class="tsd-kind-icon">features</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#index" class="tsd-kind-icon">index</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#length" class="tsd-kind-icon">length</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#objectindex" class="tsd-kind-icon">object<wbr>Index</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#predicateindex" class="tsd-kind-icon">predicate<wbr>Index</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#propertyactions" class="tsd-kind-icon">property<wbr>Actions</a></li>
@@ -1118,6 +1125,7 @@ img { max-width: 100%; }
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#removestatements" class="tsd-kind-icon">remove<wbr>Statements</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#replacewith" class="tsd-kind-icon">replace<wbr>With</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#sameterm" class="tsd-kind-icon">same<wbr>Term</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="schema.html#sort" class="tsd-kind-icon">sort</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#statementsmatching" class="tsd-kind-icon">statements<wbr>Matching</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#tocanonical" class="tsd-kind-icon">to<wbr>Canonical</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="schema.html#tont" class="tsd-kind-icon">toNT</a></li>
@@ -1140,7 +1148,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/src/Schema.ts#L23">Schema.ts:23</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L23">Schema.ts:23</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1163,7 +1171,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.classActions</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L161">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:161</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L173">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:173</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1174,7 +1182,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.features</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L163">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:163</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L175">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:175</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1185,7 +1193,18 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.index</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L165">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:165</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L177">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:177</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+				<a name="length" class="tsd-anchor"></a>
+				<h3>length</h3>
+				<div class="tsd-signature tsd-kind-icon">length<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from IndexedFormula.length</p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L171">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:171</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1196,7 +1215,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.objectIndex</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L167">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:167</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L179">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:179</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -1215,7 +1234,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.predicateIndex</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L169">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:169</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L181">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:181</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -1234,7 +1253,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.propertyActions</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L171">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:171</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L183">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:183</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -1253,7 +1272,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from Formula.statements</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L155">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:155</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L165">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:165</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1264,7 +1283,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.subjectIndex</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L173">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:173</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L185">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:185</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -1283,7 +1302,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from Node.termType</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L49">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:49</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L49">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:49</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1294,7 +1313,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from Node.value</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L50">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:50</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L50">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:50</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1305,7 +1324,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from IndexedFormula.whyIndex</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L175">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:175</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L187">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:187</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -1324,7 +1343,7 @@ img { max-width: 100%; }
 				<a name="add" class="tsd-anchor"></a>
 				<h3>add</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-					<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>subj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">BlankNode</span>, pred<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span>, obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">SomeTerm</span>, why<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Statement</span></li>
+					<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>subj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">BlankNode</span>, pred<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span>, obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">SomeTerm</span>, why<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Statement</span></li>
 					<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>subj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">IndexedFormula</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">IndexedFormula</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
@@ -1332,7 +1351,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.add</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L177">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:177</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L189">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:189</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1347,7 +1366,7 @@ img { max-width: 100%; }
 								<h5>obj: <span class="tsd-signature-type">SomeTerm</span></h5>
 							</li>
 							<li>
-								<h5>why: <span class="tsd-signature-type">Node</span></h5>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> why: <span class="tsd-signature-type">Node</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span>
@@ -1361,7 +1380,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.add</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L179">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:179</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L191">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:191</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1385,7 +1404,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.addAll</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L181">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:181</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L193">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:193</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1408,7 +1427,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/src/Schema.ts#L34">Schema.ts:34</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L34">Schema.ts:34</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1431,7 +1450,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/src/Schema.ts#L39">Schema.ts:39</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L39">Schema.ts:39</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1460,7 +1479,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.any</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L183">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:183</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L195">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:195</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1496,7 +1515,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.anyStatementMatching</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L188">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:188</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L200">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:200</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1532,7 +1551,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.anyValue</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L193">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:193</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L205">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:205</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1568,7 +1587,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.canon</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L198">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:198</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L210">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:210</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1592,7 +1611,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.compareTerm</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L52">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:52</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L52">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:52</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1616,7 +1635,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.equals</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L54">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:54</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L54">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:54</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1639,7 +1658,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/src/Schema.ts#L50">Schema.ts:50</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L50">Schema.ts:50</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <a href="../interfaces/vocabularyprocessingcontext.html" class="tsd-signature-type">VocabularyProcessingContext</a></h4>
@@ -1657,7 +1676,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.hashString</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L56">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:56</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L56">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:56</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -1675,7 +1694,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Formula.holdsStatement</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L157">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:157</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L167">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:167</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1698,7 +1717,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/src/Schema.ts#L58">Schema.ts:58</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L58">Schema.ts:58</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1724,7 +1743,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/src/Schema.ts#L62">Schema.ts:62</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L62">Schema.ts:62</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1751,7 +1770,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.match</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L200">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:200</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L212">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:212</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1783,7 +1802,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/src/Schema.ts#L76">Schema.ts:76</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L76">Schema.ts:76</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1816,7 +1835,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.newPropertyAction</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L205">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:205</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L217">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:217</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1843,7 +1862,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.remove</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L207">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:207</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L219">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:219</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1867,7 +1886,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.removeMany</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L209">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:209</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L221">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:221</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1896,29 +1915,29 @@ img { max-width: 100%; }
 				<a name="removematches" class="tsd-anchor"></a>
 				<h3>remove<wbr>Matches</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-					<li class="tsd-signature tsd-kind-icon">remove<wbr>Matches<span class="tsd-signature-symbol">(</span>sub<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span>, pred<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span>, obj<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span>, why<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+					<li class="tsd-signature tsd-kind-icon">remove<wbr>Matches<span class="tsd-signature-symbol">(</span>sub<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, pred<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, obj<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, why<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.removeMatches</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L211">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:211</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L223">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:223</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> sub: <span class="tsd-signature-type">Node</span></h5>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> sub: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> pred: <span class="tsd-signature-type">Node</span></h5>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> pred: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> obj: <span class="tsd-signature-type">Node</span></h5>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> obj: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> why: <span class="tsd-signature-type">Node</span></h5>
+								<h5><span class="tsd-flag ts-flagOptional">Optional</span> why: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -1936,7 +1955,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.removeStatement</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L213">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:213</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L225">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:225</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1960,7 +1979,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.removeStatements</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L215">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:215</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L227">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:227</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1984,7 +2003,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.replaceWith</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L217">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:217</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L229">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:229</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2014,7 +2033,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.sameTerm</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L58">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:58</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L58">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:58</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2024,6 +2043,29 @@ img { max-width: 100%; }
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="sort" class="tsd-anchor"></a>
+				<h3>sort</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">sort<span class="tsd-signature-symbol">(</span>types<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/src/Schema.ts#L114">Schema.ts:114</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>types: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -2038,7 +2080,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from IndexedFormula.statementsMatching</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L219">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:219</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L231">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:231</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2074,7 +2116,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.toCanonical</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L60">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:60</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L60">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:60</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -2092,7 +2134,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.toNT</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L62">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:62</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L62">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:62</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -2110,7 +2152,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.toString</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L64">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:64</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L64">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:64</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -2128,7 +2170,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from Node.fromValue</p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/400fe51/@types/rdflib/index.d.ts#L47">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:47</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/8407f9c/@types/rdflib/index.d.ts#L47">/home/fletcher91/dev/src/github.com/fletcher91/link-lib/@types/rdflib/index.d.ts:47</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
