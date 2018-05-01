@@ -3,7 +3,7 @@ import "jest";
 
 import { ProcessorError } from "../ProcessorError";
 
-describe("RequestInitGenerator", () => {
+describe("ProcessorError", () => {
     set("msg", () => undefined);
     set("response", () => undefined);
     subject(() => new ProcessorError(msg, response));

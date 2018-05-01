@@ -19,7 +19,9 @@ import { RDFStore } from "../RDFStore";
 import {
     DataTuple,
     EmptyRequestStatus,
-    FailedResponse, FulfilledRequestStatus, LinkedActionResponse,
+    FailedResponse,
+    FulfilledRequestStatus,
+    LinkedActionResponse,
     ResponseAndFallbacks,
     ResponseTransformer,
 } from "../types";
@@ -37,7 +39,14 @@ import {
     getJSON,
     getURL,
 } from "../utilities/responses";
-import { ProcessorError } from "./ProcessorError";
+import {
+    MSG_BAD_REQUEST,
+    MSG_INCORRECT_TARGET,
+    MSG_OBJECT_NOT_IRI,
+    MSG_URL_UNDEFINED,
+    MSG_URL_UNRESOLVABLE,
+    ProcessorError,
+} from "./ProcessorError";
 import { RequestInitGenerator } from "./RequestInitGenerator";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
@@ -185,33 +194,34 @@ export class DataProcessor {
     }
 
     public async execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse> {
+
         const [graph, blobs = []] = dataTuple;
 
         await this.store.statementsFor(subject).length > 0 ? Promise.resolve() : this.getEntity(subject);
 
         const object = this.store.getResourceProperty(subject, defaultNS.schema("object"));
         if (!object || object.termType !== "BlankNode" && object.termType !== "NamedNode") {
-            throw new ProcessorError("Action object property must be an IRI.");
+            throw new ProcessorError(MSG_OBJECT_NOT_IRI);
         }
         const target = this.store.getResourceProperty(subject, defaultNS.schema("target"));
 
         if (!target || target.termType === "Collection" || target.termType === "Literal") {
-            throw new Error();
+            throw new ProcessorError(MSG_INCORRECT_TARGET);
         }
 
         const urls = this.store.getResourceProperty(target, defaultNS.schema("url"));
         const url = Array.isArray(urls) ? urls[0] : urls;
         if (!url) {
-            throw new Error("No url given with action.");
+            throw new ProcessorError(MSG_URL_UNDEFINED);
         }
         if (url.termType !== "NamedNode") {
-            throw new Error("Can't execute action with non-named-node url.");
+            throw new ProcessorError(MSG_URL_UNRESOLVABLE);
         }
         const targetMethod = this.store.getResourceProperty(target, defaultNS.schema("httpMethod"));
         const method = typeof targetMethod !== "undefined" ? targetMethod.toString() : "GET";
         const opts = this.requestInitGenerator.generate(method, this.accept[new URL(url.value).origin]);
 
-        if (!SAFE_METHODS.includes(method) && graph && graph !== null) {
+        if (!SAFE_METHODS.includes(method) && graph && graph !== null && graph.length > 0) {
             if (opts.headers instanceof Headers) {
                 opts.headers.delete("Content-Type");
             } else if (opts.headers && !Array.isArray(opts.headers)) {
@@ -235,21 +245,25 @@ export class DataProcessor {
 
         if (resp.status > BAD_REQUEST) {
             // TODO: process responses with a correct content-type.
-            throw new ProcessorError("Request failed with bad status code", resp);
+            throw new ProcessorError(MSG_BAD_REQUEST, resp);
         }
 
         const statements = await this.feedResponse(resp);
 
-        this.store.replaceStatements(this.store.statementsFor(object), statements);
-        const removables = this
-            .store
-            .match(null, null, null, defaultNS.ll("remove"))
+        const addGraphIRIS = [defaultNS.ll("add").value];
+        const replaceGraphIRIS = [undefined, defaultNS.ll("replace").value, "chrome:theSession"];
+        const addables = statements.filter((s) => addGraphIRIS.includes(s.why.value));
+        const replacables = statements.filter((s) => replaceGraphIRIS.includes(s.why.value));
+        const removables = statements
+            .filter((s) => defaultNS.ll("remove").value === s.why.value)
             .reduce((tot: Statement[], cur) => {
                 const matches = this.store.match(cur.subject, cur.predicate, cur.object, null);
 
                 return tot.concat(matches);
             }, []);
         this.store.removeStatements(removables);
+        this.store.replaceMatches(replacables);
+        this.store.addStatements(addables);
 
         const location = getHeader(resp, "Location");
         const iri = location && namedNodeByIRI(location) || null;
@@ -282,7 +296,7 @@ export class DataProcessor {
             opts,
         );
 
-        return this.fetcher.fetch(iri, options);
+        return this.fetcher.load(iri, options);
     }
 
     /**

@@ -56,10 +56,10 @@
     "automock": false,
     "coverageThreshold": {
       "global": {
-        "branches": 59,
-        "functions": 72,
-        "lines": 72,
-        "statements": 71
+        "branches": 64,
+        "functions": 74,
+        "lines": 74,
+        "statements": 74
       }
     },
     "setupTestFrameworkScriptFile": "./jest-plugins",

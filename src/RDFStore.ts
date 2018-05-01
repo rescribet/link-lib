@@ -140,6 +140,7 @@ export class RDFStore {
         return processingBuffer;
     }
 
+    /** @private */
     public getInternalStore(): IndexedFormula {
         return this.store;
     }
@@ -175,6 +176,13 @@ export class RDFStore {
         uniqueStatements.forEach((s) => this.store.removeMatches(s.subject, s.predicate));
 
         return this.addStatements(replacement);
+    }
+
+    public replaceMatches(statements: Statement[]): void {
+        statements.forEach((s) => {
+            this.removeStatements(this.match(s.subject, s.predicate, undefined, undefined));
+        });
+        statements.forEach((s) => this.store.add(s.subject, s.predicate, s.object));
     }
 
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Statement[] {

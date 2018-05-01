@@ -53,6 +53,27 @@ describe("RDFStore", () => {
         });
     });
 
+    describe("#replaceMatches", () => {
+        it("replaces a statement", () => {
+            const store = new RDFStore();
+            store.addStatements(thingStatements);
+
+            const statements = [
+                new Statement(schemaT, NS.rdfs("label"), new Literal("Thing!"), NS.ll("replace")),
+            ];
+
+            const before = store.match(schemaT, NS.rdfs("label"));
+            expect(before).toHaveLength(1);
+            expect(before[0].object).toEqual(new Literal("Thing."));
+
+            store.replaceMatches(statements);
+
+            const after = store.match(schemaT, NS.rdfs("label"));
+            expect(after).toHaveLength(1);
+            expect(after[0].object).toEqual(new Literal("Thing!"));
+        });
+    });
+
     // describe("#removeStatements", () => {
     //     it("works", () => {
     //         const expected = undefined;
