@@ -3295,7 +3295,7 @@ rdf-canonize@^0.2.1:
     node-forge "^0.7.1"
     semver "^5.4.1"
 
-rdflib@^0.16.7:
+rdflib@^0.16.8:
   version "0.16.8"
   resolved "https://registry.yarnpkg.com/rdflib/-/rdflib-0.16.8.tgz#664a1f31b9b6c999759fb2f4a5d9cc36247705cd"
   dependencies:
