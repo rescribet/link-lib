@@ -203,14 +203,17 @@ export class LinkedRenderStore<T> {
      */
     public async getEntity(iri: NamedNode, opts?: FetchOpts): Promise<void> {
         const apiOpts: RDFFetchOpts = {};
+        let preExistingData;
         if (opts && opts.reload) {
             apiOpts.force = true;
             apiOpts.clearPreviousData = true;
-            this.store.removeStatements(this.tryEntity(iri));
+            preExistingData = this.tryEntity(iri);
         }
         const data = await this.api.getEntity(iri, apiOpts);
-
-        await this.store.addStatements(data);
+        if (preExistingData !== undefined) {
+            this.store.removeStatements(preExistingData);
+        }
+        await this.store.processDelta(data);
         this.broadcast();
     }
 
