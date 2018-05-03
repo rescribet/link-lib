@@ -143,6 +143,7 @@ export class LinkedRenderStore<T> {
             .api
             .execActionByIRI(subject, preparedData)
             .then((res: LinkedActionResponse) => {
+                this.store.processDelta(res.data);
                 this.broadcast(false, 100);
                 return res;
             });

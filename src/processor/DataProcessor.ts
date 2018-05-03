@@ -250,21 +250,6 @@ export class DataProcessor {
 
         const statements = await this.feedResponse(resp);
 
-        const addGraphIRIS = [defaultNS.ll("add").value];
-        const replaceGraphIRIS = [undefined, defaultNS.ll("replace").value, "chrome:theSession"];
-        const addables = statements.filter((s) => addGraphIRIS.includes(s.why.value));
-        const replacables = statements.filter((s) => replaceGraphIRIS.includes(s.why.value));
-        const removables = statements
-            .filter((s) => defaultNS.ll("remove").value === s.why.value)
-            .reduce((tot: Statement[], cur) => {
-                const matches = this.store.match(cur.subject, cur.predicate, cur.object, null);
-
-                return tot.concat(matches);
-            }, []);
-        this.store.removeStatements(removables);
-        this.store.replaceMatches(replacables);
-        this.store.addStatements(addables);
-
         const location = getHeader(resp, "Location");
         const iri = location && namedNodeByIRI(location) || null;
 

@@ -152,6 +152,23 @@ export class RDFStore {
         return this.store.match(subj, pred, obj, why) || [];
     }
 
+    public processDelta(statements: Statement[]): void {
+        const addGraphIRIS = [NS.ll("add").value];
+        const replaceGraphIRIS = [undefined, NS.ll("replace").value, "chrome:theSession"];
+        const addables = statements.filter((s) => addGraphIRIS.includes(s.why.value));
+        const replacables = statements.filter((s) => replaceGraphIRIS.includes(s.why.value));
+        const removables = statements
+            .filter((s) => NS.ll("remove").value === s.why.value)
+            .reduce((tot: Statement[], cur) => {
+                const matches = this.store.match(cur.subject, cur.predicate, cur.object, null);
+
+                return tot.concat(matches);
+            }, []);
+        this.removeStatements(removables);
+        this.replaceMatches(replacables);
+        this.addStatements(addables);
+    }
+
     public removeStatements(statements: Statement[]): void {
         this.store.remove(statements.slice());
     }
