@@ -12,6 +12,7 @@
     "dist/link-lib.umd.js",
     "dist/typings/**/*.*",
     "package.json",
+    "tsconfig.json",
     "yarn.lock"
   ],
   "repository": "https://github.com/fletcher91/link-lib.git",
