@@ -169,9 +169,9 @@ export function fetchWithExtension(iri: SomeNode | string, formats: string): Pro
  * @internal
  */
 export function getExtention(): Port | undefined {
-    if (typeof chrome !== "undefined" && typeof chrome.runtime.connect !== "undefined") {
-        return chrome.runtime.connect("kjgnkcpcclnlchifkbbnekmgmcefhagd");
-    }
+    // if (typeof chrome !== "undefined" && typeof chrome.runtime.connect !== "undefined") {
+    //     return chrome.runtime.connect("kjgnkcpcclnlchifkbbnekmgmcefhagd");
+    // }
 
     return undefined;
 }
