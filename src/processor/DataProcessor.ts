@@ -367,7 +367,7 @@ export class DataProcessor {
             || anyRDFValue(requestObjData, defaultNS.httph("status"));
         const requestDate = anyRDFValue(requestObjData, defaultNS.httph("date"));
 
-        if (!requestDate || !requestStatus) {
+        if (!requestStatus) {
             if (fetcherStatus === "done") {
                 return timedOutRequest(totalRequested);
             }
@@ -375,7 +375,7 @@ export class DataProcessor {
         }
 
         return {
-            lastRequested: new Date(requestDate.value),
+            lastRequested: requestDate ? new Date(requestDate.value) : new Date(0),
             requested: true,
             status: Number.parseInt(requestStatus.value, 10),
             timesRequested: totalRequested,
