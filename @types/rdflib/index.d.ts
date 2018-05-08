@@ -59,6 +59,8 @@ declare module "rdflib" {
 
         public toCanonical(): string;
 
+        public toJS(): string;
+
         public toNT(): string;
 
         public toString(): string;
@@ -70,6 +72,8 @@ declare module "rdflib" {
         public sI: number;
 
         public term: string;
+
+        public uri: string;
 
         public constructor(iri: NamedNode | string)
 
@@ -145,6 +149,8 @@ declare module "rdflib" {
     export type FetchFailureCallback = (success: false, error: string, result: undefined) => void;
 
     export class Fetcher {
+        public static crossSiteProxyTemplate: string;
+
         public mediatypes: { [k: string]: { [k: string]: number } };
 
         public requested: { [k: string]: string | number | boolean };
@@ -152,6 +158,8 @@ declare module "rdflib" {
         public constructor(store: Formula, options: FetcherOpts)
 
         public addCallback(hook: string, callback: RequestCallbackHandler): void;
+
+        public handleError(response: Response, docuri: string | NamedNode, options: RequestInit): Promise<any>;
 
         // tslint:disable-next-line no-any
         public load(url: NamedNode[] | string[] | NamedNode | string, options: FetchOpts): Promise<any>;
