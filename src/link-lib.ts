@@ -14,6 +14,8 @@ export {
     allRDFValues,
     anyRDFValue,
     defaultNS,
+    getPropBestLangRaw,
+    getTermBestLang,
     isDifferentOrigin,
     memoizedNamespace,
     namedNodeByStoreIndex,

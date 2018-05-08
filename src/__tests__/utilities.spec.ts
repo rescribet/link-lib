@@ -14,6 +14,7 @@ import {
     fetchWithExtension,
     getExtention,
     getPropBestLang,
+    getPropBestLangRaw,
     isDifferentOrigin,
     namedNodeByIRI,
     namedNodeByStoreIndex,
@@ -139,6 +140,48 @@ describe("utilities", () => {
                     new Statement(ex("a"), ex("b"), ex("d")),
                 ], langs),
             ).toEqual(ex("c"));
+        });
+    });
+
+    describe("#getPropBestLangRaw", () => {
+        const langs = ["en", "nl", "de", "fr"];
+        const deStmt = new Statement(ex("a"), ex("b"), new Literal("Wert", "de"));
+        const enStmt = new Statement(ex("a"), ex("b"), new Literal("value", "en"));
+        const nlStmt = new Statement(ex("a"), ex("b"), new Literal("waarde", "nl"));
+
+        it("returns when a single statement is given", () => {
+            expect(getPropBestLangRaw(nlStmt, langs)).toEqual(nlStmt);
+        });
+
+        it("returns when a single statement arr is given", () => {
+            expect(getPropBestLangRaw([nlStmt], langs)).toEqual(nlStmt);
+        });
+
+        it("returns the correct language when present", () => {
+            expect(
+                getPropBestLangRaw([
+                    nlStmt,
+                    enStmt,
+                    deStmt,
+                ], langs),
+            ).toEqual(enStmt);
+        });
+
+        it("returns the next best value when main is not present", () => {
+            expect(
+                getPropBestLangRaw([
+                    new Statement(ex("a"), ex("b"), ex("c")),
+                    deStmt,
+                    nlStmt,
+                    new Statement(ex("a"), ex("b"), ex("d")),
+                ], langs),
+            ).toEqual(nlStmt);
+        });
+
+        it("returns the first if no match could be fount", () => {
+            const c = new Statement(ex("a"), ex("b"), ex("c"));
+            const d = new Statement(ex("a"), ex("b"), ex("d"));
+            expect(getPropBestLangRaw([c, d], langs)).toEqual(c);
         });
     });
 

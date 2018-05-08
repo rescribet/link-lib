@@ -146,6 +146,40 @@ export function getPropBestLang(rawProp: Statement | Statement[], langPrefs: str
     return rawProp[0].object;
 }
 
+export function getPropBestLangRaw(statements: Statement | Statement[], langPrefs: string[]): Statement {
+    if (!Array.isArray(statements)) {
+        return statements;
+    }
+    if (statements.length === 1) {
+        return statements[0];
+    }
+    for (const lang of langPrefs) {
+        const pIndex = statements.findIndex((s) => "language" in s.object && s.object.language === lang);
+        if (pIndex >= 0) {
+            return statements[pIndex];
+        }
+    }
+
+    return statements[0];
+}
+
+export function getTermBestLang(rawTerm: SomeTerm | SomeTerm[], langPrefs: string[]): SomeTerm {
+    if (!Array.isArray(rawTerm)) {
+        return rawTerm;
+    }
+    if (rawTerm.length === 1) {
+        return rawTerm[0];
+    }
+    for (const lang of langPrefs) {
+        const pIndex = rawTerm.findIndex((p) => "language" in p && p.language === lang);
+        if (pIndex >= 0) {
+            return rawTerm[pIndex];
+        }
+    }
+
+    return rawTerm[0];
+}
+
 export function fetchWithExtension(iri: SomeNode | string, formats: string): Promise<ExtensionResponse> {
     const c = getExtention();
     if (c !== undefined) {
