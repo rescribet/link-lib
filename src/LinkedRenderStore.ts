@@ -76,10 +76,12 @@ export class LinkedRenderStore<T> {
         return constructor && constructor(matches[CI_MATCH_SUFFIX]);
     }
 
-    public static registerRenderer<T>(component: T,
-                                      type: LazyNNArgument,
-                                      prop: LazyNNArgument = RENDER_CLASS_NAME,
-                                      topology: LazyNNArgument = DEFAULT_TOPOLOGY): Array<ComponentRegistration<T>> {
+    public static registerRenderer<T>(
+        component: T,
+        type: LazyNNArgument,
+        prop: LazyNNArgument = RENDER_CLASS_NAME,
+        topology: LazyNNArgument | Array<NamedNode | undefined> = DEFAULT_TOPOLOGY): Array<ComponentRegistration<T>> {
+
         const types = normalizeType(type);
         const props = normalizeType(prop)
             .map((p) => p || RENDER_CLASS_NAME);
