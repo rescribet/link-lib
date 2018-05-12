@@ -63,6 +63,10 @@ export class RDFStore {
                             why,
                         );
                     };
+                } else if (prop === "sym") {
+                    return (uri: string): NamedNode => {
+                        return namedNodeByIRI(uri);
+                    };
                 }
 
                 return target[prop as any];
