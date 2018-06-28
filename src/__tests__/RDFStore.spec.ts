@@ -74,14 +74,43 @@ describe("RDFStore", () => {
         });
     });
 
-    // describe("#removeStatements", () => {
-    //     it("works", () => {
-    //         const expected = undefined;
-    //         expect(new RDFStore().removeStatements())
-    //             .toEqual(expected);
-    //     });
-    // });
-    //
+    describe("#processDelta", () => {
+        describe("ll:remove", () => {
+            it("removes one", () => {
+                const store = new RDFStore();
+                store.addStatements(thingStatements);
+
+                expect(store.match(null)).toHaveLength(thingStatements.length);
+
+                const statements = [
+                    new Statement(schemaT, NS.rdfs("label"), new Literal("irrelevant"), NS.ll("remove")),
+                ];
+
+                store.processDelta(statements);
+
+                expect(store.match(null)).toHaveLength(thingStatements.length - 1);
+                expect(store.match(schemaT, NS.rdfs("label"))).toHaveLength(0);
+            });
+
+            it("removes many", () => {
+                const store = new RDFStore();
+                store.addStatements(thingStatements);
+                store.addStatements([new Statement(schemaT, NS.rdfs("label"), new Literal("Thing gb", "en-gb"))]);
+
+                expect(store.match(null)).toHaveLength(thingStatements.length + 1);
+
+                const statements = [
+                    new Statement(schemaT, NS.rdfs("label"), new Literal("irrelevant"), NS.ll("remove")),
+                ];
+
+                store.processDelta(statements);
+
+                expect(store.match(null)).toHaveLength(thingStatements.length - 1);
+                expect(store.match(schemaT, NS.rdfs("label"))).toHaveLength(0);
+            });
+        });
+    });
+
     // describe("#replaceStatements", () => {
     //     it("works", () => {
     //         const expected = undefined;

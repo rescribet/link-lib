@@ -164,7 +164,7 @@ export class RDFStore {
         const removables = statements
             .filter((s) => NS.ll("remove").value === s.why.value)
             .reduce((tot: Statement[], cur) => {
-                const matches = this.store.match(cur.subject, cur.predicate, cur.object, null);
+                const matches = this.store.match(cur.subject, cur.predicate, null, null);
 
                 return tot.concat(matches);
             }, []);
