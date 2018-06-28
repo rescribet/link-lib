@@ -18,7 +18,9 @@ import { Schema } from "./Schema";
 import {
     ComponentRegistration,
     DataObject,
+    EmptyRequestStatus,
     FetchOpts,
+    FulfilledRequestStatus,
     LazyNNArgument,
     LinkedActionResponse,
     LinkedRenderStoreOptions,
@@ -256,6 +258,10 @@ export class LinkedRenderStore<T> {
      */
     public getResourceProperty(subject: SomeNode, property: SomeNode | SomeNode[]): SomeTerm | undefined {
         return this.store.getResourceProperty(subject, property);
+    }
+
+    public getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus {
+        return this.api.getStatus(iri);
     }
 
     /**
