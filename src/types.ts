@@ -89,7 +89,7 @@ export interface LinkedActionResponse {
 
 export interface ExtensionResponse {
     body: string;
-    headers: { string: string };
+    headers: { [k: string]: string };
     status: number;
     url: string;
 }
