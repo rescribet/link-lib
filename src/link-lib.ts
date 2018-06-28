@@ -1,8 +1,4 @@
-import {
-    DEFAULT_TOPOLOGY,
-    LinkedRenderStore,
-    RENDER_CLASS_NAME,
-} from "./LinkedRenderStore";
+import { LinkedRenderStore } from "./LinkedRenderStore";
 
 export { RDFStore } from "./RDFStore";
 export { Schema } from "./Schema";
@@ -13,6 +9,7 @@ export {
     allRDFPropertyStatements,
     allRDFValues,
     anyRDFValue,
+    DEFAULT_TOPOLOGY,
     defaultNS,
     getPropBestLangRaw,
     getTermBestLang,
@@ -21,12 +18,9 @@ export {
     namedNodeByStoreIndex,
     namedNodeByIRI,
     normalizeType,
+    RENDER_CLASS_NAME,
 } from "./utilities";
 
-export {
-    DEFAULT_TOPOLOGY,
-    LinkedRenderStore,
-    RENDER_CLASS_NAME,
-};
+export { LinkedRenderStore };
 
 export default LinkedRenderStore; // tslint:disable-line no-default-export

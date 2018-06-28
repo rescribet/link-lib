@@ -1,10 +1,12 @@
 /* global chrome */
 import {
     BlankNode,
+    NamedNamespace,
     NamedNode,
     Namespace,
     SomeTerm,
     Statement,
+    TermIsh,
 } from "rdflib";
 
 import { ExtensionResponse, NamespaceMap, SomeNode } from "./types";
@@ -90,6 +92,11 @@ export const defaultNS: Readonly<NamespaceMap> = Object.freeze({
     xsd: memoizedNamespace("http://www.w3.org/2001/XMLSchema#"),
 });
 
+export const DEFAULT_TOPOLOGY: NamedNode = defaultNS.ll("defaultTopology");
+
+/** Constant used to determine that a class is used to render a type rather than a property. */
+export const RENDER_CLASS_NAME: NamedNode = defaultNS.ll("typeRenderClass");
+
 /**
  * Filters {obj} to only include statements where the subject equals {predicate}.
  * @param obj The statements to filter.
@@ -131,6 +138,38 @@ export function anyRDFValue(obj: Statement[] | undefined, predicate: SomeNode): 
     }
 
     return match.object;
+}
+
+const CI_MATCH_PREFIX = 0;
+const CI_MATCH_SUFFIX = 1;
+
+/**
+ * Expands a property if it's in short-form while preserving long-form.
+ * Note: The vocabulary needs to be present in the store prefix library
+ * @param prop The short- or long-form property
+ * @param namespaces Object of namespaces by their abbreviation.
+ * @returns The (expanded) property
+ */
+export function expandProperty(prop: NamedNode | TermIsh | string | undefined,
+                               namespaces: NamespaceMap = defaultNS): NamedNode | undefined {
+    if (prop instanceof NamedNode || typeof prop === "undefined") {
+        return prop;
+    }
+    if (typeof prop === "object") {
+        if (prop.termType === "NamedNode") {
+            return namedNodeByIRI(prop.value);
+        }
+
+        return undefined;
+    }
+
+    if (prop.indexOf("/") >= 1) {
+        return namedNodeByIRI(prop);
+    }
+    const matches = prop.split(":");
+    const constructor: NamedNamespace | undefined = namespaces[matches[CI_MATCH_PREFIX]];
+
+    return constructor && constructor(matches[CI_MATCH_SUFFIX]);
 }
 
 export function getPropBestLang(rawProp: Statement | Statement[], langPrefs: string[]): SomeTerm {

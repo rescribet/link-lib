@@ -11,6 +11,7 @@ import {
     allRDFValues,
     anyRDFValue,
     defaultNS,
+    expandProperty,
     fetchWithExtension,
     getExtention,
     getPropBestLang,
@@ -83,6 +84,24 @@ describe("utilities", () => {
     describe("defaultNS", () => {
         it("contains memoized namespaces", () => {
             expect(defaultNS.argu("test")).toHaveProperty("sI");
+        });
+    });
+
+    describe("#expandProperty", () => {
+        it("expands short to long notation", () => {
+            const nameShort = expandProperty("schema:name");
+            if (nameShort === undefined) {
+                throw new TypeError();
+            }
+            expect(defaultNS.schema("name").sameTerm(nameShort)).toBeTruthy();
+        });
+
+        it("preserves long notation", () => {
+            const nameLong = expandProperty("http://schema.org/name");
+            if (nameLong === undefined) {
+                throw new TypeError();
+            }
+            expect(defaultNS.schema("name").sameTerm(nameLong)).toBeTruthy();
         });
     });
 

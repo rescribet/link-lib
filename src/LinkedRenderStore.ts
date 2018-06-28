@@ -3,11 +3,9 @@
 import {
     FetchOpts as RDFFetchOpts,
     Literal,
-    NamedNamespace,
     NamedNode,
     SomeTerm,
     Statement,
-    TermIsh,
 } from "rdflib";
 
 import { ComponentStore } from "./ComponentStore";
@@ -29,18 +27,13 @@ import {
     SubscriptionRegistration,
 } from "./types";
 import {
+    DEFAULT_TOPOLOGY,
     defaultNS,
+    expandProperty,
     namedNodeByIRI,
     normalizeType,
+    RENDER_CLASS_NAME,
 } from "./utilities";
-
-const CI_MATCH_PREFIX = 0;
-const CI_MATCH_SUFFIX = 1;
-
-export const DEFAULT_TOPOLOGY: NamedNode = defaultNS.ll("defaultTopology");
-
-/** Constant used to determine that a class is used to render a type rather than a property. */
-export const RENDER_CLASS_NAME: NamedNode = defaultNS.ll("typeRenderClass");
 
 declare global {
     interface Window {
@@ -49,35 +42,6 @@ declare global {
 }
 
 export class LinkedRenderStore<T> {
-    /**
-     * Expands a property if it's in short-form while preserving long-form.
-     * Note: The vocabulary needs to be present in the store prefix library
-     * @param prop The short- or long-form property
-     * @param namespaces Object of namespaces by their abbreviation.
-     * @returns The (expanded) property
-     */
-    public static expandProperty(prop: NamedNode | TermIsh | string | undefined,
-                                 namespaces: NamespaceMap = {}): NamedNode | undefined {
-        if (prop instanceof NamedNode || typeof prop === "undefined") {
-            return prop;
-        }
-        if (typeof prop === "object") {
-            if (prop.termType === "NamedNode") {
-                return namedNodeByIRI(prop.value);
-            }
-
-            return undefined;
-        }
-
-        if (prop.indexOf("/") >= 1) {
-            return namedNodeByIRI(prop);
-        }
-        const matches = prop.split(":");
-        const constructor: NamedNamespace | undefined = namespaces[matches[CI_MATCH_PREFIX]];
-
-        return constructor && constructor(matches[CI_MATCH_SUFFIX]);
-    }
-
     public static registerRenderer<T>(
         component: T,
         type: LazyNNArgument,
@@ -156,10 +120,9 @@ export class LinkedRenderStore<T> {
     /**
      * Convert a string value to a NamedNode if possible. Useful for looking op dynamic data like user input. Please
      * refrain from using in static code, as this will impact performance.
-     * @see LinkedRenderStore.expandProperty
      */
     public expandProperty(prop: NamedNode | string | undefined): NamedNode | undefined {
-        return LinkedRenderStore.expandProperty(prop, this.namespaces);
+        return expandProperty(prop, this.namespaces);
     }
 
     /**

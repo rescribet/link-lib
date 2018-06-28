@@ -7,14 +7,14 @@ import {
     Statement,
 } from "rdflib";
 
-import { LinkedRenderStore } from "../LinkedRenderStore";
 import {
     DataObject,
     DataTuple,
-    NamedBlobTuple, SerializableDataTypes,
+    NamedBlobTuple,
+    SerializableDataTypes,
     SomeNode,
 } from "../types";
-import { defaultNS } from "../utilities";
+import { defaultNS, expandProperty } from "../utilities";
 
 const BASE = 36;
 const DEC_CUTOFF = 2;
@@ -93,7 +93,7 @@ export function processObject(subject: SomeNode,
 function processDataObject(subject: SomeNode, data: DataObject, graph: IndexedFormula): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
     Object.keys(data).forEach((k) => {
-        const predicate = LinkedRenderStore.expandProperty(k, defaultNS);
+        const predicate = expandProperty(k, defaultNS);
         const datum = data[k];
 
         if (predicate === undefined) {

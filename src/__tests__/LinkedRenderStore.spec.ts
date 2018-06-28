@@ -1,22 +1,20 @@
 import "jest";
 import {
-    BlankNode,
     Literal,
     NamedNode,
     Statement,
 } from "rdflib";
 
 import {
-    DEFAULT_TOPOLOGY,
     LinkedRenderStore,
-    parseIRI,
-    parseNode,
-    parseTerm,
-    RENDER_CLASS_NAME,
 } from "../LinkedRenderStore";
 import { getBasicStore } from "../testUtilities";
 import { ComponentRegistration, SomeNode } from "../types";
-import { defaultNS as NS } from "../utilities";
+import {
+    DEFAULT_TOPOLOGY,
+    defaultNS as NS,
+    RENDER_CLASS_NAME,
+} from "../utilities";
 
 const DT = DEFAULT_TOPOLOGY;
 const RCN = RENDER_CLASS_NAME;
@@ -46,25 +44,6 @@ const creativeWorkStatements = [
 ];
 
 describe("LinkedRenderStore", () => {
-    describe("expands properties correctly", () => {
-        const LRS = new LinkedRenderStore();
-        it("expands short to long notation", () => {
-            const nameShort = LRS.expandProperty("schema:name");
-            if (nameShort === undefined) {
-                throw new TypeError();
-            }
-            expect(NS.schema("name").sameTerm(nameShort)).toBeTruthy();
-        });
-
-        it("preserves long notation", () => {
-            const nameLong = LRS.expandProperty("http://schema.org/name");
-            if (nameLong === undefined) {
-                throw new TypeError();
-            }
-            expect(NS.schema("name").sameTerm(nameLong)).toBeTruthy();
-        });
-    });
-
     describe("adds new graph items", () => {
         it("add a single graph item", () => {
             const store = getBasicStore();
