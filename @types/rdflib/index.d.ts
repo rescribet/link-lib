@@ -46,8 +46,8 @@ declare module "rdflib" {
     export abstract class Node {
         public static fromValue(value: string): Node;
 
-        public static toJS(): string | number | Date | boolean | object |
-                              string[] | number[] | Date[] | boolean[] | object[];
+        public static toJS(term: Node): string | number | Date | boolean | object |
+                                        string[] | number[] | Date[] | boolean[] | object[];
 
         public readonly termType: string;
         public readonly value: string;
