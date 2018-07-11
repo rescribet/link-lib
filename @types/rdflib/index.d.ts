@@ -43,11 +43,13 @@ declare module "rdflib" {
                                   obj: SomeTerm,
                                   why: Node) => boolean;
 
-    export abstract class Node {
+    export type ToJSOutputTypes = string | number | Date | boolean | object |
+        string[] | number[] | Date[] | boolean[] | object[];
+
+    export class Node {
         public static fromValue(value: string): Node;
 
-        public static toJS(term: Node): string | number | Date | boolean | object |
-                                        string[] | number[] | Date[] | boolean[] | object[];
+        public static toJS(term: Node): ToJSOutputTypes;
 
         public readonly termType: string;
         public readonly value: string;
