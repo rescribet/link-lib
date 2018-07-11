@@ -262,11 +262,11 @@ export class LinkedRenderStore<T> {
      */
     public resourcePropertyComponent(subject: SomeNode,
                                      predicate: NamedNode | NamedNode[],
-                                     topology: NamedNode = DEFAULT_TOPOLOGY): T | undefined {
+                                     topology?: NamedNode): T | undefined {
         return this.getComponentForProperty(
             this.store.getResourceProperties(subject, defaultNS.rdf("type")) as NamedNode[],
             predicate,
-            topology,
+            topology || DEFAULT_TOPOLOGY,
         );
     }
 
@@ -278,11 +278,11 @@ export class LinkedRenderStore<T> {
      * @param {"rdflib".NamedNode} topology The topology to take into account when picking the renderer.
      * @return {T | undefined}
      */
-    public resourceComponent(subject: SomeNode, topology: NamedNode = DEFAULT_TOPOLOGY): T | undefined {
+    public resourceComponent(subject: SomeNode, topology?: NamedNode): T | undefined {
         return this.getComponentForProperty(
             this.store.getResourceProperties(subject, defaultNS.rdf("type")) as NamedNode[],
             RENDER_CLASS_NAME,
-            topology,
+            topology || DEFAULT_TOPOLOGY,
         );
     }
 
