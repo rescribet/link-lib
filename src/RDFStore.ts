@@ -33,7 +33,7 @@ function normalizeTerm(term: SomeTerm | undefined): SomeTerm | undefined {
 export class RDFStore {
     private changeBuffer: Statement[] = new Array(100);
     private changeBufferCount: number = 0;
-    private langPrefs: string[] = ["nl", "en", "de"];
+    private langPrefs: string[] = Array.from(navigator.languages);
     private store: IndexedFormula = graph();
     private typeCache: { [k: string]: NamedNode[] } = {};
 
