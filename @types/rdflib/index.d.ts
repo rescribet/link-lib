@@ -46,6 +46,9 @@ declare module "rdflib" {
     export abstract class Node {
         public static fromValue(value: string): Node;
 
+        public static toJS(): string | number | Date | boolean | object |
+                              string[] | number[] | Date[] | boolean[] | object[];
+
         public readonly termType: string;
         public readonly value: string;
 
@@ -58,8 +61,6 @@ declare module "rdflib" {
         public sameTerm(other: Node): boolean;
 
         public toCanonical(): string;
-
-        public toJS(): string;
 
         public toNT(): string;
 
