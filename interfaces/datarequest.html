@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>FetchOpts | link-lib</title>
+	<title>DataRequest | link-lib</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -908,10 +908,16 @@ img { max-width: 100%; }
 <nav class="tsd-navigation secondary">
 	<ul>
 		<li class="current tsd-kind-interface">
-			<a href="fetchopts.html" class="tsd-kind-icon">Fetch<wbr>Opts</a>
+			<a href="datarequest.html" class="tsd-kind-icon">Data<wbr>Request</a>
 			<ul>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="fetchopts.html#reload" class="tsd-kind-icon">reload</a>
+					<a href="datarequest.html#callback" class="tsd-kind-icon">callback</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="datarequest.html#iri" class="tsd-kind-icon">iri</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="datarequest.html#options" class="tsd-kind-icon">options</a>
 				</li>
 			</ul>
 		</li>
@@ -923,7 +929,7 @@ img { max-width: 100%; }
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">FetchOpts</span>
+					<span class="target">DataRequest</span>
 				</li>
 			</ul>
 		</section>
@@ -934,7 +940,9 @@ img { max-width: 100%; }
 					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fetchopts.html#reload" class="tsd-kind-icon">reload</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="datarequest.html#callback" class="tsd-kind-icon">callback</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="datarequest.html#iri" class="tsd-kind-icon">iri</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="datarequest.html#options" class="tsd-kind-icon">options</a></li>
 						</ul>
 					</section>
 				</div>
@@ -943,19 +951,34 @@ img { max-width: 100%; }
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Properties</h2>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="reload" class="tsd-anchor"></a>
-				<h3>reload</h3>
-				<div class="tsd-signature tsd-kind-icon">reload<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+				<a name="callback" class="tsd-anchor"></a>
+				<h3>callback</h3>
+				<div class="tsd-signature tsd-kind-icon">callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/dde3cd5/src/types.ts#L50">types.ts:50</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/dde3cd5/src/LinkedDataAPI.ts#L28">LinkedDataAPI.ts:28</a></li>
 					</ul>
 				</aside>
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Force-reload the resource discarding any previously held data.</p>
-					</div>
-				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="iri" class="tsd-anchor"></a>
+				<h3>iri</h3>
+				<div class="tsd-signature tsd-kind-icon">iri<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/dde3cd5/src/LinkedDataAPI.ts#L27">LinkedDataAPI.ts:27</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="options" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagOptional">Optional</span> options</h3>
+				<div class="tsd-signature tsd-kind-icon">options<span class="tsd-signature-symbol">:</span> <a href="fetchopts.html" class="tsd-signature-type">FetchOpts</a></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/dde3cd5/src/LinkedDataAPI.ts#L29">LinkedDataAPI.ts:29</a></li>
+					</ul>
+				</aside>
 			</section>
 		</section>
 		<footer class="with-border-bottom">
