@@ -303,6 +303,15 @@ declare module "rdflib" {
 
     export function parse(str: string, kb: Formula, base: string, contentType: string, callback: () => void): void;
 
+    export namespace uri {
+        export function docpart(uri: string): string;
+        export function document(x: object): NamedNode;
+        export function hostpart(u: string): string;
+        export function join(given: string, base: string): string;
+        export function protocol(uri: string): string | null;
+        export function refTo(base: string, uri: string): string;
+    }
+
     /**
      * Data-factory functions
      */
