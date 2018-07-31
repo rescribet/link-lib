@@ -13,9 +13,10 @@ import {
     RequestCallbackHandler,
     Serializer,
     Statement,
+    uri as Uri,
 } from "rdflib";
-import { RDFStore } from "../RDFStore";
 
+import { RDFStore } from "../RDFStore";
 import {
     DataTuple,
     EmptyRequestStatus,
@@ -39,6 +40,7 @@ import {
     getJSON,
     getURL,
 } from "../utilities/responses";
+
 import {
     MSG_BAD_REQUEST,
     MSG_INCORRECT_TARGET,
@@ -251,7 +253,8 @@ export class DataProcessor {
         const statements = await this.feedResponse(resp);
 
         const location = getHeader(resp, "Location");
-        const iri = location && namedNodeByIRI(location) || null;
+        const fqLocation = location && Uri.join(location, window.location.origin);
+        const iri = fqLocation && namedNodeByIRI(fqLocation) || null;
 
         return {
             data: statements,
