@@ -9,6 +9,7 @@ import {
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
+import { LinkedRenderStore } from "./LinkedRenderStore";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { DisjointSet } from "./utilities/DisjointSet";
@@ -56,10 +57,17 @@ export interface LinkedRenderStoreOptions<T> {
     api?: LinkedDataAPI | undefined;
     defaultType?: NamedNode | undefined;
     mapping?: ComponentStore<T> | undefined;
+    middleware?: Array<MiddlewareFn<T>> | undefined;
     namespaces?: NamespaceMap | undefined;
     schema?: Schema | undefined;
     store?: RDFStore | undefined;
 }
+
+export type MiddlewareFn<T> = (store: LinkedRenderStore<T>) => MiddlewareWithBoundLRS;
+
+export type MiddlewareWithBoundLRS = (next: MiddlewareActionHandler) => MiddlewareActionHandler;
+
+export type MiddlewareActionHandler = (action: NamedNode, args: any) => Promise<any>;
 
 export interface NamespaceMap {
     [s: string]: NamedNamespace;

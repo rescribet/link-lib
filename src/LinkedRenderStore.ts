@@ -22,6 +22,8 @@ import {
     LazyNNArgument,
     LinkedActionResponse,
     LinkedRenderStoreOptions,
+    MiddlewareActionHandler,
+    MiddlewareFn,
     NamespaceMap,
     SomeNode,
     SubscriptionRegistration,
@@ -63,6 +65,7 @@ export class LinkedRenderStore<T> {
 
     private api: LinkedDataAPI;
     private mapping: ComponentStore<T>;
+    private middleware: MiddlewareActionHandler;
     private schema: Schema;
     private store: RDFStore = new RDFStore();
     private subscriptions: SubscriptionRegistration[] = [];
@@ -84,6 +87,9 @@ export class LinkedRenderStore<T> {
         this.namespaces = opts.namespaces || {...defaultNS};
         this.schema = opts.schema || new Schema(this.store);
         this.mapping = opts.mapping || new ComponentStore(this.schema);
+        // tslint:disable-next-line typedef
+        const actionMiddleware: MiddlewareFn<T> = () => () => this.execActionByIRI;
+        this.middleware = this.applyMiddleware(...(opts.middleware || []), actionMiddleware);
     }
 
     /**
@@ -115,6 +121,20 @@ export class LinkedRenderStore<T> {
                 this.broadcast(false, 100);
                 return res;
             });
+    }
+
+    /**
+     * Execute a resource.
+     *
+     * Every action will fall through the execution middleware layers.
+     *
+     * @see https://github.com/fletcher91/link-lib/wiki/%5BDesign-draft%5D-Actions,-data-streams,-and-middleware
+     *
+     * @param {NamedNode} subject The resource to execute (can be either an IRI or an URI)
+     * @param {Object} args The arguments to the function defined by the subject.
+     */
+    public async exec(subject: NamedNode, args?: DataObject): Promise<any> {
+        return this.middleware(subject, args);
     }
 
     /**
@@ -309,6 +329,18 @@ export class LinkedRenderStore<T> {
      */
     public tryEntity(iri: SomeNode): Statement[] {
         return this.store.statementsFor(iri);
+    }
+
+    /**
+     * Binds and reduces an array of middleware function down to a handler.
+     * @param layers
+     */
+    private applyMiddleware(...layers: Array<MiddlewareFn<T>>): MiddlewareActionHandler {
+        const storeBound = layers.map((middleware) => middleware(this));
+
+        const dispatch: MiddlewareActionHandler = (a: NamedNode, _o: any): Promise<any> => Promise.resolve(a);
+
+        return storeBound.reduceRight((composed, f) => f(composed), dispatch);
     }
 
     /**
