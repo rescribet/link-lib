@@ -14,6 +14,7 @@ import {
 import { SomeNode } from "./types";
 import {
     allRDFPropertyStatements,
+    blankNodeById,
     defaultNS as NS,
     getPropBestLang,
     namedNodeByIRI,
@@ -24,6 +25,9 @@ const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
 function normalizeTerm(term: SomeTerm | undefined): SomeTerm | undefined {
     if (term && term.termType === "NamedNode" && term.sI === undefined) {
         return namedNodeByIRI(term.value) || term;
+    }
+    if (term && term.termType === "BlankNode" && term.sI === undefined) {
+        return blankNodeById(term.value) || term;
     }
     if (term && term.termType === "Literal" && term.datatype && term.datatype.sI === undefined) {
         return new Literal(term.value, term.language, namedNodeByIRI(term.datatype.value));

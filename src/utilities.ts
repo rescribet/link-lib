@@ -14,11 +14,33 @@ import { ExtensionResponse, NamespaceMap, SomeNode } from "./types";
 import Port = chrome.runtime.Port;
 
 let termIndex = 0;
-const termMap: NamedNode[] = [];
+const termMap: Array<BlankNode|NamedNode> = [];
 const nsMap: { [k: string]: NamedNode }  = {};
+const bnMap: { [k: string]: BlankNode }  = {};
 
 export function namedNodeByStoreIndex(un: number): NamedNode | undefined {
+    const term = termMap[un];
+    if (!term) {
+        return undefined;
+    }
+    if (term.termType === "NamedNode") {
+        return term;
+    }
+
+    return undefined;
+}
+
+export function nodeByStoreIndex(un: number): BlankNode | NamedNode | undefined {
     return termMap[un];
+}
+
+export function blankNodeById(id: string): BlankNode {
+    const fromMap = bnMap[id];
+    if (fromMap !== undefined) {
+        return fromMap;
+    }
+
+    return addBn(new BlankNode(id));
 }
 
 export function namedNodeByIRI(iri: string): NamedNode {
@@ -37,6 +59,13 @@ function add(nn: NamedNode, ln: string): NamedNode {
     termMap[nn.sI] = nsMap[nn.value] = nn;
 
     return nn;
+}
+
+function addBn(bn: BlankNode): BlankNode {
+    bn.sI = ++termIndex;
+    termMap[bn.sI] = bnMap[bn.value] = bn;
+
+    return bn;
 }
 
 export function memoizedNamespace(nsIRI: string): (ns: string) => NamedNode {

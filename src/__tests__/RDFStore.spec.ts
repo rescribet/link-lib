@@ -70,7 +70,7 @@ describe("RDFStore", () => {
 
             const after = store.match(schemaT, NS.rdfs("label"));
             expect(after).toHaveLength(1);
-            expect(after[0].object).toEqual(new Literal("Thing!"));
+            expect(after[0].object).toEqual(new Literal("Thing!", undefined, NS.xsd("string")));
         });
     });
 

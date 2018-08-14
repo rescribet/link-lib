@@ -108,6 +108,8 @@ declare module "rdflib" {
     export class BlankNode extends Node {
         public readonly termType: "BlankNode";
 
+        public sI: number;
+
         public constructor(id?: string | null | undefined);
     }
 
