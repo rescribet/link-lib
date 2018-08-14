@@ -79,7 +79,7 @@ export type LazyIRIArgument = SomeNode | SomeNode[];
 
 export type NamedBlobTuple = [SomeNode, File];
 
-export type SerializablePrimitives = boolean | DataObject | Date | File | number | string;
+export type SerializablePrimitives = boolean | DataObject | Date | File | number | string | NamedNode;
 
 export type SerializableDataTypes = SerializablePrimitives | SerializablePrimitives[];
 

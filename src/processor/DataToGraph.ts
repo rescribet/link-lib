@@ -14,7 +14,7 @@ import {
     SerializableDataTypes,
     SomeNode,
 } from "../types";
-import { defaultNS, expandProperty } from "../utilities";
+import { defaultNS, expandProperty, namedNodeByIRI } from "../utilities";
 
 const BASE = 36;
 const DEC_CUTOFF = 2;
@@ -47,7 +47,10 @@ const NON_DATA_OBJECTS_CTORS = [
 ];
 
 function isPlainObject(o: any): o is DataObject {
-    return typeof o === "object" && o !== null && !NON_DATA_OBJECTS_CTORS.find((c) => o instanceof c);
+    return typeof o === "object"
+        && o !== null
+        && !NON_DATA_OBJECTS_CTORS.find((c) => o instanceof c)
+        && !Object.prototype.hasOwnProperty.call(o, "termType");
 }
 
 function isIterable(o: any): o is any[] | Set<any> {
@@ -74,6 +77,11 @@ export function processObject(subject: SomeNode,
         }
         items.close();
         graph.add(subject, predicate, items);
+    } else if (typeof datum === "string"
+        || typeof datum === "number"
+        || typeof datum === "boolean"
+        || datum instanceof Date) {
+        graph.add(subject, predicate, Literal.fromValue(datum));
     } else if (datum instanceof File) {
         const f = uploadIRI();
         const file = new Statement(subject, predicate, f);
@@ -83,6 +91,10 @@ export function processObject(subject: SomeNode,
         const bn = new BlankNode();
         blobs = blobs.concat(processDataObject(bn, datum, graph));
         graph.add(subject, predicate, bn);
+    } else if (datum && datum.termType === "NamedNode") {
+        if (datum.termType === "NamedNode") {
+            graph.add(subject, predicate, namedNodeByIRI(datum.value));
+        }
     } else if (datum !== null && datum !== undefined) {
         graph.add(subject, predicate, Literal.fromValue(datum));
     }
