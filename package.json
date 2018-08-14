@@ -29,9 +29,10 @@
   },
   "author": "Fletcher91 <thom@argu.co>",
   "license": "LGPL-3.0",
-  "dependencies": {
-    "http-status-codes": "^1.x",
-    "rdflib": "^0.17.x"
+  "dependencies": {},
+  "peerDependencies": {
+    "http-status-codes": ">= 1.x",
+    "rdflib": ">= 0.17.x"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.69",
@@ -40,10 +41,12 @@
     "@types/node": "^10.5.0",
     "esdoc": "^1.1.0",
     "gh-pages": "^1.2.0",
+    "http-status-codes": ">= 1.x",
     "jest": "^23.2.0",
     "jest-fetch-mock": "^1.6.5",
     "jest-plugins": "^2.9.0",
     "jest-plugins-recommended": "^2.9.0",
+    "rdflib": ">= 0.17.x",
     "rollup": "^0.62.0",
     "rollup-plugin-commonjs": "^9.1.3",
     "rollup-plugin-node-resolve": "^3.3.0",
