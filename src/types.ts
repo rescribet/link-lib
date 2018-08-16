@@ -1,6 +1,7 @@
 import {
     BlankNode,
     IndexedFormula,
+    Literal,
     NamedNamespace,
     NamedNode,
     SomeTerm,
@@ -79,7 +80,7 @@ export type LazyIRIArgument = SomeNode | SomeNode[];
 
 export type NamedBlobTuple = [SomeNode, File];
 
-export type SerializablePrimitives = boolean | DataObject | Date | File | number | string | NamedNode;
+export type SerializablePrimitives = boolean | DataObject | Date | File | number | string | NamedNode | Literal;
 
 export type SerializableDataTypes = SerializablePrimitives | SerializablePrimitives[];
 

@@ -92,9 +92,9 @@ export function processObject(subject: SomeNode,
         blobs = blobs.concat(processDataObject(bn, datum, graph));
         graph.add(subject, predicate, bn);
     } else if (datum && datum.termType === "NamedNode") {
-        if (datum.termType === "NamedNode") {
-            graph.add(subject, predicate, namedNodeByIRI(datum.value));
-        }
+        graph.add(subject, predicate, namedNodeByIRI(datum.value));
+    } else if (datum && datum.termType === "Literal") {
+        graph.add(subject, predicate, new Literal(datum.value, datum.language, namedNodeByIRI(datum.datatype.value)));
     } else if (datum !== null && datum !== undefined) {
         graph.add(subject, predicate, Literal.fromValue(datum));
     }
