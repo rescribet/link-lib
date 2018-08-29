@@ -6,7 +6,7 @@ import {
 } from "rdflib";
 
 import { RDFStore } from "../RDFStore";
-import { defaultNS as NS } from "../utilities";
+import { defaultNS as NS } from "../utilities/constants";
 
 const schemaT = NS.schema("Thing");
 const thingStatements = [

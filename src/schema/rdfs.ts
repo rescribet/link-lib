@@ -1,7 +1,7 @@
 import { BlankNode, NamedNode, Statement } from "rdflib";
 
 import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
-import { defaultNS as NS } from "../utilities";
+import { defaultNS as NS } from "../utilities/constants";
 
 const nsRDFProperty = NS.rdf("Property");
 const nsRDFSClass = NS.rdfs("Class");

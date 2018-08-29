@@ -3,12 +3,14 @@ import { BlankNode, IndexedFormula, Literal, Statement } from "rdflib";
 
 import { getBasicStore } from "../../testUtilities";
 
-import { defaultNS } from "../../utilities";
 import {
+    defaultNS,
     MSG_INCORRECT_TARGET,
     MSG_OBJECT_NOT_IRI,
     MSG_URL_UNDEFINED,
     MSG_URL_UNRESOLVABLE,
+} from "../../utilities/constants";
+import {
     ProcessorError,
 } from "../ProcessorError";
 

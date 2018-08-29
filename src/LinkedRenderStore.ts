@@ -28,14 +28,9 @@ import {
     SomeNode,
     SubscriptionRegistration,
 } from "./types";
-import {
-    DEFAULT_TOPOLOGY,
-    defaultNS,
-    expandProperty,
-    namedNodeByIRI,
-    normalizeType,
-    RENDER_CLASS_NAME,
-} from "./utilities";
+import { normalizeType } from "./utilities";
+import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
+import { expandProperty, namedNodeByIRI } from "./utilities/memoizedNamespace";
 
 declare global {
     interface Window {

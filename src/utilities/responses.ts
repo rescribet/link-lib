@@ -1,17 +1,16 @@
 import { ErrorResponse, ResponseAndFallbacks } from "../types";
 
-export const F_NTRIPLES = "application/n-triples";
-export const F_TURTLE = "text/turtle";
-export const F_N3 = "text/n3";
-export const F_PLAIN = "text/plain";
-export const F_JSON = "application/json";
-export const F_JSONLD = "application/ld+json";
-export const F_RDF_XML = "application/rdf+xml";
-
-export const F_NTRIPLES_DEP = "text/ntriples";
-export const F_TURTLE_DEP = "application/x-turtle";
-
-export const NON_CONTENT_EXTS = ["php", "asp", "aspx", "cgi", "jsp"];
+import {
+    F_JSONLD,
+    F_N3,
+    F_NTRIPLES,
+    F_NTRIPLES_DEP,
+    F_PLAIN,
+    F_RDF_XML,
+    F_TURTLE,
+    F_TURTLE_DEP,
+    NON_CONTENT_EXTS,
+} from "./constants";
 
 /**
  * Extracts the content type from a request.

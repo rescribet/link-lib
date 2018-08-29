@@ -14,37 +14,13 @@ import {
     SerializableDataTypes,
     SomeNode,
 } from "../types";
-import { defaultNS, expandProperty, namedNodeByIRI } from "../utilities";
+import { defaultNS, MAIN_NODE_DEFAULT_IRI, NON_DATA_OBJECTS_CTORS } from "../utilities/constants";
+import { namedNodeByIRI } from "../utilities/memoizedNamespace";
+import { expandProperty } from "../utilities/memoizedNamespace";
 
 const BASE = 36;
 const DEC_CUTOFF = 2;
 const IRI_LEN = 20;
-const MAIN_NODE_DEFAULT_IRI = defaultNS.ll("targetResource");
-const NON_DATA_OBJECTS_CTORS = [
-    Array,
-    ArrayBuffer,
-    Boolean,
-    DataView,
-    Date,
-    Error,
-    EvalError,
-    Float32Array,
-    Float64Array,
-    Int16Array,
-    Int32Array,
-    Int8Array,
-    Intl.Collator,
-    Intl.DateTimeFormat,
-    Intl.NumberFormat,
-    Map,
-    Number,
-    Promise,
-    Proxy,
-    RangeError,
-    ReferenceError,
-    RegExp,
-    Set,
-];
 
 function isPlainObject(o: any): o is DataObject {
     return typeof o === "object"

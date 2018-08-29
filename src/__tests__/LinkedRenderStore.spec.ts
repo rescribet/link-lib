@@ -10,11 +10,8 @@ import {
 } from "../LinkedRenderStore";
 import { getBasicStore } from "../testUtilities";
 import { ComponentRegistration, SomeNode } from "../types";
-import {
-    DEFAULT_TOPOLOGY,
-    defaultNS as NS,
-    RENDER_CLASS_NAME,
-} from "../utilities";
+import { defaultNS as NS } from "../utilities/constants";
+import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
 const DT = DEFAULT_TOPOLOGY;
 const RCN = RENDER_CLASS_NAME;

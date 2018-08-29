@@ -28,12 +28,19 @@ import {
 } from "../types";
 import {
     anyRDFValue,
-    defaultNS,
     fetchWithExtension,
     getExtention,
     isDifferentOrigin,
-    namedNodeByIRI,
 } from "../utilities";
+import {
+    defaultNS,
+    MSG_BAD_REQUEST,
+    MSG_INCORRECT_TARGET,
+    MSG_OBJECT_NOT_IRI,
+    MSG_URL_UNDEFINED,
+    MSG_URL_UNRESOLVABLE,
+} from "../utilities/constants";
+import { namedNodeByIRI } from "../utilities/memoizedNamespace";
 import {
     getContentType,
     getHeader,
@@ -41,14 +48,7 @@ import {
     getURL,
 } from "../utilities/responses";
 
-import {
-    MSG_BAD_REQUEST,
-    MSG_INCORRECT_TARGET,
-    MSG_OBJECT_NOT_IRI,
-    MSG_URL_UNDEFINED,
-    MSG_URL_UNRESOLVABLE,
-    ProcessorError,
-} from "./ProcessorError";
+import { ProcessorError } from "./ProcessorError";
 import { RequestInitGenerator } from "./RequestInitGenerator";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "CONNECT", "TRACE"];

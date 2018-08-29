@@ -9,17 +9,21 @@ export {
     allRDFPropertyStatements,
     allRDFValues,
     anyRDFValue,
-    DEFAULT_TOPOLOGY,
-    defaultNS,
     getPropBestLangRaw,
     getTermBestLang,
     isDifferentOrigin,
-    memoizedNamespace,
-    namedNodeByStoreIndex,
-    namedNodeByIRI,
     normalizeType,
-    RENDER_CLASS_NAME,
 } from "./utilities";
+export {
+    defaultNS,
+    DEFAULT_TOPOLOGY,
+    RENDER_CLASS_NAME,
+} from "./utilities/constants";
+export {
+    memoizedNamespace,
+    namedNodeByIRI,
+    namedNodeByStoreIndex,
+} from "./utilities/memoizedNamespace";
 
 export { LinkedRenderStore };
 

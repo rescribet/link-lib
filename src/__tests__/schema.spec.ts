@@ -6,7 +6,7 @@ import {
 
 import { RDFStore } from "../RDFStore";
 import { Schema } from "../Schema";
-import { defaultNS as NS } from "../utilities";
+import { defaultNS as NS } from "../utilities/constants";
 
 const resource1 = [
     new Statement(NS.example("5"), NS.rdf("type"), NS.schema("CreativeWork")),

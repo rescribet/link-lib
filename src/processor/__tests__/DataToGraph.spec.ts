@@ -2,7 +2,7 @@
 import "jest";
 import { BlankNode, Collection, IndexedFormula, Literal, Statement } from "rdflib";
 
-import { defaultNS } from "../../utilities";
+import { defaultNS } from "../../utilities/constants";
 
 import { dataToGraphTuple, processObject } from "../DataToGraph";
 

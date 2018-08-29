@@ -12,13 +12,9 @@ import {
 } from "rdflib";
 
 import { SomeNode } from "./types";
-import {
-    allRDFPropertyStatements,
-    blankNodeById,
-    defaultNS as NS,
-    getPropBestLang,
-    namedNodeByIRI,
-} from "./utilities";
+import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
+import { defaultNS as NS } from "./utilities/constants";
+import { blankNodeById, namedNodeByIRI } from "./utilities/memoizedNamespace";
 
 const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
 

@@ -1,7 +1,7 @@
 import { NamedNode, Statement } from "rdflib";
 
 import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
-import { defaultNS as NS } from "../utilities";
+import { defaultNS as NS } from "../utilities/constants";
 
 /*
  * TODO: All of them...

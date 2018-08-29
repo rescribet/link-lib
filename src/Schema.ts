@@ -5,8 +5,9 @@ import { OWL } from "./schema/owl";
 import { nsRDFSResource, RDFS } from "./schema/rdfs";
 
 import { VocabularyProcessingContext, VocabularyProcessor } from "./types";
-import { defaultNS as NS, namedNodeByIRI } from "./utilities";
+import { defaultNS as NS } from "./utilities/constants";
 import { DisjointSet } from "./utilities/DisjointSet";
+import { namedNodeByIRI } from "./utilities/memoizedNamespace";
 
 /**
  * Implements some RDF/OWL logic to enhance the functionality of the property lookups.

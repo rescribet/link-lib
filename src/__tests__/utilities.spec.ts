@@ -10,16 +10,14 @@ import {
     allRDFPropertyStatements,
     allRDFValues,
     anyRDFValue,
-    defaultNS,
-    expandProperty,
     fetchWithExtension,
     getExtention,
     getPropBestLang,
     getPropBestLangRaw,
     isDifferentOrigin,
-    namedNodeByIRI,
-    namedNodeByStoreIndex,
-} from "../utilities";
+    } from "../utilities";
+import { defaultNS } from "../utilities/constants";
+import { expandProperty, namedNodeByIRI, namedNodeByStoreIndex } from "../utilities/memoizedNamespace";
 
 const ex = defaultNS.example;
 

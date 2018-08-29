@@ -5,7 +5,7 @@ import {
 
 import { RDFStore } from "../../RDFStore";
 import { Schema } from "../../Schema";
-import { defaultNS as NS } from "../../utilities";
+import { defaultNS as NS } from "../../utilities/constants";
 import { RDFS } from "../rdfs";
 
 describe("RDFS", () => {

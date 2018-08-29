@@ -2,11 +2,8 @@ import { NamedNode } from "rdflib";
 
 import { Schema } from "./Schema";
 import { ComponentRegistration } from "./types";
-import {
-    DEFAULT_TOPOLOGY,
-    defaultNS,
-    namedNodeByStoreIndex,
-} from "./utilities";
+import { DEFAULT_TOPOLOGY, defaultNS } from "./utilities/constants";
+import { namedNodeByStoreIndex } from "./utilities/memoizedNamespace";
 
 const MSG_TYPE_ERR = "Non-optimized NamedNode instance given. Please memoize your namespace correctly.";
 

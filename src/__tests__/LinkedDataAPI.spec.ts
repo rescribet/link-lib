@@ -2,7 +2,7 @@ import "jest";
 import { BlankNode } from "rdflib";
 
 import { LinkedDataAPI } from "../LinkedDataAPI";
-import { defaultNS } from "../utilities";
+import { defaultNS } from "../utilities/constants";
 
 describe("LinkedDataAPI", () => {
     set("processor", () => ({
