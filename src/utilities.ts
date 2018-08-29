@@ -6,9 +6,7 @@ import {
     Statement,
 } from "rdflib";
 
-import { ExtensionResponse, SomeNode } from "./types";
-
-import Port = chrome.runtime.Port;
+import { SomeNode } from "./types";
 
 /**
  * Filters {obj} to only include statements where the subject equals {predicate}.
@@ -102,36 +100,6 @@ export function getTermBestLang(rawTerm: SomeTerm | SomeTerm[], langPrefs: strin
     }
 
     return rawTerm[0];
-}
-
-export function fetchWithExtension(iri: SomeNode | string, formats: string): Promise<ExtensionResponse> {
-    const c = getExtention();
-    if (c !== undefined) {
-        return new Promise((resolve): void => {
-            c.onMessage.addListener((message: object, port: Port) => {
-                port.disconnect();
-                c.disconnect();
-                resolve(message as ExtensionResponse);
-            });
-            c.postMessage({
-                accept: formats,
-                fetch: iri,
-            });
-        });
-    }
-    throw new Error("NoExtensionInstalledError");
-}
-
-/**
- * Tries to resolve the data extension.
- * @internal
- */
-export function getExtention(): Port | undefined {
-    // if (typeof chrome !== "undefined" && typeof chrome.runtime.connect !== "undefined") {
-    //     return chrome.runtime.connect("kjgnkcpcclnlchifkbbnekmgmcefhagd");
-    // }
-
-    return undefined;
 }
 
 /**

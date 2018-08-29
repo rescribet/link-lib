@@ -103,18 +103,6 @@ describe("utilities", () => {
         });
     });
 
-    describe("#fetchWithExtension", () => {
-        it("raises when unavailable", () => {
-            expect(() => {
-                fetchWithExtension("", "");
-            }).toThrow("NoExtensionInstalledError");
-        });
-    });
-
-    describe("#getExtention", () => {
-        it("returns undefined when unavailable", () => expect(getExtention()).toBeUndefined());
-    });
-
     describe("#getPropBestLang", () => {
         const langs = ["en", "nl", "de", "fr"];
         const deString = new Literal("Wert", "de");

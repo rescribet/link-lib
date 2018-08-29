@@ -26,12 +26,7 @@ import {
     ResponseAndFallbacks,
     ResponseTransformer,
 } from "../types";
-import {
-    anyRDFValue,
-    fetchWithExtension,
-    getExtention,
-    isDifferentOrigin,
-} from "../utilities";
+import { anyRDFValue } from "../utilities";
 import {
     defaultNS,
     MSG_BAD_REQUEST,
@@ -265,9 +260,6 @@ export class DataProcessor {
     public async fetchResource(iri: NamedNode | string, opts?: FetchOpts): Promise<ResponseAndFallbacks> {
         const iriString = typeof iri === "string" ? iri : iri.value;
         const accept = this.accept[new URL(iriString).origin] || this.accept.default;
-        if (isDifferentOrigin(iri) && getExtention()) {
-            return fetchWithExtension(iri, accept);
-        }
         if (accept) {
             this.fetcher.mediatypes = {[accept]: {q: 1.0}};
         }
