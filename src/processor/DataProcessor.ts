@@ -315,10 +315,11 @@ export class DataProcessor {
      * @see LinkedDataAPI#getStatus for documentation
      */
     public getStatus(iri: NamedNode): EmptyRequestStatus | FulfilledRequestStatus {
-        const fetcherStatus = this.fetcher.requested[iri.value];
+        const irl = namedNodeByIRI(iri.value.split("#").shift()!);
+        const fetcherStatus = this.fetcher.requested[irl.value];
 
         if (fetcherStatus === undefined) {
-            if (iri.value in this.fetcher.requested) {
+            if (irl.value in this.fetcher.requested) {
                 return failedRequest();
             }
             return emptyRequest as EmptyRequestStatus;
@@ -327,7 +328,7 @@ export class DataProcessor {
         const requests = this.store.match(
             null,
             defaultNS.link("requestedURI"),
-            new Literal(iri.value),
+            new Literal(irl.value),
         );
         const totalRequested = requests.length;
         if (requests.length === 0) {
