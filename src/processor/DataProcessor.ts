@@ -47,6 +47,7 @@ import { ProcessorError } from "./ProcessorError";
 import { RequestInitGenerator } from "./RequestInitGenerator";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
+const FETCHER_CALLBACKS = ["done", "fail", "refresh", "request", "retract"];
 
 async function handleStatus(res: ResponseAndFallbacks): Promise<ResponseAndFallbacks> {
     if (res.status === NOT_FOUND) {
@@ -127,7 +128,7 @@ export const emptyRequest = Object.freeze({
     requested: false,
     status: null,
     timesRequested: 0,
-});
+}) as EmptyRequestStatus;
 
 /**
  * The client (User Agent) has closed the connection, e.g. due to CORS or going offline.
@@ -154,6 +155,7 @@ export class DataProcessor {
     private readonly requestInitGenerator: RequestInitGenerator;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
     private readonly requestMap: Map<NamedNode, Promise<Statement[]> | undefined>;
+    private readonly statusMap: Map<NamedNode, EmptyRequestStatus | FulfilledRequestStatus>;
     private readonly requestNotifier?: RequestCallbackHandler;
     private readonly store: RDFStore;
 
@@ -163,11 +165,12 @@ export class DataProcessor {
                 fetch: window && window.fetch.bind(window),
                 timeout: this.timeout,
             });
-            if (typeof this.requestNotifier !== "undefined") {
-                ["done", "fail", "refresh", "request", "retract"].forEach((hook) => {
-                    this._fetcher!.addCallback(hook, this.requestNotifier!);
-                });
-            }
+            FETCHER_CALLBACKS.forEach((hook) => {
+                this._fetcher!.addCallback(hook, this.invalidateCache.bind(this));
+                if (typeof this.requestNotifier === "function") {
+                    this._fetcher!.addCallback(hook, this.requestNotifier);
+                }
+            });
         }
         return this._fetcher;
     }
@@ -183,6 +186,7 @@ export class DataProcessor {
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
         this.requestMap = new Map();
+        this.statusMap = new Map();
         this.store = opts.store;
         this.requestNotifier = opts.requestNotifier;
         if (opts.fetcher) {
@@ -318,13 +322,17 @@ export class DataProcessor {
      */
     public getStatus(iri: NamedNode): EmptyRequestStatus | FulfilledRequestStatus {
         const irl = namedNodeByIRI(iri.value.split("#").shift()!);
+
+        if (this.statusMap.has(irl)) {
+            return this.statusMap.get(irl)!;
+        }
         const fetcherStatus = this.fetcher.requested[irl.value];
 
         if (fetcherStatus === undefined) {
             if (irl.value in this.fetcher.requested) {
-                return failedRequest();
+                return this.memoizeStatus(irl, failedRequest());
             }
-            return emptyRequest as EmptyRequestStatus;
+            return this.memoizeStatus(irl, emptyRequest);
         }
 
         const requests = this.store.match(
@@ -334,18 +342,21 @@ export class DataProcessor {
         );
         const totalRequested = requests.length;
         if (requests.length === 0) {
-            return emptyRequest as EmptyRequestStatus;
+            return this.memoizeStatus(irl, emptyRequest);
         }
         if (fetcherStatus === true) {
-            return {
-                lastRequested: new Date(),
-                requested: true,
-                status: 202,
-                timesRequested: totalRequested,
-            };
+            return this.memoizeStatus(
+                irl,
+                {
+                    lastRequested: new Date(),
+                    requested: true,
+                    status: 202,
+                    timesRequested: totalRequested,
+                },
+            );
         }
         if (fetcherStatus === "timeout") {
-            return timedOutRequest(totalRequested);
+            return this.memoizeStatus(irl, timedOutRequest(totalRequested));
         }
         const requestIRI = requests.pop()!.subject as BlankNode;
         const requestObj = anyRDFValue(
@@ -354,7 +365,7 @@ export class DataProcessor {
         );
 
         if (!requestObj) {
-            return emptyRequest as EmptyRequestStatus;
+            return this.memoizeStatus(irl, emptyRequest);
         }
 
         const requestObjData = this.store.statementsFor(requestObj as BlankNode);
@@ -367,17 +378,20 @@ export class DataProcessor {
 
         if (!requestStatus) {
             if (fetcherStatus === "done") {
-                return timedOutRequest(totalRequested);
+                return this.memoizeStatus(irl, timedOutRequest(totalRequested));
             }
-            return emptyRequest as EmptyRequestStatus;
+            return this.memoizeStatus(irl, emptyRequest);
         }
 
-        return {
-            lastRequested: requestDate ? new Date(requestDate.value) : new Date(0),
-            requested: true,
-            status: Number.parseInt(requestStatus.value, 10),
-            timesRequested: totalRequested,
-        };
+        return this.memoizeStatus(
+            irl,
+            {
+                lastRequested: requestDate ? new Date(requestDate.value) : new Date(0),
+                requested: true,
+                status: Number.parseInt(requestStatus.value, 10),
+                timesRequested: totalRequested,
+            },
+        );
     }
 
     public processExternalResponse(response: Response): Promise<Statement[] | undefined> {
@@ -410,5 +424,17 @@ export class DataProcessor {
         }
 
         return processor(res);
+    }
+
+    private invalidateCache(iri: string | NamedNode, _err?: Error): boolean {
+        this.statusMap.delete(typeof iri === "string" ? namedNodeByIRI(iri) : iri);
+        return true;
+    }
+
+    private memoizeStatus(iri: NamedNode,
+                          s: EmptyRequestStatus | FulfilledRequestStatus): EmptyRequestStatus | FulfilledRequestStatus {
+        this.statusMap.set(iri, s);
+
+        return s;
     }
 }
