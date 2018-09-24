@@ -1,9 +1,11 @@
 import {
     BlankNode,
+    Fetcher,
     IndexedFormula,
     Literal,
     NamedNamespace,
     NamedNode,
+    RequestCallbackHandler,
     SomeTerm,
     Statement,
 } from "rdflib";
@@ -11,6 +13,7 @@ import {
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
+import { RequestInitGenerator } from "./processor/RequestInitGenerator";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { DisjointSet } from "./utilities/DisjointSet";
@@ -160,4 +163,13 @@ export interface VocabularyProcessor {
      * instance of rdfs:Class.
      */
     processType: (type: NamedNode, ctx: VocabularyProcessingContext) => boolean;
+}
+
+export interface DataProcessorOpts {
+    accept?: { [k: string]: string };
+    requestInitGenerator?: RequestInitGenerator;
+    fetcher?: Fetcher;
+    mapping?: { [k: string]: ResponseTransformer[] };
+    requestNotifier?: RequestCallbackHandler;
+    store: RDFStore;
 }

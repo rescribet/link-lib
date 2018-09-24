@@ -15,9 +15,11 @@ import {
     Statement,
     uri as Uri,
 } from "rdflib";
+import { LinkedDataAPI } from "../LinkedDataAPI";
 
 import { RDFStore } from "../RDFStore";
 import {
+    DataProcessorOpts,
     DataTuple,
     EmptyRequestStatus,
     FailedResponse,
@@ -114,15 +116,6 @@ function processResponse(iri: string | NamedNode, res: Response): Statement[] {
     return [];
 }
 
-export interface DataProcessorOpts {
-    accept?: { [k: string]: string };
-    requestInitGenerator?: RequestInitGenerator;
-    fetcher?: Fetcher;
-    mapping?: { [k: string]: ResponseTransformer[] };
-    requestNotifier?: RequestCallbackHandler;
-    store: RDFStore;
-}
-
 export const emptyRequest = Object.freeze({
     lastRequested: null,
     requested: false,
@@ -147,7 +140,7 @@ const timedOutRequest = (totalRequested: number): FulfilledRequestStatus => Obje
     timesRequested: totalRequested,
 }) as FulfilledRequestStatus;
 
-export class DataProcessor {
+export class DataProcessor implements LinkedDataAPI {
     public accept: { [k: string]: string };
     public timeout: number = 30000;
 

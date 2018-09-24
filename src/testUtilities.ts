@@ -32,7 +32,7 @@ export type GetBasicStoreOpts = Partial<ExplodedLRS<BasicComponent>>;
 export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicComponent> => {
     const store = opts.store || new RDFStore();
     const processor = opts.processor || new DataProcessor({ store });
-    const api = opts.api || new LinkedDataAPI({ processor });
+    const api = opts.api || processor;
     const schema = opts.schema || new Schema(store);
     const mapping = opts.mapping || new ComponentStoreTestProxy<BasicComponent>(schema);
 

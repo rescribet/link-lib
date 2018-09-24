@@ -10,6 +10,7 @@ import {
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
+import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
 import { dataToGraphTuple } from "./processor/DataToGraph";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
@@ -72,11 +73,9 @@ export class LinkedRenderStore<T> {
             this.store = opts.store;
         }
 
-        this.api = opts.api || new LinkedDataAPI({
-            dataProcessorOpts: {
-                requestNotifier: this.touch.bind(this),
-                store: this.store,
-            },
+        this.api = opts.api || new DataProcessor({
+            requestNotifier: this.touch.bind(this),
+            store: this.store,
         });
         this.defaultType = opts.defaultType || defaultNS.schema("Thing");
         this.namespaces = opts.namespaces || {...defaultNS};
@@ -239,6 +238,10 @@ export class LinkedRenderStore<T> {
     }
 
     public getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus {
+        if (iri.termType === "BlankNode") {
+            return emptyRequest as EmptyRequestStatus;
+        }
+
         return this.api.getStatus(iri);
     }
 

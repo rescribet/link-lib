@@ -5,10 +5,8 @@ import {
 } from "rdflib";
 
 import {
-    DataProcessor,
     DataProcessorOpts,
-    emptyRequest,
-} from "./processor/DataProcessor";
+} from "./types";
 import {
     DataTuple,
     EmptyRequestStatus,
@@ -18,21 +16,8 @@ import {
     SomeNode,
 } from "./types";
 
-export interface LinkedDataAPIOpts {
-    dataProcessorOpts?: DataProcessorOpts;
-    processor?: DataProcessor;
-}
-
-export class LinkedDataAPI {
-    private processor: DataProcessor;
-
-    public constructor(opts: LinkedDataAPIOpts) {
-        this.processor = opts.processor || new DataProcessor(opts.dataProcessorOpts);
-    }
-
-    public execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse> {
-        return this.processor.execActionByIRI(subject, dataTuple);
-    }
+export interface LinkedDataAPI {
+    execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
     /**
      * Loads a resource from the {iri}.
@@ -40,9 +25,7 @@ export class LinkedDataAPI {
      * @return The response from the server, or an response object from
      * the extension
      */
-    public fetchResource(iri: NamedNode): Promise<Response | object> {
-        return this.processor.fetchResource(iri);
-    }
+    fetchResource(iri: NamedNode): Promise<Response | object>;
 
     /**
      * Gets an entity by its SomeNode.
@@ -53,9 +36,7 @@ export class LinkedDataAPI {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Statement[]> {
-        return this.processor.getEntity(iri, opts);
-    }
+    getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Statement[]>;
 
     /**
      * Retrieve the (network) status for a resource.
@@ -74,28 +55,22 @@ export class LinkedDataAPI {
      * @param {SomeNode} iri The resource to get the status on.
      * @return {EmptyRequestStatus | FulfilledRequestStatus}
      */
-    public getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus {
-        if (iri.termType === "BlankNode") {
-            return emptyRequest as EmptyRequestStatus;
-        }
-
-        return this.processor.getStatus(iri);
-    }
+    getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus;
 
     /** Register a transformer so it can be used to interact with API's. */
-    public registerTransformer(processor: ResponseTransformer,
-                               mediaType: string | string[],
-                               acceptValue: number): void {
-        const mediaTypes: string[] = Array.isArray(mediaType) ? mediaType : [mediaType];
-        this.processor.registerTransformer(processor, mediaTypes, acceptValue);
-    }
+    registerTransformer(processor: ResponseTransformer,
+                        mediaType: string | string[],
+                        acceptValue: number): void;
 
     /**
      * Overrides the `Accept` value for when a certain host doesn't respond well to multiple values.
      * @param origin The iri of the origin for the requests.
      * @param acceptValue The value to use for the `Accept` header.
      */
-    public setAcceptForHost(origin: string, acceptValue: string): void {
-        this.processor.setAcceptForHost(origin, acceptValue);
-    }
+    setAcceptForHost(origin: string, acceptValue: string): void;
 }
+
+declare var LinkedDataAPI: {
+    new (opts?: DataProcessorOpts): any;
+    (): any;
+};
