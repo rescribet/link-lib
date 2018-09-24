@@ -153,7 +153,7 @@ export class DataProcessor {
     private _fetcher: Fetcher | undefined;
     private readonly requestInitGenerator: RequestInitGenerator;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
-    private readonly requestMap: { [k: string]: Promise<Statement[]> | undefined };
+    private readonly requestMap: Map<NamedNode, Promise<Statement[]> | undefined>;
     private readonly requestNotifier?: RequestCallbackHandler;
     private readonly store: RDFStore;
 
@@ -182,7 +182,7 @@ export class DataProcessor {
         };
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
-        this.requestMap = {};
+        this.requestMap = new Map();
         this.store = opts.store;
         this.requestNotifier = opts.requestNotifier;
         if (opts.fetcher) {
@@ -290,14 +290,16 @@ export class DataProcessor {
         const url = new URL(iri.value);
         url.hash = "";
         const requestIRI = new NamedNode(url.toString());
-        if (typeof this.requestMap[requestIRI.toString()] !== "undefined") {
-            return this.requestMap[requestIRI.toString()] || [];
+        if (this.requestMap.has(requestIRI)) {
+            return this.requestMap.get(requestIRI) || [];
         }
 
         try {
-            return this.requestMap[requestIRI.toString()] = this
+            const req = this
                 .fetchResource(requestIRI, opts)
                 .then((res) => this.feedResponse(res)); // TODO: feedResponse is only necessary for external requests.
+            this.requestMap.set(requestIRI, req);
+            return await req;
         } catch (e) {
             if (typeof e.res === "undefined") {
                 throw e;
@@ -307,7 +309,7 @@ export class DataProcessor {
 
             return responseQuads;
         } finally {
-            this.requestMap[requestIRI.toString()] = undefined;
+            this.requestMap.delete(requestIRI);
         }
     }
 
