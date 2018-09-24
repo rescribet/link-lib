@@ -21,7 +21,7 @@
     "doc": "rm -rf dist/docs/* && typedoc --tsconfig tsconfig-types.json --exclude **/*.spec.ts --excludeExternals --excludePrivate --mode file --theme minimal --target ES6 --includeDeclarations --out dist/docs/ src/",
     "doc:deploy": "gh-pages -d ./dist/docs",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
-    "prebuild": "rm -rf dist/",
+    "prebuild": "rm -rf dist/*",
     "prepublish": "npm run build && npm run doc",
     "postpublish": "npm run doc:deploy",
     "pretest": "npm run lint",
