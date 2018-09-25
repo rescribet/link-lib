@@ -80,16 +80,17 @@ export function processObject(subject: SomeNode,
 
 function processDataObject(subject: SomeNode, data: DataObject, graph: IndexedFormula): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
-    Object.keys(data).forEach((k) => {
-        const predicate = expandProperty(k, defaultNS);
-        const datum = data[k];
+    const keys = Object.keys(data);
+    for (let i = 0; i < keys.length; i++) {
+        const predicate = expandProperty(keys[i], defaultNS);
+        const datum = data[keys[i]];
 
         if (predicate === undefined) {
-            throw new Error(`Unknown predicate ${k} given.`);
+            throw new Error(`Unknown predicate ${keys[i]} given.`);
         }
 
         blobs = blobs.concat(processObject(subject, predicate, datum, graph));
-    });
+    }
 
     return blobs;
 }

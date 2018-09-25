@@ -78,18 +78,21 @@ export class Schema extends IndexedFormula {
         if (lookupTypes.length === 0) {
             return [nsRDFSResource];
         }
-        const allTypes = lookupTypes
-            .map((v) => {
-                const canon = this.liveStore.canon(v) as NamedNode;
-                if (!this.processedTypes.includes(canon)) {
-                    for (const vocab of Schema.vocabularies) {
-                        vocab.processType(canon, this.getProcessingCtx());
-                    }
-                    this.processedTypes.push(canon);
-                }
 
-                return canon;
-            })
+        const canonicalTypes = [];
+        for (let i = 0; i < lookupTypes.length; i++) {
+            const canon = this.liveStore.canon(lookupTypes[i]) as NamedNode;
+            if (!this.processedTypes.includes(canon)) {
+                for (const vocab of Schema.vocabularies) {
+                    vocab.processType(canon, this.getProcessingCtx());
+                }
+                this.processedTypes.push(canon);
+            }
+
+            canonicalTypes.push(canon);
+        }
+
+        const allTypes = canonicalTypes
             .reduce(
                 (a, b) => {
                     const superSet = this.superMap.get(b.value);

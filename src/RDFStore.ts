@@ -191,23 +191,37 @@ export class RDFStore {
      * @param replacement The statements to add to the store.
      */
     public replaceStatements(original: Statement[], replacement: Statement[]): void {
-        const uniqueStatements = replacement
-            .filter((s) => !original.some(
-                (o) => o.subject.sameTerm(s.subject) && o.predicate.sameTerm(s.predicate),
-            ));
+        const uniqueStatements = new Array(replacement.length);
+        for (let i = 0; i < replacement.length; i++) {
+            const cond = original.some(
+                (o) => o.subject.sameTerm(replacement[i].subject) && o.predicate.sameTerm(replacement[i].predicate),
+            );
+            if (!cond) {
+                uniqueStatements.push(replacement[i]);
+            }
+        }
 
         this.removeStatements(original);
         // Remove statements not in the old object. Useful for replacing data loosely related to the main resource.
-        uniqueStatements.forEach((s) => this.store.removeMatches(s.subject, s.predicate));
+        for (let i = 0; i < uniqueStatements.length; i++) {
+            this.store.removeMatches(uniqueStatements[i].subject, uniqueStatements[i].predicate);
+        }
 
         return this.addStatements(replacement);
     }
 
     public replaceMatches(statements: Statement[]): void {
-        statements.forEach((s) => {
-            this.removeStatements(this.match(s.subject, s.predicate, undefined, undefined));
-        });
-        statements.forEach((s) => this.store.add(s.subject, s.predicate, s.object));
+        for (let i = 0; i < statements.length; i++) {
+            this.removeStatements(this.match(
+                statements[i].subject,
+                statements[i].predicate,
+                undefined,
+                undefined,
+            ));
+        }
+        for (let i = 0; i < statements.length; i++) {
+            this.store.add(statements[i].subject, statements[i].predicate, statements[i].object);
+        }
     }
 
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Statement[] {

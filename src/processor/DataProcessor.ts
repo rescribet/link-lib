@@ -244,9 +244,9 @@ export class DataProcessor implements LinkedDataAPI {
                 new Blob([rdfSerialization],
                     { type: "text/n3" }),
             );
-            blobs.forEach(([blobIRI, blob]) => {
-                data.append(blobIRI.toString(), blob);
-            });
+            for (let i = 0; i < blobs.length; i++) {
+                data.append(blobs[i][0].toString(), blobs[i][1]);
+            }
             opts.body = data;
         }
 

@@ -71,16 +71,16 @@ export const RDFS = {
 
         const domainStatements = ctx.store.statementsMatching(item.predicate, nsRDFSdomain);
         if (domainStatements.length > 0) {
-            domainStatements.forEach(({ object }) => {
-                result.push(new Statement(item.subject as NamedNode, nsRDFtype, object));
-            });
+            for (let i = 0; i < domainStatements.length; i++) {
+                result.push(new Statement(item.subject as NamedNode, nsRDFtype, domainStatements[i].object));
+            }
         }
 
         const rangeStatements = ctx.store.statementsMatching(item.predicate, nsRDFSrange);
         if (rangeStatements.length > 0) {                                                     // P rdfs:range C..Cn
-            rangeStatements.forEach(({ object }) => {
-                result.push(new Statement(item.object as NamedNode, nsRDFtype, object));
-            });
+            for (let i = 0; i < rangeStatements.length; i++) {
+                result.push(new Statement(item.object as NamedNode, nsRDFtype, rangeStatements[i].object));
+            }
         }
 
         if (nsRDFSdomain.equals(item.predicate)) {

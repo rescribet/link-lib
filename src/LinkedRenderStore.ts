@@ -266,9 +266,15 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const registerItem = (i: ComponentRegistration<T>): void => {
             this.mapping.registerRenderer(i.component, i.type, i.property, i.topology);
         };
-        components.forEach((c: ComponentRegistration<T> | Array<ComponentRegistration<T>>) => {
-            Array.isArray(c) ? c.forEach(registerItem) : registerItem(c);
-        });
+        for (let i = 0; i < components.length; i++) {
+            if (Array.isArray(components[i])) {
+                for (let j = 0; j < (components[i] as Array<ComponentRegistration<T>>).length; j++) {
+                    registerItem((components[i] as Array<ComponentRegistration<T>>)[j]);
+                }
+            } else {
+                registerItem(components[i] as ComponentRegistration<T>);
+            }
+        }
     }
 
     /**

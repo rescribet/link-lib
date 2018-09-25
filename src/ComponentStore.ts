@@ -34,23 +34,22 @@ export class ComponentStore<T> {
         }
         const registrations: Array<ComponentRegistration<T>> = [];
 
-        types.forEach((t) => {
-            properties.forEach((p) => {
-                topologies.forEach((top) => {
-                    if (p.sI === undefined
-                        || top.sI === undefined
-                        || t.sI === undefined) {
-                        throw new TypeError(MSG_TYPE_ERR);
-                    }
+        for (let t = 0; t < types.length; t++) {
+            if (types[t].sI === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+            for (let p = 0; p < properties.length; p++) {
+                if (properties[p].sI === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+                for (let top = 0; top < topologies.length; top++) {
+                    if (topologies[top].sI === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+
                     registrations.push({
                         component,
-                        property: p,
-                        topology: top,
-                        type: t,
+                        property: properties[p],
+                        topology: topologies[top],
+                        type: types[t],
                     });
-                });
-            });
-        });
+                }
+            }
+        }
 
         return registrations;
     }
@@ -216,12 +215,12 @@ export class ComponentStore<T> {
         for (const predicate of predicates) {
             if (typeof this.mapping[predicate.sI] !== "undefined") {
                 const types = this.mapping[predicate.sI];
-                types.forEach((_v, i) => {
+                for (let i = 0; i < types.length; i++) {
                     const compType = this.lookup(predicate.sI, i, topology.sI);
                     if (compType !== undefined) {
                         classes.push(namedNodeByStoreIndex(i) as NamedNode);
                     }
-                });
+                }
             }
         }
 
