@@ -5,7 +5,6 @@ import {
     Literal,
     NamedNamespace,
     NamedNode,
-    RequestCallbackHandler,
     SomeTerm,
     Statement,
 } from "rdflib";
@@ -60,11 +59,15 @@ export type SomeNode = NamedNode | BlankNode;
 export interface LinkedRenderStoreOptions<T> {
     api?: LinkedDataAPI | undefined;
     defaultType?: NamedNode | undefined;
+    dispatch?: MiddlewareActionHandler;
     mapping?: ComponentStore<T> | undefined;
-    middleware?: Array<MiddlewareFn<T>> | undefined;
     namespaces?: NamespaceMap | undefined;
     schema?: Schema | undefined;
     store?: RDFStore | undefined;
+}
+
+export interface Dispatcher {
+    dispatch: MiddlewareActionHandler;
 }
 
 export type MiddlewareFn<T> = (store: LinkedRenderStore<T>) => MiddlewareWithBoundLRS;
@@ -167,9 +170,9 @@ export interface VocabularyProcessor {
 
 export interface DataProcessorOpts {
     accept?: { [k: string]: string };
+    dispatch?: MiddlewareActionHandler;
     requestInitGenerator?: RequestInitGenerator;
     fetcher?: Fetcher;
     mapping?: { [k: string]: ResponseTransformer[] };
-    requestNotifier?: RequestCallbackHandler;
     store: RDFStore;
 }

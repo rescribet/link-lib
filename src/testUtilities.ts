@@ -1,12 +1,13 @@
 import { NamedNode } from "rdflib";
 
 import { ComponentStore } from "./ComponentStore";
+import { createStore } from "./createStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
-import { LinkedRenderStoreOptions } from "./types";
+import { LinkedRenderStoreOptions, MiddlewareActionHandler } from "./types";
 
 export type BasicComponent = () => string | undefined;
 
@@ -20,6 +21,7 @@ export class ComponentStoreTestProxy<T> extends ComponentStore<T> {
 
 export interface ExplodedLRS<T> {
     api: LinkedDataAPI;
+    dispatch: MiddlewareActionHandler;
     processor: DataProcessor;
     lrs: LinkedRenderStore<T>;
     mapping: ComponentStoreTestProxy<T>;
@@ -42,7 +44,14 @@ export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicC
         schema,
         store,
     } as LinkedRenderStoreOptions<BasicComponent>;
-    const lrs = new LinkedRenderStore(conf);
+    const lrs = createStore(conf);
 
-    return {lrs, mapping, processor, schema, store} as ExplodedLRS<BasicComponent>;
+    return {
+        dispatch: lrs.dispatch,
+        lrs,
+        mapping,
+        processor,
+        schema,
+        store,
+    } as ExplodedLRS<BasicComponent>;
 };

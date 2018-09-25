@@ -61,9 +61,9 @@
     "coverageThreshold": {
       "global": {
         "branches": 64,
-        "functions": 74,
-        "lines": 74,
-        "statements": 74
+        "functions": 76,
+        "lines": 76,
+        "statements": 75
       }
     },
     "setupTestFrameworkScriptFile": "./jest-plugins",

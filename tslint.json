@@ -10,6 +10,8 @@
     "no-inferrable-types": [{"severity": "warning"}],
     "no-null-keyword": false,
     "only-arrow-functions": false,
+    // for-of is a lot slower then an iota for
+    "prefer-for-of": false,
     "typedef": [
       true,
       "call-signature",

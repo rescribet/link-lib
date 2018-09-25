@@ -6,6 +6,7 @@ import {
 
 import {
     DataProcessorOpts,
+    Dispatcher,
 } from "./types";
 import {
     DataTuple,
@@ -16,7 +17,7 @@ import {
     SomeNode,
 } from "./types";
 
-export interface LinkedDataAPI {
+export interface LinkedDataAPI extends Dispatcher {
     execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
     /**

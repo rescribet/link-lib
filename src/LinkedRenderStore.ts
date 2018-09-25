@@ -17,6 +17,7 @@ import { Schema } from "./Schema";
 import {
     ComponentRegistration,
     DataObject,
+    Dispatcher,
     EmptyRequestStatus,
     FetchOpts,
     FulfilledRequestStatus,
@@ -24,7 +25,6 @@ import {
     LinkedActionResponse,
     LinkedRenderStoreOptions,
     MiddlewareActionHandler,
-    MiddlewareFn,
     NamespaceMap,
     SomeNode,
     SubscriptionRegistration,
@@ -39,7 +39,7 @@ declare global {
     }
 }
 
-export class LinkedRenderStore<T> {
+export class LinkedRenderStore<T> implements Dispatcher {
     public static registerRenderer<T>(
         component: T,
         type: LazyNNArgument,
@@ -61,7 +61,7 @@ export class LinkedRenderStore<T> {
 
     private api: LinkedDataAPI;
     private mapping: ComponentStore<T>;
-    private middleware: MiddlewareActionHandler;
+    private _dispatch?: MiddlewareActionHandler;
     private schema: Schema;
     private store: RDFStore = new RDFStore();
     private subscriptions: SubscriptionRegistration[] = [];
@@ -74,16 +74,29 @@ export class LinkedRenderStore<T> {
         }
 
         this.api = opts.api || new DataProcessor({
-            requestNotifier: this.touch.bind(this),
+            dispatch: opts.dispatch,
             store: this.store,
         });
+        if (opts.dispatch) {
+            this.dispatch = opts.dispatch;
+        }
         this.defaultType = opts.defaultType || defaultNS.schema("Thing");
         this.namespaces = opts.namespaces || {...defaultNS};
         this.schema = opts.schema || new Schema(this.store);
         this.mapping = opts.mapping || new ComponentStore(this.schema);
-        // tslint:disable-next-line typedef
-        const actionMiddleware: MiddlewareFn<T> = () => () => this.execActionByIRI.bind(this);
-        this.middleware = this.applyMiddleware(...(opts.middleware || []), actionMiddleware);
+    }
+
+    public get dispatch(): MiddlewareActionHandler {
+        if (typeof this._dispatch === "undefined") {
+            throw new Error("Invariant: cannot call `dispatch` before initialization is complete");
+        }
+
+        return this._dispatch;
+    }
+
+    public set dispatch(value: MiddlewareActionHandler) {
+        this._dispatch = value;
+        this.api.dispatch = value;
     }
 
     /**
@@ -128,7 +141,7 @@ export class LinkedRenderStore<T> {
      * @param {Object} args The arguments to the function defined by the subject.
      */
     public async exec(subject: NamedNode, args?: DataObject): Promise<any> {
-        return this.middleware(subject, args);
+        return this.dispatch(subject, args);
     }
 
     /**
@@ -317,6 +330,14 @@ export class LinkedRenderStore<T> {
         this.subscriptions.push(registration);
     }
 
+    /** @internal */
+    public touch(iri: string | NamedNode, _err?: Error): boolean {
+        const resource = typeof iri === "string" ? namedNodeByIRI(iri) : iri;
+        this.store.addStatements([new Statement(resource, defaultNS.ll("nop"), Literal.fromValue(0))]);
+        this.broadcast();
+        return true;
+    }
+
     /**
      * Returns an entity from the cache directly.
      * This won't cause any network requests even if the entity can't be found.
@@ -327,18 +348,6 @@ export class LinkedRenderStore<T> {
      */
     public tryEntity(iri: SomeNode): Statement[] {
         return this.store.statementsFor(iri);
-    }
-
-    /**
-     * Binds and reduces an array of middleware function down to a handler.
-     * @param layers
-     */
-    private applyMiddleware(...layers: Array<MiddlewareFn<T>>): MiddlewareActionHandler {
-        const storeBound = layers.map((middleware) => middleware(this));
-
-        const dispatch: MiddlewareActionHandler = (a: NamedNode, _o: any): Promise<any> => Promise.resolve(a);
-
-        return storeBound.reduceRight((composed, f) => f(composed), dispatch);
     }
 
     /**
@@ -388,12 +397,5 @@ export class LinkedRenderStore<T> {
                 registration.callback(processingBuffer);
             }
         });
-    }
-
-    private touch(iri: string | NamedNode, _err?: Error): boolean {
-        const resource = typeof iri === "string" ? namedNodeByIRI(iri) : iri;
-        this.store.addStatements([new Statement(resource, defaultNS.ll("nop"), Literal.fromValue(0))]);
-        this.broadcast();
-        return true;
     }
 }

@@ -10,8 +10,6 @@ import {
     allRDFPropertyStatements,
     allRDFValues,
     anyRDFValue,
-    fetchWithExtension,
-    getExtention,
     getPropBestLang,
     getPropBestLangRaw,
     isDifferentOrigin,

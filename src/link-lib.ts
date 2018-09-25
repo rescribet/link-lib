@@ -1,5 +1,7 @@
 import { LinkedRenderStore } from "./LinkedRenderStore";
 
+export { createStore } from "./createStore";
+export { linkMiddleware } from "./linkMiddleware";
 export { RDFStore } from "./RDFStore";
 export { Schema } from "./Schema";
 export * from "./testUtilities";

@@ -10,7 +10,6 @@ import {
     IndexedFormula,
     Literal,
     NamedNode,
-    RequestCallbackHandler,
     Serializer,
     Statement,
     uri as Uri,
@@ -25,6 +24,7 @@ import {
     FailedResponse,
     FulfilledRequestStatus,
     LinkedActionResponse,
+    MiddlewareActionHandler,
     ResponseAndFallbacks,
     ResponseTransformer,
 } from "../types";
@@ -145,11 +145,11 @@ export class DataProcessor implements LinkedDataAPI {
     public timeout: number = 30000;
 
     private _fetcher: Fetcher | undefined;
+    private _dispatch?: MiddlewareActionHandler;
     private readonly requestInitGenerator: RequestInitGenerator;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
     private readonly requestMap: Map<NamedNode, Promise<Statement[]> | undefined>;
     private readonly statusMap: Map<NamedNode, EmptyRequestStatus | FulfilledRequestStatus>;
-    private readonly requestNotifier?: RequestCallbackHandler;
     private readonly store: RDFStore;
 
     private get fetcher(): Fetcher {
@@ -159,10 +159,13 @@ export class DataProcessor implements LinkedDataAPI {
                 timeout: this.timeout,
             });
             FETCHER_CALLBACKS.forEach((hook) => {
+                const hookIRI = defaultNS.ll(`data/rdflib/${hook}`);
                 this._fetcher!.addCallback(hook, this.invalidateCache.bind(this));
-                if (typeof this.requestNotifier === "function") {
-                    this._fetcher!.addCallback(hook, this.requestNotifier);
-                }
+                this._fetcher!.addCallback(hook, (iri: string | NamedNode, _err?: Error) => {
+                    this.dispatch(hookIRI, [typeof iri === "string" ? namedNodeByIRI(iri) : iri, _err]);
+
+                    return true;
+                });
             });
         }
         return this._fetcher;
@@ -176,15 +179,27 @@ export class DataProcessor implements LinkedDataAPI {
         this.accept = opts.accept || {
             default: "",
         };
+        this._dispatch = opts.dispatch;
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
         this.requestMap = new Map();
         this.statusMap = new Map();
         this.store = opts.store;
-        this.requestNotifier = opts.requestNotifier;
         if (opts.fetcher) {
             this.fetcher = opts.fetcher;
         }
+    }
+
+    public get dispatch(): MiddlewareActionHandler {
+        if (typeof this._dispatch === "undefined") {
+            throw new Error("Invariant: cannot call `dispatch` before initialization is complete");
+        }
+
+        return this._dispatch;
+    }
+
+    public set dispatch(value: MiddlewareActionHandler) {
+        this._dispatch = value;
     }
 
     public async execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse> {
@@ -273,7 +288,17 @@ export class DataProcessor implements LinkedDataAPI {
             opts,
         );
 
-        return this.fetcher.load(iri, options);
+        return this.fetcher.load(iri, options).then((res) => {
+            const actionsHeader = getHeader(res, "Exec-Action");
+            if (actionsHeader) {
+                const actions = actionsHeader.split(", ");
+                for (let i = 0; i < actions.length; i++) {
+                    this.dispatch(namedNodeByIRI(actions[i]), undefined);
+                }
+            }
+
+            return res;
+        });
     }
 
     /**
