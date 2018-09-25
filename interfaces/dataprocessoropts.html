@@ -914,6 +914,9 @@ img { max-width: 100%; }
 					<a href="dataprocessoropts.html#accept" class="tsd-kind-icon">accept</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="dataprocessoropts.html#dispatch" class="tsd-kind-icon">dispatch</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="dataprocessoropts.html#fetcher" class="tsd-kind-icon">fetcher</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
@@ -921,9 +924,6 @@ img { max-width: 100%; }
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="dataprocessoropts.html#requestinitgenerator" class="tsd-kind-icon">request<wbr>Init<wbr>Generator</a>
-				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="dataprocessoropts.html#requestnotifier" class="tsd-kind-icon">request<wbr>Notifier</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="dataprocessoropts.html#store" class="tsd-kind-icon">store</a>
@@ -950,10 +950,10 @@ img { max-width: 100%; }
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dataprocessoropts.html#accept" class="tsd-kind-icon">accept</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dataprocessoropts.html#dispatch" class="tsd-kind-icon">dispatch</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dataprocessoropts.html#fetcher" class="tsd-kind-icon">fetcher</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dataprocessoropts.html#mapping" class="tsd-kind-icon">mapping</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dataprocessoropts.html#requestinitgenerator" class="tsd-kind-icon">request<wbr>Init<wbr>Generator</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dataprocessoropts.html#requestnotifier" class="tsd-kind-icon">request<wbr>Notifier</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="dataprocessoropts.html#store" class="tsd-kind-icon">store</a></li>
 						</ul>
 					</section>
@@ -968,7 +968,17 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/01abfee/src/processor/DataProcessor.ts#L118">processor/DataProcessor.ts:118</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1eb37fb/src/types.ts#L172">types.ts:172</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="dispatch" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagOptional">Optional</span> dispatch</h3>
+				<div class="tsd-signature tsd-kind-icon">dispatch<span class="tsd-signature-symbol">:</span> <a href="../globals.html#middlewareactionhandler" class="tsd-signature-type">MiddlewareActionHandler</a></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1eb37fb/src/types.ts#L173">types.ts:173</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -978,7 +988,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">fetcher<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Fetcher</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/01abfee/src/processor/DataProcessor.ts#L120">processor/DataProcessor.ts:120</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1eb37fb/src/types.ts#L175">types.ts:175</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -988,7 +998,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">mapping<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/01abfee/src/processor/DataProcessor.ts#L121">processor/DataProcessor.ts:121</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1eb37fb/src/types.ts#L176">types.ts:176</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -998,17 +1008,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">request<wbr>Init<wbr>Generator<span class="tsd-signature-symbol">:</span> <a href="../classes/requestinitgenerator.html" class="tsd-signature-type">RequestInitGenerator</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/01abfee/src/processor/DataProcessor.ts#L119">processor/DataProcessor.ts:119</a></li>
-					</ul>
-				</aside>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="requestnotifier" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagOptional">Optional</span> request<wbr>Notifier</h3>
-				<div class="tsd-signature tsd-kind-icon">request<wbr>Notifier<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestCallbackHandler</span></div>
-				<aside class="tsd-sources">
-					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/01abfee/src/processor/DataProcessor.ts#L122">processor/DataProcessor.ts:122</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1eb37fb/src/types.ts#L174">types.ts:174</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1018,7 +1018,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">store<span class="tsd-signature-symbol">:</span> <a href="../classes/rdfstore.html" class="tsd-signature-type">RDFStore</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/01abfee/src/processor/DataProcessor.ts#L123">processor/DataProcessor.ts:123</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/1eb37fb/src/types.ts#L177">types.ts:177</a></li>
 					</ul>
 				</aside>
 			</section>
