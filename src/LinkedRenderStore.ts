@@ -82,7 +82,7 @@ export class LinkedRenderStore<T> {
         this.schema = opts.schema || new Schema(this.store);
         this.mapping = opts.mapping || new ComponentStore(this.schema);
         // tslint:disable-next-line typedef
-        const actionMiddleware: MiddlewareFn<T> = () => () => this.execActionByIRI;
+        const actionMiddleware: MiddlewareFn<T> = () => () => this.execActionByIRI.bind(this);
         this.middleware = this.applyMiddleware(...(opts.middleware || []), actionMiddleware);
     }
 
