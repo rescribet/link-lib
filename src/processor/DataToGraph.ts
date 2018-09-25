@@ -70,7 +70,15 @@ export function processObject(subject: SomeNode,
     } else if (datum && datum.termType === "NamedNode") {
         graph.add(subject, predicate, namedNodeByIRI(datum.value));
     } else if (datum && datum.termType === "Literal") {
-        graph.add(subject, predicate, new Literal(datum.value, datum.language, namedNodeByIRI(datum.datatype.value)));
+        graph.add(
+            subject,
+            predicate,
+            new Literal(
+                datum.value,
+                (datum as Literal).language,
+                namedNodeByIRI((datum as Literal).datatype.value),
+            ),
+        );
     } else if (datum !== null && datum !== undefined) {
         graph.add(subject, predicate, Literal.fromValue(datum));
     }

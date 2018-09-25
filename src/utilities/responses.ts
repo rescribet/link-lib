@@ -56,7 +56,7 @@ export function getHeader(res: ResponseAndFallbacks, header: string): string | n
     } else if (res instanceof XMLHttpRequest) {
         return res.getResponseHeader(header) || null;
     } else if (res && res.headers) {
-        const { [header]: headerValue } = res.headers;
+        const headerValue = res.headers[header];
         return headerValue || null;
     }
 
