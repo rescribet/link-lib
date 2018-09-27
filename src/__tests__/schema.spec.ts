@@ -1,6 +1,6 @@
 import "jest";
 import {
-    Literal, NamedNode,
+    Literal,
     Statement,
 } from "rdflib";
 

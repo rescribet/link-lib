@@ -207,7 +207,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         if (preExistingData !== undefined) {
             this.store.removeStatements(preExistingData);
         }
-        await this.store.processDelta(data);
+        this.store.processDelta(data);
         this.broadcast();
     }
 
