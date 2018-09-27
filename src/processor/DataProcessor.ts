@@ -188,6 +188,7 @@ export class DataProcessor implements LinkedDataAPI {
         if (opts.fetcher) {
             this.fetcher = opts.fetcher;
         }
+        this.processExecAction = this.processExecAction.bind(this);
     }
 
     public get dispatch(): MiddlewareActionHandler {
@@ -250,7 +251,7 @@ export class DataProcessor implements LinkedDataAPI {
             opts.body = data;
         }
 
-        const resp = await fetch(url.value, opts);
+        const resp = await fetch(url.value, opts).then(this.processExecAction);
 
         if (resp.status > BAD_REQUEST) {
             // TODO: process responses with a correct content-type.
@@ -288,17 +289,7 @@ export class DataProcessor implements LinkedDataAPI {
             opts,
         );
 
-        return this.fetcher.load(iri, options).then((res) => {
-            const actionsHeader = getHeader(res, "Exec-Action");
-            if (actionsHeader) {
-                const actions = actionsHeader.split(", ");
-                for (let i = 0; i < actions.length; i++) {
-                    this.dispatch(namedNodeByIRI(actions[i]), undefined);
-                }
-            }
-
-            return res;
-        });
+        return this.fetcher.load(iri, options).then(this.processExecAction);
     }
 
     /**
@@ -454,5 +445,17 @@ export class DataProcessor implements LinkedDataAPI {
         this.statusMap.set(iri, s);
 
         return s;
+    }
+
+    private processExecAction(res: Response): Promise<Response> {
+        const actionsHeader = getHeader(res, "Exec-Action");
+        if (actionsHeader) {
+            const actions = actionsHeader.split(", ");
+            for (let i = 0; i < actions.length; i++) {
+                this.dispatch(namedNodeByIRI(actions[i]), undefined);
+            }
+        }
+
+        return Promise.resolve(res);
     }
 }
