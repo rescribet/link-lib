@@ -159,8 +159,8 @@ acorn@^5.5.3:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.7.3.tgz#67aa231bf8812974b85235a96771eb6bd07ea279"
 
 acorn@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.0.1.tgz#66e6147e1027704479dc6d9b20d884c572db3cc1"
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.0.2.tgz#6a459041c320ab17592c6317abbfdf4bbaa98ca4"
 
 ajv@^5.3.0:
   version "5.5.2"
@@ -319,11 +319,9 @@ atob@^2.1.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
 
-auth-header@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/auth-header/-/auth-header-0.3.1.tgz#44007ed69644cc9eab068ec4c8c495deee64697f"
-  dependencies:
-    babel-core "^6.4.5"
+auth-header@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/auth-header/-/auth-header-1.0.0.tgz#ea24fdc5588e1eb8b750df8655a396aa48fc9076"
 
 aws-sign2@~0.7.0:
   version "0.7.0"
@@ -341,7 +339,7 @@ babel-code-frame@^6.22.0, babel-code-frame@^6.26.0:
     esutils "^2.0.2"
     js-tokens "^3.0.2"
 
-babel-core@^6.0.0, babel-core@^6.26.0, babel-core@^6.4.5:
+babel-core@^6.0.0, babel-core@^6.26.0:
   version "6.26.3"
   resolved "https://registry.yarnpkg.com/babel-core/-/babel-core-6.26.3.tgz#b2e2f09e342d0f0c88e2f02e067794125e75c207"
   dependencies:
@@ -2425,7 +2423,7 @@ map-visit@^1.0.0:
 
 marked@0.3.19:
   version "0.3.19"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.19.tgz#5d47f709c4c9fc3c216b6d46127280f40b39d790"
+  resolved "http://registry.npmjs.org/marked/-/marked-0.3.19.tgz#5d47f709c4c9fc3c216b6d46127280f40b39d790"
 
 marked@^0.4.0:
   version "0.4.0"
@@ -2597,7 +2595,7 @@ needle@^2.2.1:
     iconv-lite "^0.4.4"
     sax "^1.2.4"
 
-node-fetch@^1.0.1, node-fetch@^1.7.1:
+node-fetch@^1.0.1:
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.3.tgz#980f6f72d85211a5347c6b2bc18c5b84c3eb47ef"
   dependencies:
@@ -3016,13 +3014,12 @@ rc@^1.2.7:
     strip-json-comments "~2.0.1"
 
 "rdflib@>= 0.17.x":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/rdflib/-/rdflib-0.18.0.tgz#eda8e04ef5bfb82ffee634224f94cbb2121efc63"
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/rdflib/-/rdflib-0.19.0.tgz#31a66119594cf68fab943ab6599d3e390e4c639c"
   dependencies:
     async "^0.9.x"
     jsonld "^0.4.5"
     n3 "^0.4.1"
-    node-fetch "^1.7.1"
     solid-auth-client "^2.2.3"
     xmldom "^0.1.22"
 
@@ -3369,11 +3366,11 @@ snapdragon@^0.8.1:
     use "^3.1.0"
 
 solid-auth-client@^2.2.3:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/solid-auth-client/-/solid-auth-client-2.2.4.tgz#76d8765fbf7a8a52ffab8e717f231de2cec2df66"
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/solid-auth-client/-/solid-auth-client-2.2.5.tgz#d8dcf1417b825a3768e0050110c2f15449d7293b"
   dependencies:
     "@solid/oidc-rp" "^0.8.0"
-    auth-header "^0.3.1"
+    auth-header "^1.0.0"
     commander "^2.11.0"
     isomorphic-fetch "^2.2.1"
     uuid "^3.1.0"
