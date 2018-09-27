@@ -258,6 +258,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.api.getStatus(iri);
     }
 
+    public processDelta(delta: Statement[], expedite = false): void {
+        this.store.processDelta(delta);
+        this.broadcast(expedite, expedite ? 100 : 500);
+    }
+
     /**
      * Bulk register components formatted with {LinkedRenderStore.registerRenderer}.
      * @see LinkedRenderStore.registerRenderer
