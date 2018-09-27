@@ -1,44 +1,51 @@
 /* @globals set, generator, init */
 import "jest";
 
-import { RequestInitGenerator } from "../RequestInitGenerator";
+import { RequestInitGenerator, RequestInitGeneratorOpts } from "../RequestInitGenerator";
+
+const getGenerator = (opts?: Partial<RequestInitGeneratorOpts>): RequestInitGenerator =>
+    new RequestInitGenerator(opts as RequestInitGeneratorOpts);
 
 describe("RequestInitGenerator", () => {
-    set("opts", () => undefined);
-    set("generator", () => new RequestInitGenerator(opts));
-    subject(() => generator);
-    set("method", () => undefined);
-    set("accept", () => undefined);
-
     describe("#constructor", () => {
-        set("opts", () => ({ csrfFieldName: "custom-element ", mode: "no-cors" }));
-
-        its("mode", () => isExpected.toEqual("no-cors"));
+        it("sets the mode", () => {
+            const subject = getGenerator({ csrfFieldName: "custom-element ", mode: "no-cors" });
+            expect(subject).toHaveProperty("mode", "no-cors");
+        });
     });
 
     describe("#authenticityHeader", () => {
-        subject(() => generator.authenticityHeader());
+        it("has the correct X-Requested-With header", () => {
+            expect(getGenerator()).toHaveProperty("xRequestedWith", "XMLHttpRequest");
+        });
 
-        its("X-Requested-With", () => isExpected.toEqual("XMLHttpRequest"));
-        its("X-CSRF-Token", () => isExpected.toEqual(""));
+        it("has no X-CSRF-Token header", () => {
+            expect(getGenerator()).not.toHaveProperty("X-CSRF-Token");
+        });
     });
 
     describe("#generate", () => {
-        subject(() => generator.generate(method, accept));
+        describe("with empty parameters", () => {
+            const subject = getGenerator().generate(undefined, undefined);
 
-        its("credentials", () => isExpected.toEqual("include"));
-        its("method", () => isExpected.toEqual("GET"));
-        its("mode", () => isExpected.toEqual("same-origin"));
+            it("sets the credentials option", () => expect(subject).toHaveProperty("credentials", "include"));
+            it("sets the method option", () => expect(subject).toHaveProperty("method", "GET"));
+            it("sets the mode option", () => expect(subject).toHaveProperty("mode", "same-origin"));
 
-        its("headers.Accept", () => isExpected.toEqual("text/turtle"));
-        its("headers.X-Requested-With", () => isExpected.toEqual("XMLHttpRequest"));
+            const headers = subject.headers;
+            it("sets the Accept header", () => expect(headers).toHaveProperty("Accept", "text/turtle"));
+            it("sets the X-Requested-With header", () => {
+                expect(headers).toHaveProperty("X-Requested-With", "XMLHttpRequest");
+            });
+        });
 
         describe("with arguments", () => {
-            set("method", () => "POST");
-            set("accept", () => "application/n-quads");
+            const subject = getGenerator().generate("POST", "application/n-quads");
 
-            its("method", () => isExpected.toEqual("POST"));
-            its("headers.Accept", () => isExpected.toEqual("application/n-quads"));
+            it("sets the method option", () => expect(subject).toHaveProperty("method", "POST"));
+
+            const headers = subject.headers;
+            it("sets the Accept header", () => expect(headers).toHaveProperty("Accept", "application/n-quads"));
         });
     });
 });

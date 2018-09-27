@@ -92,6 +92,7 @@ describe("responses", () => {
                     "Content-Type": "text/turtle",
                 },
             });
+            // @ts-ignore
             response.headers = {
                 get: (header: string): string | undefined => {
                     if (header === "Content-Type") {

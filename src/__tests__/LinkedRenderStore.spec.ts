@@ -200,7 +200,6 @@ describe("LinkedRenderStore", () => {
         store.store.addStatements(actionStatements);
 
         it("sends the described request", async () => {
-            fetch.mockResponseOnce("", {});
             const sub = jest.fn();
             store.lrs.subscribe({ callback: sub, onlySubjects: false });
 

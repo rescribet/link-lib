@@ -1,10 +1,17 @@
+export interface RequestInitGeneratorOpts {
+    credentials: string;
+    csrfFieldName: string;
+    mode: string;
+    xRequestedWith: string;
+}
+
 export class RequestInitGenerator {
     public readonly credentials: string;
     public readonly csrfFieldName: string;
     public readonly mode: string;
     public readonly xRequestedWith: string;
 
-    constructor(opts = {
+    constructor(opts: RequestInitGeneratorOpts = {
         credentials: "include",
         csrfFieldName: "csrf-token",
         mode: "same-origin",

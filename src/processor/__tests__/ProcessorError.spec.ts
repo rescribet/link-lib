@@ -3,22 +3,21 @@ import "jest";
 
 import { ProcessorError } from "../ProcessorError";
 
+const getMessage = (msg: string, response?: Response): ProcessorError => new ProcessorError(msg, response);
+
+const r = new Response();
+
 describe("ProcessorError", () => {
-    set("msg", () => undefined);
-    set("response", () => undefined);
-    subject(() => new ProcessorError(msg, response));
-
-    its("message", () => isExpected.toEqual(""));
-
     describe("with message", () => {
-        set("msg", () => "info");
-
-        its("message", () => isExpected.toEqual("info"));
+        it("has a message", () => {
+            expect(getMessage("info", undefined)).toHaveProperty("message", "info");
+            expect(getMessage("info", undefined)).not.toHaveProperty("response", r);
+        });
     });
 
     describe("with response", () => {
-        set("response", () => "info");
-
-        its("response", () => isExpected.toEqual("info"));
+        it("has a message", () => {
+            expect(getMessage("info", r)).toHaveProperty("response", r);
+        });
     });
 });

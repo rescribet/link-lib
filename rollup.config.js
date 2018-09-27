@@ -11,6 +11,7 @@ export default {
         "ml-disjoint-set",
         "node-fetch",
         "rdflib",
+        "solid-auth-client",
     ],
     input: "src/link-lib.ts",
     output: [

@@ -43,27 +43,29 @@
     "http-status-codes": ">= 1.x",
     "jest": "^23.6.0",
     "jest-fetch-mock": "^1.6.6",
-    "jest-plugins": "^2.9.0",
-    "jest-plugins-recommended": "^2.9.0",
     "rdflib": ">= 0.17.x",
     "rollup": "^0.66.2",
     "rollup-plugin-commonjs": "^9.1.8",
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "rollup-plugin-typescript2": "^0.17.0",
-    "ts-jest": "=23.1.4",
+    "ts-jest": "^23.10.2",
     "tslint": "^5.11.0",
     "typedoc": "^0.12.0",
     "typescript": "^3.0.3"
   },
   "jest": {
     "automock": false,
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "src/utilities/DisjointSet.ts"
+    ],
     "coverageThreshold": {
       "global": {
-        "branches": 64,
-        "functions": 76,
-        "lines": 76,
-        "statements": 75
+        "branches": 65,
+        "functions": 77,
+        "lines": 79,
+        "statements": 79
       }
     },
     "setupTestFrameworkScriptFile": "./jest-plugins",
