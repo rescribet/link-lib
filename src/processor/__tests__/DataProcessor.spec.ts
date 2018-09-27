@@ -2,6 +2,7 @@ import "jest";
 import { BlankNode, IndexedFormula, Literal, Statement } from "rdflib";
 
 import { getBasicStore } from "../../testUtilities";
+import { FulfilledRequestStatus, ResponseAndFallbacks } from "../../types";
 
 import {
     defaultNS,
@@ -10,9 +11,19 @@ import {
     MSG_URL_UNDEFINED,
     MSG_URL_UNRESOLVABLE,
 } from "../../utilities/constants";
+import { emptyRequest } from "../DataProcessor";
 import {
     ProcessorError,
 } from "../ProcessorError";
+
+const getFulfilledRequest = (): FulfilledRequestStatus => {
+    return {
+        lastRequested: new Date(),
+        requested: true,
+        status: 200,
+        timesRequested: 1,
+    };
+};
 
 describe("DataProcessor", () => {
     describe("#execActionByIRI", () => {
@@ -111,7 +122,7 @@ describe("DataProcessor", () => {
         });
     });
 
-    describe("fetchResource", () => {
+    describe("#fetchResource", () => {
         it("calls processExecAction", async () => {
             const store = getBasicStore();
 
@@ -125,7 +136,63 @@ describe("DataProcessor", () => {
         });
     });
 
-    describe("processExecAction", () => {
+    describe("#getStatus", () => {
+        it("returns the empty status if unfetched", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/1");
+
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toEqual(emptyRequest);
+        });
+
+        it("returns a memoized status if present", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/1");
+            const request = getFulfilledRequest();
+
+            // @ts-ignore
+            store.processor.memoizeStatus(subject, request);
+
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toEqual(request);
+        });
+
+        it("checks for the base document", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/1#subDocument");
+            const request = getFulfilledRequest();
+
+            // @ts-ignore
+            store.processor.memoizeStatus(defaultNS.example("resource/1"), request);
+
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toEqual(request);
+        });
+    });
+
+    describe("#invalidateCache", () => {
+        it("returns true to resubscribe", () => {
+            // @ts-ignore
+            expect(getBasicStore().processor.invalidateCache(defaultNS.example("test"))).toEqual(true);
+        });
+
+        it("removes the item from the map", () => {
+            const store = getBasicStore();
+            // @ts-ignore
+            const map = store.processor.statusMap;
+            map.set(defaultNS.example("test"), emptyRequest);
+
+            expect(map.size).toEqual(1);
+            // @ts-ignore
+            store.processor.invalidateCache(defaultNS.example("test"));
+            expect(map.size).toEqual(0);
+        });
+    });
+
+    describe("#processExecAction", () => {
         it("resolves when the header is blank", async () => {
             const store = getBasicStore();
 
@@ -176,6 +243,22 @@ describe("DataProcessor", () => {
             expect(dispatch).toHaveBeenNthCalledWith(1, action0, undefined);
             expect(dispatch).toHaveBeenNthCalledWith(2, action1, undefined);
             expect(dispatch).toHaveBeenNthCalledWith(3, action2, undefined);
+        });
+    });
+
+    describe("#registerTransformer", () => {
+        it("registers a transformer", () => {
+            const store = getBasicStore();
+            // @ts-ignore
+            const mapping = store.processor.mapping;
+
+            const transformer = (_res: ResponseAndFallbacks): Promise<Statement[]> => Promise.resolve([]);
+
+            store.processor.registerTransformer(transformer, "text/n3", 0.9);
+
+            expect(mapping["text/n3"]).toContain(transformer);
+            expect(mapping["application/n-quads"]).not.toBeDefined();
+            expect(store.processor.accept.default).toEqual(",text/n3;0.9");
         });
     });
 });
