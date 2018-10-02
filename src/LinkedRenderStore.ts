@@ -1,8 +1,5 @@
-/* eslint no-console: 0 */
-
 import {
     FetchOpts as RDFFetchOpts,
-    Literal,
     NamedNode,
     SomeTerm,
     Statement,
@@ -10,6 +7,7 @@ import {
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
+import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
 import { dataToGraphTuple } from "./processor/DataToGraph";
 import { RDFStore } from "./RDFStore";
@@ -31,13 +29,7 @@ import {
 } from "./types";
 import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
-import { expandProperty, namedNodeByIRI } from "./utilities/memoizedNamespace";
-
-declare global {
-    interface Window {
-        requestIdleCallback: (callback: any, opts: object) => void;
-    }
-}
+import { expandProperty } from "./utilities/memoizedNamespace";
 
 export class LinkedRenderStore<T> implements Dispatcher {
     public static registerRenderer<T>(
@@ -64,7 +56,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private _dispatch?: MiddlewareActionHandler;
     private schema: Schema;
     private store: RDFStore = new RDFStore();
-    private subscriptions: SubscriptionRegistration[] = [];
+    private bulkSubscriptions: SubscriptionRegistration[] = [];
+    private subjectSubscriptions: Map<SomeNode, SubscriptionRegistration[]> = new Map();
     private lastPostponed: number | undefined;
 
     // tslint:disable-next-line no-object-literal-type-assertion
@@ -369,15 +362,38 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param registration[0] Will be called with the new statements as its argument.
      * @param registration[1] Options for the callback.
      * @param registration[1].onlySubjects Only the subjects are passed when true.
+     * @return function Unsubscription function.
      */
-    public subscribe(registration: SubscriptionRegistration): void {
-        this.subscriptions.push(registration);
+    public subscribe(registration: SubscriptionRegistration): () => void {
+        const subjectFilter = registration.subjectFilter;
+
+        if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {
+            subjectFilter.forEach((s) => {
+                const subjectRegistrations = this.subjectSubscriptions.get(s);
+                if (!subjectRegistrations) {
+                    this.subjectSubscriptions.set(s, [registration]);
+                } else {
+                    subjectRegistrations.push(registration);
+                }
+            });
+
+            return (): void => {
+                subjectFilter.forEach((s) => {
+                    const partialSub = this.subjectSubscriptions.get(s)!;
+                    partialSub.splice(partialSub.indexOf(registration), 1);
+                });
+            };
+        }
+
+        this.bulkSubscriptions.push(registration);
+
+        return (): void => {
+            this.bulkSubscriptions.splice(this.bulkSubscriptions.indexOf(registration), 1);
+        };
     }
 
     /** @internal */
-    public touch(iri: string | NamedNode, _err?: Error): boolean {
-        const resource = typeof iri === "string" ? namedNodeByIRI(iri) : iri;
-        this.store.addStatements([new Statement(resource, defaultNS.ll("nop"), Literal.fromValue(0))]);
+    public touch(_iri: string | NamedNode, _err?: Error): boolean {
         this.broadcast();
         return true;
     }
@@ -405,41 +421,24 @@ export class LinkedRenderStore<T> implements Dispatcher {
             if (this.store.workAvailable() < 100) {
                 if (this.lastPostponed === undefined) {
                     this.lastPostponed = Date.now();
-                    window.setTimeout(this.broadcast.bind(this), 100);
+                    window.setTimeout(this.broadcast.bind(this), 200);
                     return;
                 } else if (Date.now() - this.lastPostponed <= maxTimeout) {
-                    window.setTimeout(this.broadcast.bind(this), 100);
+                    window.setTimeout(this.broadcast.bind(this), 200);
                     return;
                 }
             }
             this.lastPostponed = undefined;
-            if (this.store.workAvailable() === 0) {
-                return;
-            }
         }
-        if ("requestIdleCallback" in window) {
-            window.requestIdleCallback(this.processBroadcast.bind(this), {timeout: maxTimeout});
-        } else {
-            this.processBroadcast();
-        }
-    }
-
-    private processBroadcast(): void {
-        const processingBuffer = this.store.flush();
-        if (processingBuffer.length === 0) {
+        if (this.store.workAvailable() === 0) {
             return;
         }
 
-        let subjects: SomeNode[];
-        if (this.subscriptions.length >= 2) {
-            subjects = processingBuffer.map((s) => s.subject);
-        }
-        this.subscriptions.forEach((registration) => {
-            if (registration.onlySubjects) {
-                registration.callback(subjects || processingBuffer.map((s) => s.subject));
-            } else {
-                registration.callback(processingBuffer);
-            }
-        });
+        new ProcessBroadcast({
+            bulkSubscriptions: this.bulkSubscriptions,
+            subjectSubscriptions: this.subjectSubscriptions,
+            timeout: maxTimeout,
+            work: this.store.flush(),
+        }).run();
     }
 }

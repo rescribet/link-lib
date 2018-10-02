@@ -20,12 +20,16 @@ import { DisjointSet } from "./utilities/DisjointSet";
 export type SubscriptionCallback<T> = (v: T) => void;
 
 export interface StatementSubscriptionRegistration {
-    callback: SubscriptionCallback<Statement[]>;
+    callback: SubscriptionCallback<ReadonlyArray<Statement>>;
+    index?: number;
+    subjectFilter?: SomeNode[];
     onlySubjects: false;
 }
 
 export interface NodeSubscriptionRegistration {
     callback: SubscriptionCallback<SomeNode[]>;
+    index?: number;
+    subjectFilter?: SomeNode[];
     onlySubjects: true;
 }
 
