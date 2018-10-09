@@ -233,6 +233,12 @@ export class DataProcessor implements LinkedDataAPI {
         const method = typeof targetMethod !== "undefined" ? targetMethod.toString() : "GET";
         const opts = this.requestInitGenerator.generate(method, this.accept[new URL(url.value).origin]);
 
+        if (opts.headers instanceof Headers) {
+            opts.headers.set("Request-Referrer", subject.value);
+        } else if (opts.headers && !Array.isArray(opts.headers)) {
+            opts.headers["Request-Referrer"] = subject.value;
+        }
+
         if (!SAFE_METHODS.includes(method) && graph && graph !== null && graph.length > 0) {
             if (opts.headers instanceof Headers) {
                 opts.headers.delete("Content-Type");
