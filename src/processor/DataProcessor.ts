@@ -207,7 +207,9 @@ export class DataProcessor implements LinkedDataAPI {
 
         const [graph, blobs = []] = dataTuple;
 
-        await this.store.statementsFor(subject).length > 0 ? Promise.resolve() : this.getEntity(subject);
+        await (this.store.statementsFor(subject).length > 0
+            ? Promise.resolve([])
+            : this.getEntity(subject).then(this.store.processDelta));
 
         const object = this.store.getResourceProperty(subject, defaultNS.schema("object"));
         if (!object || object.termType !== "BlankNode" && object.termType !== "NamedNode") {

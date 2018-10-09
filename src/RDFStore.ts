@@ -42,6 +42,8 @@ export class RDFStore {
     private typeCache: { [k: string]: NamedNode[] } = {};
 
     constructor() {
+        this.processDelta = this.processDelta.bind(this);
+
         const g = graph();
         this.store = new Proxy(g, {
             get: (target: any, prop: string): any => {
@@ -160,7 +162,7 @@ export class RDFStore {
         return this.store.match(subj, pred, obj, why) || [];
     }
 
-    public processDelta(statements: Statement[]): void {
+    public processDelta(statements: Statement[]): Promise<void> {
         const addGraphIRIS = [NS.ll("add").value];
         const replaceGraphIRIS = [undefined, NS.ll("replace").value, "chrome:theSession"];
         const addables = statements.filter((s) => addGraphIRIS.includes(s.why.value));
@@ -175,6 +177,8 @@ export class RDFStore {
         this.removeStatements(removables);
         this.replaceMatches(replacables);
         this.addStatements(addables);
+
+        return Promise.resolve();
     }
 
     public removeStatements(statements: Statement[]): void {
