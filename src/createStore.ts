@@ -21,7 +21,7 @@ export function createStore<T>(storeOpts: LinkedRenderStoreOptions<T>,
     LRS.dispatch = applyMiddleware<T>(
         LRS,
         ...middleware,
-        linkMiddleware(trailingMiddleware.length > 0),
+        linkMiddleware(trailingMiddleware.length === 0),
         ...trailingMiddleware,
     );
 
