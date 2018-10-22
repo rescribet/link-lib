@@ -12,6 +12,14 @@ function applyMiddleware<T>(lrs: LinkedRenderStore<T>, ...layers: Array<Middlewa
     return storeBound.reduceRight((composed, f) => f(composed), finish);
 }
 
+/**
+ * Initializes a {LinkedRenderStore} with tied together middleware.
+ * @param storeOpts Constructor arguments for the LRS.
+ * @param middleware Main middleware, to be executed before the {linkMiddelware}.
+ * @param trailingMiddleware Middleware to be placed after the {linkMiddleware}. Note: defining trailing middleware
+ *  causes actions not to be executed via {LinkedRenderStore#execActionByIRI} anymore, this behaviour can be enabled
+ *  manually in one of the defined middlewares if still desired.
+ */
 export function createStore<T>(storeOpts: LinkedRenderStoreOptions<T>,
                                middleware = [],
                                trailingMiddleware = []): LinkedRenderStore<T> {

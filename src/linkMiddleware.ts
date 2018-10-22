@@ -7,7 +7,8 @@ import { defaultNS } from "./utilities/constants";
 /**
  * Binds various uris to link actions.
  *
- * @param catchActions {boolean} Set to true to catch and pass left-over actions to execActionByIRI.
+ * @see {createStore}
+ * @param catchActions {boolean} Set to true to catch all left-over actions to {LinkedRenderStore#execActionByIRI}.
  */
 export const linkMiddleware = <T>(catchActions = true): MiddlewareFn<T> =>
     (lrs: LinkedRenderStore<T>): MiddlewareWithBoundLRS =>
