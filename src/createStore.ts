@@ -21,8 +21,8 @@ function applyMiddleware<T>(lrs: LinkedRenderStore<T>, ...layers: Array<Middlewa
  *  manually in one of the defined middlewares if still desired.
  */
 export function createStore<T>(storeOpts: LinkedRenderStoreOptions<T>,
-                               middleware = [],
-                               trailingMiddleware = []): LinkedRenderStore<T> {
+                               middleware: Array<MiddlewareFn<any>> = [],
+                               trailingMiddleware: Array<MiddlewareFn<any>> = []): LinkedRenderStore<T> {
 
     const LRS = new LinkedRenderStore<T>(storeOpts);
 
