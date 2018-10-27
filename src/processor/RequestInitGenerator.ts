@@ -42,7 +42,7 @@ export class RequestInitGenerator {
     }
 
     private getMetaContent(name: string): string | null {
-        const header = document.head.querySelector(`meta[name="${name}"]`);
+        const header = document.head && document.head.querySelector(`meta[name="${name}"]`);
         return header && header.getAttribute("content");
     }
 
