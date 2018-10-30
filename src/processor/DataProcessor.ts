@@ -31,6 +31,7 @@ import {
 import { anyRDFValue } from "../utilities";
 import {
     defaultNS,
+    F_NTRIPLES,
     MSG_BAD_REQUEST,
     MSG_INCORRECT_TARGET,
     MSG_OBJECT_NOT_IRI,
@@ -247,11 +248,12 @@ export class DataProcessor implements LinkedDataAPI {
             }
             const data = new FormData();
             const s = new Serializer(new IndexedFormula());
-            const rdfSerialization = s.toN3(graph);
+            s.setFlags("px");
+            const rdfSerialization = s.statementsToNTriples(graph.statements);
             data.append(
                 defaultNS.ll("graph").toString(),
                 new Blob([rdfSerialization],
-                    { type: "text/n3" }),
+                    { type: F_NTRIPLES }),
             );
             for (let i = 0; i < blobs.length; i++) {
                 data.append(blobs[i][0].toString(), blobs[i][1]);
