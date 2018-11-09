@@ -89,6 +89,7 @@ describe("monkeys", () => {
             expect(changeBuffer.changeBufferCount).toEqual(1);
         });
 
+        /** This verifies whether we use a memoization-enabled store */
         it("normalizes terms", () => {
             const [ g, changeBuffer ] = getStorePair();
             patchRDFLibStoreWithOverrides(g, changeBuffer);

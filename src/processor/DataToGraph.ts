@@ -15,7 +15,6 @@ import {
     SomeNode,
 } from "../types";
 import { defaultNS, MAIN_NODE_DEFAULT_IRI, NON_DATA_OBJECTS_CTORS } from "../utilities/constants";
-import { namedNodeByIRI } from "../utilities/memoizedNamespace";
 import { expandProperty } from "../utilities/memoizedNamespace";
 
 const BASE = 36;
@@ -68,15 +67,15 @@ export function processObject(subject: SomeNode,
         blobs = blobs.concat(processDataObject(bn, datum, graph));
         graph.add(subject, predicate, bn);
     } else if (datum && datum.termType === "NamedNode") {
-        graph.add(subject, predicate, namedNodeByIRI(datum.value));
+        graph.add(subject, predicate, NamedNode.find(datum.value));
     } else if (datum && datum.termType === "Literal") {
         graph.add(
             subject,
             predicate,
-            new Literal(
+            Literal.find(
                 datum.value,
                 (datum as Literal).language,
-                namedNodeByIRI((datum as Literal).datatype.value),
+                NamedNode.find((datum as Literal).datatype.value),
             ),
         );
     } else if (datum !== null && datum !== undefined) {

@@ -3521,10 +3521,10 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-"rdflib@>= 0.19.x":
-  version "0.19.0"
-  resolved "https://registry.yarnpkg.com/rdflib/-/rdflib-0.19.0.tgz#31a66119594cf68fab943ab6599d3e390e4c639c"
-  integrity sha512-2XS7QkVoGuo/B5jjcZsLsCNgh6Zxmcbk2AkWcFocvH1DxXnlLCgSx9RKOWEo0YW38VoFpa63tGyExyL1fKV5cg==
+"rdflib@npm:link-rdflib@0.19.1-20190108T094946":
+  version "0.19.1-20190108T094946"
+  resolved "https://registry.yarnpkg.com/link-rdflib/-/link-rdflib-0.19.1-20190108T094946.tgz#70a40076a9f3e1b62ff43a713569ee9d21eb0dfe"
+  integrity sha512-LCNHHkrTHpbJGC24AqdLa3YlYydHSnsZsIa19Du1SRt8M2vpEtop+wEmtIVltvsZUaqGQ/97KxAtHSO45JhwsA==
   dependencies:
     async "^0.9.x"
     jsonld "^0.4.5"

@@ -11,7 +11,7 @@ import {
 
 import { ChangeBuffer, SomeNode } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
-import { defaultNS, defaultNS as NS } from "./utilities/constants";
+import { defaultNS as NS } from "./utilities/constants";
 import { patchRDFLibStoreWithOverrides, patchRDFLibStoreWithProxy } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
@@ -44,6 +44,7 @@ export class RDFStore implements ChangeBuffer {
         } else {
             this.store = patchRDFLibStoreWithOverrides(g, this);
         }
+
         this.store.newPropertyAction(NS.rdf("type"), this.processTypeStatement.bind(this));
     }
 
@@ -224,7 +225,7 @@ export class RDFStore implements ChangeBuffer {
      * @param subject The identifier of the resource.
      */
     public statementsFor(subject: SomeNode): Statement[] {
-        const canon = this.store.canon(subject).toString();
+        const canon = this.store.canon(subject).sI;
 
         return typeof this.store.subjectIndex[canon] !== "undefined"
             ? this.store.subjectIndex[canon]
@@ -248,7 +249,7 @@ export class RDFStore implements ChangeBuffer {
             return false;
         }
         this.typeCache[subj.sI] = this.statementsFor((subj as NamedNode))
-            .filter((s) => s.predicate === defaultNS.rdf("type"))
+            .filter((s) => s.predicate === NS.rdf("type"))
             .map((s) => s.object as NamedNode);
         if (obj) {
             this.typeCache[subj.sI].push((obj as NamedNode));

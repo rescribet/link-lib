@@ -69,12 +69,18 @@ declare module "rdflib" {
         public toString(): string;
     }
 
-    export class NamedNode extends Node {
+    export class Term extends Node {
+        public readonly sI: number;
+    }
+
+    export class NamedNode extends Term {
+        public static find(iri: string | NamedNode, ln?: string): NamedNode;
+
+        public static findByStoreIndex(si: number): NamedNode;
+
         public readonly termType: "NamedNode";
 
-        public sI: number;
-
-        public term: string;
+        public term?: string;
 
         public uri: string;
 
@@ -87,7 +93,7 @@ declare module "rdflib" {
         public site(): NamedNode;
     }
 
-    export class Literal extends Node {
+    export class Literal extends Term {
         public static fromBoolean(value: boolean): Literal;
 
         public static fromDate(value: Date): Literal;
@@ -95,6 +101,8 @@ declare module "rdflib" {
         public static fromNumber(value: number): Literal;
 
         public static fromValue(value: undefined | null | object | boolean | number | string): Literal;
+
+        public static find(value: string, lang?: string | undefined, datatype?: NamedNode): Literal;
 
         public readonly datatype: NamedNode;
 
@@ -105,10 +113,10 @@ declare module "rdflib" {
         public constructor(value: string | number, language?: string, datatype?: NamedNode | undefined)
     }
 
-    export class BlankNode extends Node {
-        public readonly termType: "BlankNode";
+    export class BlankNode extends Term {
+        public static find(id?: string): BlankNode;
 
-        public sI: number;
+        public readonly termType: "BlankNode";
 
         public constructor(id?: string | null | undefined);
     }
@@ -246,6 +254,8 @@ declare module "rdflib" {
                                   obj?: Node | undefined,
                                   why?: Node | undefined,
                                   justOne?: boolean): Statement[];
+
+        public wildcardCompare(subj?: Node, pred?: Node, obj?: Node,  why?: Node): (st: Statement) => boolean;
     }
 
     export class Variable extends Node {
@@ -279,6 +289,8 @@ declare module "rdflib" {
     }
 
     export class Statement {
+        public static from(s: Term, p: Term, o: Term, g: Node): Statement;
+
         public object: SomeTerm;
 
         public predicate: NamedNode;
@@ -304,6 +316,18 @@ declare module "rdflib" {
     export type NamedNamespace = (ln: string) => NamedNode;
 
     export function Namespace(nsuri: string): (ln: string) => NamedNode;
+
+    export type Quadruple = [Term, Term, Term, Node];
+
+    export class NQuadsParser {
+        public constructor(store: IndexedFormula);
+
+        public addArr(quads: Quadruple[]): void;
+
+        public loadBuf(str: string): [];
+
+        public parseString(str: string): [];
+    }
 
     export function parse(str: string, kb: Formula, base: string, contentType: string, callback: () => void): void;
 

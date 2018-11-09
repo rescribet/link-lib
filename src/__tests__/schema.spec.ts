@@ -47,6 +47,7 @@ describe("Schema", () => {
                     NS.rdfs("range"),
                     NS.rdfs("Resource"),
                 );
+
                 expect(schema.holdsStatement(expected))
                     .toBeTruthy();
             });

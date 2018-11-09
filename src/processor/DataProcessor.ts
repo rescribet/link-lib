@@ -38,7 +38,6 @@ import {
     MSG_URL_UNDEFINED,
     MSG_URL_UNRESOLVABLE,
 } from "../utilities/constants";
-import { namedNodeByIRI } from "../utilities/memoizedNamespace";
 import { patchRDFLibSerializer } from "../utilities/monkeys";
 import {
     getContentType,
@@ -107,9 +106,9 @@ function processResponse(iri: string | NamedNode, res: Response): Statement[] {
     if (rawURL && iri !== rawURL) {
         return [
             new Statement(
-                new NamedNode(iri),
-                new NamedNode("http://www.w3.org/2002/07/owl#sameAs"),
-                new NamedNode(rawURL),
+                NamedNode.find(iri),
+                NamedNode.find("http://www.w3.org/2002/07/owl#sameAs"),
+                NamedNode.find(rawURL),
                 origin,
             ),
         ];
@@ -164,7 +163,7 @@ export class DataProcessor implements LinkedDataAPI {
                 const hookIRI = defaultNS.ll(`data/rdflib/${hook}`);
                 this._fetcher!.addCallback(hook, this.invalidateCache.bind(this));
                 this._fetcher!.addCallback(hook, (iri: string | NamedNode, _err?: Error) => {
-                    this.dispatch(hookIRI, [typeof iri === "string" ? namedNodeByIRI(iri) : iri, _err]);
+                    this.dispatch(hookIRI, [typeof iri === "string" ? NamedNode.find(iri) : iri, _err]);
 
                     return true;
                 });
@@ -274,12 +273,16 @@ export class DataProcessor implements LinkedDataAPI {
 
         const location = getHeader(resp, "Location");
         const fqLocation = location && Uri.join(location, window.location.origin);
-        const iri = fqLocation && namedNodeByIRI(fqLocation) || null;
+        const iri = fqLocation && NamedNode.find(fqLocation) || null;
 
         return {
             data: statements,
             iri,
         };
+    }
+
+    public fetchableURLFromIRI(iri: NamedNode): NamedNode {
+        return NamedNode.find(iri.value.split("#").shift()!);
     }
 
     public async fetchResource(iri: NamedNode | string, opts?: FetchOpts): Promise<ResponseAndFallbacks> {
@@ -325,7 +328,7 @@ export class DataProcessor implements LinkedDataAPI {
     public async getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Statement[]> {
         const url = new URL(iri.value);
         url.hash = "";
-        const requestIRI = new NamedNode(url.toString());
+        const requestIRI = NamedNode.find(url.toString());
         if (this.requestMap.has(requestIRI)) {
             return this.requestMap.get(requestIRI) || [];
         }
@@ -353,7 +356,7 @@ export class DataProcessor implements LinkedDataAPI {
      * @see LinkedDataAPI#getStatus for documentation
      */
     public getStatus(iri: NamedNode): EmptyRequestStatus | FulfilledRequestStatus {
-        const irl = namedNodeByIRI(iri.value.split("#").shift()!);
+        const irl = this.fetchableURLFromIRI(iri);
 
         if (this.statusMap.has(irl)) {
             return this.statusMap.get(irl)!;
@@ -370,7 +373,7 @@ export class DataProcessor implements LinkedDataAPI {
         const requests = this.store.match(
             null,
             defaultNS.link("requestedURI"),
-            new Literal(irl.value),
+            Literal.find(irl.value),
         );
         const totalRequested = requests.length;
         if (requests.length === 0) {
@@ -461,7 +464,7 @@ export class DataProcessor implements LinkedDataAPI {
     }
 
     private invalidateCache(iri: string | NamedNode, _err?: Error): boolean {
-        this.statusMap.delete(typeof iri === "string" ? namedNodeByIRI(iri) : iri);
+        this.statusMap.delete(typeof iri === "string" ? NamedNode.find(iri) : iri);
         return true;
     }
 
@@ -477,7 +480,7 @@ export class DataProcessor implements LinkedDataAPI {
         if (actionsHeader) {
             const actions = actionsHeader.split(", ");
             for (let i = 0; i < actions.length; i++) {
-                this.dispatch(namedNodeByIRI(actions[i]), undefined);
+                this.dispatch(NamedNode.find(actions[i]), undefined);
             }
         }
 
