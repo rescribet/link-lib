@@ -3,6 +3,7 @@ import {
     Literal,
     NamedNode,
     Statement,
+    Term,
 } from "rdflib";
 
 import {
@@ -31,7 +32,7 @@ const creativeWorkStatements = [
     new Statement(
         schemaCW,
         NS.dc("source"),
-        new NamedNode("http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_rNews"),
+        Term.namedNodeByIRI("http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_rNews"),
     ),
     new Statement(
         schemaCW,
@@ -165,7 +166,7 @@ describe("LinkedRenderStore", () => {
             const testData = [
                 new Statement(id, NS.rdf("type"), NS.schema("CreativeWork")),
                 new Statement(id, NS.schema("text"), new Literal("text")),
-                new Statement(id, NS.schema("author"), new NamedNode("http://example.org/people/0")),
+                new Statement(id, NS.schema("author"), Term.namedNodeByIRI("http://example.org/people/0")),
 
                 new Statement(idSecond, NS.rdf("type"), NS.schema("CreativeWork")),
                 new Statement(idSecond, NS.schema("name"), new Literal("other")),
@@ -194,7 +195,7 @@ describe("LinkedRenderStore", () => {
             new Statement(entryPoint, NS.rdf("type"), NS.schema("Entrypoint")),
             new Statement(entryPoint, NS.schema("httpMethod"), new Literal("POST")),
             new Statement(entryPoint, NS.schema("url"), NS.example("location/everest/pictures")),
-            new Statement(entryPoint, NS.schema("image"), new NamedNode("http://fontawesome.io/icon/plus")),
+            new Statement(entryPoint, NS.schema("image"), Term.namedNodeByIRI("http://fontawesome.io/icon/plus")),
             new Statement(entryPoint, NS.schema("name"), new Literal("Add a picture")),
         ];
         store.store.addStatements(actionStatements);

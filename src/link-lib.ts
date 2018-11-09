@@ -21,11 +21,6 @@ export {
     DEFAULT_TOPOLOGY,
     RENDER_CLASS_NAME,
 } from "./utilities/constants";
-export {
-    memoizedNamespace,
-    namedNodeByIRI,
-    namedNodeByStoreIndex,
-} from "./utilities/memoizedNamespace";
 
 export { LinkedRenderStore };
 

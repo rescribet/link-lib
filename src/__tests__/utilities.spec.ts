@@ -2,8 +2,8 @@ import "jest";
 import {
     BlankNode,
     Literal,
-    NamedNode,
     Statement,
+    Term,
 } from "rdflib";
 
 import {
@@ -15,7 +15,7 @@ import {
     isDifferentOrigin,
     } from "../utilities";
 import { defaultNS } from "../utilities/constants";
-import { expandProperty, namedNodeByIRI, namedNodeByStoreIndex } from "../utilities/memoizedNamespace";
+import { expandProperty } from "../utilities/memoizedNamespace";
 
 const ex = defaultNS.example;
 
@@ -194,22 +194,22 @@ describe("utilities", () => {
         });
 
         it("is false on the same origin", () => {
-            expect(isDifferentOrigin(new NamedNode("http://example.org/test"))).toBeFalsy();
+            expect(isDifferentOrigin(Term.namedNodeByIRI("http://example.org/test"))).toBeFalsy();
         });
 
         it("is true on a different origin", () => {
-            expect(isDifferentOrigin(new NamedNode("http://example.com/test"))).toBeTruthy();
+            expect(isDifferentOrigin(Term.namedNodeByIRI("http://example.com/test"))).toBeTruthy();
         });
     });
 
     describe("#namedNodeByIRI", () => {
         it("returns known iris from the map", () => {
             const name = defaultNS.schema("name");
-            expect(namedNodeByIRI(name.value)).toEqual(name);
+            expect(Term.namedNodeByIRI(name.value)).toEqual(name);
         });
 
         it("adds new IRI's to the map", () => {
-            const added = namedNodeByIRI("http://new.example.org/test");
+            const added = Term.namedNodeByIRI("http://new.example.org/test", "test");
             expect(added).toHaveProperty("sI");
             expect(added).toHaveProperty("termType", "NamedNode");
             expect(added).toHaveProperty("term", "test");
@@ -219,11 +219,11 @@ describe("utilities", () => {
     describe("#namedNodeByStoreIndex", () => {
         it("returns known iris from the map", () => {
             const name = defaultNS.schema("name");
-            expect(namedNodeByStoreIndex(name.sI)).toEqual(name);
+            expect(Term.namedNodeByStoreIndex(name.sI)).toEqual(name);
         });
 
         it("returns undefined for unknown values", () => {
-            expect(namedNodeByStoreIndex(999999)).toBeUndefined();
+            expect(Term.namedNodeByStoreIndex(999999)).toBeUndefined();
         });
     });
 });

@@ -1,4 +1,4 @@
-import { NamedNode, Statement } from "rdflib";
+import { NamedNode, Namespace, Statement } from "rdflib";
 import { VocabularyProcessingContext } from "../types";
 
 import {
@@ -12,11 +12,10 @@ import {
     F_RDF_XML,
     F_TURTLE,
 } from "../utilities/constants";
-import { memoizedNamespace } from "../utilities/memoizedNamespace";
 import { nsRDFSResource } from "./rdfs";
 
 const nsRDFSsubClassOf = NS.rdfs("subClassOf");
-const ianaMT = memoizedNamespace("http://www.w3.org/ns/iana/media-types/");
+const ianaMT = Namespace("http://www.w3.org/ns/iana/media-types/");
 const ianaJSONResource = ianaMT(`${F_JSON}#Resource`);
 const ianaJSONLDResource = ianaMT(`${F_JSONLD}#Resource`);
 const ianaN3Resource = ianaMT(`${F_N3}#Resource`);

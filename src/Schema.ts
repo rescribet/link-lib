@@ -1,4 +1,4 @@
-import { IndexedFormula, Statement } from "rdflib";
+import { IndexedFormula, Statement, Term } from "rdflib";
 import { RDFStore } from "./RDFStore";
 
 import { OWL } from "./schema/owl";
@@ -8,7 +8,6 @@ import { nsRDFSResource, RDFS } from "./schema/rdfs";
 import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "./types";
 import { defaultNS as NS } from "./utilities/constants";
 import { DisjointSet } from "./utilities/DisjointSet";
-import { namedNodeByStoreIndex } from "./utilities/memoizedNamespace";
 
 /**
  * Implements some RDF/OWL logic to enhance the functionality of the property lookups.
@@ -73,9 +72,9 @@ export class Schema extends IndexedFormula {
 
     public isInstanceOf(resource: number, superClass: number): boolean {
         return this.holdsStatement(new Statement(
-            namedNodeByStoreIndex(resource)!,
+            Term.namedNodeByStoreIndex(resource)!,
             NS.rdf("type"),
-            namedNodeByStoreIndex(superClass)!,
+            Term.namedNodeByStoreIndex(superClass)!,
         ));
     }
 
@@ -110,10 +109,10 @@ export class Schema extends IndexedFormula {
 
         const canonicalTypes: number[] = [];
         for (let i = 0; i < lookupTypes.length; i++) {
-            const canon = (this.liveStore.canon(namedNodeByStoreIndex(lookupTypes[i])!) as SomeNode).sI;
+            const canon = (this.liveStore.canon(Term.namedNodeByStoreIndex(lookupTypes[i])!) as SomeNode).sI;
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
-                    Schema.vocabularies[j].processType(namedNodeByStoreIndex(canon)!, this.getProcessingCtx());
+                    Schema.vocabularies[j].processType(Term.namedNodeByStoreIndex(canon)!, this.getProcessingCtx());
                 }
                 this.processedTypes.push(canon);
             }

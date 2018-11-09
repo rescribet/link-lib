@@ -1,6 +1,13 @@
 /* @globals set, generator, init */
 import "jest";
-import { BlankNode, Collection, IndexedFormula, Literal, Statement } from "rdflib";
+import {
+    BlankNode,
+    Collection,
+    IndexedFormula,
+    Literal,
+    Statement,
+    Term,
+} from "rdflib";
 
 import { defaultNS } from "../../utilities/constants";
 
@@ -23,7 +30,7 @@ describe("DataToGraph", () => {
             expect(name).toBeTruthy();
             expect(name.subject).toEqual(defaultNS.ll("targetResource"));
             expect(name.predicate).toEqual(defaultNS.schema("name"));
-            expect(name.object).toEqual(new Literal("Some name"));
+            expect(name.object).toEqual(Term.literalByValue("Some name"));
         });
 
         it("handles shortened strings", () => {
@@ -35,7 +42,7 @@ describe("DataToGraph", () => {
             expect(name).toBeTruthy();
             expect(name.subject).toEqual(defaultNS.ll("targetResource"));
             expect(name.predicate).toEqual(defaultNS.schema("name"));
-            expect(name.object).toEqual(new Literal("Some name"));
+            expect(name.object).toEqual(Term.literalByValue("Some name"));
         });
 
         it("raises on bad strings", () => {
@@ -143,7 +150,7 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
-            expect(stmt.object).toEqual(new Literal("Some string"));
+            expect(stmt.object).toEqual(Term.literalByValue("Some string"));
         });
     });
 

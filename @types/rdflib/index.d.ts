@@ -51,6 +51,7 @@ declare module "rdflib" {
 
         public static toJS(term: Node): ToJSOutputTypes;
 
+        public readonly sI: number;
         public readonly termType: string;
         public readonly value: string;
 
@@ -69,12 +70,22 @@ declare module "rdflib" {
         public toString(): string;
     }
 
-    export class NamedNode extends Node {
+    export class Term extends Node {
+        public static blankNodeByID(id?: string): BlankNode;
+
+        public static literalByValue(value: string, lang?: string | undefined, datatype?: NamedNode): Literal;
+
+        public static namedNodeByIRI(iri: string | NamedNode, ln?: string): NamedNode;
+
+        public static namedNodeByStoreIndex(si: number): NamedNode;
+    }
+
+    export class NamedNode extends Term {
         public readonly termType: "NamedNode";
 
         public sI: number;
 
-        public term: string;
+        public term?: string;
 
         public uri: string;
 
@@ -87,7 +98,7 @@ declare module "rdflib" {
         public site(): NamedNode;
     }
 
-    export class Literal extends Node {
+    export class Literal extends Term {
         public static fromBoolean(value: boolean): Literal;
 
         public static fromDate(value: Date): Literal;
@@ -105,7 +116,7 @@ declare module "rdflib" {
         public constructor(value: string | number, language?: string, datatype?: NamedNode | undefined)
     }
 
-    export class BlankNode extends Node {
+    export class BlankNode extends Term {
         public readonly termType: "BlankNode";
 
         public sI: number;

@@ -44,7 +44,7 @@
     "http-status-codes": ">= 1.x",
     "jest": "^23.6.0",
     "jest-fetch-mock": "^1.7.5",
-    "rdflib": ">= 0.19.x",
+    "rdflib": "npm:link-rdflib@0.19.1-20190108T094946",
     "rollup": "^0.67.3",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-node-resolve": "^3.4.0",
@@ -63,10 +63,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 66,
+        "branches": 65,
         "functions": 80,
-        "lines": 81,
-        "statements": 81
+        "lines": 80,
+        "statements": 80
       }
     },
     "preset": "ts-jest",
