@@ -1,7 +1,7 @@
 # Link Library
 *A Link to the Web*
 
-[![Build Status](https://travis-ci.org/fletcher91/link-lib.svg?branch=master)](https://travis-ci.org/fletcher91/link-lib)
+[![CircleCI](https://circleci.com/gh/fletcher91/link-lib.svg?style=svg)](https://circleci.com/gh/fletcher91/link-lib)
 
 This package aims to make building rich web applications quick and easy by providing a wrapper around 
 [rdflib.js](https://github.com/linkeddata/rdflib.js)'s store, adding high-level API's for view rendering, data querying
