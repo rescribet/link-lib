@@ -25,7 +25,7 @@ const IRI_LEN = 20;
 function isPlainObject(o: any): o is DataObject {
     return typeof o === "object"
         && o !== null
-        && !NON_DATA_OBJECTS_CTORS.find((c) => o instanceof c)
+        && !NON_DATA_OBJECTS_CTORS.find((c) => typeof o.prototype !== "undefined" && o instanceof c)
         && !Object.prototype.hasOwnProperty.call(o, "termType");
 }
 
