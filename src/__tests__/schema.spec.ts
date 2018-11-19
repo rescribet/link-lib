@@ -24,7 +24,7 @@ describe("Schema", () => {
             it("processes the axioms", () => {
                 // TODO: verify
                 expect(schema.statements.length)
-                    .toEqual(33);
+                    .toEqual(42);
             });
 
             // TODO: Implement core rdf logic

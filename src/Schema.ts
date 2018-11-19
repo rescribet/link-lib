@@ -2,6 +2,7 @@ import { IndexedFormula, NamedNode, SomeTerm, Statement } from "rdflib";
 import { RDFStore } from "./RDFStore";
 
 import { OWL } from "./schema/owl";
+import { RDFLIB } from "./schema/rdflib";
 import { nsRDFSResource, RDFS } from "./schema/rdfs";
 
 import { VocabularyProcessingContext, VocabularyProcessor } from "./types";
@@ -16,7 +17,7 @@ import { namedNodeByIRI } from "./utilities/memoizedNamespace";
  * optimized so it can be used in real-time by low-power devices as well.
  */
 export class Schema extends IndexedFormula {
-    private static vocabularies: VocabularyProcessor[] = [OWL, RDFS];
+    private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
 
     private equivalenceSet: DisjointSet<SomeTerm> = new DisjointSet();
     private liveStore: RDFStore;
@@ -70,6 +71,16 @@ export class Schema extends IndexedFormula {
     }
 
     /**
+     * Returns the hierarchical depth of the type, or -1 if unknown.
+     * @param type the type to check
+     */
+    public superTypeDepth(type: NamedNode): number {
+        const superMap = this.superMap.get(type.value);
+
+        return superMap ? superMap.size : -1;
+    }
+
+    /**
      * Expands the given lookupTypes to include all their equivalent and subclasses.
      * This is done in multiple iterations until no new types are found.
      * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
@@ -79,7 +90,7 @@ export class Schema extends IndexedFormula {
             return [nsRDFSResource];
         }
 
-        const canonicalTypes = [];
+        const canonicalTypes: NamedNode[] = [];
         for (let i = 0; i < lookupTypes.length; i++) {
             const canon = this.liveStore.canon(lookupTypes[i]) as NamedNode;
             if (!this.processedTypes.includes(canon)) {
@@ -89,7 +100,9 @@ export class Schema extends IndexedFormula {
                 this.processedTypes.push(canon);
             }
 
-            canonicalTypes.push(canon);
+            if (!canonicalTypes.includes(canon)) {
+                canonicalTypes.push(canon);
+            }
         }
 
         const allTypes = canonicalTypes
@@ -122,6 +135,15 @@ export class Schema extends IndexedFormula {
             } else if (this.isSubclassOf(b, a)) {
                 return 1;
             }
+
+            const aDepth = this.superTypeDepth(a);
+            const bDepth = this.superTypeDepth(b);
+            if (aDepth < bDepth) {
+                return 1;
+            } else if (aDepth > bDepth) {
+                return -1;
+            }
+
             return 0;
         });
     }

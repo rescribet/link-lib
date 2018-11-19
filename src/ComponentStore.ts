@@ -75,7 +75,7 @@ export class ComponentStore<T> {
                               predicates: NamedNode[],
                               topology: NamedNode,
                               defaultType: NamedNode): T | undefined {
-        const oTypes = this.schema.sort(types);
+        const oTypes = this.schema.sort(this.schema.mineForTypes(types));
         const key = convertToCacheKey(oTypes, predicates, topology);
         const cached = this.getComponentFromCache(key);
         if (cached !== undefined) {
