@@ -248,7 +248,7 @@ export class DataProcessor implements LinkedDataAPI {
             }
             const data = new FormData();
             const s = new Serializer(new IndexedFormula());
-            s.setFlags("px");
+            s.setFlags("deinprstux");
             const rdfSerialization = s.statementsToNTriples(graph.statements);
             data.append(
                 defaultNS.ll("graph").toString(),
