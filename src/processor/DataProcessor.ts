@@ -368,6 +368,7 @@ export class DataProcessor implements LinkedDataAPI {
                 irl,
                 {
                     lastRequested: new Date(),
+                    lastResponseHeaders: null,
                     requested: true,
                     status: 202,
                     timesRequested: totalRequested,
@@ -381,13 +382,13 @@ export class DataProcessor implements LinkedDataAPI {
         const requestObj = anyRDFValue(
             this.store.statementsFor(requestIRI),
             defaultNS.link("response"),
-        );
+        ) as BlankNode | undefined;
 
         if (!requestObj) {
             return this.memoizeStatus(irl, emptyRequest);
         }
 
-        const requestObjData = this.store.statementsFor(requestObj as BlankNode);
+        const requestObjData = this.store.statementsFor(requestObj);
 
         // RDFLib has different behaviour across browsers and code-paths, so we must check for multiple properties.
         const requestStatus = anyRDFValue(requestObjData, defaultNS.http("status"))
@@ -406,6 +407,7 @@ export class DataProcessor implements LinkedDataAPI {
             irl,
             {
                 lastRequested: requestDate ? new Date(requestDate.value) : new Date(0),
+                lastResponseHeaders: requestObj,
                 requested: true,
                 status: Number.parseInt(requestStatus.value, 10),
                 timesRequested: totalRequested,

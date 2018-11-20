@@ -132,6 +132,7 @@ export interface EmptyRequestStatus extends RequestStatus {
 
 export interface FulfilledRequestStatus extends RequestStatus {
     lastRequested: Date;
+    lastResponseHeaders: BlankNode | null;
     requested: true;
     status: number;
 }
