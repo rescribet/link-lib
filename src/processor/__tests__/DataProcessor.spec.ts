@@ -1,3 +1,8 @@
+import {
+    BAD_REQUEST,
+    INTERNAL_SERVER_ERROR,
+    NOT_FOUND,
+} from "http-status-codes";
 import "jest";
 import { BlankNode, IndexedFormula, Literal, Statement } from "rdflib";
 
@@ -19,6 +24,7 @@ import {
 const getFulfilledRequest = (): FulfilledRequestStatus => {
     return {
         lastRequested: new Date(),
+        lastResponseHeaders: null,
         requested: true,
         status: 200,
         timesRequested: 1,
@@ -246,6 +252,38 @@ describe("DataProcessor", () => {
         });
     });
 
+    describe("#processExternalResponse", () => {
+        it("handles blank responses", async () => {
+            const store = getBasicStore();
+
+            const res = new Response();
+            const data = await store.processor.processExternalResponse(res);
+
+            expect(data).toHaveLength(0);
+        });
+
+        it("rejects for not-found responses", async () => {
+            const store = getBasicStore();
+
+            const res = new Response(null, { status: NOT_FOUND });
+            expect(store.processor.processExternalResponse(res)).rejects.toBeTruthy();
+        });
+
+        it("rejects for client errors", async () => {
+            const store = getBasicStore();
+
+            const res = new Response(null, { status: BAD_REQUEST });
+            expect(store.processor.processExternalResponse(res)).rejects.toBeTruthy();
+        });
+
+        it("rejects for server errors", async () => {
+            const store = getBasicStore();
+
+            const res = new Response(null, { status: INTERNAL_SERVER_ERROR });
+            expect(store.processor.processExternalResponse(res)).rejects.toBeTruthy();
+        });
+    });
+
     describe("#registerTransformer", () => {
         it("registers a transformer", () => {
             const store = getBasicStore();
@@ -259,6 +297,17 @@ describe("DataProcessor", () => {
             expect(mapping["text/n3"]).toContain(transformer);
             expect(mapping["application/n-quads"]).not.toBeDefined();
             expect(store.processor.accept.default).toEqual(",text/n3;0.9");
+        });
+    });
+
+    describe("#setAcceptForHost", () => {
+        it("sets the value and trims to origin", () => {
+            const store = getBasicStore();
+
+            store.processor.setAcceptForHost("https://example.org/4321", "text/n3");
+
+            expect(store.processor.accept["https://example.org/4321"]).toBeUndefined();
+            expect(store.processor.accept["https://example.org"]).toEqual("text/n3");
         });
     });
 });
