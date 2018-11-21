@@ -151,6 +151,44 @@ describe("RDFStore", () => {
     //     });
     // });
 
+    describe("#processTypeStatement", () => {
+        it("initializes new resources", () => {
+            const store = new RDFStore();
+
+            // @ts-ignore TS-2341
+            expect(store.typeCache[NS.ex("1").toString()]).toBeUndefined();
+            store.addStatements([
+                new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("type"), NS.ex("_")),
+            ]);
+            // @ts-ignore TS-2341
+            expect(store.typeCache[NS.ex("1").toString()]).toEqual([NS.ex("type")]);
+        });
+
+        it("adds new types for cached resources", () => {
+            const store = new RDFStore();
+            store.addStatements([
+                new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("type"), NS.ex("_")),
+                new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("type2"), NS.ex("_")),
+            ]);
+
+            // @ts-ignore TS-2341
+            expect(store.typeCache[NS.ex("1").toString()]).toEqual([NS.ex("type"), NS.ex("type2")]);
+        });
+
+        it("removes type statements after they are removed from the store", () => {
+            const store = new RDFStore();
+            store.addStatements([
+                new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("type"), NS.ex("_")),
+                new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("type2"), NS.ex("_")),
+            ]);
+            store.removeStatements([new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("type"), NS.ex("_"))]);
+            store.flush();
+
+            // @ts-ignore TS-2341
+            expect(store.typeCache[NS.ex("1").toString()]).toEqual([NS.ex("type2")]);
+        });
+    });
+
     describe("#workAvailable", () => {
         it("is zero without work", () => {
             expect(new RDFStore().workAvailable()).toEqual(0);

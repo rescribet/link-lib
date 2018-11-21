@@ -13,7 +13,7 @@ import {
 
 import { SomeNode } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
-import { defaultNS as NS } from "./utilities/constants";
+import { defaultNS, defaultNS as NS } from "./utilities/constants";
 import { blankNodeById, namedNodeByIRI } from "./utilities/memoizedNamespace";
 
 const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
@@ -145,6 +145,9 @@ export class RDFStore {
             return EMPTY_ST_ARR as Statement[];
         }
         const processingBuffer = this.changeBuffer;
+        processingBuffer
+            .filter((s) => s.predicate === NS.rdf("type"))
+            .map((s) => this.processTypeStatement(undefined, s.subject, s.predicate, undefined, undefined));
         this.changeBuffer = new Array(100);
         this.changeBufferCount = 0;
         return processingBuffer;
@@ -285,17 +288,22 @@ export class RDFStore {
     /**
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
-    private processTypeStatement(_formula: Formula,
+    private processTypeStatement(_formula: Formula | undefined,
                                  subj: SomeTerm,
                                  _pred: NamedNode,
-                                 obj: SomeTerm,
-                                 _why: Node): boolean {
+                                 obj?: SomeTerm,
+                                 _why?: Node): boolean {
         const sSubj = subj.toString();
         if (!Array.isArray(this.typeCache[sSubj])) {
             this.typeCache[sSubj] = [obj as NamedNode];
             return false;
         }
-        this.typeCache[sSubj].push(obj as NamedNode);
+        this.typeCache[sSubj] = this.statementsFor((subj as NamedNode))
+            .filter((s) => s.predicate === defaultNS.rdf("type"))
+            .map((s) => s.object as NamedNode);
+        if (obj) {
+            this.typeCache[sSubj].push((obj as NamedNode));
+        }
         return false;
     }
 }
