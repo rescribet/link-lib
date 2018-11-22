@@ -38,6 +38,7 @@
     "@types/firefox-webext-browser": "^64.0.0",
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.10",
+    "core-js": "^3.0.0-beta.3",
     "esdoc": "^1.1.0",
     "gh-pages": "^2.0.1",
     "http-status-codes": ">= 1.x",
@@ -68,7 +69,11 @@
         "statements": 81
       }
     },
-    "setupTestFrameworkScriptFile": "./jest-plugins",
+    "preset": "ts-jest",
+    "setupFiles": [
+      "core-js",
+      "./jest-plugins"
+    ],
     "testMatch": [
       "**/*.spec.ts"
     ],

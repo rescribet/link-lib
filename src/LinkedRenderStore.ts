@@ -153,6 +153,35 @@ export class LinkedRenderStore<T> implements Dispatcher {
     }
 
     /**
+     * Retrieve the subjects from {subject} to find all resources which have an object at the
+     * end of the {path} which matches {match}.
+     * @param subject The resource to start descending on.
+     * @param path A list of linked predicates to descend on.
+     * @param match The value which the predicate at the end of {path} has to match for its subject to return.
+     */
+    public findSubject(subject: SomeNode, path: NamedNode[], match: SomeTerm): SomeNode[] {
+        if (path.length === 0) {
+            return [];
+        }
+
+        const remaining = path.slice();
+        const pred = remaining.shift();
+        const props = this.getResourceProperties(subject, pred!);
+
+        if (props && remaining.length === 0) {
+            return props.find((p) => match.equals(p)) ? [subject] : [];
+        } else if (props) {
+            return props
+                .map((term) => (term.termType === "NamedNode" || term.termType === "BlankNode")
+                    && this.findSubject(term, remaining, match))
+                .flat(1)
+                .filter(Boolean);
+        }
+
+        return [];
+    }
+
+    /**
      * Finds the best render component for a given property in respect to a topology.
      *
      * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.

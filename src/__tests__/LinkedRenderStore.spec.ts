@@ -213,6 +213,65 @@ describe("LinkedRenderStore", () => {
         });
     });
 
+    describe("#findSubject", () => {
+        const store = getBasicStore();
+        const bill = new Literal("Bill");
+        const bookTitle = new Literal("His first work");
+        const testData = [
+            new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("Organization")),
+            new Statement(NS.ex("1"), NS.schema("name"), new Literal("Some org")),
+            new Statement(NS.ex("1"), NS.schema("employee"), NS.ex("2")),
+
+            new Statement(NS.ex("2"), NS.rdf("type"), NS.schema("Person")),
+            new Statement(NS.ex("2"), NS.schema("name"), bill),
+            new Statement(NS.ex("2"), NS.schema("author"), NS.ex("3")),
+            new Statement(NS.ex("2"), NS.schema("author"), NS.ex("4")),
+
+            new Statement(NS.ex("3"), NS.rdf("type"), NS.schema("Book")),
+            new Statement(NS.ex("3"), NS.schema("name"), bookTitle),
+            new Statement(NS.ex("3"), NS.schema("numberOfPages"), Literal.fromNumber(75)),
+
+            new Statement(NS.ex("4"), NS.rdf("type"), NS.schema("Book")),
+            new Statement(NS.ex("4"), NS.schema("name"), new Literal("His second work")),
+            new Statement(NS.ex("4"), NS.schema("numberOfPages"), Literal.fromNumber(475)),
+            new Statement(NS.ex("4"), NS.schema("bookEdition"), new Literal("1st")),
+        ];
+        store.store.addStatements(testData);
+
+        it("resolves an empty path to nothing", () => {
+            const answer = store.lrs.findSubject(NS.ex("1"), [], NS.ex("2"));
+            expect(answer).toHaveLength(0);
+        });
+
+        it("resolves unknown subject to nothing", () => {
+            const answer = store.lrs.findSubject(NS.ex("x"), [NS.schema("name")], bill);
+            expect(answer).toHaveLength(0);
+        });
+
+        it("resolves first order matches", () => {
+            const answer = store.lrs.findSubject(NS.ex("2"), [NS.schema("name")], bill);
+            expect(answer).toEqual([NS.ex("2")]);
+        });
+
+        it("resolves second order matches", () => {
+            const answer = store.lrs.findSubject(
+                NS.ex("1"),
+                [NS.schema("employee"), NS.schema("name")],
+                new Literal("Bill"),
+            );
+            expect(answer).toEqual([NS.ex("2")]);
+        });
+
+        it("resolves third order matches", () => {
+            const answer = store.lrs.findSubject(
+                NS.ex("1"),
+                [NS.schema("employee"), NS.schema("author"), NS.schema("name")],
+                bookTitle,
+            );
+            expect(answer).toEqual([NS.ex("3")]);
+        });
+    });
+
     describe("#registerAll", () => {
         const reg1 = {
             component: (): string => "1",
