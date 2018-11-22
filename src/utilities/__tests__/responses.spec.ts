@@ -92,15 +92,6 @@ describe("responses", () => {
                     "Content-Type": "text/turtle",
                 },
             });
-            // @ts-ignore
-            response.headers = {
-                get: (header: string): string | undefined => {
-                    if (header === "Content-Type") {
-                        return "text/turtle";
-                    }
-                    return undefined;
-                },
-            };
             // expect(typeof response.headers.get).toEqual("function");
             expect(getHeader(response, "Content-Type")).toEqual("text/turtle");
         });
