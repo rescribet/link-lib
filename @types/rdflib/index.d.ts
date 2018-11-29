@@ -47,7 +47,7 @@ declare module "rdflib" {
         string[] | number[] | Date[] | boolean[] | object[];
 
     export class Node {
-        public static fromValue(value: string): Node;
+        public static fromValue(value: any): Node;
 
         public static toJS(term: Node): ToJSOutputTypes;
 
