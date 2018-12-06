@@ -134,15 +134,56 @@ describe("RDFStore", () => {
     //             .toEqual(expected);
     //     });
     // });
-    //
-    // describe("#getResourceProperty", () => {
-    //     it("works", () => {
-    //         const expected = undefined;
-    //         expect(new RDFStore().getResourceProperty())
-    //             .toEqual(expected);
-    //     });
-    // });
-    //
+
+    describe("#getResourceProperty", () => {
+        it("returns undefined for type statements on unloaded resources", () => {
+            const store = new RDFStore();
+
+            expect(store.getResourceProperty(NS.ex("1"), NS.rdf("type")))
+                .toBeUndefined();
+        });
+
+        it("returns the type for type statements", () => {
+            const store = new RDFStore();
+            store.addStatements([
+                new Statement(NS.ex("2"), NS.rdf("type"), NS.ex("SomeClass")),
+            ]);
+
+            expect(store.getResourceProperty(NS.ex("2"), NS.rdf("type")))
+                .toEqual(NS.ex("SomeClass"));
+        });
+
+        it("returns undefined for other statements on unloaded resources", () => {
+            const store = new RDFStore();
+
+            expect(store.getResourceProperty(NS.ex("1"), NS.ex("prop")))
+                .toBeUndefined();
+        });
+
+        it("returns the object for other statements", () => {
+            const store = new RDFStore();
+            store.addStatements([
+                new Statement(NS.ex("2"), NS.ex("prop"), new Literal("some prop")),
+            ]);
+
+            expect(store.getResourceProperty(NS.ex("2"), NS.ex("prop")))
+                .toEqual(new Literal("some prop"));
+        });
+
+        it("picks the preferred language", () => {
+            const store = new RDFStore();
+            store.addStatements([
+                new Statement(NS.ex("2"), NS.ex("prop"), new Literal("some prop", "de")),
+                new Statement(NS.ex("2"), NS.ex("prop"), new Literal("some prop", "nl")),
+                new Statement(NS.ex("2"), NS.ex("prop"), new Literal("some prop", "en")),
+                new Statement(NS.ex("2"), NS.ex("prop"), new Literal("some prop", "fr")),
+            ]);
+
+            expect(store.getResourceProperty(NS.ex("2"), NS.ex("prop")))
+                .toEqual(new Literal("some prop", "en"));
+        });
+    });
+
     // describe("#statementsFor", () => {
     //     it("works", () => {
     //         const expected = undefined;

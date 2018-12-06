@@ -259,7 +259,8 @@ export class RDFStore {
 
     public getResourceProperty(subject: SomeNode, property: SomeNode | SomeNode[]): SomeTerm | undefined {
         if (property === NS.rdf("type")) {
-            return this.typeCache[subject.toString()][0];
+            const entry = this.typeCache[subject.toString()];
+            return entry ? entry[0] : undefined;
         }
         const rawProp = this.getResourcePropertyRaw(subject, property);
         if (rawProp.length === 0) {
