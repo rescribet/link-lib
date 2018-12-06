@@ -299,7 +299,18 @@ export class DataProcessor implements LinkedDataAPI {
             opts,
         );
 
-        return this.fetcher.load(iri, options).then(this.processExecAction);
+        let res;
+        try {
+            res = await this.fetcher.load(iri, options);
+        } catch (e) {
+            if (typeof e.response !== "undefined") {
+                res =  e.response;
+            } else {
+                throw e;
+            }
+        }
+
+        return this.processExecAction(res);
     }
 
     /**

@@ -140,6 +140,24 @@ describe("DataProcessor", () => {
 
             expect(process).toHaveBeenCalledTimes(1);
         });
+
+        it("processes error responses", async () => {
+            const result = new Response(null, {
+                status: 401,
+                statusText: "unauthorized",
+            });
+
+            (fetch as any).mockRejectOnce(result);
+
+            const store = getBasicStore();
+            const process = jest.fn((res) => Promise.resolve(res));
+            // @ts-ignore
+            store.processor.processExecAction = process;
+
+            await store.processor.fetchResource(defaultNS.example("test"));
+
+            expect(process).toHaveBeenCalled();
+        });
     });
 
     describe("#getStatus", () => {
