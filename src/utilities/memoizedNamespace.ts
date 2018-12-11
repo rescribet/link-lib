@@ -1,4 +1,4 @@
-import { BlankNode, NamedNamespace, NamedNode, Namespace, TermIsh } from "rdflib";
+import { BlankNode, Literal, NamedNamespace, NamedNode, Namespace, SomeTerm, TermIsh } from "rdflib";
 
 import { NamespaceMap } from "../types";
 
@@ -74,6 +74,19 @@ export function memoizedNamespace(nsIRI: string): (ns: string) => NamedNode {
 
 const CI_MATCH_PREFIX = 0;
 const CI_MATCH_SUFFIX = 1;
+
+export function normalizeTerm(term: SomeTerm | undefined): SomeTerm | undefined {
+    if (term && term.termType === "NamedNode" && term.sI === undefined) {
+        return namedNodeByIRI(term.value) || term;
+    }
+    if (term && term.termType === "BlankNode" && term.sI === undefined) {
+        return blankNodeById(term.value) || term;
+    }
+    if (term && term.termType === "Literal" && term.datatype && term.datatype.sI === undefined) {
+        return new Literal(term.value, term.language, namedNodeByIRI(term.datatype.value));
+    }
+    return term;
+}
 
 /**
  * Expands a property if it's in short-form while preserving long-form.

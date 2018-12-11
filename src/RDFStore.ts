@@ -1,9 +1,7 @@
 import {
-    BlankNode,
     Formula,
     graph,
     IndexedFormula,
-    Literal,
     NamedNode,
     Node,
     OptionalNode,
@@ -11,33 +9,23 @@ import {
     Statement,
 } from "rdflib";
 
-import { SomeNode } from "./types";
+import { ChangeBuffer, SomeNode } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
 import { defaultNS, defaultNS as NS } from "./utilities/constants";
-import { blankNodeById, namedNodeByIRI } from "./utilities/memoizedNamespace";
+import { patchRDFLibStoreWithOverrides, patchRDFLibStoreWithProxy } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
-
-function normalizeTerm(term: SomeTerm | undefined): SomeTerm | undefined {
-    if (term && term.termType === "NamedNode" && term.sI === undefined) {
-        return namedNodeByIRI(term.value) || term;
-    }
-    if (term && term.termType === "BlankNode" && term.sI === undefined) {
-        return blankNodeById(term.value) || term;
-    }
-    if (term && term.termType === "Literal" && term.datatype && term.datatype.sI === undefined) {
-        return new Literal(term.value, term.language, namedNodeByIRI(term.datatype.value));
-    }
-    return term;
-}
 
 /**
  * Provides a clean consistent interface to stored (RDF) data.
  */
-export class RDFStore {
-    private changeBuffer: Statement[] = new Array(100);
-    private changeBufferCount: number = 0;
-    private langPrefs: string[] = Array.from(typeof navigator !== undefined ? navigator.languages : ["en"]);
+export class RDFStore implements ChangeBuffer {
+    public changeBuffer: Statement[] = new Array(100);
+    public changeBufferCount: number = 0;
+
+    private langPrefs: string[] = Array.from(typeof navigator !== undefined
+        ? (navigator.languages || [navigator.language])
+        : ["en"]);
     private store: IndexedFormula = graph();
     private typeCache: { [k: string]: NamedNode[] } = {};
 
@@ -45,60 +33,11 @@ export class RDFStore {
         this.processDelta = this.processDelta.bind(this);
 
         const g = graph();
-        this.store = new Proxy(g, {
-            get: (target: any, prop: string): any => {
-                if (prop === "add") {
-                    return (subj: NamedNode | BlankNode, pred: NamedNode, obj: SomeTerm, why: Node):
-                        IndexedFormula | null | Statement => {
-                        if (Array.isArray(subj)) {
-                            if (subj[0] && subj[0].predicate.sI !== undefined) {
-                                return target.add(subj);
-                            }
-                            return target.add(subj.map((s) => new Statement(
-                                normalizeTerm(s.subject) as SomeNode,
-                                normalizeTerm(s.predicate) as NamedNode,
-                                normalizeTerm(s.object) as SomeTerm,
-                                s.why,
-                            )));
-                        }
-
-                        return target.add(
-                            normalizeTerm(subj),
-                            normalizeTerm(pred),
-                            normalizeTerm(obj),
-                            why,
-                        );
-                    };
-                } else if (prop === "sym") {
-                    return (uri: string): NamedNode => {
-                        return namedNodeByIRI(uri);
-                    };
-                }
-
-                return target[prop as any];
-            },
-        });
-
-        g.statements = new Proxy(g.statements, {
-            get: (target: Statement[], prop: string): any => {
-                if (prop === "push") {
-                    return (elem: any): number => {
-                        this.changeBuffer[this.changeBufferCount] = elem;
-                        this.changeBufferCount++;
-                        return target.push(elem);
-                    };
-                } else if (prop === "splice") {
-                    return (index: any, len: any): Statement[] => {
-                        const rem = target.splice(index, len);
-                        this.changeBuffer.push(...rem);
-                        this.changeBufferCount += len;
-                        return rem;
-                    };
-                }
-
-                return target[prop as any];
-            },
-        });
+        if (typeof Proxy !== "undefined") {
+            this.store = patchRDFLibStoreWithProxy(g, this);
+        } else {
+            this.store = patchRDFLibStoreWithOverrides(g, this);
+        }
         this.store.newPropertyAction(NS.rdf("type"), this.processTypeStatement.bind(this));
     }
 
@@ -234,8 +173,8 @@ export class RDFStore {
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Statement[] {
         const props = this.statementsFor(subject);
         if (Array.isArray(property)) {
-            for (const prop of property) {
-                const values = allRDFPropertyStatements(props, prop);
+            for (let i = 0; i < property.length; i++) {
+                const values = allRDFPropertyStatements(props, property[i]);
                 if (values.length > 0) {
                     return values;
                 }

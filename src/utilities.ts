@@ -58,8 +58,8 @@ export function getPropBestLang(rawProp: Statement | Statement[], langPrefs: str
     if (rawProp.length === 1) {
         return rawProp[0].object;
     }
-    for (const lang of langPrefs) {
-        const pIndex = rawProp.findIndex((p) => "language" in p.object && p.object.language === lang);
+    for (let i = 0; i < langPrefs.length; i++) {
+        const pIndex = rawProp.findIndex((p) => "language" in p.object && p.object.language === langPrefs[i]);
         if (pIndex >= 0) {
             return rawProp[pIndex].object;
         }
@@ -75,8 +75,8 @@ export function getPropBestLangRaw(statements: Statement | Statement[], langPref
     if (statements.length === 1) {
         return statements[0];
     }
-    for (const lang of langPrefs) {
-        const pIndex = statements.findIndex((s) => "language" in s.object && s.object.language === lang);
+    for (let i = 0; i < langPrefs.length; i++) {
+        const pIndex = statements.findIndex((s) => "language" in s.object && s.object.language === langPrefs[i]);
         if (pIndex >= 0) {
             return statements[pIndex];
         }
@@ -92,8 +92,8 @@ export function getTermBestLang(rawTerm: SomeTerm | SomeTerm[], langPrefs: strin
     if (rawTerm.length === 1) {
         return rawTerm[0];
     }
-    for (const lang of langPrefs) {
-        const pIndex = rawTerm.findIndex((p) => "language" in p && p.language === lang);
+    for (let i = 0; i < langPrefs.length; i++) {
+        const pIndex = rawTerm.findIndex((p) => "language" in p && p.language === langPrefs[i]);
         if (pIndex >= 0) {
             return rawTerm[pIndex];
         }

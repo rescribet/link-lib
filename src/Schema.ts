@@ -28,8 +28,8 @@ export class Schema extends IndexedFormula {
         super();
         this.liveStore = liveStore;
 
-        for (const vocab of Schema.vocabularies) {
-            this.addStatements(vocab.axioms);
+        for (let i = 0; i < Schema.vocabularies.length; i++) {
+            this.addStatements(Schema.vocabularies[i].axioms);
         }
     }
 
@@ -94,8 +94,8 @@ export class Schema extends IndexedFormula {
         for (let i = 0; i < lookupTypes.length; i++) {
             const canon = this.liveStore.canon(lookupTypes[i]) as NamedNode;
             if (!this.processedTypes.includes(canon)) {
-                for (const vocab of Schema.vocabularies) {
-                    vocab.processType(canon, this.getProcessingCtx());
+                for (let j = 0; j < Schema.vocabularies.length; j++) {
+                    Schema.vocabularies[j].processType(canon, this.getProcessingCtx());
                 }
                 this.processedTypes.push(canon);
             }
@@ -149,8 +149,8 @@ export class Schema extends IndexedFormula {
     }
 
     private process(item: Statement): Statement[] | null {
-        for (const vocab of Schema.vocabularies) {
-            const res = vocab.processStatement(item, this.getProcessingCtx());
+        for (let i = 0; i < Schema.vocabularies.length; i++) {
+            const res = Schema.vocabularies[i].processStatement(item, this.getProcessingCtx());
             if (res !== null) {
                 return res;
             }

@@ -82,8 +82,8 @@ export class ComponentStore<T> {
             return cached;
         }
 
-        for (const lookupType of oTypes) {
-            const exact = this.lookup(predicates[0].sI, lookupType.sI, topology.sI);
+        for (let i = 0; i < oTypes.length; i++) {
+            const exact = this.lookup(predicates[0].sI, oTypes[i].sI, topology.sI);
             if (exact !== undefined) {
                 return this.addComponentToCache(exact, key);
             }
@@ -101,10 +101,10 @@ export class ComponentStore<T> {
 
             return this.addComponentToCache(foundComponent, key);
         }
-        for (const lookupProp of predicates) {
+        for (let i = 0; i < predicates.length; i++) {
             const bestComponent = this.bestComponent(possibleComponents, oTypes);
             const component = bestComponent && this.lookup(
-                lookupProp.sI,
+                predicates[i].sI,
                 bestComponent.sI,
                 topology.sI,
             );
@@ -112,8 +112,8 @@ export class ComponentStore<T> {
                 return this.addComponentToCache(component, key);
             }
         }
-        for (const lookupProp of predicates) {
-            const component = this.lookup(lookupProp.sI, defaultType.sI, topology.sI);
+        for (let i = 0; i < predicates.length; i++) {
+            const component = this.lookup(predicates[i].sI, defaultType.sI, topology.sI);
             if (component) {
                 return this.addComponentToCache(component, key);
             }
@@ -212,13 +212,14 @@ export class ComponentStore<T> {
 
     private possibleComponents(predicates: NamedNode[], topology: NamedNode): NamedNode[] {
         const classes = [defaultNS.rdfs("Resource")];
-        for (const predicate of predicates) {
+        for (let i = 0; i < predicates.length; i++) {
+            const predicate = predicates[i];
             if (typeof this.mapping[predicate.sI] !== "undefined") {
                 const types = this.mapping[predicate.sI];
-                for (let i = 0; i < types.length; i++) {
-                    const compType = this.lookup(predicate.sI, i, topology.sI);
+                for (let j = 0; j < types.length; j++) {
+                    const compType = this.lookup(predicate.sI, j, topology.sI);
                     if (compType !== undefined) {
-                        classes.push(namedNodeByStoreIndex(i) as NamedNode);
+                        classes.push(namedNodeByStoreIndex(j) as NamedNode);
                     }
                 }
             }

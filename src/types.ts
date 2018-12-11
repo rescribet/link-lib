@@ -96,6 +96,11 @@ export interface DataObject {
 
 export type DataTuple = [IndexedFormula, NamedBlobTuple[]];
 
+export interface ChangeBuffer {
+    changeBuffer: Statement[];
+    changeBufferCount: number;
+}
+
 export interface LinkedActionResponse {
     /** The IRI of the created resource, based from the Location header. */
     iri: NamedNode | null;

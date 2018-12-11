@@ -91,8 +91,8 @@ export const RDFS = {
             result.push(new Statement(item.object, nsRDFtype, nsRDFSClass));        // C rdf:type rdfs:Class
 
             const dereferences = ctx.store.statementsMatching(item.subject);
-            for (const { object } of dereferences) {
-                result.push(new Statement(item.subject as NamedNode, nsRDFtype, object));
+            for (let i = 0; i < dereferences.length; i++) {
+                result.push(new Statement(item.subject as NamedNode, nsRDFtype, dereferences[i].object));
             }
         } else if (nsRDFSrange.equals(item.predicate)) {
             if (!(item.object instanceof NamedNode)) {
@@ -102,8 +102,8 @@ export const RDFS = {
             result.push(new Statement(item.object, nsRDFtype, nsRDFSClass));        // C rdf:type rdfs:Class
 
             const dereferences = ctx.store.statementsMatching(undefined, undefined, item.subject);
-            for (const { subject } of dereferences) {
-                result.push(new Statement(subject, nsRDFtype, item.object));
+            for (let i = 0; i < dereferences.length; i++) {
+                result.push(new Statement(dereferences[i].subject, nsRDFtype, item.object));
             }
         } else if (nsRDFSsubClassOf.equals(item.predicate)) {                                   // C1 rdfs:subClassOf C2
             if (!(item.object instanceof NamedNode || item.object instanceof BlankNode)) {

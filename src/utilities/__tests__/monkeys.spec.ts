@@ -1,12 +1,14 @@
 import {
     IndexedFormula,
     Literal,
+    NamedNode,
     Serializer,
     Statement,
 } from "rdflib";
+import { ChangeBuffer } from "../../types";
 
 import { defaultNS as NS } from "../constants";
-import { patchRDFLibSerializer } from "../monkeys";
+import { patchRDFLibSerializer, patchRDFLibStoreWithOverrides, patchRDFLibStoreWithProxy } from "../monkeys";
 
 function serializeString(str: string, patch = true): string {
     const g = new IndexedFormula();
@@ -19,6 +21,17 @@ function serializeString(str: string, patch = true): string {
     s.setFlags("deinprstux");
 
     return s.statementsToNTriples(g.statements);
+}
+
+function getStorePair(): [IndexedFormula, ChangeBuffer] {
+    const g = new IndexedFormula();
+
+    const changeBuffer = {
+        changeBuffer: [],
+        changeBufferCount: 0,
+    };
+
+    return [g, changeBuffer];
 }
 
 describe("monkeys", () => {
@@ -39,7 +52,60 @@ describe("monkeys", () => {
 
         it("is still required", () => {
             expect(serializeString(failing, false))
-                .toContain('"""');
+                .toContain("\"\"\"");
+        });
+    });
+
+    describe("patchRDFLibStoreWithProxy", () => {
+        it("returns the graph", () => {
+            const [ g, changeBuffer ] = getStorePair();
+
+            expect(patchRDFLibStoreWithProxy(g, changeBuffer))
+                .toEqual(g);
+        });
+
+        it("increments the changebuffer", () => {
+            const [ g, changeBuffer ] = getStorePair();
+            patchRDFLibStoreWithProxy(g, changeBuffer);
+            g.statements.push(new Statement(NS.ex("1"), NS.ex("p"), NS.ex("2")));
+
+            expect(changeBuffer.changeBufferCount).toEqual(1);
+        });
+    });
+
+    describe("patchRDFLibStoreWithOverrides", () => {
+        it("returns the graph", () => {
+            const [ g, changeBuffer ] = getStorePair();
+
+            expect(patchRDFLibStoreWithOverrides(g, changeBuffer))
+                .toEqual(g);
+        });
+
+        it("increments the changebuffer", () => {
+            const [ g, changeBuffer ] = getStorePair();
+            patchRDFLibStoreWithOverrides(g, changeBuffer);
+            g.statements.push(new Statement(NS.ex("1"), NS.ex("p"), NS.ex("2")));
+
+            expect(changeBuffer.changeBufferCount).toEqual(1);
+        });
+
+        it("normalizes terms", () => {
+            const [ g, changeBuffer ] = getStorePair();
+            patchRDFLibStoreWithOverrides(g, changeBuffer);
+            g.add([
+                new Statement(
+                    new NamedNode("http://example.com/1"),
+                    new NamedNode("http://example.com/p"),
+                    new NamedNode("http://example.com/2"),
+                ),
+                new Statement(
+                    new NamedNode("http://example.com/3"),
+                    new NamedNode("http://example.com/p"),
+                    new NamedNode("http://example.com/4"),
+                ),
+            ]);
+
+            expect(g.statements[0].subject).toHaveProperty("sI");
         });
     });
 });

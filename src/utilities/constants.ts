@@ -63,7 +63,8 @@ export const DEFAULT_TOPOLOGY: NamedNode = defaultNS.ll("defaultTopology");
 export const RENDER_CLASS_NAME: NamedNode = defaultNS.ll("typeRenderClass");
 
 export const MAIN_NODE_DEFAULT_IRI = defaultNS.ll("targetResource");
-export const NON_DATA_OBJECTS_CTORS = [
+// tslint:disable-next-line ban-types
+export const NON_DATA_OBJECTS_CTORS: Function[] = [
     Array,
     ArrayBuffer,
     Boolean,
@@ -82,12 +83,12 @@ export const NON_DATA_OBJECTS_CTORS = [
     Map,
     Number,
     Promise,
-    Proxy,
+    (typeof Proxy !== "undefined" ? Proxy : undefined)!,
     RangeError,
     ReferenceError,
     RegExp,
     Set,
-];
+].filter(Boolean);
 export const MSG_BAD_REQUEST = "Request failed with bad status code";
 export const MSG_INCORRECT_TARGET = "Collections or Literals can't be the target";
 export const MSG_URL_UNDEFINED = "No url given with action.";
