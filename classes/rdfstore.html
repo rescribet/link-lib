@@ -913,6 +913,12 @@ img { max-width: 100%; }
 				<li class=" tsd-kind-constructor tsd-parent-kind-class">
 					<a href="rdfstore.html#constructor" class="tsd-kind-icon">constructor</a>
 				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="rdfstore.html#changebuffer" class="tsd-kind-icon">change<wbr>Buffer</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="rdfstore.html#changebuffercount" class="tsd-kind-icon">change<wbr>Buffer<wbr>Count</a>
+				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="rdfstore.html#addstatements" class="tsd-kind-icon">add<wbr>Statements</a>
 				</li>
@@ -985,6 +991,12 @@ img { max-width: 100%; }
 				</li>
 			</ul>
 		</section>
+		<section class="tsd-panel">
+			<h3>Implements</h3>
+			<ul class="tsd-hierarchy">
+				<li><a href="../interfaces/changebuffer.html" class="tsd-signature-type">ChangeBuffer</a></li>
+			</ul>
+		</section>
 		<section class="tsd-panel-group tsd-index-group">
 			<h2>Index</h2>
 			<section class="tsd-panel tsd-index-panel">
@@ -993,6 +1005,13 @@ img { max-width: 100%; }
 						<h3>Constructors</h3>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="rdfstore.html#constructor" class="tsd-kind-icon">constructor</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Properties</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="rdfstore.html#changebuffer" class="tsd-kind-icon">change<wbr>Buffer</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="rdfstore.html#changebuffercount" class="tsd-kind-icon">change<wbr>Buffer<wbr>Count</a></li>
 						</ul>
 					</section>
 					<section class="tsd-index-section ">
@@ -1032,12 +1051,37 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L44">RDFStore.ts:44</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L30">RDFStore.ts:30</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <a href="rdfstore.html" class="tsd-signature-type">RDFStore</a></h4>
 					</li>
 				</ul>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Properties</h2>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="changebuffer" class="tsd-anchor"></a>
+				<h3>change<wbr>Buffer</h3>
+				<div class="tsd-signature tsd-kind-icon">change<wbr>Buffer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;new Array(100)</span></div>
+				<aside class="tsd-sources">
+					<p>Implementation of <a href="../interfaces/changebuffer.html">ChangeBuffer</a>.<a href="../interfaces/changebuffer.html#changebuffer-1">changeBuffer</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L23">RDFStore.ts:23</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="changebuffercount" class="tsd-anchor"></a>
+				<h3>change<wbr>Buffer<wbr>Count</h3>
+				<div class="tsd-signature tsd-kind-icon">change<wbr>Buffer<wbr>Count<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0</span></div>
+				<aside class="tsd-sources">
+					<p>Implementation of <a href="../interfaces/changebuffer.html">ChangeBuffer</a>.<a href="../interfaces/changebuffer.html#changebuffercount">changeBufferCount</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L24">RDFStore.ts:24</a></li>
+					</ul>
+				</aside>
 			</section>
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
@@ -1052,7 +1096,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L173">RDFStore.ts:173</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L48">RDFStore.ts:48</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1083,7 +1127,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L181">RDFStore.ts:181</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L56">RDFStore.ts:56</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1118,7 +1162,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L185">RDFStore.ts:185</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L60">RDFStore.ts:60</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1153,7 +1197,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L192">RDFStore.ts:192</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L67">RDFStore.ts:67</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1188,7 +1232,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L199">RDFStore.ts:199</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L74">RDFStore.ts:74</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1211,7 +1255,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L207">RDFStore.ts:207</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L82">RDFStore.ts:82</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1234,7 +1278,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L221">RDFStore.ts:221</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L96">RDFStore.ts:96</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1253,7 +1297,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L314">RDFStore.ts:314</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L189">RDFStore.ts:189</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1279,7 +1323,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L324">RDFStore.ts:324</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L199">RDFStore.ts:199</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1308,7 +1352,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L298">RDFStore.ts:298</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L173">RDFStore.ts:173</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1334,7 +1378,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L225">RDFStore.ts:225</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L100">RDFStore.ts:100</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1366,7 +1410,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L232">RDFStore.ts:232</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L107">RDFStore.ts:107</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1389,7 +1433,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L251">RDFStore.ts:251</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L126">RDFStore.ts:126</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1412,7 +1456,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L284">RDFStore.ts:284</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L159">RDFStore.ts:159</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1435,7 +1479,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L264">RDFStore.ts:264</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L139">RDFStore.ts:139</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1480,7 +1524,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L341">RDFStore.ts:341</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L216">RDFStore.ts:216</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1511,7 +1555,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/e4dcb1e/src/RDFStore.ts#L349">RDFStore.ts:349</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c46dd4b/src/RDFStore.ts#L224">RDFStore.ts:224</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
