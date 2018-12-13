@@ -39,6 +39,7 @@ import {
     MSG_URL_UNRESOLVABLE,
 } from "../utilities/constants";
 import { namedNodeByIRI } from "../utilities/memoizedNamespace";
+import { patchRDFLibSerializer } from "../utilities/monkeys";
 import {
     getContentType,
     getHeader,
@@ -248,6 +249,7 @@ export class DataProcessor implements LinkedDataAPI {
             }
             const data = new FormData();
             const s = new Serializer(new IndexedFormula());
+            patchRDFLibSerializer(s, "deinprstux");
             s.setFlags("deinprstux");
             const rdfSerialization = s.statementsToNTriples(graph.statements);
             data.append(

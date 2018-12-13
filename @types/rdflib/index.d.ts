@@ -274,6 +274,8 @@ declare module "rdflib" {
 
         public statementsToXML(sts: Statement[]): string;
 
+        public stringToN3(str: string, flags: string): string;
+
     }
 
     export class Statement {
