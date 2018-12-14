@@ -217,6 +217,7 @@ describe("LinkedRenderStore", () => {
         const store = getBasicStore();
         const bill = new Literal("Bill");
         const bookTitle = new Literal("His first work");
+        const alternativeTitle = new Literal("Some alternative title");
         const testData = [
             new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("Organization")),
             new Statement(NS.ex("1"), NS.schema("name"), new Literal("Some org")),
@@ -229,6 +230,7 @@ describe("LinkedRenderStore", () => {
 
             new Statement(NS.ex("3"), NS.rdf("type"), NS.schema("Book")),
             new Statement(NS.ex("3"), NS.schema("name"), bookTitle),
+            new Statement(NS.ex("3"), NS.schema("name"), alternativeTitle),
             new Statement(NS.ex("3"), NS.schema("numberOfPages"), Literal.fromNumber(75)),
 
             new Statement(NS.ex("4"), NS.rdf("type"), NS.schema("Book")),
@@ -267,6 +269,15 @@ describe("LinkedRenderStore", () => {
                 NS.ex("1"),
                 [NS.schema("employee"), NS.schema("author"), NS.schema("name")],
                 bookTitle,
+            );
+            expect(answer).toEqual([NS.ex("3")]);
+        });
+
+        it("resolves third order array matches", () => {
+            const answer = store.lrs.findSubject(
+                NS.ex("1"),
+                [NS.schema("employee"), NS.schema("author"), NS.schema("name")],
+                [bill, alternativeTitle],
             );
             expect(answer).toEqual([NS.ex("3")]);
         });

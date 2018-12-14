@@ -159,7 +159,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param path A list of linked predicates to descend on.
      * @param match The value which the predicate at the end of {path} has to match for its subject to return.
      */
-    public findSubject(subject: SomeNode, path: NamedNode[], match: SomeTerm): SomeNode[] {
+    public findSubject(subject: SomeNode, path: NamedNode[], match: SomeTerm | SomeTerm[]): SomeNode[] {
         if (path.length === 0) {
             return [];
         }
@@ -169,7 +169,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const props = this.getResourceProperties(subject, pred!);
 
         if (props && remaining.length === 0) {
-            return props.find((p) => match.equals(p)) ? [subject] : [];
+            const finder = Array.isArray(match)
+                ? (p: SomeTerm): boolean => match.some((m) => m.equals(p))
+                : (p: SomeTerm): boolean => match.equals(p);
+
+            return props.find(finder) ? [subject] : [];
         } else if (props) {
             return props
                 .map((term) => (term.termType === "NamedNode" || term.termType === "BlankNode")
