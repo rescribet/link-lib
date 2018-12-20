@@ -914,7 +914,13 @@ img { max-width: 100%; }
 					<a href="statementsubscriptionregistration.html#callback" class="tsd-kind-icon">callback</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="statementsubscriptionregistration.html#index" class="tsd-kind-icon">index</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="statementsubscriptionregistration.html#onlysubjects" class="tsd-kind-icon">only<wbr>Subjects</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="statementsubscriptionregistration.html#subjectfilter" class="tsd-kind-icon">subject<wbr>Filter</a>
 				</li>
 			</ul>
 		</li>
@@ -938,7 +944,9 @@ img { max-width: 100%; }
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="statementsubscriptionregistration.html#callback" class="tsd-kind-icon">callback</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="statementsubscriptionregistration.html#index" class="tsd-kind-icon">index</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="statementsubscriptionregistration.html#onlysubjects" class="tsd-kind-icon">only<wbr>Subjects</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="statementsubscriptionregistration.html#subjectfilter" class="tsd-kind-icon">subject<wbr>Filter</a></li>
 						</ul>
 					</section>
 				</div>
@@ -949,10 +957,20 @@ img { max-width: 100%; }
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 				<a name="callback" class="tsd-anchor"></a>
 				<h3>callback</h3>
-				<div class="tsd-signature tsd-kind-icon">callback<span class="tsd-signature-symbol">:</span> <a href="../globals.html#subscriptioncallback" class="tsd-signature-type">SubscriptionCallback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<div class="tsd-signature tsd-kind-icon">callback<span class="tsd-signature-symbol">:</span> <a href="../globals.html#subscriptioncallback" class="tsd-signature-type">SubscriptionCallback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadonlyArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/ed9b075/src/types.ts#L23">types.ts:23</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/755097c/src/types.ts#L23">types.ts:23</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="index" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagOptional">Optional</span> index</h3>
+				<div class="tsd-signature tsd-kind-icon">index<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/755097c/src/types.ts#L24">types.ts:24</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -962,7 +980,17 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">only<wbr>Subjects<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">false</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/ed9b075/src/types.ts#L24">types.ts:24</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/755097c/src/types.ts#L26">types.ts:26</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="subjectfilter" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagOptional">Optional</span> subject<wbr>Filter</h3>
+				<div class="tsd-signature tsd-kind-icon">subject<wbr>Filter<span class="tsd-signature-symbol">:</span> <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol">[]</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/755097c/src/types.ts#L25">types.ts:25</a></li>
 					</ul>
 				</aside>
 			</section>
