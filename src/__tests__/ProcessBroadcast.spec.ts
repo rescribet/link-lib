@@ -63,7 +63,7 @@ describe("ProcessBroadcast", () => {
             const processor = new ProcessBroadcast(getOpts(
                 [],
                 [
-                    { callback: cb, onlySubjects: false },
+                    { callback: cb, markedForDelete: false, onlySubjects: false },
                 ],
             ));
 
@@ -81,8 +81,8 @@ describe("ProcessBroadcast", () => {
                 const processor = new ProcessBroadcast(getOpts(
                     mixedWork,
                     [
-                        { callback: bulk1, onlySubjects: false },
-                        { callback: bulk2, onlySubjects: false },
+                        { callback: bulk1, markedForDelete: false, onlySubjects: false },
+                        { callback: bulk2, markedForDelete: false, onlySubjects: false },
                     ],
                 ));
 
@@ -117,7 +117,7 @@ describe("ProcessBroadcast", () => {
                 [],
                 [],
                 new Map<SomeNode, SubscriptionRegistration[]>([
-                    [schemaT, [{ callback: cb, onlySubjects: true }]],
+                    [schemaT, [{ callback: cb, markedForDelete: false, onlySubjects: true }]],
                 ]),
             ));
 
@@ -141,16 +141,16 @@ describe("ProcessBroadcast", () => {
                 [],
                 new Map<SomeNode, SubscriptionRegistration[]>([
                     [schemaT, [
-                        { callback: st, onlySubjects: true },
-                        { callback: stb, onlySubjects: true },
+                        { callback: st, markedForDelete: false, onlySubjects: true },
+                        { callback: stb, markedForDelete: false, onlySubjects: true },
                     ]],
-                    [resource1, [{ callback: r1, onlySubjects: true }]],
-                    [resource2, [{ callback: r2, onlySubjects: true }]],
+                    [resource1, [{ callback: r1, markedForDelete: false, onlySubjects: true }]],
+                    [resource2, [{ callback: r2, markedForDelete: false, onlySubjects: true }]],
                     [resource4, [
-                        { callback: r4a, onlySubjects: true },
-                        { callback: r4b, onlySubjects: true },
+                        { callback: r4a, markedForDelete: false, onlySubjects: true },
+                        { callback: r4b, markedForDelete: false, onlySubjects: true },
                     ]],
-                    [resource5, [{ callback: r5, onlySubjects: true }]],
+                    [resource5, [{ callback: r5, markedForDelete: false, onlySubjects: true }]],
                 ]),
             ));
 
@@ -202,21 +202,21 @@ describe("ProcessBroadcast", () => {
             const processor = new ProcessBroadcast(getOpts(
                 mixedWork,
                 [
-                    { callback: bulk1, onlySubjects: false },
-                    { callback: bulk2, onlySubjects: false },
+                    { callback: bulk1, markedForDelete: false, onlySubjects: false },
+                    { callback: bulk2, markedForDelete: false, onlySubjects: false },
                 ],
                 new Map<SomeNode, SubscriptionRegistration[]>([
                     [schemaT, [
-                        { callback: st, onlySubjects: true },
-                        { callback: stb, onlySubjects: true },
+                        { callback: st, markedForDelete: false, onlySubjects: true },
+                        { callback: stb, markedForDelete: false, onlySubjects: true },
                     ]],
-                    [resource1, [{ callback: r1, onlySubjects: true }]],
-                    [resource2, [{ callback: r2, onlySubjects: true }]],
+                    [resource1, [{ callback: r1, markedForDelete: false, onlySubjects: true }]],
+                    [resource2, [{ callback: r2, markedForDelete: false, onlySubjects: true }]],
                     [resource4, [
-                        { callback: r4a, onlySubjects: true },
-                        { callback: r4b, onlySubjects: true },
+                        { callback: r4a, markedForDelete: false, onlySubjects: true },
+                        { callback: r4b, markedForDelete: false, onlySubjects: true },
                     ]],
-                    [resource5, [{ callback: r5, onlySubjects: true }]],
+                    [resource5, [{ callback: r5, markedForDelete: false, onlySubjects: true }]],
                 ]),
             ));
 

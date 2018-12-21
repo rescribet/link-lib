@@ -378,9 +378,13 @@ export class LinkedRenderStore<T> implements Dispatcher {
             });
 
             return (): void => {
+                registration.markedForDelete = true;
                 subjectFilter.forEach((s) => {
                     const partialSub = this.subjectSubscriptions.get(s)!;
                     partialSub.splice(partialSub.indexOf(registration), 1);
+                    if (partialSub.length === 0) {
+                        this.subjectSubscriptions.delete(s);
+                    }
                 });
             };
         }
@@ -435,7 +439,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         }
 
         new ProcessBroadcast({
-            bulkSubscriptions: this.bulkSubscriptions,
+            bulkSubscriptions: this.bulkSubscriptions.slice(),
             subjectSubscriptions: this.subjectSubscriptions,
             timeout: maxTimeout,
             work: this.store.flush(),

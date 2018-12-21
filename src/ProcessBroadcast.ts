@@ -27,7 +27,7 @@ export class ProcessBroadcast {
     public readonly bulkLength: number;
     public readonly subjectLength: number;
 
-    private readonly bulkSubscriptions: SubscriptionRegistration[];
+    private readonly bulkSubscriptions: ReadonlyArray<SubscriptionRegistration>;
     private readonly isSplit: boolean;
     private subjectSubscriptions: Map<SomeNode, SubscriptionRegistration[]>;
     /** Every statement to be processed. */
@@ -39,13 +39,14 @@ export class ProcessBroadcast {
     private readonly timeout: number;
 
     constructor(opts: ProcessBroadcastOpts) {
-        this.bulkSubscriptions = opts.bulkSubscriptions;
+        this.bulkSubscriptions = Object.freeze(opts.bulkSubscriptions);
         this.bulkLength = this.bulkSubscriptions.length;
         this.subjectSubscriptions = opts.subjectSubscriptions;
         this.subjectLength = this.subjectSubscriptions.size;
         this.isSplit = "requestIdleCallback" in window;
         this.timeout = opts.timeout;
         this.work = Object.freeze(opts.work);
+        this.process = this.process.bind(this);
     }
 
     public done(): boolean {
@@ -74,6 +75,9 @@ export class ProcessBroadcast {
      * registration settings.
      */
     private broadcast(reg: SubscriptionRegistration): void {
+        if (reg.markedForDelete) {
+            return;
+        }
         if (reg.onlySubjects) {
             reg.callback(this.subjectWork);
         } else {
@@ -126,8 +130,11 @@ export class ProcessBroadcast {
 
         this._subjectWork = [];
         let s: SomeNode;
+        let w: Statement|undefined;
         for (let i = 0; i < this.work.length; i++) {
-            s = this.work[i].subject;
+            w = this.work[i];
+            if (!w) { continue; }
+            s = w.subject;
             if (!this._subjectWork.includes(s) && this.subjectSubscriptions.has(s)) {
                 this._subjectWork.push(s);
             }

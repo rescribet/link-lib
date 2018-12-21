@@ -84,11 +84,11 @@ export class RDFStore implements ChangeBuffer {
             return EMPTY_ST_ARR as Statement[];
         }
         const processingBuffer = this.changeBuffer;
+        this.changeBuffer = new Array(100);
+        this.changeBufferCount = 0;
         processingBuffer
             .filter((s) => s.predicate === NS.rdf("type"))
             .map((s) => this.processTypeStatement(undefined, s.subject, s.predicate, undefined, undefined));
-        this.changeBuffer = new Array(100);
-        this.changeBufferCount = 0;
         return processingBuffer;
     }
 

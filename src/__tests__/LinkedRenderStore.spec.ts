@@ -201,7 +201,7 @@ describe("LinkedRenderStore", () => {
 
         it("sends the described request", async () => {
             const sub = jest.fn();
-            store.lrs.subscribe({ callback: sub, onlySubjects: false });
+            store.lrs.subscribe({ callback: sub, markedForDelete: false, onlySubjects: false });
 
             const response = await store.lrs.execActionByIRI(action);
 

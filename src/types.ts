@@ -22,6 +22,7 @@ export type SubscriptionCallback<T> = (v: T) => void;
 export interface StatementSubscriptionRegistration {
     callback: SubscriptionCallback<ReadonlyArray<Statement>>;
     index?: number;
+    markedForDelete: boolean;
     subjectFilter?: SomeNode[];
     onlySubjects: false;
 }
@@ -29,6 +30,7 @@ export interface StatementSubscriptionRegistration {
 export interface NodeSubscriptionRegistration {
     callback: SubscriptionCallback<SomeNode[]>;
     index?: number;
+    markedForDelete: boolean;
     subjectFilter?: SomeNode[];
     onlySubjects: true;
 }
