@@ -197,12 +197,12 @@ describe("RDFStore", () => {
             const store = new RDFStore();
 
             // @ts-ignore TS-2341
-            expect(store.typeCache[NS.ex("1").toString()]).toBeUndefined();
+            expect(store.typeCache[NS.ex("1").sI]).toBeUndefined();
             store.addStatements([
                 new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("type"), NS.ex("_")),
             ]);
             // @ts-ignore TS-2341
-            expect(store.typeCache[NS.ex("1").toString()]).toEqual([NS.ex("type")]);
+            expect(store.typeCache[NS.ex("1").sI]).toEqual([NS.ex("type")]);
         });
 
         it("adds new types for cached resources", () => {
@@ -213,7 +213,7 @@ describe("RDFStore", () => {
             ]);
 
             // @ts-ignore TS-2341
-            expect(store.typeCache[NS.ex("1").toString()]).toEqual([NS.ex("type"), NS.ex("type2")]);
+            expect(store.typeCache[NS.ex("1").sI]).toEqual([NS.ex("type"), NS.ex("type2")]);
         });
 
         it("removes type statements after they are removed from the store", () => {
@@ -226,7 +226,7 @@ describe("RDFStore", () => {
             store.flush();
 
             // @ts-ignore TS-2341
-            expect(store.typeCache[NS.ex("1").toString()]).toEqual([NS.ex("type2")]);
+            expect(store.typeCache[NS.ex("1").sI]).toEqual([NS.ex("type2")]);
         });
     });
 

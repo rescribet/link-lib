@@ -27,7 +27,7 @@ export class RDFStore implements ChangeBuffer {
         ? (navigator.languages || [navigator.language])
         : ["en"]);
     private store: IndexedFormula = graph();
-    private typeCache: { [k: string]: NamedNode[] } = {};
+    private typeCache: NamedNode[][] = [];
 
     constructor() {
         this.processDelta = this.processDelta.bind(this);
@@ -188,7 +188,7 @@ export class RDFStore implements ChangeBuffer {
 
     public getResourceProperties(subject: SomeNode, property: SomeNode | SomeNode[]): SomeTerm[] {
         if (property === NS.rdf("type")) {
-            return this.typeCache[subject.toString()] || [];
+            return this.typeCache[subject.sI] || [];
         }
 
         return this
@@ -198,7 +198,7 @@ export class RDFStore implements ChangeBuffer {
 
     public getResourceProperty(subject: SomeNode, property: SomeNode | SomeNode[]): SomeTerm | undefined {
         if (property === NS.rdf("type")) {
-            const entry = this.typeCache[subject.toString()];
+            const entry = this.typeCache[subject.sI];
             return entry ? entry[0] : undefined;
         }
         const rawProp = this.getResourcePropertyRaw(subject, property);
@@ -229,20 +229,19 @@ export class RDFStore implements ChangeBuffer {
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
     private processTypeStatement(_formula: Formula | undefined,
-                                 subj: SomeTerm,
+                                 subj: SomeNode,
                                  _pred: NamedNode,
                                  obj?: SomeTerm,
                                  _why?: Node): boolean {
-        const sSubj = subj.toString();
-        if (!Array.isArray(this.typeCache[sSubj])) {
-            this.typeCache[sSubj] = [obj as NamedNode];
+        if (!Array.isArray(this.typeCache[subj.sI])) {
+            this.typeCache[subj.sI] = [obj as NamedNode];
             return false;
         }
-        this.typeCache[sSubj] = this.statementsFor((subj as NamedNode))
+        this.typeCache[subj.sI] = this.statementsFor((subj as NamedNode))
             .filter((s) => s.predicate === defaultNS.rdf("type"))
             .map((s) => s.object as NamedNode);
         if (obj) {
-            this.typeCache[sSubj].push((obj as NamedNode));
+            this.typeCache[subj.sI].push((obj as NamedNode));
         }
         return false;
     }
