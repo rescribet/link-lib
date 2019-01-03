@@ -22,12 +22,18 @@ const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
 export class RDFStore implements ChangeBuffer {
     public changeBuffer: Statement[] = new Array(100);
     public changeBufferCount: number = 0;
+    /**
+     * Record of the last time a resource was flushed.
+     *
+     * @note Not to be confused with the last change in the store, which might be later than the flush time.
+     */
+    public changeTimestamps: number[] = [];
+    public typeCache: NamedNode[][] = [];
 
     private langPrefs: string[] = Array.from(typeof navigator !== undefined
         ? (navigator.languages || [navigator.language])
         : ["en"]);
     private store: IndexedFormula = graph();
-    private typeCache: NamedNode[][] = [];
 
     constructor() {
         this.processDelta = this.processDelta.bind(this);
@@ -86,8 +92,12 @@ export class RDFStore implements ChangeBuffer {
         const processingBuffer = this.changeBuffer;
         this.changeBuffer = new Array(100);
         this.changeBufferCount = 0;
+        const changeStamp = Date.now();
         processingBuffer
-            .filter((s) => s.predicate === NS.rdf("type"))
+            .filter((s) => {
+                this.changeTimestamps[s.subject.sI] = changeStamp;
+                return s.predicate === NS.rdf("type");
+            })
             .map((s) => this.processTypeStatement(undefined, s.subject, s.predicate, undefined, undefined));
         return processingBuffer;
     }

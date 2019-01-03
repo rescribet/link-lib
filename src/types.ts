@@ -17,21 +17,23 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { DisjointSet } from "./utilities/DisjointSet";
 
-export type SubscriptionCallback<T> = (v: T) => void;
+export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
-export interface StatementSubscriptionRegistration {
-    callback: SubscriptionCallback<ReadonlyArray<Statement>>;
+export interface SubscriptionRegistrationBase<T> {
+    callback: SubscriptionCallback<T>;
     index?: number;
+    lastUpdateAt?: number;
     markedForDelete: boolean;
+    onlySubjects: boolean;
     subjectFilter?: SomeNode[];
+    subscribedAt?: number;
+}
+
+export interface StatementSubscriptionRegistration extends SubscriptionRegistrationBase<ReadonlyArray<Statement>> {
     onlySubjects: false;
 }
 
-export interface NodeSubscriptionRegistration {
-    callback: SubscriptionCallback<SomeNode[]>;
-    index?: number;
-    markedForDelete: boolean;
-    subjectFilter?: SomeNode[];
+export interface NodeSubscriptionRegistration extends SubscriptionRegistrationBase<SomeNode[]> {
     onlySubjects: true;
 }
 

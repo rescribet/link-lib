@@ -25,7 +25,7 @@ import {
     MiddlewareActionHandler,
     NamespaceMap,
     SomeNode,
-    SubscriptionRegistration,
+    SubscriptionRegistrationBase,
 } from "./types";
 import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
@@ -56,8 +56,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private _dispatch?: MiddlewareActionHandler;
     private schema: Schema;
     private store: RDFStore = new RDFStore();
-    private bulkSubscriptions: SubscriptionRegistration[] = [];
-    private subjectSubscriptions: Map<SomeNode, SubscriptionRegistration[]> = new Map();
+    private bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [];
+    private subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>> = new Map();
     private lastPostponed: number | undefined;
 
     // tslint:disable-next-line no-object-literal-type-assertion
@@ -364,7 +364,13 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param registration[1].onlySubjects Only the subjects are passed when true.
      * @return function Unsubscription function.
      */
-    public subscribe(registration: SubscriptionRegistration): () => void {
+    public subscribe(registration: SubscriptionRegistrationBase<unknown>): () => void {
+        registration.subscribedAt = Date.now();
+        const givenCallback = registration.callback;
+        registration.callback = (data: any): void => {
+            registration.lastUpdateAt = Date.now();
+            givenCallback(data, registration.lastUpdateAt);
+        };
         const subjectFilter = registration.subjectFilter;
 
         if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {

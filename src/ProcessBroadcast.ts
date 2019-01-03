@@ -1,6 +1,6 @@
 import { Statement } from "rdflib";
 
-import { SomeNode, SubscriptionRegistration } from "./types";
+import { SomeNode, SubscriptionRegistrationBase } from "./types";
 
 declare global {
     interface Window {
@@ -14,8 +14,8 @@ declare global {
 }
 
 export interface ProcessBroadcastOpts {
-    bulkSubscriptions: SubscriptionRegistration[];
-    subjectSubscriptions: Map<SomeNode, SubscriptionRegistration[]>;
+    bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
+    subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>>;
     timeout: number;
     work: Statement[] | ReadonlyArray<Statement>;
 }
@@ -27,9 +27,9 @@ export class ProcessBroadcast {
     public readonly bulkLength: number;
     public readonly subjectLength: number;
 
-    private readonly bulkSubscriptions: ReadonlyArray<SubscriptionRegistration>;
+    private readonly bulkSubscriptions: ReadonlyArray<SubscriptionRegistrationBase<unknown>>;
     private readonly isSplit: boolean;
-    private subjectSubscriptions: Map<SomeNode, SubscriptionRegistration[]>;
+    private subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>>;
     /** Every statement to be processed. */
     private readonly work: ReadonlyArray<Statement>;
     private _subjectWork: SomeNode[] | undefined;
@@ -74,7 +74,7 @@ export class ProcessBroadcast {
      * Calls the subscriber callback function {reg} with the correct arguments according to its
      * registration settings.
      */
-    private broadcast(reg: SubscriptionRegistration): void {
+    private broadcast(reg: SubscriptionRegistrationBase<unknown>): void {
         if (reg.markedForDelete) {
             return;
         }
