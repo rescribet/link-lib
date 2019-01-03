@@ -75,7 +75,7 @@ export class ComponentStore<T> {
                               predicates: NamedNode[],
                               topology: NamedNode,
                               defaultType: NamedNode): T | undefined {
-        const oTypes = this.schema.sort(this.schema.mineForTypes(types));
+        const oTypes = this.schema.expand(types);
         const key = convertToCacheKey(oTypes, predicates, topology);
         const cached = this.getComponentFromCache(key);
         if (cached !== undefined) {
@@ -196,7 +196,7 @@ export class ComponentStore<T> {
             }
         }
 
-        const chain = this.schema.mineForTypes(types || []);
+        const chain = this.schema.expand(types || []);
 
         return components.find((c) => chain.indexOf(c) > 0);
     }

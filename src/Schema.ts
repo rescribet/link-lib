@@ -20,6 +20,7 @@ export class Schema extends IndexedFormula {
     private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
 
     private equivalenceSet: DisjointSet<SomeTerm> = new DisjointSet();
+    private expansionCache: NamedNode[][];
     private liveStore: RDFStore;
     private superMap: Map<string, Set<string>> = new Map();
     private processedTypes: NamedNode[] = [];
@@ -27,6 +28,7 @@ export class Schema extends IndexedFormula {
     public constructor(liveStore: RDFStore) {
         super();
         this.liveStore = liveStore;
+        this.expansionCache = [];
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             this.addStatements(Schema.vocabularies[i].axioms);
@@ -47,6 +49,18 @@ export class Schema extends IndexedFormula {
 
         this.addAll(eligible);
         return this.addStatements(eligible);
+    }
+
+    public expand(types: NamedNode[]): NamedNode[] {
+        if (types.length === 1) {
+            const existing = this.expansionCache[types[0].sI];
+
+            return this.expansionCache[types[0].sI] = existing
+                ? existing
+                : this.sort(this.mineForTypes(types));
+        }
+
+        return this.sort(this.mineForTypes(types));
     }
 
     public getProcessingCtx(): VocabularyProcessingContext {
