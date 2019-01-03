@@ -109,25 +109,25 @@ export const RDFS = {
             if (!(item.object instanceof NamedNode || item.object instanceof BlankNode)) {
                 throw new Error("Object of subClassOf statement must be a NamedNode");
             }
-            const sSubject = item.subject.value;
-            const sObject = item.object.value;
-            if (!ctx.superMap.has(sObject)) {
-                ctx.superMap.set(sObject, new Set([nsRDFSResource.value]));
+            const iSubject = item.subject.sI;
+            const iObject = item.object.sI;
+            if (!ctx.superMap.has(iObject)) {
+                ctx.superMap.set(iObject, new Set([nsRDFSResource.sI]));
             }
 
-            let parents = ctx.superMap.get(sObject);
+            let parents = ctx.superMap.get(iObject);
             if (parents === undefined) {
                 parents = new Set();
-                ctx.superMap.set(sObject, parents);
+                ctx.superMap.set(iObject, parents);
             }
-            parents.add(item.object.value);
-            const itemVal = ctx.superMap.get(sSubject) || new Set<string>([item.subject.value]);
+            parents.add(iObject);
+            const itemVal = ctx.superMap.get(iSubject) || new Set<number>([iSubject]);
 
             parents.forEach((i) => itemVal.add(i));
 
-            ctx.superMap.set(sSubject, itemVal);
+            ctx.superMap.set(iSubject, itemVal);
             ctx.superMap.forEach((v, k) => {
-                if (k !== sSubject && v.has(item.subject.value)) {
+                if (k !== iSubject && v.has(iSubject)) {
                     itemVal.forEach(v.add, v);
                 }
             });

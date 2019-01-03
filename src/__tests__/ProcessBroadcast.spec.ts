@@ -2,7 +2,7 @@ import "jest";
 import { Literal, Statement } from "rdflib";
 
 import { ProcessBroadcast, ProcessBroadcastOpts } from "../ProcessBroadcast";
-import { SomeNode, SubscriptionRegistration } from "../types";
+import { SomeNode, SubscriptionRegistrationBase } from "../types";
 import { defaultNS as NS} from "../utilities/constants";
 
 const schemaT = NS.schema("Thing");
@@ -26,8 +26,8 @@ const mixedWork = [
 
 const getOpts = (
     work: Statement[] = [],
-    bulkSubscriptions: SubscriptionRegistration[] = [],
-    subjectSubscriptions: Map<SomeNode, SubscriptionRegistration[]> = new Map(),
+    bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [],
+    subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>> = new Map(),
 ): ProcessBroadcastOpts => ({
     bulkSubscriptions,
     subjectSubscriptions,
@@ -116,7 +116,7 @@ describe("ProcessBroadcast", () => {
             const processor = new ProcessBroadcast(getOpts(
                 [],
                 [],
-                new Map<SomeNode, SubscriptionRegistration[]>([
+                new Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>>([
                     [schemaT, [{ callback: cb, markedForDelete: false, onlySubjects: true }]],
                 ]),
             ));
@@ -139,7 +139,7 @@ describe("ProcessBroadcast", () => {
             const processor = new ProcessBroadcast(getOpts(
                 mixedWork,
                 [],
-                new Map<SomeNode, SubscriptionRegistration[]>([
+                new Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>>([
                     [schemaT, [
                         { callback: st, markedForDelete: false, onlySubjects: true },
                         { callback: stb, markedForDelete: false, onlySubjects: true },
@@ -205,7 +205,7 @@ describe("ProcessBroadcast", () => {
                     { callback: bulk1, markedForDelete: false, onlySubjects: false },
                     { callback: bulk2, markedForDelete: false, onlySubjects: false },
                 ],
-                new Map<SomeNode, SubscriptionRegistration[]>([
+                new Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>>([
                     [schemaT, [
                         { callback: st, markedForDelete: false, onlySubjects: true },
                         { callback: stb, markedForDelete: false, onlySubjects: true },

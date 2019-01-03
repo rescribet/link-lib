@@ -1,14 +1,14 @@
-import { IndexedFormula, NamedNode, SomeTerm, Statement } from "rdflib";
+import { IndexedFormula, Statement } from "rdflib";
 import { RDFStore } from "./RDFStore";
 
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";
 import { nsRDFSResource, RDFS } from "./schema/rdfs";
 
-import { VocabularyProcessingContext, VocabularyProcessor } from "./types";
+import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "./types";
 import { defaultNS as NS } from "./utilities/constants";
 import { DisjointSet } from "./utilities/DisjointSet";
-import { namedNodeByIRI } from "./utilities/memoizedNamespace";
+import { namedNodeByStoreIndex } from "./utilities/memoizedNamespace";
 
 /**
  * Implements some RDF/OWL logic to enhance the functionality of the property lookups.
@@ -19,11 +19,11 @@ import { namedNodeByIRI } from "./utilities/memoizedNamespace";
 export class Schema extends IndexedFormula {
     private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
 
-    private equivalenceSet: DisjointSet<SomeTerm> = new DisjointSet();
-    private expansionCache: NamedNode[][];
+    private equivalenceSet: DisjointSet<number> = new DisjointSet();
+    private expansionCache: number[][];
     private liveStore: RDFStore;
-    private superMap: Map<string, Set<string>> = new Map();
-    private processedTypes: NamedNode[] = [];
+    private superMap: Map<number, Set<number>> = new Map();
+    private processedTypes: number[] = [];
 
     public constructor(liveStore: RDFStore) {
         super();
@@ -51,11 +51,11 @@ export class Schema extends IndexedFormula {
         return this.addStatements(eligible);
     }
 
-    public expand(types: NamedNode[]): NamedNode[] {
+    public expand(types: number[]): number[] {
         if (types.length === 1) {
-            const existing = this.expansionCache[types[0].sI];
+            const existing = this.expansionCache[types[0]];
 
-            return this.expansionCache[types[0].sI] = existing
+            return this.expansionCache[types[0]] = existing
                 ? existing
                 : this.sort(this.mineForTypes(types));
         }
@@ -71,15 +71,19 @@ export class Schema extends IndexedFormula {
         };
     }
 
-    public isInstanceOf(resource: NamedNode, superClass: NamedNode): boolean {
-        return this.holdsStatement(new Statement(resource, NS.rdf("type"), superClass));
+    public isInstanceOf(resource: number, superClass: number): boolean {
+        return this.holdsStatement(new Statement(
+            namedNodeByStoreIndex(resource)!,
+            NS.rdf("type"),
+            namedNodeByStoreIndex(superClass)!,
+        ));
     }
 
-    public isSubclassOf(resource: NamedNode, superClass: NamedNode): boolean {
-        const resourceMap = this.superMap.get(resource.value);
+    public isSubclassOf(resource: number, superClass: number): boolean {
+        const resourceMap = this.superMap.get(resource);
 
         if (resourceMap) {
-            return resourceMap.has(superClass.value);
+            return resourceMap.has(superClass);
         }
         return false;
     }
@@ -88,8 +92,8 @@ export class Schema extends IndexedFormula {
      * Returns the hierarchical depth of the type, or -1 if unknown.
      * @param type the type to check
      */
-    public superTypeDepth(type: NamedNode): number {
-        const superMap = this.superMap.get(type.value);
+    public superTypeDepth(type: number): number {
+        const superMap = this.superMap.get(type);
 
         return superMap ? superMap.size : -1;
     }
@@ -99,17 +103,17 @@ export class Schema extends IndexedFormula {
      * This is done in multiple iterations until no new types are found.
      * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
      */
-    public mineForTypes(lookupTypes: NamedNode[]): NamedNode[] {
+    public mineForTypes(lookupTypes: number[]): number[] {
         if (lookupTypes.length === 0) {
-            return [nsRDFSResource];
+            return [nsRDFSResource.sI];
         }
 
-        const canonicalTypes: NamedNode[] = [];
+        const canonicalTypes: number[] = [];
         for (let i = 0; i < lookupTypes.length; i++) {
-            const canon = this.liveStore.canon(lookupTypes[i]) as NamedNode;
+            const canon = (this.liveStore.canon(namedNodeByStoreIndex(lookupTypes[i])!) as SomeNode).sI;
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
-                    Schema.vocabularies[j].processType(canon, this.getProcessingCtx());
+                    Schema.vocabularies[j].processType(namedNodeByStoreIndex(canon)!, this.getProcessingCtx());
                 }
                 this.processedTypes.push(canon);
             }
@@ -122,15 +126,14 @@ export class Schema extends IndexedFormula {
         const allTypes = canonicalTypes
             .reduce(
                 (a, b) => {
-                    const superSet = this.superMap.get(b.value);
+                    const superSet = this.superMap.get(b);
                     if (typeof superSet === "undefined") {
                         return a;
                     }
 
                     superSet.forEach((s) => {
-                        const nn = namedNodeByIRI(s);
-                        if (!a.includes(nn)) {
-                            a.push(nn);
+                        if (!a.includes(s)) {
+                            a.push(s);
                         }
                     });
 
@@ -142,7 +145,7 @@ export class Schema extends IndexedFormula {
         return this.sort(allTypes);
     }
 
-    public sort(types: NamedNode[]): NamedNode[] {
+    public sort(types: number[]): number[] {
         return types.sort((a, b) => {
             if (this.isSubclassOf(a, b)) {
                 return -1;

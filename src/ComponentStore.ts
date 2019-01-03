@@ -3,18 +3,17 @@ import { NamedNode } from "rdflib";
 import { Schema } from "./Schema";
 import { ComponentRegistration } from "./types";
 import { DEFAULT_TOPOLOGY, defaultNS } from "./utilities/constants";
-import { namedNodeByStoreIndex } from "./utilities/memoizedNamespace";
 
 const MSG_TYPE_ERR = "Non-optimized NamedNode instance given. Please memoize your namespace correctly.";
 
 /** Constant used to determine that a component is used to render a type rather than a property. */
 export const RENDER_CLASS_NAME: NamedNode = defaultNS.ll("typeRenderClass");
 
-function convertToCacheKey(types: NamedNode[], props: NamedNode[], topology: NamedNode): string {
-    const sType = types.map((t) => t.sI).join();
+function convertToCacheKey(types: number[], props: number[], topology: number): string {
+    const sType = types.map((t) => t).join();
     return (props.length > 1)
-        ? `${sType}[${props.map((p) => p.sI).join()}][${topology.sI}]`
-        : `${sType}[${props[0].sI}][${topology.sI}]`;
+        ? `${sType}[${props.map((p) => p).join()}][${topology}]`
+        : `${sType}[${props[0]}][${topology}]`;
 }
 
 /**
@@ -26,20 +25,20 @@ export class ComponentStore<T> {
      * @see LinkedRenderStore#registerAll
      */
     public static registerRenderer<T>(component: T,
-                                      types: NamedNode[],
-                                      properties: NamedNode[],
-                                      topologies: NamedNode[]): Array<ComponentRegistration<T>> {
+                                      types: number[],
+                                      properties: number[],
+                                      topologies: number[]): Array<ComponentRegistration<T>> {
         if (typeof component === "undefined") {
             throw new Error(`Undefined component was given for (${types}, ${properties}, ${topologies}).`);
         }
         const registrations: Array<ComponentRegistration<T>> = [];
 
         for (let t = 0; t < types.length; t++) {
-            if (types[t].sI === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+            if (types[t] === undefined) { throw new TypeError(MSG_TYPE_ERR); }
             for (let p = 0; p < properties.length; p++) {
-                if (properties[p].sI === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+                if (properties[p] === undefined) { throw new TypeError(MSG_TYPE_ERR); }
                 for (let top = 0; top < topologies.length; top++) {
-                    if (topologies[top].sI === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+                    if (topologies[top] === undefined) { throw new TypeError(MSG_TYPE_ERR); }
 
                     registrations.push({
                         component,
@@ -71,10 +70,10 @@ export class ComponentStore<T> {
      * TODO: remove defaultType - Basically a bug. We default the type if no matches were found, rather than using
      *   inheritance to associate unknown types the RDF way (using rdfs:Resource).
      */
-    public getRenderComponent(types: NamedNode[],
-                              predicates: NamedNode[],
-                              topology: NamedNode,
-                              defaultType: NamedNode): T | undefined {
+    public getRenderComponent(types: number[],
+                              predicates: number[],
+                              topology: number,
+                              defaultType: number): T | undefined {
         const oTypes = this.schema.expand(types);
         const key = convertToCacheKey(oTypes, predicates, topology);
         const cached = this.getComponentFromCache(key);
@@ -83,7 +82,7 @@ export class ComponentStore<T> {
         }
 
         for (let i = 0; i < oTypes.length; i++) {
-            const exact = this.lookup(predicates[0].sI, oTypes[i].sI, topology.sI);
+            const exact = this.lookup(predicates[0], oTypes[i], topology);
             if (exact !== undefined) {
                 return this.addComponentToCache(exact, key);
             }
@@ -91,10 +90,10 @@ export class ComponentStore<T> {
 
         const possibleComponents = this.possibleComponents(predicates, topology);
         if (possibleComponents.length === 0) {
-            if (topology === DEFAULT_TOPOLOGY) {
+            if (topology === DEFAULT_TOPOLOGY.sI) {
                 return undefined;
             }
-            const foundComponent = this.getRenderComponent(oTypes, predicates, DEFAULT_TOPOLOGY, defaultType);
+            const foundComponent = this.getRenderComponent(oTypes, predicates, DEFAULT_TOPOLOGY.sI, defaultType);
             if (!foundComponent) {
                 return undefined;
             }
@@ -104,16 +103,16 @@ export class ComponentStore<T> {
         for (let i = 0; i < predicates.length; i++) {
             const bestComponent = this.bestComponent(possibleComponents, oTypes);
             const component = bestComponent && this.lookup(
-                predicates[i].sI,
-                bestComponent.sI,
-                topology.sI,
+                predicates[i],
+                bestComponent,
+                topology,
             );
             if (component) {
                 return this.addComponentToCache(component, key);
             }
         }
         for (let i = 0; i < predicates.length; i++) {
-            const component = this.lookup(predicates[i].sI, defaultType.sI, topology.sI);
+            const component = this.lookup(predicates[i], defaultType, topology);
             if (component) {
                 return this.addComponentToCache(component, key);
             }
@@ -130,44 +129,50 @@ export class ComponentStore<T> {
      * @param [topology] An alternate topology this {component} should render.
      */
     public registerRenderer(component: T,
-                            type: NamedNode,
-                            property: NamedNode = RENDER_CLASS_NAME,
-                            topology: NamedNode = DEFAULT_TOPOLOGY): void {
+                            type: number,
+                            property: number = RENDER_CLASS_NAME.sI,
+                            topology: number = DEFAULT_TOPOLOGY.sI): void {
         if (!property || !type) {
             return;
         }
-        if (type.sI === undefined
-            || property.sI === undefined
-            || topology.sI === undefined) {
-            throw new TypeError("Non-optimized NamedNode instance given. Please memoize your namespace correctly.");
-        }
 
-        if (typeof this.mapping[property.sI] === "undefined") {
-            this.mapping[property.sI] = [];
-        }
-        if (typeof this.mapping[property.sI][type.sI] === "undefined") {
-            this.mapping[property.sI][type.sI] = [];
-        }
-        this.mapping[property.sI][type.sI][topology.sI] = component;
+        this.store(component, property, type, topology);
         this.lookupCache = {};
     }
 
     /**
-     * Find a component from the mapping.
-     * @param predicate The SomeNode of the property (or {RENDER_CLASS_NAME})
-     * @param type The SomeNode of the resource type
-     * @param topology The SomeNode of the topology
+     * Find a component from a cache.
+     * @param predicate The index of the property (or {RENDER_CLASS_NAME})
+     * @param obj The index of either the resource type or resource IRI
+     * @param topology The index of the topology
+     * @param cache The cache to look into (defaults to the mapping)
      * @returns The appropriate component if any
      */
     protected lookup(predicate: number,
-                     type: number,
-                     topology: number): T | undefined {
-        const predMap = this.mapping[predicate];
-        if (!predMap || !predMap[type]) {
+                     obj: number,
+                     topology: number,
+                     cache: T[][][] = this.mapping): T | undefined {
+        const predMap = cache[predicate];
+        if (!predMap || !predMap[obj]) {
             return undefined;
         }
 
-        return predMap[type][topology];
+        return predMap[obj][topology];
+    }
+
+    /** Store a component to a cache. */
+    protected store(component: T,
+                    predicate: number,
+                    obj: number,
+                    topology: number,
+                    cache: T[][][] = this.mapping): void {
+        if (typeof cache[predicate] === "undefined") {
+            cache[predicate] = [];
+        }
+        if (typeof cache[predicate][obj] === "undefined") {
+            cache[predicate][obj] = [];
+        }
+        cache[predicate][obj][topology] = component;
     }
 
     /**
@@ -188,7 +193,7 @@ export class ComponentStore<T> {
      * @param [types] The types to expand on.
      * @returns The best match for the given components and types.
      */
-    private bestComponent(components: NamedNode[], types: NamedNode[]): NamedNode | undefined {
+    private bestComponent(components: number[], types: number[]): number | undefined {
         if (types.length > 0) {
             const direct = this.schema.sort(types).find((c) => components.indexOf(c) >= 0);
             if (direct) {
@@ -210,16 +215,16 @@ export class ComponentStore<T> {
         return this.lookupCache[key];
     }
 
-    private possibleComponents(predicates: NamedNode[], topology: NamedNode): NamedNode[] {
-        const classes = [defaultNS.rdfs("Resource")];
+    private possibleComponents(predicates: number[], topology: number): number[] {
+        const classes = [defaultNS.rdfs("Resource").sI];
         for (let i = 0; i < predicates.length; i++) {
             const predicate = predicates[i];
-            if (typeof this.mapping[predicate.sI] !== "undefined") {
-                const types = this.mapping[predicate.sI];
+            if (typeof this.mapping[predicate] !== "undefined") {
+                const types = this.mapping[predicate];
                 for (let j = 0; j < types.length; j++) {
-                    const compType = this.lookup(predicate.sI, j, topology.sI);
+                    const compType = this.lookup(predicate, j, topology);
                     if (compType !== undefined) {
-                        classes.push(namedNodeByStoreIndex(j) as NamedNode);
+                        classes.push(j);
                     }
                 }
             }

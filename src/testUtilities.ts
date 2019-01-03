@@ -1,5 +1,3 @@
-import { NamedNode } from "rdflib";
-
 import { ComponentStore } from "./ComponentStore";
 import { createStore } from "./createStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
@@ -12,10 +10,10 @@ import { LinkedRenderStoreOptions, MiddlewareActionHandler } from "./types";
 export type BasicComponent = () => string | undefined;
 
 export class ComponentStoreTestProxy<T> extends ComponentStore<T> {
-    public publicLookup(predicate: NamedNode,
-                        type: NamedNode,
-                        topology: NamedNode): T | undefined {
-        return this.lookup(predicate.sI, type.sI, topology.sI);
+    public publicLookup(predicate: number,
+                        obj: number,
+                        topology: number): T | undefined {
+        return this.lookup(predicate, obj, topology);
     }
 }
 

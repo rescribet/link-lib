@@ -82,27 +82,27 @@ describe("Schema", () => {
             it("returns the default ", () => {
                 const s = blankSchema();
                 expect(s.mineForTypes([]))
-                    .toEqual([NS.rdfs("Resource")]);
+                    .toEqual([NS.rdfs("Resource").sI]);
             });
 
             it("ensures all have rdfs:Resource as base class", () => {
                 const schema = blankSchema();
                 const result = [
-                    NS.schema("CreativeWork"),
-                    NS.rdfs("Resource"),
+                    NS.schema("CreativeWork").sI,
+                    NS.rdfs("Resource").sI,
                 ];
 
-                expect(schema.mineForTypes([NS.schema("CreativeWork")]))
+                expect(schema.mineForTypes([NS.schema("CreativeWork").sI]))
                     .toEqual(result);
             });
 
             it("adds superclasses", () => {
                 const schema = blankSchema();
                 const result = [
-                    NS.schema("BlogPost"),
-                    NS.schema("CreativeWork"),
-                    NS.schema("Thing"),
-                    NS.rdfs("Resource"),
+                    NS.schema("BlogPost").sI,
+                    NS.schema("CreativeWork").sI,
+                    NS.schema("Thing").sI,
+                    NS.rdfs("Resource").sI,
                 ];
 
                 schema.addStatements([
@@ -110,7 +110,7 @@ describe("Schema", () => {
                     new Statement(NS.schema("BlogPost"), NS.rdfs("subClassOf"), NS.schema("CreativeWork")),
                 ]);
 
-                expect(schema.mineForTypes([NS.schema("BlogPost")]))
+                expect(schema.mineForTypes([NS.schema("BlogPost").sI]))
                     .toEqual(result);
             });
         });

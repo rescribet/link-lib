@@ -5,7 +5,6 @@ import {
     Literal,
     NamedNamespace,
     NamedNode,
-    SomeTerm,
     Statement,
 } from "rdflib";
 
@@ -41,9 +40,9 @@ export type SubscriptionRegistration = StatementSubscriptionRegistration | NodeS
 
 export interface ComponentRegistration<T> {
     component: T;
-    property: NamedNode;
-    topology: NamedNode;
-    type: NamedNode;
+    property: number;
+    topology: number;
+    type: number;
 }
 
 export type ResponseTransformer = (response: ResponseAndFallbacks) => Promise<Statement[]>;
@@ -165,8 +164,8 @@ export interface GetEntityMessage {
 }
 
 export interface VocabularyProcessingContext {
-    equivalenceSet: DisjointSet<SomeTerm>;
-    superMap: Map<string, Set<string>>;
+    equivalenceSet: DisjointSet<number>;
+    superMap: Map<number, Set<number>>;
     store: IndexedFormula;
 }
 

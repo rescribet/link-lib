@@ -1,6 +1,6 @@
 import { NamedNode, Statement } from "rdflib";
 
-import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
+import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
 import { defaultNS as NS } from "../utilities/constants";
 
 /*
@@ -89,8 +89,8 @@ export const OWL = {
 
     processStatement(item: Statement, ctx: VocabularyProcessingContext): Statement[] | null {
         if (item.predicate.equals(nsOWLsameAs)) {
-            const a = ctx.equivalenceSet.add(item.object);
-            const b = ctx.equivalenceSet.add(item.subject);
+            const a = ctx.equivalenceSet.add((item.object as SomeNode).sI);
+            const b = ctx.equivalenceSet.add(item.subject.sI);
             ctx.equivalenceSet.union(a, b);
 
             return [item];

@@ -4,8 +4,8 @@ import { ComponentStore } from "../ComponentStore";
 import { defaultNS as NS } from "../utilities/constants";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
-const DT = DEFAULT_TOPOLOGY;
-const RCN = RENDER_CLASS_NAME;
+const DT = DEFAULT_TOPOLOGY.sI;
+const RCN = RENDER_CLASS_NAME.sI;
 
 describe("ComponentStore", () => {
     describe("registerRenderer", () => {
@@ -13,7 +13,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     undefined,
-                    [NS.schema("Thing")],
+                    [NS.schema("Thing").sI],
                     [RCN],
                     [DT],
                 );
@@ -24,7 +24,7 @@ describe("ComponentStore", () => {
             const comp = (): string => "a";
             const reg = ComponentStore.registerRenderer(
                 comp,
-                [NS.schema("Thing")],
+                [NS.schema("Thing").sI],
                 [RCN],
                 [DT],
             );
@@ -33,7 +33,7 @@ describe("ComponentStore", () => {
                 component: comp,
                 property: RCN,
                 topology: DT,
-                type: NS.schema("Thing"),
+                type: NS.schema("Thing").sI,
             }]);
         });
 
@@ -41,7 +41,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [NS.schema("Thing"), undefined!],
+                    [NS.schema("Thing").sI, undefined!],
                     [RCN],
                     [DT],
                 );
@@ -52,7 +52,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [NS.schema("Thing")],
+                    [NS.schema("Thing").sI],
                     [RCN, undefined!],
                     [DT],
                 );
@@ -63,7 +63,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [NS.schema("Thing")],
+                    [NS.schema("Thing").sI],
                     [RCN],
                     [DT, undefined!],
                 );

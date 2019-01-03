@@ -38,11 +38,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         prop: LazyNNArgument = RENDER_CLASS_NAME,
         topology: LazyNNArgument | Array<NamedNode | undefined> = DEFAULT_TOPOLOGY): Array<ComponentRegistration<T>> {
 
-        const types = normalizeType(type);
+        const types = normalizeType(type).map((n) => n.sI);
         const props = normalizeType(prop)
-            .map((p) => p || RENDER_CLASS_NAME);
+            .map((p) => (p || RENDER_CLASS_NAME).sI);
         const topologies = normalizeType(topology)
-            .map((t) => t || DEFAULT_TOPOLOGY);
+            .map((t) => (t || DEFAULT_TOPOLOGY).sI);
 
         return ComponentStore.registerRenderer(component, types, props, topologies);
     }
@@ -193,10 +193,10 @@ export class LinkedRenderStore<T> implements Dispatcher {
         if (type === undefined || (Array.isArray(type) && type.length === 0)) {
             return undefined;
         }
-        const types = normalizeType(type);
-        const predicates = normalizeType(predicate);
+        const types = normalizeType(type).map((n) => n.sI);
+        const predicates = normalizeType(predicate).map((n) => n.sI);
 
-        return this.mapping.getRenderComponent(types, predicates, topology, this.defaultType);
+        return this.mapping.getRenderComponent(types, predicates, topology.sI, this.defaultType.sI);
     }
 
     /**

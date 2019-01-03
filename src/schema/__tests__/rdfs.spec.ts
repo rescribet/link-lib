@@ -39,35 +39,35 @@ describe("RDFS", () => {
 
             const ctx = schema.getProcessingCtx();
 
-            expect(ctx.superMap.get(NS.schema("CreativeWork").value)).toBeUndefined();
+            expect(ctx.superMap.get(NS.schema("CreativeWork").sI)).toBeUndefined();
 
             RDFS.processStatement(
                 new Statement(NS.schema("BlogPost"), NS.rdfs("subClassOf"), NS.schema("CreativeWork")),
                 ctx,
             );
-            expect(ctx.superMap.get(NS.schema("BlogPost").value))
+            expect(ctx.superMap.get(NS.schema("BlogPost").sI))
                 .toEqual(new Set([
-                    NS.schema("BlogPost").value,
-                    NS.schema("CreativeWork").value,
-                    NS.rdfs("Resource").value,
+                    NS.schema("BlogPost").sI,
+                    NS.schema("CreativeWork").sI,
+                    NS.rdfs("Resource").sI,
                 ]));
 
             RDFS.processStatement(
                 new Statement(NS.schema("CreativeWork"), NS.rdfs("subClassOf"), NS.schema("Thing")),
                 ctx,
             );
-            expect(ctx.superMap.get(NS.schema("CreativeWork").value))
+            expect(ctx.superMap.get(NS.schema("CreativeWork").sI))
                 .toEqual(new Set([
-                    NS.schema("CreativeWork").value,
-                    NS.schema("Thing").value,
-                    NS.rdfs("Resource").value,
+                    NS.schema("CreativeWork").sI,
+                    NS.schema("Thing").sI,
+                    NS.rdfs("Resource").sI,
                 ]));
-            expect(ctx.superMap.get(NS.schema("BlogPost").value))
+            expect(ctx.superMap.get(NS.schema("BlogPost").sI))
                 .toEqual(new Set([
-                    NS.schema("BlogPost").value,
-                    NS.schema("CreativeWork").value,
-                    NS.schema("Thing").value,
-                    NS.rdfs("Resource").value,
+                    NS.schema("BlogPost").sI,
+                    NS.schema("CreativeWork").sI,
+                    NS.schema("Thing").sI,
+                    NS.rdfs("Resource").sI,
                 ]));
         });
     });
@@ -98,14 +98,14 @@ describe("RDFS", () => {
             const schema = new Schema(new RDFStore());
 
             const ctx = schema.getProcessingCtx();
-            expect(ctx.superMap.get(NS.schema("CreativeWork").value)).toBeUndefined();
+            expect(ctx.superMap.get(NS.schema("CreativeWork").sI)).toBeUndefined();
 
             RDFS.processType(NS.schema("CreativeWork"), ctx);
 
-            expect(ctx.superMap.get(NS.schema("CreativeWork").value))
+            expect(ctx.superMap.get(NS.schema("CreativeWork").sI))
                 .toEqual(new Set([
-                    NS.schema("CreativeWork").value,
-                    NS.rdfs("Resource").value,
+                    NS.schema("CreativeWork").sI,
+                    NS.rdfs("Resource").sI,
                 ]));
         });
     });

@@ -13,8 +13,8 @@ import { ComponentRegistration, SomeNode } from "../types";
 import { defaultNS as NS } from "../utilities/constants";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
-const DT = DEFAULT_TOPOLOGY;
-const RCN = RENDER_CLASS_NAME;
+const DT = DEFAULT_TOPOLOGY.sI;
+const RCN = RENDER_CLASS_NAME.sI;
 
 const schemaT = NS.schema("Thing");
 const thingStatements = [
@@ -45,14 +45,14 @@ describe("LinkedRenderStore", () => {
         it("add a single graph item", () => {
             const store = getBasicStore();
             store.lrs.addOntologySchematics(thingStatements);
-            expect(store.schema.isInstanceOf(schemaT, NS.rdfs("Class"))).toBeTruthy();
+            expect(store.schema.isInstanceOf(schemaT.sI, NS.rdfs("Class").sI)).toBeTruthy();
         });
 
         it("adds multiple graph items", () => {
             const store = getBasicStore();
             store.lrs.addOntologySchematics(thingStatements.concat(creativeWorkStatements));
-            expect(store.schema.isInstanceOf(schemaT, NS.rdfs("Class"))).toBeTruthy();
-            expect(store.schema.isInstanceOf(schemaCW, NS.rdfs("Class"))).toBeTruthy();
+            expect(store.schema.isInstanceOf(schemaT.sI, NS.rdfs("Class").sI)).toBeTruthy();
+            expect(store.schema.isInstanceOf(schemaCW.sI, NS.rdfs("Class").sI)).toBeTruthy();
         });
     });
 
@@ -62,10 +62,10 @@ describe("LinkedRenderStore", () => {
             const comp = (): string => "a";
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(comp, NS.schema("Thing")));
             const thingComp = store.mapping.getRenderComponent(
-                [NS.schema("Thing")],
+                [NS.schema("Thing").sI],
                 [RCN],
                 DT,
-                NS.rdfs("Resource"),
+                NS.rdfs("Resource").sI,
             );
             expect(thingComp).toEqual(comp);
         });
@@ -78,17 +78,17 @@ describe("LinkedRenderStore", () => {
                 [NS.schema("Thing"), NS.schema("CreativeWork")],
             ));
             const thingComp = store.mapping.getRenderComponent(
-                [NS.schema("Thing")],
+                [NS.schema("Thing").sI],
                 [RCN],
                 DT,
-                NS.rdfs("Resource"),
+                NS.rdfs("Resource").sI,
             );
             expect(thingComp).toEqual(comp);
             const cwComp = store.mapping.getRenderComponent(
-                [NS.schema("CreativeWork")],
+                [NS.schema("CreativeWork").sI],
                 [RCN],
                 DT,
-                NS.rdfs("Resource"),
+                NS.rdfs("Resource").sI,
             );
             expect(cwComp).toEqual(comp);
         });
@@ -100,10 +100,10 @@ describe("LinkedRenderStore", () => {
             const ident = (): string => "a";
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(ident, NS.schema("Thing"), NS.schema("name")));
             const nameComp = store.mapping.getRenderComponent(
-                [NS.schema("Thing")],
-                [NS.schema("name")],
+                [NS.schema("Thing").sI],
+                [NS.schema("name").sI],
                 DT,
-                NS.rdfs("Resource"),
+                NS.rdfs("Resource").sI,
             );
             expect(nameComp).toEqual(ident);
         });
@@ -118,10 +118,10 @@ describe("LinkedRenderStore", () => {
             ));
             [NS.schema("name"), NS.rdfs("label")].forEach((prop) => {
                 const nameComp = store.mapping.getRenderComponent(
-                    [NS.schema("Thing")],
-                    [prop],
+                    [NS.schema("Thing").sI],
+                    [prop.sI],
                     DT,
-                    NS.rdfs("Resource"),
+                    NS.rdfs("Resource").sI,
                 );
                 expect(nameComp).toEqual(ident);
                 expect(nameComp).not.toEqual((): string => "b");
@@ -286,15 +286,15 @@ describe("LinkedRenderStore", () => {
     describe("#registerAll", () => {
         const reg1 = {
             component: (): string => "1",
-            property: NS.schema("text"),
-            topology: DEFAULT_TOPOLOGY,
-            type: NS.schema("Thing"),
+            property: NS.schema("text").sI,
+            topology: DT,
+            type: NS.schema("Thing").sI,
         } as ComponentRegistration<() => string>;
         const reg2 = {
             component: (): string => "2",
-            property: NS.schema("name"),
-            topology: NS.argu("collection"),
-            type: NS.schema("Person"),
+            property: NS.schema("name").sI,
+            topology: NS.argu("collection").sI,
+            type: NS.schema("Person").sI,
         } as ComponentRegistration<() => string>;
 
         it("stores multiple ComponentRegistration objects", () => {
@@ -334,13 +334,13 @@ describe("LinkedRenderStore", () => {
                                       p: NamedNode,
                                       top: SomeNode): void {
             expect(r.component).toEqual(c);
-            expect(r.type).toEqual(t);
-            expect(r.property).toEqual(p);
-            expect(r.topology).toEqual(top);
+            expect(r.type).toEqual(t.sI);
+            expect(r.property).toEqual(p.sI);
+            expect(r.topology).toEqual(top.sI);
         }
 
         it("does not register without component", () => {
-            const defaultMsg = `Undefined component was given for (${type}, ${RCN}, ${DT}).`;
+            const defaultMsg = `Undefined component was given for (${type.sI}, ${RCN}, ${DT}).`;
             try {
                 LinkedRenderStore.registerRenderer(undefined, type);
                 expect(true).toBeFalsy();
