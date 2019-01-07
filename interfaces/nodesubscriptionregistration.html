@@ -910,20 +910,26 @@ img { max-width: 100%; }
 		<li class="current tsd-kind-interface">
 			<a href="nodesubscriptionregistration.html" class="tsd-kind-icon">Node<wbr>Subscription<wbr>Registration</a>
 			<ul>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a href="nodesubscriptionregistration.html#callback" class="tsd-kind-icon">callback</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a href="nodesubscriptionregistration.html#index" class="tsd-kind-icon">index</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="nodesubscriptionregistration.html#lastupdateat" class="tsd-kind-icon">last<wbr>Update<wbr>At</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a href="nodesubscriptionregistration.html#markedfordelete" class="tsd-kind-icon">marked<wbr>For<wbr>Delete</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
 					<a href="nodesubscriptionregistration.html#onlysubjects" class="tsd-kind-icon">only<wbr>Subjects</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a href="nodesubscriptionregistration.html#subjectfilter" class="tsd-kind-icon">subject<wbr>Filter</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="nodesubscriptionregistration.html#subscribedat" class="tsd-kind-icon">subscribed<wbr>At</a>
 				</li>
 			</ul>
 		</li>
@@ -935,7 +941,12 @@ img { max-width: 100%; }
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">NodeSubscriptionRegistration</span>
+					<a href="subscriptionregistrationbase.html" class="tsd-signature-type">SubscriptionRegistrationBase</a><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span>
+					<ul class="tsd-hierarchy">
+						<li>
+							<span class="target">NodeSubscriptionRegistration</span>
+						</li>
+					</ul>
 				</li>
 			</ul>
 		</section>
@@ -946,11 +957,13 @@ img { max-width: 100%; }
 					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="nodesubscriptionregistration.html#callback" class="tsd-kind-icon">callback</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="nodesubscriptionregistration.html#index" class="tsd-kind-icon">index</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="nodesubscriptionregistration.html#markedfordelete" class="tsd-kind-icon">marked<wbr>For<wbr>Delete</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="nodesubscriptionregistration.html#onlysubjects" class="tsd-kind-icon">only<wbr>Subjects</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="nodesubscriptionregistration.html#subjectfilter" class="tsd-kind-icon">subject<wbr>Filter</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="nodesubscriptionregistration.html#callback" class="tsd-kind-icon">callback</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="nodesubscriptionregistration.html#index" class="tsd-kind-icon">index</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="nodesubscriptionregistration.html#lastupdateat" class="tsd-kind-icon">last<wbr>Update<wbr>At</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="nodesubscriptionregistration.html#markedfordelete" class="tsd-kind-icon">marked<wbr>For<wbr>Delete</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="nodesubscriptionregistration.html#onlysubjects" class="tsd-kind-icon">only<wbr>Subjects</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="nodesubscriptionregistration.html#subjectfilter" class="tsd-kind-icon">subject<wbr>Filter</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="nodesubscriptionregistration.html#subscribedat" class="tsd-kind-icon">subscribed<wbr>At</a></li>
 						</ul>
 					</section>
 				</div>
@@ -958,53 +971,80 @@ img { max-width: 100%; }
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Properties</h2>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 				<a name="callback" class="tsd-anchor"></a>
 				<h3>callback</h3>
 				<div class="tsd-signature tsd-kind-icon">callback<span class="tsd-signature-symbol">:</span> <a href="../globals.html#subscriptioncallback" class="tsd-signature-type">SubscriptionCallback</a><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
+					<p>Inherited from <a href="subscriptionregistrationbase.html">SubscriptionRegistrationBase</a>.<a href="subscriptionregistrationbase.html#callback">callback</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/types.ts#L31">types.ts:31</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/types.ts#L22">types.ts:22</a></li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 				<a name="index" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagOptional">Optional</span> index</h3>
 				<div class="tsd-signature tsd-kind-icon">index<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 				<aside class="tsd-sources">
+					<p>Inherited from <a href="subscriptionregistrationbase.html">SubscriptionRegistrationBase</a>.<a href="subscriptionregistrationbase.html#index">index</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/types.ts#L32">types.ts:32</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/types.ts#L23">types.ts:23</a></li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="lastupdateat" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagOptional">Optional</span> last<wbr>Update<wbr>At</h3>
+				<div class="tsd-signature tsd-kind-icon">last<wbr>Update<wbr>At<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from <a href="subscriptionregistrationbase.html">SubscriptionRegistrationBase</a>.<a href="subscriptionregistrationbase.html#lastupdateat">lastUpdateAt</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/types.ts#L24">types.ts:24</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 				<a name="markedfordelete" class="tsd-anchor"></a>
 				<h3>marked<wbr>For<wbr>Delete</h3>
 				<div class="tsd-signature tsd-kind-icon">marked<wbr>For<wbr>Delete<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 				<aside class="tsd-sources">
+					<p>Inherited from <a href="subscriptionregistrationbase.html">SubscriptionRegistrationBase</a>.<a href="subscriptionregistrationbase.html#markedfordelete">markedForDelete</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/types.ts#L33">types.ts:33</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/types.ts#L25">types.ts:25</a></li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
 				<a name="onlysubjects" class="tsd-anchor"></a>
 				<h3>only<wbr>Subjects</h3>
 				<div class="tsd-signature tsd-kind-icon">only<wbr>Subjects<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span></div>
 				<aside class="tsd-sources">
+					<p>Overrides <a href="subscriptionregistrationbase.html">SubscriptionRegistrationBase</a>.<a href="subscriptionregistrationbase.html#onlysubjects">onlySubjects</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/types.ts#L35">types.ts:35</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/types.ts#L36">types.ts:36</a></li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 				<a name="subjectfilter" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagOptional">Optional</span> subject<wbr>Filter</h3>
 				<div class="tsd-signature tsd-kind-icon">subject<wbr>Filter<span class="tsd-signature-symbol">:</span> <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
+					<p>Inherited from <a href="subscriptionregistrationbase.html">SubscriptionRegistrationBase</a>.<a href="subscriptionregistrationbase.html#subjectfilter">subjectFilter</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/types.ts#L34">types.ts:34</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/types.ts#L27">types.ts:27</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="subscribedat" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagOptional">Optional</span> subscribed<wbr>At</h3>
+				<div class="tsd-signature tsd-kind-icon">subscribed<wbr>At<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from <a href="subscriptionregistrationbase.html">SubscriptionRegistrationBase</a>.<a href="subscriptionregistrationbase.html#subscribedat">subscribedAt</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/types.ts#L28">types.ts:28</a></li>
 					</ul>
 				</aside>
 			</section>

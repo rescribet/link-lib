@@ -922,6 +922,9 @@ img { max-width: 100%; }
 				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="componentstore.html#registerrenderer" class="tsd-kind-icon">register<wbr>Renderer</a>
 				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a href="componentstore.html#store" class="tsd-kind-icon">store</a>
+				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
 					<a href="componentstore.html#registerrenderer-1" class="tsd-kind-icon">register<wbr>Renderer</a>
 				</li>
@@ -975,6 +978,7 @@ img { max-width: 100%; }
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="componentstore.html#getrendercomponent" class="tsd-kind-icon">get<wbr>Render<wbr>Component</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="componentstore.html#lookup" class="tsd-kind-icon">lookup</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="componentstore.html#registerrenderer" class="tsd-kind-icon">register<wbr>Renderer</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="componentstore.html#store" class="tsd-kind-icon">store</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static"><a href="componentstore.html#registerrenderer-1" class="tsd-kind-icon">register<wbr>Renderer</a></li>
 						</ul>
 					</section>
@@ -993,7 +997,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/ComponentStore.ts#L63">ComponentStore.ts:63</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/ComponentStore.ts#L62">ComponentStore.ts:62</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1013,13 +1017,13 @@ img { max-width: 100%; }
 				<a name="getrendercomponent" class="tsd-anchor"></a>
 				<h3>get<wbr>Render<wbr>Component</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Render<wbr>Component<span class="tsd-signature-symbol">(</span>types<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span>, predicates<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span>, topology<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span>, defaultType<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Render<wbr>Component<span class="tsd-signature-symbol">(</span>types<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, predicates<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, topology<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, defaultType<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/ComponentStore.ts#L74">ComponentStore.ts:74</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/ComponentStore.ts#L73">ComponentStore.ts:73</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1031,16 +1035,16 @@ img { max-width: 100%; }
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>types: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>types: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 							<li>
-								<h5>predicates: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>predicates: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 							<li>
-								<h5>topology: <span class="tsd-signature-type">NamedNode</span></h5>
+								<h5>topology: <span class="tsd-signature-type">number</span></h5>
 							</li>
 							<li>
-								<h5>defaultType: <span class="tsd-signature-type">NamedNode</span></h5>
+								<h5>defaultType: <span class="tsd-signature-type">number</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span>
@@ -1054,18 +1058,18 @@ img { max-width: 100%; }
 				<a name="lookup" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagProtected">Protected</span> lookup</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
-					<li class="tsd-signature tsd-kind-icon">lookup<span class="tsd-signature-symbol">(</span>predicate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, topology<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+					<li class="tsd-signature tsd-kind-icon">lookup<span class="tsd-signature-symbol">(</span>predicate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, topology<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, cache<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/ComponentStore.ts#L162">ComponentStore.ts:162</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/ComponentStore.ts#L151">ComponentStore.ts:151</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>Find a component from the mapping.</p>
+								<p>Find a component from a cache.</p>
 							</div>
 						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1073,19 +1077,25 @@ img { max-width: 100%; }
 							<li>
 								<h5>predicate: <span class="tsd-signature-type">number</span></h5>
 								<div class="tsd-comment tsd-typography">
-									<p>The SomeNode of the property (or {RENDER_CLASS_NAME})</p>
+									<p>The index of the property (or {RENDER_CLASS_NAME})</p>
 								</div>
 							</li>
 							<li>
-								<h5>type: <span class="tsd-signature-type">number</span></h5>
+								<h5>obj: <span class="tsd-signature-type">number</span></h5>
 								<div class="tsd-comment tsd-typography">
-									<p>The SomeNode of the resource type</p>
+									<p>The index of either the resource type or resource IRI</p>
 								</div>
 							</li>
 							<li>
 								<h5>topology: <span class="tsd-signature-type">number</span></h5>
 								<div class="tsd-comment tsd-typography">
-									<p>The SomeNode of the topology</p>
+									<p>The index of the topology</p>
+								</div>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> cache: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;this.mapping</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<p>The cache to look into (defaults to the mapping)</p>
 								</div>
 							</li>
 						</ul>
@@ -1101,13 +1111,13 @@ img { max-width: 100%; }
 				<a name="registerrenderer" class="tsd-anchor"></a>
 				<h3>register<wbr>Renderer</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">register<wbr>Renderer<span class="tsd-signature-symbol">(</span>component<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span>, property<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">NamedNode</span>, topology<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">register<wbr>Renderer<span class="tsd-signature-symbol">(</span>component<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, property<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, topology<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/ComponentStore.ts#L132">ComponentStore.ts:132</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/ComponentStore.ts#L131">ComponentStore.ts:131</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1124,16 +1134,56 @@ img { max-width: 100%; }
 								</div>
 							</li>
 							<li>
-								<h5>type: <span class="tsd-signature-type">NamedNode</span></h5>
+								<h5>type: <span class="tsd-signature-type">number</span></h5>
 								<div class="tsd-comment tsd-typography">
 									<p>The type&#39;s SomeNode of the object which the {component} can render.</p>
 								</div>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> property: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;RENDER_CLASS_NAME</span></h5>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> property: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;RENDER_CLASS_NAME.sI</span></h5>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> topology: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;DEFAULT_TOPOLOGY</span></h5>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> topology: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;DEFAULT_TOPOLOGY.sI</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+				<a name="store" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagProtected">Protected</span> store</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<li class="tsd-signature tsd-kind-icon">store<span class="tsd-signature-symbol">(</span>component<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, predicate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, topology<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, cache<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/ComponentStore.ts#L164">ComponentStore.ts:164</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Store a component to a cache.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>component: <span class="tsd-signature-type">T</span></h5>
+							</li>
+							<li>
+								<h5>predicate: <span class="tsd-signature-type">number</span></h5>
+							</li>
+							<li>
+								<h5>obj: <span class="tsd-signature-type">number</span></h5>
+							</li>
+							<li>
+								<h5>topology: <span class="tsd-signature-type">number</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> cache: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;this.mapping</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1144,13 +1194,13 @@ img { max-width: 100%; }
 				<a name="registerrenderer-1" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagStatic">Static</span> register<wbr>Renderer</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
-					<li class="tsd-signature tsd-kind-icon">register<wbr>Renderer&lt;T&gt;<span class="tsd-signature-symbol">(</span>component<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, types<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span>, properties<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span>, topologies<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/componentregistration.html" class="tsd-signature-type">ComponentRegistration</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">register<wbr>Renderer&lt;T&gt;<span class="tsd-signature-symbol">(</span>component<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, types<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, properties<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span>, topologies<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/componentregistration.html" class="tsd-signature-type">ComponentRegistration</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/09393ab/src/ComponentStore.ts#L28">ComponentStore.ts:28</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/df1ec2b/src/ComponentStore.ts#L27">ComponentStore.ts:27</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1175,13 +1225,13 @@ img { max-width: 100%; }
 								<h5>component: <span class="tsd-signature-type">T</span></h5>
 							</li>
 							<li>
-								<h5>types: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>types: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 							<li>
-								<h5>properties: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>properties: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 							<li>
-								<h5>topologies: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol">[]</span></h5>
+								<h5>topologies: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/componentregistration.html" class="tsd-signature-type">ComponentRegistration</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
