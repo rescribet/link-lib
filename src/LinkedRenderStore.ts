@@ -52,6 +52,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     public namespaces: NamespaceMap = {...defaultNS};
 
     private api: LinkedDataAPI;
+    private cleanupTimer: number | undefined;
     private mapping: ComponentStore<T>;
     private _dispatch?: MiddlewareActionHandler;
     private schema: Schema;
@@ -385,13 +386,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
             return (): void => {
                 registration.markedForDelete = true;
-                subjectFilter.forEach((s) => {
-                    const partialSub = this.subjectSubscriptions.get(s)!;
-                    partialSub.splice(partialSub.indexOf(registration), 1);
-                    if (partialSub.length === 0) {
-                        this.subjectSubscriptions.delete(s);
-                    }
-                });
+                this.markForCleanup();
             };
         }
 
@@ -450,5 +445,29 @@ export class LinkedRenderStore<T> implements Dispatcher {
             timeout: maxTimeout,
             work: this.store.flush(),
         }).run();
+    }
+
+    private markForCleanup(): void {
+        if (this.cleanupTimer) {
+            return;
+        }
+
+        this.cleanupTimer = window.setTimeout(() => {
+            this.cleanupTimer = undefined;
+            let reg;
+            for (const [ k, registrations ] of this.subjectSubscriptions.entries()) {
+                if (registrations.length === 1 && registrations[0].markedForDelete) {
+                    this.subjectSubscriptions.delete(k);
+                    continue;
+                }
+
+                for (let i = 0; i < registrations.length; i++) {
+                    reg = registrations[i];
+                    if (reg.markedForDelete) {
+                        registrations.splice(i, 1);
+                    }
+                }
+            }
+        }, 500);
     }
 }

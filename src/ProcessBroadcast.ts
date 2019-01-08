@@ -105,12 +105,18 @@ export class ProcessBroadcast {
 
     private processSubjectItem(): void {
         const sub = this.subjectSubscriptions.get(this.subjectWork[this.subjLoc]);
-        if (sub) {
-            this.broadcast(sub[this.subjSubLoc++]);
-            if (!sub[this.subjSubLoc]) {
-                this.subjLoc++;
-                this.subjSubLoc = 0;
-            }
+        const activeSubs = sub && sub.filter((reg) => !reg.markedForDelete);
+        let next;
+        if (activeSubs && activeSubs.length > 0) {
+            this.broadcast(activeSubs[this.subjSubLoc++]);
+            next = !activeSubs[this.subjSubLoc];
+        } else {
+            next = true;
+        }
+
+        if (next) {
+            this.subjLoc++;
+            this.subjSubLoc = 0;
         }
     }
 

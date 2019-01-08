@@ -11,6 +11,7 @@ const resource2 = NS.ex("2");
 const resource3 = NS.ex("3");
 const resource4 = NS.ex("4");
 const resource5 = NS.ex("5");
+const resource6 = NS.ex("6");
 
 const mixedWork = [
     new Statement(resource5, NS.ex("prop"), NS.ex("unknown"), NS.example("why")),
@@ -22,6 +23,7 @@ const mixedWork = [
     new Statement(resource4, NS.schema("name"), new Literal("Resource Name"), NS.example("why")),
     new Statement(resource4, NS.schema("text"), new Literal("Resource text"), NS.example("why")),
     new Statement(resource4, NS.schema("author"), resource3, NS.example("why")),
+    new Statement(resource6, NS.schema("text"), new Literal("Should contain only deleted regs"), NS.example("why")),
 ];
 
 const getOpts = (
@@ -198,6 +200,7 @@ describe("ProcessBroadcast", () => {
             const r4a = jest.fn<ReadonlyArray<Statement>>();
             const r4b = jest.fn<ReadonlyArray<Statement>>();
             const r5 = jest.fn<ReadonlyArray<Statement>>();
+            const r6 = jest.fn<ReadonlyArray<Statement>>();
 
             const processor = new ProcessBroadcast(getOpts(
                 mixedWork,
@@ -217,11 +220,12 @@ describe("ProcessBroadcast", () => {
                         { callback: r4b, markedForDelete: false, onlySubjects: true },
                     ]],
                     [resource5, [{ callback: r5, markedForDelete: false, onlySubjects: true }]],
+                    [resource6, [{ callback: r6, markedForDelete: true, onlySubjects: true }]],
                 ]),
             ));
 
             it("has no bulk processors", () => expect(processor.bulkLength).toBe(2));
-            it("has subject processors", () => expect(processor.subjectLength).toBe(5));
+            it("has subject processors", () => expect(processor.subjectLength).toBe(6));
             it("is done", () => expect(processor.done()).toBeFalsy());
             it("skips the processors on setup", () => {
                 expect(bulk1).not.toHaveBeenCalled();
@@ -234,6 +238,7 @@ describe("ProcessBroadcast", () => {
                 expect(r4a).not.toHaveBeenCalled();
                 expect(r4b).not.toHaveBeenCalled();
                 expect(r5).not.toHaveBeenCalled();
+                expect(r6).not.toHaveBeenCalled();
             });
 
             it("calls the processors on run", () => {
@@ -249,6 +254,7 @@ describe("ProcessBroadcast", () => {
                 expect(r4a).toHaveBeenCalledTimes(1);
                 expect(r4b).toHaveBeenCalledTimes(1);
                 expect(r5).toHaveBeenCalledTimes(1);
+                expect(r6).not.toHaveBeenCalled();
             });
 
             it("is done after run", () => {
