@@ -4,7 +4,8 @@ import { SomeNode, SubscriptionRegistrationBase } from "./types";
 
 declare global {
     interface Window {
-        requestIdleCallback: (callback: any, opts: object) => void;
+        requestIdleCallback: (callback: any, opts: object) => number;
+        cancelIdleCallback: (handle: number) => void;
     }
 
     interface IdleDeadline {

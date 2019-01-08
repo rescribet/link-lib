@@ -57,9 +57,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private _dispatch?: MiddlewareActionHandler;
     private schema: Schema;
     private store: RDFStore = new RDFStore();
+    private broadcastHandle: number | undefined;
     private bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [];
     private subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>> = new Map();
     private lastPostponed: number | undefined;
+    private resourceQueue: Array<[NamedNode, FetchOpts|undefined]>;
+    private resourceQueueHandle: number | undefined;
 
     // tslint:disable-next-line no-object-literal-type-assertion
     public constructor(opts: LinkedRenderStoreOptions<T> = {} as LinkedRenderStoreOptions<T>) {
@@ -78,6 +81,10 @@ export class LinkedRenderStore<T> implements Dispatcher {
         this.namespaces = opts.namespaces || {...defaultNS};
         this.schema = opts.schema || new Schema(this.store);
         this.mapping = opts.mapping || new ComponentStore(this.schema);
+        this.resourceQueue = [];
+
+        this.broadcast = this.broadcast.bind(this);
+        this.processResourceQueue = this.processResourceQueue.bind(this);
     }
 
     public get dispatch(): MiddlewareActionHandler {
@@ -213,6 +220,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.getComponentForProperty(type, RENDER_CLASS_NAME, topology);
     }
 
+    public queueEntity(iri: NamedNode, opts?: FetchOpts): void {
+        this.resourceQueue.push([iri, opts]);
+        this.processResourceQueue();
+    }
+
     /**
      * Will fetch the entity with the URL {iri}. When a resource under that subject is already present, it will not
      * be fetched again.
@@ -280,6 +292,17 @@ export class LinkedRenderStore<T> implements Dispatcher {
     public getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus {
         if (iri.termType === "BlankNode") {
             return emptyRequest as EmptyRequestStatus;
+        }
+
+        // TODO: Add queueing API to the data api
+        if (this.resourceQueue.find(([resource]) => resource === iri)) {
+            return {
+                lastRequested: new Date(),
+                lastResponseHeaders: null,
+                requested: true,
+                status: 202,
+                timesRequested: 1,
+            };
         }
 
         return this.api.getStatus(iri);
@@ -424,16 +447,20 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private broadcast(buffer = true, maxTimeout = 500): void {
         if (buffer) {
             if (this.store.workAvailable() < 100) {
+                if (this.broadcastHandle) {
+                    window.clearTimeout(this.broadcastHandle);
+                }
                 if (this.lastPostponed === undefined) {
                     this.lastPostponed = Date.now();
-                    window.setTimeout(this.broadcast.bind(this), 200);
+                    this.broadcastHandle = window.setTimeout(this.broadcast, 200);
                     return;
                 } else if (Date.now() - this.lastPostponed <= maxTimeout) {
-                    window.setTimeout(this.broadcast.bind(this), 200);
+                    this.broadcastHandle = window.setTimeout(this.broadcast, 200);
                     return;
                 }
             }
             this.lastPostponed = undefined;
+            this.broadcastHandle = undefined;
         }
         if (this.store.workAvailable() === 0) {
             return;
@@ -469,5 +496,32 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 }
             }
         }, 500);
+    }
+
+    private processResourceQueue(): void {
+        if (this.resourceQueueHandle) {
+            typeof window.requestIdleCallback !== "undefined"
+                ? window.cancelIdleCallback(this.resourceQueueHandle)
+                : window.clearTimeout(this.resourceQueueHandle);
+        }
+        const process = (): void => {
+            const queue = this.resourceQueue;
+            this.resourceQueue = [];
+
+            const len = queue.length;
+            const items = new Array(len);
+            for (let i = 0; i < len; i++) {
+                const [iri, opts] = queue[i];
+                items[i] = this.getEntity(iri, opts);
+            }
+
+            Promise.all(items);
+        };
+
+        if (typeof window.requestIdleCallback !== "undefined") {
+            this.resourceQueueHandle = window.requestIdleCallback(process, { timeout: 100 });
+        } else {
+            this.resourceQueueHandle = window.setTimeout(process, 100);
+        }
     }
 }
