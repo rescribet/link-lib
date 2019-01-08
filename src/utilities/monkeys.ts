@@ -23,34 +23,6 @@ export function patchRDFLibSerializer(serializer: Serializer, fallback: string):
 }
 
 /**
- * Patch rdflib with memoized versions of terms via a Proxy object.
- */
-export function patchRDFLibStoreWithProxy(graph: IndexedFormula, changeBufferTarget: ChangeBuffer): IndexedFormula {
-    graph.statements = new Proxy(graph.statements, {
-        get: (target: Statement[], prop: string): any => {
-            if (prop === "push") {
-                return (elem: any): number => {
-                    changeBufferTarget.changeBuffer[changeBufferTarget.changeBufferCount] = elem;
-                    changeBufferTarget.changeBufferCount++;
-                    return target.push(elem);
-                };
-            } else if (prop === "splice") {
-                return (index: any, len: any): Statement[] => {
-                    const rem = target.splice(index, len);
-                    changeBufferTarget.changeBuffer.push(...rem);
-                    changeBufferTarget.changeBufferCount += len;
-                    return rem;
-                };
-            }
-
-            return target[prop as any];
-        },
-    });
-
-    return graph;
-}
-
-/**
  * Patch rdflib with memoized versions of terms by overriding certain object methods.
  * For browsers that don't support Proxy.
  */

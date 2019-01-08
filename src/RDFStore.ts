@@ -12,7 +12,7 @@ import {
 import { ChangeBuffer, SomeNode } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
 import { defaultNS as NS } from "./utilities/constants";
-import { patchRDFLibStoreWithOverrides, patchRDFLibStoreWithProxy } from "./utilities/monkeys";
+import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
 
@@ -39,11 +39,7 @@ export class RDFStore implements ChangeBuffer {
         this.processDelta = this.processDelta.bind(this);
 
         const g = graph();
-        if (typeof Proxy !== "undefined") {
-            this.store = patchRDFLibStoreWithProxy(g, this);
-        } else {
-            this.store = patchRDFLibStoreWithOverrides(g, this);
-        }
+        this.store = patchRDFLibStoreWithOverrides(g, this);
 
         this.store.newPropertyAction(NS.rdf("type"), this.processTypeStatement.bind(this));
     }

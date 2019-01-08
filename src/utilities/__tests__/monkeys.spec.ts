@@ -8,7 +8,7 @@ import {
 import { ChangeBuffer } from "../../types";
 
 import { defaultNS as NS } from "../constants";
-import { patchRDFLibSerializer, patchRDFLibStoreWithOverrides, patchRDFLibStoreWithProxy } from "../monkeys";
+import { patchRDFLibSerializer, patchRDFLibStoreWithOverrides } from "../monkeys";
 
 function serializeString(str: string, patch = true): string {
     const g = new IndexedFormula();
@@ -53,23 +53,6 @@ describe("monkeys", () => {
         it("is still required", () => {
             expect(serializeString(failing, false))
                 .toContain("\"\"\"");
-        });
-    });
-
-    describe("patchRDFLibStoreWithProxy", () => {
-        it("returns the graph", () => {
-            const [ g, changeBuffer ] = getStorePair();
-
-            expect(patchRDFLibStoreWithProxy(g, changeBuffer))
-                .toEqual(g);
-        });
-
-        it("increments the changebuffer", () => {
-            const [ g, changeBuffer ] = getStorePair();
-            patchRDFLibStoreWithProxy(g, changeBuffer);
-            g.statements.push(new Statement(NS.ex("1"), NS.ex("p"), NS.ex("2")));
-
-            expect(changeBuffer.changeBufferCount).toEqual(1);
         });
     });
 
