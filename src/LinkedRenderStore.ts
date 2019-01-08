@@ -385,13 +385,19 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
             return (): void => {
                 registration.markedForDelete = true;
-                subjectFilter.forEach((s) => {
-                    const partialSub = this.subjectSubscriptions.get(s)!;
-                    partialSub.splice(partialSub.indexOf(registration), 1);
-                    if (partialSub.length === 0) {
+                let s;
+                let filterIndex;
+                let partialSub;
+                for (let i = 0, len = subjectFilter.length; i < len; i++) {
+                    s = subjectFilter[i];
+                    partialSub = this.subjectSubscriptions.get(s)!;
+                    filterIndex = partialSub.indexOf(registration);
+                    if (filterIndex !== -1 && partialSub.length === 1) {
                         this.subjectSubscriptions.delete(s);
+                    } else {
+                        partialSub.splice(filterIndex, 1);
                     }
-                });
+                }
             };
         }
 
