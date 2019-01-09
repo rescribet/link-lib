@@ -73,6 +73,10 @@ export interface LinkedRenderStoreOptions<T> {
     store?: RDFStore | undefined;
 }
 
+export interface DeltaProcessor {
+    processDelta: (delta: Statement[]) => void;
+}
+
 export interface Dispatcher {
     dispatch: MiddlewareActionHandler;
 }
@@ -189,3 +193,5 @@ export interface DataProcessorOpts {
     mapping?: { [k: string]: ResponseTransformer[] };
     store: RDFStore;
 }
+
+export type ResourceQueueItem = [NamedNode, FetchOpts|undefined];

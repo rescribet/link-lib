@@ -2983,6 +2983,11 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
 
+n-quads-parser@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/n-quads-parser/-/n-quads-parser-1.0.0.tgz#e7b886d24d3906aa04230466d382706bb7fd629d"
+  integrity sha512-gD/IvfwYelYT9I64sMxQMhJk2m1hhx/05lu1uAfWbJdBOSbVKmPIN4twpTg9qd82CWT2/tG/F745FeMDOPT70A==
+
 n3@^0.4.1:
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/n3/-/n3-0.4.5.tgz#5b70d3ab6a21c9e8d4c9bda2a3d4d90909beb508"
@@ -3521,13 +3526,14 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-"rdflib@npm:link-rdflib@0.19.1-20190108T135057":
-  version "0.19.1-20190108T135057"
-  resolved "https://registry.yarnpkg.com/link-rdflib/-/link-rdflib-0.19.1-20190108T135057.tgz#3867c5f2da4c38860fe86d4a08e9f03d0a399c6f"
-  integrity sha512-hElvQhUHZgXHurSRlvmLNkfDWil7zj/4diRgqFed6Kpllmwkh/2VKxebBUyQNS3ObKVbzP06z7oC+toDKvZiEQ==
+"rdflib@npm:link-rdflib@0.19.1-20190116T092215":
+  version "0.19.1-20190116T092215"
+  resolved "https://registry.yarnpkg.com/link-rdflib/-/link-rdflib-0.19.1-20190116T092215.tgz#e20ab0565fc35202d78dace4f11eaf391d9ea40f"
+  integrity sha512-DG3yjQfGthUrx2LYG43VvhbxM956YlGHsP9uxjNJS2gTMY1zezmve9fIYtjpV59jGlvUflZCd9eZIBHs4ttR2w==
   dependencies:
     async "^0.9.x"
     jsonld "^0.4.5"
+    n-quads-parser "^1.0.0"
     n3 "^0.4.1"
     solid-auth-client "^2.2.3"
     xmldom "^0.1.22"

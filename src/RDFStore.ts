@@ -7,9 +7,10 @@ import {
     OptionalNode,
     SomeTerm,
     Statement,
+    Term,
 } from "rdflib";
 
-import { ChangeBuffer, SomeNode } from "./types";
+import { ChangeBuffer, DeltaProcessor, SomeNode } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
 import { defaultNS as NS } from "./utilities/constants";
 import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
@@ -19,7 +20,7 @@ const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
 /**
  * Provides a clean consistent interface to stored (RDF) data.
  */
-export class RDFStore implements ChangeBuffer {
+export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public changeBuffer: Statement[] = new Array(100);
     public changeBufferCount: number = 0;
     /**
@@ -27,15 +28,25 @@ export class RDFStore implements ChangeBuffer {
      *
      * @note Not to be confused with the last change in the store, which might be later than the flush time.
      */
-    public changeTimestamps: number[] = [];
+    public changeTimestamps: Uint32Array = new Uint32Array(0x100000);
     public typeCache: NamedNode[][] = [];
 
+    private addGraphIRIS: any[];
+    private replaceGraphIRIS: any[];
+    private removeGraphIRIS: any[];
     private langPrefs: string[] = Array.from(typeof navigator !== undefined
         ? (navigator.languages || [navigator.language])
         : ["en"]);
     private store: IndexedFormula = graph();
 
     constructor() {
+        this.addGraphIRIS = [NS.ll("add").value];
+        this.replaceGraphIRIS = [
+            undefined,
+            NS.ll("replace").value,
+            NamedNode.fromValue("chrome:theSession").value,
+        ];
+        this.removeGraphIRIS = [NS.ll("remove").value];
         this.processDelta = this.processDelta.bind(this);
 
         const g = graph();
@@ -49,10 +60,12 @@ export class RDFStore implements ChangeBuffer {
      * @param data Data to parse and add to the store.
      */
     public addStatements(data: Statement[]): void {
-        if (Array.isArray(data)) {
-            this.store.add(data);
-        } else {
+        if (!Array.isArray(data)) {
             throw new TypeError("An array of statements must be passed to addStatements");
+        }
+
+        for (let i = 0, len = data.length; i < len; i++) {
+            this.store.addStatement(data[i]);
         }
     }
 
@@ -111,13 +124,11 @@ export class RDFStore implements ChangeBuffer {
         return this.store.match(subj, pred, obj, why) || [];
     }
 
-    public processDelta(statements: Statement[]): Promise<void> {
-        const addGraphIRIS = [NS.ll("add").value];
-        const replaceGraphIRIS = [undefined, NS.ll("replace").value, "chrome:theSession"];
-        const addables = statements.filter((s) => addGraphIRIS.includes(s.why.value));
-        const replacables = statements.filter((s) => replaceGraphIRIS.includes(s.why.value));
-        const removables = statements
-            .filter((s) => NS.ll("remove").value === s.why.value)
+    public processDelta(delta: Statement[]): void {
+        const addables = delta.filter((s) => this.addGraphIRIS.includes(s.why.value));
+        const replacables = delta.filter((s) => this.replaceGraphIRIS.includes(s.why.value));
+        const removables = delta
+            .filter((s) => this.removeGraphIRIS.includes(s.why.value))
             .reduce((tot: Statement[], cur) => {
                 const matches = this.store.match(cur.subject, cur.predicate, null, null);
 
@@ -126,8 +137,6 @@ export class RDFStore implements ChangeBuffer {
         this.removeStatements(removables);
         this.replaceMatches(replacables);
         this.addStatements(addables);
-
-        return Promise.resolve();
     }
 
     public removeStatements(statements: Statement[]): void {
@@ -172,8 +181,8 @@ export class RDFStore implements ChangeBuffer {
                 undefined,
             ));
         }
-        for (let i = 0; i < statements.length; i++) {
-            this.store.add(statements[i].subject, statements[i].predicate, statements[i].object);
+        for (let i = 0, len = statements.length; i < len; i++) {
+            this.store.addStatement(statements[i]);
         }
     }
 
@@ -221,11 +230,17 @@ export class RDFStore implements ChangeBuffer {
      * @param subject The identifier of the resource.
      */
     public statementsFor(subject: SomeNode): Statement[] {
-        const canon = this.store.canon(subject).sI;
+        const canon = (this.store.canon(subject) as Term).sI;
 
         return typeof this.store.subjectIndex[canon] !== "undefined"
             ? this.store.subjectIndex[canon]
             : EMPTY_ST_ARR as Statement[];
+    }
+
+    public touch(iri: SomeNode): void {
+        this.changeTimestamps[iri.sI] = Date.now();
+        this.changeBuffer.push(new Statement(iri, NS.ll("nop"), NS.ll("nop")));
+        this.changeBufferCount++;
     }
 
     public workAvailable(): number {

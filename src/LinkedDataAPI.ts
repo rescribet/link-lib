@@ -6,7 +6,9 @@ import {
 
 import {
     DataProcessorOpts,
+    DeltaProcessor,
     Dispatcher,
+    ResourceQueueItem,
 } from "./types";
 import {
     DataTuple,
@@ -17,7 +19,7 @@ import {
     SomeNode,
 } from "./types";
 
-export interface LinkedDataAPI extends Dispatcher {
+export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
     execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
     /**
@@ -27,6 +29,9 @@ export interface LinkedDataAPI extends Dispatcher {
      * the extension
      */
     fetchResource(iri: NamedNode): Promise<Response | object>;
+
+    /** @private */
+    getEntities(resources: ResourceQueueItem[]): Promise<Statement[]>;
 
     /**
      * Gets an entity by its SomeNode.

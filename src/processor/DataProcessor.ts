@@ -20,11 +20,13 @@ import { RDFStore } from "../RDFStore";
 import {
     DataProcessorOpts,
     DataTuple,
+    DeltaProcessor,
     EmptyRequestStatus,
     FailedResponse,
     FulfilledRequestStatus,
     LinkedActionResponse,
     MiddlewareActionHandler,
+    ResourceQueueItem,
     ResponseAndFallbacks,
     ResponseTransformer,
 } from "../types";
@@ -141,12 +143,13 @@ const timedOutRequest = (totalRequested: number): FulfilledRequestStatus => Obje
     timesRequested: totalRequested,
 }) as FulfilledRequestStatus;
 
-export class DataProcessor implements LinkedDataAPI {
+export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     public accept: { [k: string]: string };
     public timeout: number = 30000;
 
     private _fetcher: Fetcher | undefined;
     private _dispatch?: MiddlewareActionHandler;
+    private readonly bulkEndpoint: string;
     private readonly requestInitGenerator: RequestInitGenerator;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
     private readonly requestMap: Map<NamedNode, Promise<Statement[]> | undefined>;
@@ -180,6 +183,7 @@ export class DataProcessor implements LinkedDataAPI {
         this.accept = opts.accept || {
             default: "",
         };
+        this.bulkEndpoint = `${window.location.origin}/link-lib/bulk`;
         this._dispatch = opts.dispatch;
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
@@ -190,6 +194,7 @@ export class DataProcessor implements LinkedDataAPI {
             this.fetcher = opts.fetcher;
         }
         this.processExecAction = this.processExecAction.bind(this);
+        this.feedResponse = this.feedResponse.bind(this);
     }
 
     public get dispatch(): MiddlewareActionHandler {
@@ -318,6 +323,30 @@ export class DataProcessor implements LinkedDataAPI {
         return this.processExecAction(res);
     }
 
+    public getEntities(resources: ResourceQueueItem[]): Promise<Statement[]> {
+        const reload: NamedNode[] = [];
+        const url = new URL(this.bulkEndpoint);
+        for (let i = 0; i < resources.length; i++) {
+            const resource = resources[i];
+            if (resource[1] && resource[1].reload) {
+                reload.push(resource[0]);
+            }
+            url.searchParams.append("resource", encodeURIComponent(resource[0].value));
+        }
+        const opts = this.requestInitGenerator.generate("GET", this.accept[url.origin]);
+
+        return fetch(url.toString(), opts)
+            .then(this.feedResponse)
+            .catch((err) => {
+                const status = Literal.fromNumber(err.status);
+                const delta = resources
+                    .map(([s]) => Statement.from(s, defaultNS.http("statusCode"), status, defaultNS.ll("meta")));
+                this.processDelta(delta);
+
+                return delta;
+            });
+    }
+
     /**
      * @see LinkedDataAPI#getEntity
      * @param iri The SomeNode of the entity
@@ -336,7 +365,7 @@ export class DataProcessor implements LinkedDataAPI {
         try {
             const req = this
                 .fetchResource(requestIRI, opts)
-                .then((res) => this.feedResponse(res)); // TODO: feedResponse is only necessary for external requests.
+                .then(this.feedResponse); // TODO: feedResponse might only be necessary for non-rdflib fetcher requests.
             this.requestMap.set(requestIRI, req);
             return await req;
         } catch (e) {
@@ -433,7 +462,22 @@ export class DataProcessor implements LinkedDataAPI {
 
     public processExternalResponse(response: Response): Promise<Statement[] | undefined> {
         return handleStatus(response)
-            .then((res) => this.feedResponse(res));
+            .then(this.feedResponse);
+    }
+
+    public processDelta(delta: Statement[]): void {
+        let s: Statement;
+        for (let i = 0, len = delta.length; i < len; i++) {
+            s = delta[i];
+
+            if (s.why !== defaultNS.ll("meta")) {
+                continue;
+            }
+
+            if (s.predicate === defaultNS.http("statusCode")) {
+                this.setStatus(s.subject as NamedNode, Number.parseInt(s.object.value, 10));
+            }
+        }
     }
 
     /** Register a transformer so it can be used to interact with API's. */
@@ -452,6 +496,9 @@ export class DataProcessor implements LinkedDataAPI {
     }
 
     private feedResponse(res: ResponseAndFallbacks): Promise<Statement[]> {
+        if (res.status >= INTERNAL_SERVER_ERROR) {
+            return Promise.reject(res);
+        }
         const format = getContentType(res);
         const formatProcessors = this.mapping[format];
         const processor = formatProcessors && formatProcessors[0];
@@ -485,5 +532,23 @@ export class DataProcessor implements LinkedDataAPI {
         }
 
         return Promise.resolve(res);
+    }
+
+    private setStatus(iri: NamedNode, status: number): void {
+        const url = this.fetchableURLFromIRI(iri);
+        const prevStatus = this.statusMap.get(url);
+        this.store.touch(url);
+        this.store.touch(iri);
+
+        this.memoizeStatus(
+            url,
+            {
+                lastRequested: new Date(),
+                lastResponseHeaders: null,
+                requested: true,
+                status,
+                timesRequested: prevStatus ? prevStatus.timesRequested + 1 : 1,
+            },
+        );
     }
 }

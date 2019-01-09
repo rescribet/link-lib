@@ -44,7 +44,7 @@
     "http-status-codes": ">= 1.x",
     "jest": "^23.6.0",
     "jest-fetch-mock": "^1.7.5",
-    "rdflib": "npm:link-rdflib@0.19.1-20190108T135057",
+    "rdflib": "npm:link-rdflib@0.19.1-20190116T092215",
     "rollup": "^0.67.3",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-node-resolve": "^3.4.0",

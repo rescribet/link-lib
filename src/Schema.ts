@@ -34,10 +34,6 @@ export class Schema extends IndexedFormula {
         }
     }
 
-    public addStatement(st: Statement): void {
-        this.addStatements([st]);
-    }
-
     /** Push statements onto the graph so it can be used by the render store for component determination. */
     public addStatements(statements: Statement[]): void {
         const unique = statements.filter((s) => !this.holdsStatement(s));
@@ -47,7 +43,7 @@ export class Schema extends IndexedFormula {
         }
 
         this.addAll(eligible);
-        return this.addStatements(eligible);
+        return this.liveStore.addStatements(eligible);
     }
 
     public expand(types: number[]): number[] {

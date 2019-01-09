@@ -15,6 +15,7 @@ import { Schema } from "./Schema";
 import {
     ComponentRegistration,
     DataObject,
+    DeltaProcessor,
     Dispatcher,
     EmptyRequestStatus,
     FetchOpts,
@@ -24,6 +25,7 @@ import {
     LinkedRenderStoreOptions,
     MiddlewareActionHandler,
     NamespaceMap,
+    ResourceQueueItem,
     SomeNode,
     SubscriptionRegistrationBase,
 } from "./types";
@@ -51,17 +53,19 @@ export class LinkedRenderStore<T> implements Dispatcher {
     public defaultType: NamedNode = defaultNS.schema("Thing");
     public namespaces: NamespaceMap = {...defaultNS};
 
-    private api: LinkedDataAPI;
-    private cleanupTimer: number | undefined;
-    private mapping: ComponentStore<T>;
     private _dispatch?: MiddlewareActionHandler;
+    private api: LinkedDataAPI;
+    private bulkFetch: boolean = false;
+    private cleanupTimer: number | undefined;
+    private deltaProcessors: DeltaProcessor[];
+    private mapping: ComponentStore<T>;
     private schema: Schema;
     private store: RDFStore = new RDFStore();
     private broadcastHandle: number | undefined;
     private bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [];
     private subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>> = new Map();
     private lastPostponed: number | undefined;
-    private resourceQueue: Array<[NamedNode, FetchOpts|undefined]>;
+    private resourceQueue: ResourceQueueItem[];
     private resourceQueueHandle: number | undefined;
 
     // tslint:disable-next-line no-object-literal-type-assertion
@@ -74,6 +78,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             dispatch: opts.dispatch,
             store: this.store,
         });
+        this.deltaProcessors = [this.api, this.store];
         if (opts.dispatch) {
             this.dispatch = opts.dispatch;
         }
@@ -222,7 +227,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
     public queueEntity(iri: NamedNode, opts?: FetchOpts): void {
         this.resourceQueue.push([iri, opts]);
-        this.processResourceQueue();
+        this.scheduleResourceQueue();
     }
 
     /**
@@ -309,7 +314,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     }
 
     public processDelta(delta: Statement[], expedite = false): void {
-        this.store.processDelta(delta);
+        this.deltaProcessors.map((dp) => dp.processDelta(delta));
         this.broadcast(expedite, expedite ? 100 : 500);
     }
 
@@ -389,12 +394,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @return function Unsubscription function.
      */
     public subscribe(registration: SubscriptionRegistrationBase<unknown>): () => void {
-        registration.subscribedAt = Date.now();
         const givenCallback = registration.callback;
         registration.callback = (data: any): void => {
             registration.lastUpdateAt = Date.now();
             givenCallback(data, registration.lastUpdateAt);
         };
+        registration.subscribedAt = Date.now();
         const subjectFilter = registration.subjectFilter;
 
         if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {
@@ -498,30 +503,33 @@ export class LinkedRenderStore<T> implements Dispatcher {
         }, 500);
     }
 
-    private processResourceQueue(): void {
+    private scheduleResourceQueue(): void {
         if (this.resourceQueueHandle) {
             typeof window.requestIdleCallback !== "undefined"
                 ? window.cancelIdleCallback(this.resourceQueueHandle)
                 : window.clearTimeout(this.resourceQueueHandle);
         }
-        const process = (): void => {
-            const queue = this.resourceQueue;
-            this.resourceQueue = [];
-
-            const len = queue.length;
-            const items = new Array(len);
-            for (let i = 0; i < len; i++) {
-                const [iri, opts] = queue[i];
-                items[i] = this.getEntity(iri, opts);
-            }
-
-            Promise.all(items);
-        };
 
         if (typeof window.requestIdleCallback !== "undefined") {
-            this.resourceQueueHandle = window.requestIdleCallback(process, { timeout: 100 });
+            this.resourceQueueHandle = window.requestIdleCallback(this.processResourceQueue, { timeout: 100 });
         } else {
-            this.resourceQueueHandle = window.setTimeout(process, 100);
+            this.resourceQueueHandle = window.setTimeout(this.processResourceQueue, 100);
+        }
+    }
+
+    private processResourceQueue(): void {
+        const queue = this.resourceQueue;
+        this.resourceQueue = [];
+
+        if (this.bulkFetch) {
+            this.api
+                .getEntities(queue)
+                .then(() => this.broadcast(false));
+        } else {
+            for (let i = 0; i < queue.length; i++) {
+                const [iri, opts] = queue[i];
+                this.getEntity(iri, opts);
+            }
         }
     }
 }
