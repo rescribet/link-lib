@@ -914,6 +914,9 @@ img { max-width: 100%; }
 			<a href="__global.window.html" class="tsd-kind-icon">Window</a>
 			<ul>
 				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a href="__global.window.html#cancelidlecallback" class="tsd-kind-icon">cancel<wbr>Idle<wbr>Callback</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
 					<a href="__global.window.html#requestidlecallback" class="tsd-kind-icon">request<wbr>Idle<wbr>Callback</a>
 				</li>
 			</ul>
@@ -937,6 +940,7 @@ img { max-width: 100%; }
 					<section class="tsd-index-section tsd-is-not-exported">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="__global.window.html#cancelidlecallback" class="tsd-kind-icon">cancel<wbr>Idle<wbr>Callback</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="__global.window.html#requestidlecallback" class="tsd-kind-icon">request<wbr>Idle<wbr>Callback</a></li>
 						</ul>
 					</section>
@@ -946,12 +950,12 @@ img { max-width: 100%; }
 		<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
 			<h2>Properties</h2>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-				<a name="requestidlecallback" class="tsd-anchor"></a>
-				<h3>request<wbr>Idle<wbr>Callback</h3>
-				<div class="tsd-signature tsd-kind-icon">request<wbr>Idle<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+				<a name="cancelidlecallback" class="tsd-anchor"></a>
+				<h3>cancel<wbr>Idle<wbr>Callback</h3>
+				<div class="tsd-signature tsd-kind-icon">cancel<wbr>Idle<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/a70dc6f/src/ProcessBroadcast.ts#L7">ProcessBroadcast.ts:7</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c35902a/src/ProcessBroadcast.ts#L8">ProcessBroadcast.ts:8</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -959,7 +963,38 @@ img { max-width: 100%; }
 					<ul class="tsd-parameters">
 						<li class="tsd-parameter-siganture">
 							<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
-								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, opts<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>handle<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<h4 class="tsd-parameters-title">Parameters</h4>
+									<ul class="tsd-parameters">
+										<li>
+											<h5>handle: <span class="tsd-signature-type">number</span></h5>
+										</li>
+									</ul>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+				<a name="requestidlecallback" class="tsd-anchor"></a>
+				<h3>request<wbr>Idle<wbr>Callback</h3>
+				<div class="tsd-signature tsd-kind-icon">request<wbr>Idle<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/c35902a/src/ProcessBroadcast.ts#L7">ProcessBroadcast.ts:7</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-type-declaration">
+					<h4>Type declaration</h4>
+					<ul class="tsd-parameters">
+						<li class="tsd-parameter-siganture">
+							<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, opts<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
 							</ul>
 							<ul class="tsd-descriptions">
 								<li class="tsd-description">
@@ -972,7 +1007,7 @@ img { max-width: 100%; }
 											<h5>opts: <span class="tsd-signature-type">object</span></h5>
 										</li>
 									</ul>
-									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 								</li>
 							</ul>
 						</li>
