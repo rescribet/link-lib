@@ -122,10 +122,10 @@ export class ProcessBroadcast {
     }
 
     private queue(idleCallback?: IdleDeadline): void {
-        if (this.isSplit && (!idleCallback || idleCallback.timeRemaining() <= 10)) {
-            window.requestIdleCallback(this.process, {timeout: this.timeout});
+        if (!this.isSplit || idleCallback && (idleCallback.timeRemaining() > 0 || idleCallback.didTimeout)) {
+            this.process(idleCallback);
         } else {
-            this.process();
+            window.requestIdleCallback(this.process, {timeout: this.timeout});
         }
     }
 

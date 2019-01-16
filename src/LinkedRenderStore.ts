@@ -449,7 +449,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      *
      * Note: This should only be used by render-libraries (e.g. link-redux), not by application code.
      */
-    private broadcast(buffer = true, maxTimeout = 500): void {
+    private broadcast(buffer = true, maxTimeout = 1000): void {
         if (buffer) {
             if (this.store.workAvailable() < 100) {
                 if (this.broadcastHandle) {
