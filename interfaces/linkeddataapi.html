@@ -913,6 +913,9 @@ img { max-width: 100%; }
 				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a href="linkeddataapi.html#dispatch" class="tsd-kind-icon">dispatch</a>
 				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="linkeddataapi.html#processdelta" class="tsd-kind-icon">process<wbr>Delta</a>
+				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-interface">
 					<a href="linkeddataapi.html#execactionbyiri" class="tsd-kind-icon">exec<wbr>Action<wbr>ByIRI</a>
 				</li>
@@ -945,6 +948,9 @@ img { max-width: 100%; }
 			<ul class="tsd-hierarchy">
 				<li>
 					<a href="dispatcher.html" class="tsd-signature-type">Dispatcher</a>
+				</li>
+				<li>
+					<a href="deltaprocessor.html" class="tsd-signature-type">DeltaProcessor</a>
 					<ul class="tsd-hierarchy">
 						<li>
 							<span class="target">LinkedDataAPI</span>
@@ -967,6 +973,7 @@ img { max-width: 100%; }
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="linkeddataapi.html#dispatch" class="tsd-kind-icon">dispatch</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="linkeddataapi.html#processdelta" class="tsd-kind-icon">process<wbr>Delta</a></li>
 						</ul>
 					</section>
 					<section class="tsd-index-section ">
@@ -993,9 +1000,41 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Inherited from <a href="dispatcher.html">Dispatcher</a>.<a href="dispatcher.html#dispatch">dispatch</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/types.ts#L92">types.ts:92</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/types.ts#L81">types.ts:81</a></li>
 					</ul>
 				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="processdelta" class="tsd-anchor"></a>
+				<h3>process<wbr>Delta</h3>
+				<div class="tsd-signature tsd-kind-icon">process<wbr>Delta<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from <a href="deltaprocessor.html">DeltaProcessor</a>.<a href="deltaprocessor.html#processdelta">processDelta</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/types.ts#L77">types.ts:77</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-type-declaration">
+					<h4>Type declaration</h4>
+					<ul class="tsd-parameters">
+						<li class="tsd-parameter-siganture">
+							<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>delta<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<h4 class="tsd-parameters-title">Parameters</h4>
+									<ul class="tsd-parameters">
+										<li>
+											<h5>delta: <span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></h5>
+										</li>
+									</ul>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
 			</section>
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
@@ -1010,7 +1049,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/LinkedDataAPI.ts#L22">LinkedDataAPI.ts:22</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/LinkedDataAPI.ts#L23">LinkedDataAPI.ts:23</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1036,7 +1075,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/LinkedDataAPI.ts#L30">LinkedDataAPI.ts:30</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/LinkedDataAPI.ts#L31">LinkedDataAPI.ts:31</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1069,7 +1108,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/LinkedDataAPI.ts#L33">LinkedDataAPI.ts:33</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/LinkedDataAPI.ts#L34">LinkedDataAPI.ts:34</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1094,7 +1133,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/LinkedDataAPI.ts#L44">LinkedDataAPI.ts:44</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/LinkedDataAPI.ts#L45">LinkedDataAPI.ts:45</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1134,7 +1173,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/LinkedDataAPI.ts#L63">LinkedDataAPI.ts:63</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/LinkedDataAPI.ts#L64">LinkedDataAPI.ts:64</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1172,13 +1211,13 @@ img { max-width: 100%; }
 				<a name="registertransformer" class="tsd-anchor"></a>
 				<h3>register<wbr>Transformer</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-					<li class="tsd-signature tsd-kind-icon">register<wbr>Transformer<span class="tsd-signature-symbol">(</span>processor<span class="tsd-signature-symbol">: </span><a href="../globals.html#responsetransformer" class="tsd-signature-type">ResponseTransformer</a>, storeTransformer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span>, mediaType<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, acceptValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">register<wbr>Transformer<span class="tsd-signature-symbol">(</span>processor<span class="tsd-signature-symbol">: </span><a href="../globals.html#responsetransformer" class="tsd-signature-type">ResponseTransformer</a>, mediaType<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, acceptValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/LinkedDataAPI.ts#L66">LinkedDataAPI.ts:66</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/LinkedDataAPI.ts#L67">LinkedDataAPI.ts:67</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1190,9 +1229,6 @@ img { max-width: 100%; }
 						<ul class="tsd-parameters">
 							<li>
 								<h5>processor: <a href="../globals.html#responsetransformer" class="tsd-signature-type">ResponseTransformer</a></h5>
-							</li>
-							<li>
-								<h5>storeTransformer: <span class="tsd-signature-type">boolean</span></h5>
 							</li>
 							<li>
 								<h5>mediaType: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
@@ -1215,7 +1251,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/fa82d60/src/LinkedDataAPI.ts#L76">LinkedDataAPI.ts:76</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/b204bc8/src/LinkedDataAPI.ts#L76">LinkedDataAPI.ts:76</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
