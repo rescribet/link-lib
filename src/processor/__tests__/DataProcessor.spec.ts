@@ -310,9 +310,9 @@ describe("DataProcessor", () => {
 
             const transformer = (_res: ResponseAndFallbacks): Promise<Statement[]> => Promise.resolve([]);
 
-            store.processor.registerTransformer(transformer, false, "text/n3", 0.9);
+            store.processor.registerTransformer(transformer, "text/n3", 0.9);
 
-            expect(mapping["text/n3"][0]).toHaveProperty("transformer", transformer);
+            expect(mapping["text/n3"]).toContain(transformer);
             expect(mapping["application/n-quads"]).not.toBeDefined();
             expect(store.processor.accept.default).toEqual(",text/n3;0.9");
         });

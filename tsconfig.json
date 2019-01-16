@@ -15,11 +15,7 @@
     "outDir": "dist/es",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017",
-    "typeRoots": [
-      "node_modules/@types",
-      "@types"
-    ]
+    "target": "es2017"
   },
   "files": [
     "src/link-lib.ts"

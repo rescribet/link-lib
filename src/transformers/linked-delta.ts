@@ -1,8 +1,5 @@
-import {
-    NQuadsParser,
-    Quadruple,
-    Statement,
-} from "rdflib";
+import { NQuadsParser, Quadruple } from "n-quads-parser";
+import { Statement } from "rdflib";
 import { LinkedRenderStore } from "../LinkedRenderStore";
 import { ResponseAndFallbacks, ResponseTransformer } from "../types";
 

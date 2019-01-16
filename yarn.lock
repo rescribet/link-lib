@@ -2983,10 +2983,10 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
 
-n-quads-parser@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/n-quads-parser/-/n-quads-parser-1.0.0.tgz#e7b886d24d3906aa04230466d382706bb7fd629d"
-  integrity sha512-gD/IvfwYelYT9I64sMxQMhJk2m1hhx/05lu1uAfWbJdBOSbVKmPIN4twpTg9qd82CWT2/tG/F745FeMDOPT70A==
+n-quads-parser@>=1.2.0, n-quads-parser@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/n-quads-parser/-/n-quads-parser-1.2.0.tgz#b866eb610d6c5fd1b9857a8d6b92b599a7b3721e"
+  integrity sha512-2IYzvNm+cFht0Z8gWgF1Z9wunq7jaSIpb32+7fVgQJdZ1w6bu5HDsNaqfjcGn2n1uhugFzJSkUVb8s61QOtKQg==
 
 n3@^0.4.1:
   version "0.4.5"
@@ -3526,14 +3526,14 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-"rdflib@npm:link-rdflib@0.19.1-20190116T092215":
-  version "0.19.1-20190116T092215"
-  resolved "https://registry.yarnpkg.com/link-rdflib/-/link-rdflib-0.19.1-20190116T092215.tgz#e20ab0565fc35202d78dace4f11eaf391d9ea40f"
-  integrity sha512-DG3yjQfGthUrx2LYG43VvhbxM956YlGHsP9uxjNJS2gTMY1zezmve9fIYtjpV59jGlvUflZCd9eZIBHs4ttR2w==
+"rdflib@npm:link-rdflib@0.19.1-20190116T143208":
+  version "0.19.1-20190116T143208"
+  resolved "https://registry.yarnpkg.com/link-rdflib/-/link-rdflib-0.19.1-20190116T143208.tgz#513b54741ecac0f0a51f38b6c1d9ff1ebf8ddf54"
+  integrity sha512-TcKbbjQQ+8m/MECzwMQV/tzh8CBR/kNKTWMahegjstHK97ekRqaPKN4tvrWdCNVnYh/fXQgfufW/jQiqENGQRw==
   dependencies:
     async "^0.9.x"
     jsonld "^0.4.5"
-    n-quads-parser "^1.0.0"
+    n-quads-parser ">=1.2.0"
     n3 "^0.4.1"
     solid-auth-client "^2.2.3"
     xmldom "^0.1.22"

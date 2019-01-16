@@ -21,9 +21,7 @@ a back-end, so it's only a demo for the view rendering mechanism.
 
 ## Installation
 
-`npm install link-lib rdflib`
-
-`yarn add link-lib rdflib`
+`yarn add link-lib rdflib@npm:link-rdflib`
 
 The package externalizes the Promise API, so make sure to include your own when targeting platforms without native
 support.

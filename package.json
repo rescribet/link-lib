@@ -7,7 +7,6 @@
   "sideEffects": false,
   "typings": "dist/typings/link-lib.d.ts",
   "files": [
-    "@types/**/*.*",
     "dist/link-lib.es6.js",
     "dist/link-lib.umd.js",
     "dist/typings/**/*.*",
@@ -44,7 +43,8 @@
     "http-status-codes": ">= 1.x",
     "jest": "^23.6.0",
     "jest-fetch-mock": "^1.7.5",
-    "rdflib": "npm:link-rdflib@0.19.1-20190116T092215",
+    "n-quads-parser": "^1.2.0",
+    "rdflib": "npm:link-rdflib@0.19.1-20190116T143208",
     "rollup": "^0.67.3",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-node-resolve": "^3.4.0",
