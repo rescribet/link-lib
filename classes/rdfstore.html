@@ -974,6 +974,9 @@ img { max-width: 100%; }
 					<a href="rdfstore.html#statementsfor" class="tsd-kind-icon">statements<wbr>For</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="rdfstore.html#touch" class="tsd-kind-icon">touch</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="rdfstore.html#workavailable" class="tsd-kind-icon">work<wbr>Available</a>
 				</li>
 			</ul>
@@ -1042,6 +1045,7 @@ img { max-width: 100%; }
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#replacematches" class="tsd-kind-icon">replace<wbr>Matches</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#replacestatements" class="tsd-kind-icon">replace<wbr>Statements</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#statementsfor" class="tsd-kind-icon">statements<wbr>For</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#touch" class="tsd-kind-icon">touch</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="rdfstore.html#workavailable" class="tsd-kind-icon">work<wbr>Available</a></li>
 						</ul>
 					</section>
@@ -1095,7 +1099,7 @@ img { max-width: 100%; }
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="changetimestamps" class="tsd-anchor"></a>
 				<h3>change<wbr>Timestamps</h3>
-				<div class="tsd-signature tsd-kind-icon">change<wbr>Timestamps<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
+				<div class="tsd-signature tsd-kind-icon">change<wbr>Timestamps<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Uint32Array</span><span class="tsd-signature-symbol"> =&nbsp;new Uint32Array(0x100000)</span></div>
 				<aside class="tsd-sources">
 					<ul>
 						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/ae0c2a1/src/RDFStore.ts#L31">RDFStore.ts:31</a></li>
@@ -1585,6 +1589,29 @@ img { max-width: 100%; }
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="touch" class="tsd-anchor"></a>
+				<h3>touch</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">touch<span class="tsd-signature-symbol">(</span>iri<span class="tsd-signature-symbol">: </span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/ae0c2a1/src/RDFStore.ts#L238">RDFStore.ts:238</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>iri: <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 				<a name="workavailable" class="tsd-anchor"></a>
 				<h3>work<wbr>Available</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -1594,7 +1621,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/ae0c2a1/src/RDFStore.ts#L238">RDFStore.ts:238</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/ae0c2a1/src/RDFStore.ts#L244">RDFStore.ts:244</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
