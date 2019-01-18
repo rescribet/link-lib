@@ -28,10 +28,14 @@ export function patchRDFLibSerializer(serializer: Serializer, fallback: string):
  */
 export function patchRDFLibStoreWithOverrides(graph: IndexedFormula, changeBufferTarget: ChangeBuffer): IndexedFormula {
     // Don't try this at home, kids!
-    graph.statements.push = (elem: any): number => {
-        changeBufferTarget.changeBuffer[changeBufferTarget.changeBufferCount] = elem;
-        changeBufferTarget.changeBufferCount++;
-        return Array.prototype.push.call(graph.statements, elem);
+    graph.statements.push = (...elems: any): number => {
+        let elem;
+        for (let i = 0, len = elems.length; i < len; i++) {
+            elem = elems[i];
+            changeBufferTarget.changeBuffer[changeBufferTarget.changeBufferCount] = elem;
+            changeBufferTarget.changeBufferCount++;
+        }
+        return Array.prototype.push.call(graph.statements, ...elems);
     };
 
     graph.statements.splice = (index: any, len: any): Statement[] => {
