@@ -96,15 +96,15 @@ describe("ProcessBroadcast", () => {
                     expect(bulk2).not.toHaveBeenCalled();
                 });
 
-                it("calls the processors on run", () => {
-                    processor.run();
+                it("calls the processors on run", async () => {
+                    await processor.run();
 
                     expect(bulk1).toHaveBeenCalledTimes(1);
                     expect(bulk2).toHaveBeenCalledTimes(1);
                 });
 
-                it("is done after run", () => {
-                    processor.run();
+                it("is done after run", async () => {
+                    await processor.run();
                     expect(processor.done()).toBeTruthy();
                 });
             });
@@ -169,8 +169,8 @@ describe("ProcessBroadcast", () => {
                 expect(r5).not.toHaveBeenCalled();
             });
 
-            it("calls the processors on run", () => {
-                processor.run();
+            it("calls the processors on run", async () => {
+                await processor.run();
 
                 expect(st).toHaveBeenCalledTimes(1);
                 expect(stb).toHaveBeenCalledTimes(1);
@@ -181,8 +181,8 @@ describe("ProcessBroadcast", () => {
                 expect(r5).toHaveBeenCalledTimes(1);
             });
 
-            it("is done after run", () => {
-                processor.run();
+            it("is done after run", async () => {
+                await processor.run();
                 expect(processor.done()).toBeTruthy();
             });
         });
@@ -241,8 +241,8 @@ describe("ProcessBroadcast", () => {
                 expect(r6).not.toHaveBeenCalled();
             });
 
-            it("calls the processors on run", () => {
-                processor.run();
+            it("calls the processors on run", async () => {
+                await processor.run();
 
                 expect(bulk1).toHaveBeenCalledTimes(1);
                 expect(bulk2).toHaveBeenCalledTimes(1);
@@ -257,8 +257,8 @@ describe("ProcessBroadcast", () => {
                 expect(r6).not.toHaveBeenCalled();
             });
 
-            it("is done after run", () => {
-                processor.run();
+            it("is done after run", async () => {
+                await processor.run();
                 expect(processor.done()).toBeTruthy();
             });
         });

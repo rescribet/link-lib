@@ -29,12 +29,14 @@ export class ProcessBroadcast {
     public readonly subjectLength: number;
 
     private readonly bulkSubscriptions: ReadonlyArray<SubscriptionRegistrationBase<unknown>>;
-    private readonly isSplit: boolean;
+    private readonly hasIdleCallback: boolean;
+    private readonly hasRequestAnimationFrame: boolean;
     private subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>>;
     /** Every statement to be processed. */
     private readonly work: ReadonlyArray<Statement>;
     private _subjectWork: SomeNode[] | undefined;
     private bulkLoc: number = 0;
+    private resolve: () => void;
     private subjLoc: number = 0;
     private subjSubLoc: number = 0;
     private readonly timeout: number;
@@ -42,12 +44,14 @@ export class ProcessBroadcast {
     constructor(opts: ProcessBroadcastOpts) {
         this.bulkSubscriptions = Object.freeze(opts.bulkSubscriptions);
         this.bulkLength = this.bulkSubscriptions.length;
+        this.resolve = (): void => undefined;
         this.subjectSubscriptions = opts.subjectSubscriptions;
         this.subjectLength = this.subjectSubscriptions.size;
-        this.isSplit = "requestIdleCallback" in window;
+        this.hasIdleCallback = "requestIdleCallback" in window;
+        this.hasRequestAnimationFrame = "requestAnimationFrame" in window;
         this.timeout = opts.timeout;
         this.work = Object.freeze(opts.work);
-        this.process = this.process.bind(this);
+        this.queue = this.queue.bind(this);
     }
 
     public done(): boolean {
@@ -57,18 +61,25 @@ export class ProcessBroadcast {
         if (this.subjectLength === 0) {
             return this.bulkLoc >= this.bulkLength;
         }
+        if (this.bulkLoc < this.bulkLength) {
+            return false;
+        }
 
         const subLocItem = this.subjectSubscriptions.get(this.subjectWork[this.subjLoc]);
 
         return !subLocItem;
     }
 
-    public run(): void {
-        if (this.done()) {
-            return;
+    public run(): Promise <void> {
+        if (this.timeout === 0) {
+            this.queue();
+            return Promise.resolve();
         }
 
-        this.queue();
+        return new Promise((resolve): void => {
+            this.resolve = resolve;
+            this.queue();
+        });
     }
 
     /**
@@ -86,18 +97,12 @@ export class ProcessBroadcast {
         }
     }
 
-    private process(idleCallback?: IdleDeadline): void {
+    private process(): void {
         if (this.bulkLoc < this.bulkLength) {
             this.processBulkItem();
         } else if (this.subjLoc < this.subjectLength) {
             this.processSubjectItem();
         }
-
-        if (this.done()) {
-            return;
-        }
-
-        this.queue(idleCallback);
     }
 
     private processBulkItem(): void {
@@ -121,11 +126,37 @@ export class ProcessBroadcast {
         }
     }
 
-    private queue(idleCallback?: IdleDeadline): void {
-        if (!this.isSplit || idleCallback && (idleCallback.timeRemaining() > 0 || idleCallback.didTimeout)) {
-            this.process(idleCallback);
+    private queue(idleCallback?: IdleDeadline | number): void {
+        if (this.timeout !== 0 && this.hasIdleCallback) {
+            while (typeof idleCallback === "object"
+                && (!this.done() && (idleCallback.timeRemaining() > 0 || idleCallback.didTimeout))) {
+                this.process();
+            }
+
+            if (this.done()) {
+                return this.resolve();
+            }
+
+            window.requestIdleCallback(this.queue, {timeout: this.timeout});
+        } else if (this.timeout !== 0 && this.hasRequestAnimationFrame) {
+            this.process();
+            while (typeof idleCallback === "number" && (performance.now() - idleCallback) < 33) {
+                this.process();
+            }
+
+            if (this.done()) {
+                return this.resolve();
+            }
+
+            window.requestAnimationFrame(this.queue);
         } else {
-            window.requestIdleCallback(this.process, {timeout: this.timeout});
+            while (!this.done()) {
+                this.process();
+            }
+
+            if (this.done()) {
+                this.resolve();
+            }
         }
     }
 

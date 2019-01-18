@@ -57,6 +57,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private api: LinkedDataAPI;
     private bulkFetch: boolean = false;
     private cleanupTimer: number | undefined;
+    private currentBroadcast: Promise<void> | undefined;
     private deltaProcessors: DeltaProcessor[];
     private mapping: ComponentStore<T>;
     private schema: Schema;
@@ -313,9 +314,9 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.api.getStatus(iri);
     }
 
-    public processDelta(delta: Statement[], expedite = false): void {
+    public processDelta(delta: Statement[], expedite = false): Promise<void> | undefined {
         this.deltaProcessors.map((dp) => dp.processDelta(delta));
-        this.broadcast(expedite, expedite ? 100 : 500);
+        return this.broadcast(!expedite, expedite ? 0 : 500);
     }
 
     /**
@@ -447,9 +448,15 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * Broadcasts buffered to all subscribers.
      * The actual broadcast might be executed asynchronously to prevent lag.
      *
+     * @param buffer Controls whether processing can be delayed until enough is available.
+     * @param maxTimeout Set to 0 to execute immediately.
      * Note: This should only be used by render-libraries (e.g. link-redux), not by application code.
      */
-    private broadcast(buffer = true, maxTimeout = 1000): void {
+    private broadcast(buffer = true, maxTimeout = 1000): Promise<void> | undefined {
+        if (maxTimeout !== 0 && this.currentBroadcast || this.broadcastHandle) {
+            return this.currentBroadcast;
+        }
+
         if (buffer) {
             if (this.store.workAvailable() < 100) {
                 if (this.broadcastHandle) {
@@ -457,10 +464,16 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 }
                 if (this.lastPostponed === undefined) {
                     this.lastPostponed = Date.now();
-                    this.broadcastHandle = window.setTimeout(this.broadcast, 200);
+                    this.broadcastHandle = window.setTimeout(() => {
+                        this.broadcastHandle = undefined;
+                        this.broadcast();
+                    }, 200);
                     return;
                 } else if (Date.now() - this.lastPostponed <= maxTimeout) {
-                    this.broadcastHandle = window.setTimeout(this.broadcast, 200);
+                    this.broadcastHandle = window.setTimeout(() => {
+                        this.broadcastHandle = undefined;
+                        this.broadcast();
+                    }, 200);
                     return;
                 }
             }
@@ -471,12 +484,18 @@ export class LinkedRenderStore<T> implements Dispatcher {
             return;
         }
 
-        new ProcessBroadcast({
+        return this.currentBroadcast = new ProcessBroadcast({
             bulkSubscriptions: this.bulkSubscriptions.slice(),
             subjectSubscriptions: this.subjectSubscriptions,
             timeout: maxTimeout,
             work: this.store.flush(),
-        }).run();
+        }).run()
+          .then(() => {
+              this.currentBroadcast = undefined;
+              if (this.store.workAvailable() > 0) {
+                  this.broadcast();
+              }
+          });
     }
 
     private markForCleanup(): void {
@@ -524,7 +543,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         if (this.bulkFetch) {
             this.api
                 .getEntities(queue)
-                .then(() => this.broadcast(false));
+                .then(() => this.broadcast());
         } else {
             for (let i = 0; i < queue.length; i++) {
                 const [iri, opts] = queue[i];

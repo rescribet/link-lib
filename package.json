@@ -44,7 +44,7 @@
     "jest": "^23.6.0",
     "jest-fetch-mock": "^1.7.5",
     "n-quads-parser": "^1.2.0",
-    "rdflib": "npm:link-rdflib@0.19.1-20190116T143208",
+    "rdflib": "npm:link-rdflib@0.19.1-20190122T104813",
     "rollup": "^0.67.3",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-node-resolve": "^3.4.0",
