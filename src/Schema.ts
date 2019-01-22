@@ -67,7 +67,7 @@ export class Schema extends IndexedFormula {
     }
 
     public isInstanceOf(resource: number, superClass: number): boolean {
-        return this.holdsStatement(new Statement(
+        return this.holdsStatement(Statement.from(
             NamedNode.findByStoreIndex(resource)!,
             NS.rdf("type"),
             NamedNode.findByStoreIndex(superClass)!,

@@ -1,6 +1,7 @@
 import {
     FetchOpts as RDFFetchOpts,
     NamedNode,
+    Quadruple,
     SomeTerm,
     Statement,
 } from "rdflib";
@@ -131,7 +132,6 @@ export class LinkedRenderStore<T> implements Dispatcher {
             .api
             .execActionByIRI(subject, preparedData)
             .then((res: LinkedActionResponse) => {
-                this.store.processDelta(res.data);
                 this.broadcast(false, 100);
                 return res;
             });
@@ -248,11 +248,10 @@ export class LinkedRenderStore<T> implements Dispatcher {
             apiOpts.clearPreviousData = true;
             preExistingData = this.tryEntity(iri);
         }
-        const data = await this.api.getEntity(iri, apiOpts);
         if (preExistingData !== undefined) {
             this.store.removeStatements(preExistingData);
         }
-        this.store.processDelta(data);
+        await this.api.getEntity(iri, apiOpts);
         this.broadcast();
     }
 
@@ -300,7 +299,6 @@ export class LinkedRenderStore<T> implements Dispatcher {
             return emptyRequest as EmptyRequestStatus;
         }
 
-        // TODO: Add queueing API to the data api
         if (this.resourceQueue.find(([resource]) => resource === iri)) {
             return {
                 lastRequested: new Date(),
@@ -314,9 +312,15 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.api.getStatus(iri);
     }
 
-    public processDelta(delta: Statement[], expedite = false): Promise<void> | undefined {
-        this.deltaProcessors.map((dp) => dp.processDelta(delta));
-        return this.broadcast(!expedite, expedite ? 0 : 500);
+    public processDelta(delta: Quadruple[] | Statement[], expedite = false): Promise<Statement[]> {
+        const quadArr = delta[0] instanceof Statement
+            ? (delta as Statement[]).map((s: Statement) => s.toQuad())
+            : delta as Quadruple[];
+        const statements = this.deltaProcessors
+            .reduce((acc: Statement[], dp: DeltaProcessor) => acc.concat(dp.processDelta(quadArr)), []);
+
+        return this.broadcast(!expedite, expedite ? 0 : 500)
+            .then(() => statements);
     }
 
     /**
@@ -452,9 +456,9 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param maxTimeout Set to 0 to execute immediately.
      * Note: This should only be used by render-libraries (e.g. link-redux), not by application code.
      */
-    private broadcast(buffer = true, maxTimeout = 1000): Promise<void> | undefined {
+    private broadcast(buffer = true, maxTimeout = 1000): Promise<void> {
         if (maxTimeout !== 0 && this.currentBroadcast || this.broadcastHandle) {
-            return this.currentBroadcast;
+            return this.currentBroadcast || Promise.resolve();
         }
 
         if (buffer) {
@@ -468,20 +472,22 @@ export class LinkedRenderStore<T> implements Dispatcher {
                         this.broadcastHandle = undefined;
                         this.broadcast();
                     }, 200);
-                    return;
+
+                    return this.currentBroadcast || Promise.resolve();
                 } else if (Date.now() - this.lastPostponed <= maxTimeout) {
                     this.broadcastHandle = window.setTimeout(() => {
                         this.broadcastHandle = undefined;
                         this.broadcast();
                     }, 200);
-                    return;
+
+                    return this.currentBroadcast || Promise.resolve();
                 }
             }
             this.lastPostponed = undefined;
             this.broadcastHandle = undefined;
         }
         if (this.store.workAvailable() === 0) {
-            return;
+            return Promise.resolve();
         }
 
         return this.currentBroadcast = new ProcessBroadcast({

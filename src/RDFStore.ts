@@ -1,3 +1,4 @@
+import { Quadruple } from "n-quads-parser";
 import {
     Formula,
     graph,
@@ -40,13 +41,13 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     private store: IndexedFormula = graph();
 
     constructor() {
-        this.addGraphIRIS = [NS.ll("add").value];
+        this.addGraphIRIS = [NS.ll("add")];
         this.replaceGraphIRIS = [
             undefined,
-            NS.ll("replace").value,
-            NamedNode.fromValue("chrome:theSession").value,
+            NS.ll("replace"),
+            this.store.defaultGraphIRI,
         ];
-        this.removeGraphIRIS = [NS.ll("remove").value];
+        this.removeGraphIRIS = [NS.ll("remove")];
         this.processDelta = this.processDelta.bind(this);
 
         const g = graph();
@@ -67,6 +68,15 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         for (let i = 0, len = data.length; i < len; i++) {
             this.store.addStatement(data[i]);
         }
+    }
+
+    public addQuads(data: Quadruple[]): Statement[] {
+        const statements = new Array(data.length);
+        for (let i = 0, len = data.length; i < len; i++) {
+            statements[i] = this.store.add(data[i][0], data[i][1], data[i][2]);
+        }
+
+        return statements;
     }
 
     public any(subj: OptionalNode, pred?: OptionalNode, obj?: OptionalNode, why?: OptionalNode): SomeTerm | undefined {
@@ -124,19 +134,19 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return this.store.match(subj, pred, obj, why) || [];
     }
 
-    public processDelta(delta: Statement[]): void {
-        const addables = delta.filter((s) => this.addGraphIRIS.includes(s.why.value));
-        const replacables = delta.filter((s) => this.replaceGraphIRIS.includes(s.why.value));
+    public processDelta(delta: Quadruple[]): Statement[] {
+        const addables = delta.filter(([, , , why]) => this.addGraphIRIS.includes(why));
+        const replacables = delta.filter(([, , , why]) => this.replaceGraphIRIS.includes(why));
         const removables = delta
-            .filter((s) => this.removeGraphIRIS.includes(s.why.value))
-            .reduce((tot: Statement[], cur) => {
-                const matches = this.store.match(cur.subject, cur.predicate, null, null);
+            .filter(([, , , why]) => this.removeGraphIRIS.includes(why))
+            .reduce((tot: Statement[], [subject, predicate]) => {
+                const matches = this.store.match(subject, predicate, null, null);
 
                 return tot.concat(matches);
             }, []);
         this.removeStatements(removables);
-        this.replaceMatches(replacables);
-        this.addStatements(addables);
+
+        return this.replaceMatches(replacables).concat(this.addQuads(addables));
     }
 
     public removeStatements(statements: Statement[]): void {
@@ -172,18 +182,21 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return this.addStatements(replacement);
     }
 
-    public replaceMatches(statements: Statement[]): void {
+    public replaceMatches(statements: Quadruple[]): Statement[] {
         for (let i = 0; i < statements.length; i++) {
             this.removeStatements(this.match(
-                statements[i].subject,
-                statements[i].predicate,
+                statements[i][0],
+                statements[i][1],
                 undefined,
                 undefined,
             ));
         }
+        const matches = new Array(statements.length);
         for (let i = 0, len = statements.length; i < len; i++) {
-            this.store.addStatement(statements[i]);
+            matches[i] = this.store.add(statements[i][0], statements[i][1], statements[i][2]);
         }
+
+        return matches;
     }
 
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Statement[] {

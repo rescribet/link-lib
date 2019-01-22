@@ -2,6 +2,7 @@ import "jest";
 import {
     IndexedFormula,
     Literal,
+    Quadruple,
     Statement,
 } from "rdflib";
 
@@ -58,15 +59,15 @@ describe("RDFStore", () => {
             const store = new RDFStore();
             store.addStatements(thingStatements);
 
-            const statements = [
-                new Statement(schemaT, NS.rdfs("label"), new Literal("Thing!"), NS.ll("replace")),
+            const quads: Quadruple[] = [
+                [schemaT, NS.rdfs("label"), new Literal("Thing!"), NS.ll("replace")],
             ];
 
             const before = store.match(schemaT, NS.rdfs("label"));
             expect(before).toHaveLength(1);
             expect(before[0].object).toEqual(new Literal("Thing."));
 
-            store.replaceMatches(statements);
+            store.replaceMatches(quads);
 
             const after = store.match(schemaT, NS.rdfs("label"));
             expect(after).toHaveLength(1);
@@ -82,8 +83,8 @@ describe("RDFStore", () => {
 
                 expect(store.match(null)).toHaveLength(thingStatements.length);
 
-                const statements = [
-                    new Statement(schemaT, NS.rdfs("label"), new Literal("irrelevant"), NS.ll("remove")),
+                const statements: Quadruple[] = [
+                    [schemaT, NS.rdfs("label"), new Literal("irrelevant"), NS.ll("remove")],
                 ];
 
                 store.processDelta(statements);
@@ -99,11 +100,11 @@ describe("RDFStore", () => {
 
                 expect(store.match(null)).toHaveLength(thingStatements.length + 1);
 
-                const statements = [
-                    new Statement(schemaT, NS.rdfs("label"), new Literal("irrelevant"), NS.ll("remove")),
+                const quads: Quadruple[] = [
+                    [schemaT, NS.rdfs("label"), new Literal("irrelevant"), NS.ll("remove")],
                 ];
 
-                store.processDelta(statements);
+                store.processDelta(quads);
 
                 expect(store.match(null)).toHaveLength(thingStatements.length - 1);
                 expect(store.match(schemaT, NS.rdfs("label"))).toHaveLength(0);

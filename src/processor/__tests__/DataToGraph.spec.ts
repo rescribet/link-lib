@@ -134,7 +134,7 @@ describe("DataToGraph", () => {
             expect(stmt!.predicate).toEqual(defaultNS.example("property"));
             expect(stmt!.object.termType).toEqual("BlankNode");
 
-            const match = new Statement(
+            const match = Statement.from(
                 (stmt!.object as BlankNode),
                 defaultNS.schema("name"),
                 Literal.fromValue("Some string"),

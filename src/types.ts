@@ -1,3 +1,4 @@
+import { Quadruple } from "n-quads-parser";
 import {
     BlankNode,
     Fetcher,
@@ -74,7 +75,7 @@ export interface LinkedRenderStoreOptions<T> {
 }
 
 export interface DeltaProcessor {
-    processDelta: (delta: Statement[]) => void;
+    processDelta: (delta: Quadruple[]) => Statement[];
 }
 
 export interface Dispatcher {

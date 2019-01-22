@@ -1,4 +1,4 @@
-import { NQuadsParser, Quadruple } from "n-quads-parser";
+import { NQuadsParser } from "n-quads-parser";
 import { Statement } from "rdflib";
 import { LinkedRenderStore } from "../LinkedRenderStore";
 import { ResponseAndFallbacks, ResponseTransformer } from "../types";
@@ -23,13 +23,8 @@ export function linkedDeltaProcessor(lrs: LinkedRenderStore<any>): ResponseTrans
         }
 
         const parser = new NQuadsParser((lrs as any).store.getInternalStore());
-        const quads: Array<Quadruple | Statement> = parser.parseString(data);
-        for (let i = 0, len = quads.length; i < len; i++) {
-            quads[i] = Statement.from(...quads[i] as Quadruple);
-        }
+        const quads = parser.parseString(data);
 
-        lrs.processDelta(quads as Statement[]);
-
-        return quads as Statement[];
+        return lrs.processDelta(quads);
     };
 }

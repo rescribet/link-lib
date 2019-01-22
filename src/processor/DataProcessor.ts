@@ -10,12 +10,13 @@ import {
     IndexedFormula,
     Literal,
     NamedNode,
+    Quadruple,
     Serializer,
     Statement,
     uri as Uri,
 } from "rdflib";
-import { LinkedDataAPI } from "../LinkedDataAPI";
 
+import { LinkedDataAPI } from "../LinkedDataAPI";
 import { RDFStore } from "../RDFStore";
 import {
     DataProcessorOpts,
@@ -104,7 +105,7 @@ function pushToMap<T>(map: { [key: string]: T[] }, k: string, v: T): void {
  */
 function processResponse(iri: string | NamedNode, res: Response): Statement[] {
     const rawURL = getURL(res);
-    const origin = iri instanceof NamedNode ? iri.site() : new URL(rawURL).origin;
+    const origin = iri instanceof NamedNode ? iri.site() : NamedNode.find(new URL(rawURL).origin);
     if (rawURL && iri !== rawURL) {
         return [
             new Statement(
@@ -215,7 +216,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         await (this.store.statementsFor(subject).length > 0
             ? Promise.resolve([])
-            : this.getEntity(subject).then(this.store.processDelta));
+            : this.getEntity(subject));
 
         const object = this.store.getResourceProperty(subject, defaultNS.schema("object"));
         if (!object || object.termType !== "BlankNode" && object.termType !== "NamedNode") {
@@ -340,10 +341,9 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             .catch((err) => {
                 const status = Literal.fromNumber(err.status);
                 const delta = resources
-                    .map(([s]) => Statement.from(s, defaultNS.http("statusCode"), status, defaultNS.ll("meta")));
-                this.processDelta(delta);
+                    .map(([s]) => [s, defaultNS.http("statusCode"), status, defaultNS.ll("meta")] as Quadruple);
 
-                return delta;
+                return this.processDelta(delta);
             });
     }
 
@@ -362,16 +362,26 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             return this.requestMap.get(requestIRI) || [];
         }
 
+        let preExistingData: Statement[] = [];
+        if (opts && opts.clearPreviousData) {
+            preExistingData = this.store.statementsFor(iri);
+            preExistingData = preExistingData.concat(this.store.statementsFor(requestIRI));
+        }
+
         try {
             const req = this
                 .fetchResource(requestIRI, opts)
-                .then(this.feedResponse); // TODO: feedResponse might only be necessary for non-rdflib fetcher requests.
+                .then((res) => {
+                    this.store.removeStatements(preExistingData);
+                    return this.feedResponse(res);
+                }); // TODO: feedResponse might only be necessary for non-rdflib fetcher requests.
             this.requestMap.set(requestIRI, req);
             return await req;
         } catch (e) {
             if (typeof e.res === "undefined") {
                 throw e;
             }
+            this.store.removeStatements(preExistingData);
             const responseQuads = processResponse(iri, e.res);
             this.store.addStatements(responseQuads);
 
@@ -465,19 +475,21 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             .then(this.feedResponse);
     }
 
-    public processDelta(delta: Statement[]): void {
-        let s: Statement;
+    public processDelta(delta: Quadruple[]): Statement[] {
+        let s: Quadruple;
         for (let i = 0, len = delta.length; i < len; i++) {
             s = delta[i];
 
-            if (s.why !== defaultNS.ll("meta")) {
+            if (s[3] !== defaultNS.ll("meta")) {
                 continue;
             }
 
-            if (s.predicate === defaultNS.http("statusCode")) {
-                this.setStatus(s.subject as NamedNode, Number.parseInt(s.object.value, 10));
+            if (s[1] === defaultNS.http("statusCode")) {
+                this.setStatus(s[0] as NamedNode, Number.parseInt(s[2].value, 10));
             }
         }
+
+        return [];
     }
 
     /** Register a transformer so it can be used to interact with API's. */
