@@ -90,10 +90,11 @@ export class ProcessBroadcast {
         if (reg.markedForDelete) {
             return;
         }
+        reg.lastUpdateAt = Date.now();
         if (reg.onlySubjects) {
-            reg.callback(this.subjectWork);
+            reg.callback(this.subjectWork, reg.lastUpdateAt);
         } else {
-            reg.callback(this.work);
+            reg.callback(this.work, reg.lastUpdateAt);
         }
     }
 
@@ -154,9 +155,7 @@ export class ProcessBroadcast {
                 this.process();
             }
 
-            if (this.done()) {
-                this.resolve();
-            }
+            this.resolve();
         }
     }
 

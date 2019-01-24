@@ -10,10 +10,7 @@ const MSG_TYPE_ERR = "Non-optimized NamedNode instance given. Please memoize you
 export const RENDER_CLASS_NAME: NamedNode = defaultNS.ll("typeRenderClass");
 
 function convertToCacheKey(types: number[], props: number[], topology: number): string {
-    const sType = types.map((t) => t).join();
-    return (props.length > 1)
-        ? `${sType}[${props.map((p) => p).join()}][${topology}]`
-        : `${sType}[${props[0]}][${topology}]`;
+    return `${types.join()}[${props.join()}][${topology}]`;
 }
 
 /**

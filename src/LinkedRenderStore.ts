@@ -52,6 +52,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
     /** Whenever a resource has no type, assume it to be this. */
     public defaultType: NamedNode = defaultNS.schema("Thing");
+    public deltaProcessors: DeltaProcessor[];
     public namespaces: NamespaceMap = {...defaultNS};
 
     private _dispatch?: MiddlewareActionHandler;
@@ -59,7 +60,6 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private bulkFetch: boolean = false;
     private cleanupTimer: number | undefined;
     private currentBroadcast: Promise<void> | undefined;
-    private deltaProcessors: DeltaProcessor[];
     private mapping: ComponentStore<T>;
     private schema: Schema;
     private store: RDFStore = new RDFStore();
@@ -399,23 +399,19 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @return function Unsubscription function.
      */
     public subscribe(registration: SubscriptionRegistrationBase<unknown>): () => void {
-        const givenCallback = registration.callback;
-        registration.callback = (data: any): void => {
-            registration.lastUpdateAt = Date.now();
-            givenCallback(data, registration.lastUpdateAt);
-        };
         registration.subscribedAt = Date.now();
         const subjectFilter = registration.subjectFilter;
 
         if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {
-            subjectFilter.forEach((s) => {
-                const subjectRegistrations = this.subjectSubscriptions.get(s);
+            let subjectRegistrations;
+            for (let i = 0, len = subjectFilter.length; i < len; i++) {
+                subjectRegistrations = this.subjectSubscriptions.get(subjectFilter[i]);
                 if (!subjectRegistrations) {
-                    this.subjectSubscriptions.set(s, [registration]);
+                    this.subjectSubscriptions.set(subjectFilter[i], [registration]);
                 } else {
                     subjectRegistrations.push(registration);
                 }
-            });
+            }
 
             return (): void => {
                 registration.markedForDelete = true;
@@ -470,14 +466,14 @@ export class LinkedRenderStore<T> implements Dispatcher {
                     this.lastPostponed = Date.now();
                     this.broadcastHandle = window.setTimeout(() => {
                         this.broadcastHandle = undefined;
-                        this.broadcast();
+                        this.broadcast(buffer, maxTimeout);
                     }, 200);
 
                     return this.currentBroadcast || Promise.resolve();
                 } else if (Date.now() - this.lastPostponed <= maxTimeout) {
                     this.broadcastHandle = window.setTimeout(() => {
                         this.broadcastHandle = undefined;
-                        this.broadcast();
+                        this.broadcast(buffer, maxTimeout);
                     }, 200);
 
                     return this.currentBroadcast || Promise.resolve();
@@ -530,9 +526,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
     private scheduleResourceQueue(): void {
         if (this.resourceQueueHandle) {
-            typeof window.requestIdleCallback !== "undefined"
-                ? window.cancelIdleCallback(this.resourceQueueHandle)
-                : window.clearTimeout(this.resourceQueueHandle);
+            return;
         }
 
         if (typeof window.requestIdleCallback !== "undefined") {
@@ -543,6 +537,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     }
 
     private processResourceQueue(): void {
+        this.resourceQueueHandle = undefined;
         const queue = this.resourceQueue;
         this.resourceQueue = [];
 

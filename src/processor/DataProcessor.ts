@@ -275,7 +275,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             throw new ProcessorError(MSG_BAD_REQUEST, resp);
         }
 
-        const statements = await this.feedResponse(resp);
+        const statements = await this.feedResponse(resp, true);
 
         const location = getHeader(resp, "Location");
         const fqLocation = location && Uri.join(location, window.location.origin);
@@ -339,6 +339,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return fetch(url.toString(), opts)
             .then(this.feedResponse)
             .catch((err) => {
+                if (err instanceof Error) {
+                    throw err;
+                }
+
                 const status = Literal.fromNumber(err.status);
                 const delta = resources
                     .map(([s]) => [s, defaultNS.http("statusCode"), status, defaultNS.ll("meta")] as Quadruple);
@@ -507,7 +511,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this.accept[new URL(origin).origin] = acceptValue;
     }
 
-    private feedResponse(res: ResponseAndFallbacks): Promise<Statement[]> {
+    private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Statement[]> {
         if (res.status >= INTERNAL_SERVER_ERROR) {
             return Promise.reject(res);
         }
@@ -518,6 +522,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         if (processor === undefined) {
             return Promise.resolve([]);
         }
+
+        (res as any).expedite = expedite;
 
         return processor(res);
     }
