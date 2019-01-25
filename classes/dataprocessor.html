@@ -932,6 +932,9 @@ img { max-width: 100%; }
 					<a href="dataprocessor.html#fetchableurlfromiri" class="tsd-kind-icon">fetchableURLFromIRI</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="dataprocessor.html#flush" class="tsd-kind-icon">flush</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="dataprocessor.html#getentities" class="tsd-kind-icon">get<wbr>Entities</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -945,6 +948,9 @@ img { max-width: 100%; }
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="dataprocessor.html#processexternalresponse" class="tsd-kind-icon">process<wbr>External<wbr>Response</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="dataprocessor.html#queuedelta" class="tsd-kind-icon">queue<wbr>Delta</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-class">
 					<a href="dataprocessor.html#registertransformer" class="tsd-kind-icon">register<wbr>Transformer</a>
@@ -1002,11 +1008,13 @@ img { max-width: 100%; }
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#execactionbyiri" class="tsd-kind-icon">exec<wbr>Action<wbr>ByIRI</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#fetchresource" class="tsd-kind-icon">fetch<wbr>Resource</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#fetchableurlfromiri" class="tsd-kind-icon">fetchableURLFromIRI</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#flush" class="tsd-kind-icon">flush</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#getentities" class="tsd-kind-icon">get<wbr>Entities</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#getentity" class="tsd-kind-icon">get<wbr>Entity</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#getstatus" class="tsd-kind-icon">get<wbr>Status</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#processdelta" class="tsd-kind-icon">process<wbr>Delta</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#processexternalresponse" class="tsd-kind-icon">process<wbr>External<wbr>Response</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#queuedelta" class="tsd-kind-icon">queue<wbr>Delta</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#registertransformer" class="tsd-kind-icon">register<wbr>Transformer</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-class"><a href="dataprocessor.html#setacceptforhost" class="tsd-kind-icon">set<wbr>Accept<wbr>For<wbr>Host</a></li>
 						</ul>
@@ -1026,7 +1034,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L181">processor/DataProcessor.ts:181</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L182">processor/DataProcessor.ts:182</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1048,7 +1056,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L148">processor/DataProcessor.ts:148</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L148">processor/DataProcessor.ts:148</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -1066,7 +1074,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">timeout<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;30000</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L149">processor/DataProcessor.ts:149</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L149">processor/DataProcessor.ts:149</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1080,8 +1088,8 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Implementation of <a href="../interfaces/linkeddataapi.html">LinkedDataAPI</a>.<a href="../interfaces/linkeddataapi.html#dispatch">dispatch</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L201">processor/DataProcessor.ts:201</a></li>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L209">processor/DataProcessor.ts:209</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L202">processor/DataProcessor.ts:202</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L210">processor/DataProcessor.ts:210</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1099,7 +1107,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/linkeddataapi.html">LinkedDataAPI</a>.<a href="../interfaces/linkeddataapi.html#execactionbyiri">execActionByIRI</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L213">processor/DataProcessor.ts:213</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L214">processor/DataProcessor.ts:214</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1125,7 +1133,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L294">processor/DataProcessor.ts:294</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L295">processor/DataProcessor.ts:295</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1151,7 +1159,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L290">processor/DataProcessor.ts:290</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L291">processor/DataProcessor.ts:291</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1161,6 +1169,23 @@ img { max-width: 100%; }
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">NamedNode</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="flush" class="tsd-anchor"></a>
+				<h3>flush</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">flush<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L328">processor/DataProcessor.ts:328</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1175,7 +1200,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/linkeddataapi.html">LinkedDataAPI</a>.<a href="../interfaces/linkeddataapi.html#getentities">getEntities</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L327">processor/DataProcessor.ts:327</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L337">processor/DataProcessor.ts:337</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1199,7 +1224,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/linkeddataapi.html">LinkedDataAPI</a>.<a href="../interfaces/linkeddataapi.html#getentity">getEntity</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L361">processor/DataProcessor.ts:361</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L371">processor/DataProcessor.ts:371</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1241,7 +1266,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L401">processor/DataProcessor.ts:401</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L411">processor/DataProcessor.ts:411</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1274,7 +1299,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L482">processor/DataProcessor.ts:482</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L492">processor/DataProcessor.ts:492</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1297,7 +1322,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L477">processor/DataProcessor.ts:477</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L487">processor/DataProcessor.ts:487</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1307,6 +1332,29 @@ img { max-width: 100%; }
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="queuedelta" class="tsd-anchor"></a>
+				<h3>queue<wbr>Delta</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">queue<wbr>Delta<span class="tsd-signature-symbol">(</span>delta<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quadruple</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L520">processor/DataProcessor.ts:520</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>delta: <span class="tsd-signature-type">Quadruple</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1321,7 +1369,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/linkeddataapi.html">LinkedDataAPI</a>.<a href="../interfaces/linkeddataapi.html#registertransformer">registerTransformer</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L500">processor/DataProcessor.ts:500</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L510">processor/DataProcessor.ts:510</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1356,7 +1404,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/linkeddataapi.html">LinkedDataAPI</a>.<a href="../interfaces/linkeddataapi.html#setacceptforhost">setAcceptForHost</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/processor/DataProcessor.ts#L510">processor/DataProcessor.ts:510</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/processor/DataProcessor.ts#L524">processor/DataProcessor.ts:524</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>

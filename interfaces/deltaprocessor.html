@@ -911,7 +911,13 @@ img { max-width: 100%; }
 			<a href="deltaprocessor.html" class="tsd-kind-icon">Delta<wbr>Processor</a>
 			<ul>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="deltaprocessor.html#flush" class="tsd-kind-icon">flush</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="deltaprocessor.html#processdelta" class="tsd-kind-icon">process<wbr>Delta</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="deltaprocessor.html#queuedelta" class="tsd-kind-icon">queue<wbr>Delta</a>
 				</li>
 			</ul>
 		</li>
@@ -946,7 +952,9 @@ img { max-width: 100%; }
 					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="deltaprocessor.html#flush" class="tsd-kind-icon">flush</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="deltaprocessor.html#processdelta" class="tsd-kind-icon">process<wbr>Delta</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="deltaprocessor.html#queuedelta" class="tsd-kind-icon">queue<wbr>Delta</a></li>
 						</ul>
 					</section>
 				</div>
@@ -955,12 +963,37 @@ img { max-width: 100%; }
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Properties</h2>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="flush" class="tsd-anchor"></a>
+				<h3>flush</h3>
+				<div class="tsd-signature tsd-kind-icon">flush<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/types.ts#L79">types.ts:79</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-type-declaration">
+					<h4>Type declaration</h4>
+					<ul class="tsd-parameters">
+						<li class="tsd-parameter-siganture">
+							<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></h4>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 				<a name="processdelta" class="tsd-anchor"></a>
 				<h3>process<wbr>Delta</h3>
 				<div class="tsd-signature tsd-kind-icon">process<wbr>Delta<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/70a40d3/src/types.ts#L78">types.ts:78</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/types.ts#L80">types.ts:80</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -979,6 +1012,37 @@ img { max-width: 100%; }
 										</li>
 									</ul>
 									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Statement</span><span class="tsd-signature-symbol">[]</span></h4>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="queuedelta" class="tsd-anchor"></a>
+				<h3>queue<wbr>Delta</h3>
+				<div class="tsd-signature tsd-kind-icon">queue<wbr>Delta<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/29c6d9e/src/types.ts#L78">types.ts:78</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-type-declaration">
+					<h4>Type declaration</h4>
+					<ul class="tsd-parameters">
+						<li class="tsd-parameter-siganture">
+							<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>delta<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quadruple</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<h4 class="tsd-parameters-title">Parameters</h4>
+									<ul class="tsd-parameters">
+										<li>
+											<h5>delta: <span class="tsd-signature-type">Quadruple</span><span class="tsd-signature-symbol">[]</span></h5>
+										</li>
+									</ul>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 								</li>
 							</ul>
 						</li>
