@@ -151,6 +151,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private _fetcher: Fetcher | undefined;
     private _dispatch?: MiddlewareActionHandler;
     private readonly bulkEndpoint: string;
+    private deltas: Quadruple[][] = [];
     private readonly requestInitGenerator: RequestInitGenerator;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
     private readonly requestMap: Map<NamedNode, Promise<Statement[]> | undefined>;
@@ -322,6 +323,15 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
 
         return this.processExecAction(res);
+    }
+
+    public flush(): Statement[] {
+        for (let i = 0; i < this.deltas.length; i++) {
+            this.processDelta(this.deltas[i]);
+        }
+        this.deltas = [];
+
+        return [];
     }
 
     public getEntities(resources: ResourceQueueItem[]): Promise<Statement[]> {
@@ -505,6 +515,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             pushToMap(this.mapping, type, transformer);
             this.accept.default = [this.accept.default, [type, acceptValue].join(";")].join();
         });
+    }
+
+    public queueDelta(delta: Quadruple[]): void {
+        this.deltas.push(delta);
     }
 
     public setAcceptForHost(origin: string, acceptValue: string): void {

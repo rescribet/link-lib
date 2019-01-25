@@ -26,6 +26,9 @@ export function linkedDeltaProcessor(lrs: LinkedRenderStore<any>): ResponseTrans
         const quads = parser.parseString(data);
         const expedite = response.hasOwnProperty("expedite") ? (response as any).expedite : false;
 
-        return lrs.processDelta(quads, expedite);
+        lrs.queueDelta(quads, expedite);
+
+        // TODO: Resolve the statements in this request
+        return [];
     };
 }

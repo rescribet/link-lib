@@ -227,8 +227,25 @@ export class LinkedRenderStore<T> implements Dispatcher {
     }
 
     public queueEntity(iri: NamedNode, opts?: FetchOpts): void {
+        if (!(opts && opts.reload)
+            && (this.store.changeTimestamps[iri.sI] !== 0 || this.resourceQueue.find(([i]) => i === iri))) {
+            return;
+        }
+
         this.resourceQueue.push([iri, opts]);
         this.scheduleResourceQueue();
+    }
+
+    public queueDelta(delta: Quadruple[] | Statement[], expedite = false): Promise<void> {
+        const quadArr = delta[0] instanceof Statement
+            ? (delta as Statement[]).map((s: Statement) => s.toQuad())
+            : delta as Quadruple[];
+
+        for (const dp of this.deltaProcessors) {
+            dp.queueDelta(quadArr);
+        }
+
+        return this.broadcast(!expedite, expedite ? 0 : 500);
     }
 
     /**
@@ -455,7 +472,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         }
 
         if (buffer) {
-            if (this.store.workAvailable() < 100) {
+            if (this.store.workAvailable() >= 2) {
                 if (this.broadcastHandle) {
                     window.clearTimeout(this.broadcastHandle);
                 }
@@ -483,7 +500,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             return Promise.resolve();
         }
 
-        const work = this.store.flush();
+        const work = this.deltaProcessors.flatMap((dp) => dp.flush());
         const subjects = work
             .reduce((acc, w) => acc.includes(w.subject.sI) ? acc : acc.concat(w.subject.sI), [] as number[]);
         const subjectRegs = subjects

@@ -33,6 +33,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public typeCache: NamedNode[][] = [];
 
     private addGraphIRIS: any[];
+    private deltas: Quadruple[][] = [];
     private replaceGraphIRIS: any[];
     private removeGraphIRIS: any[];
     private langPrefs: string[] = Array.from(typeof navigator !== undefined
@@ -106,6 +107,11 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @return Statements held in memory since the last flush.
      */
     public flush(): Statement[] {
+        for (let i = 0; i < this.deltas.length; i++) {
+            this.processDelta(this.deltas[i]);
+        }
+        this.deltas = [];
+
         if (this.changeBufferCount === 0) {
             return EMPTY_ST_ARR as Statement[];
         }
@@ -238,6 +244,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return getPropBestLang(rawProp, this.langPrefs);
     }
 
+    public queueDelta(delta: Quadruple[]): void {
+        this.deltas.push(delta);
+    }
+
     /**
      * Searches the store for all the statements on {iri} (so not all statements relating to {iri}).
      * @param subject The identifier of the resource.
@@ -257,7 +267,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public workAvailable(): number {
-        return this.changeBufferCount;
+        return this.deltas.length + this.changeBufferCount;
     }
 
     /**
