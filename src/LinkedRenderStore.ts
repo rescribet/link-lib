@@ -65,7 +65,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private store: RDFStore = new RDFStore();
     private broadcastHandle: number | undefined;
     private bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [];
-    private subjectSubscriptions: Map<SomeNode, Array<SubscriptionRegistrationBase<unknown>>> = new Map();
+    private subjectSubscriptions: Array<Array<SubscriptionRegistrationBase<unknown>>> = [];
     private lastPostponed: number | undefined;
     private resourceQueue: ResourceQueueItem[];
     private resourceQueueHandle: number | undefined;
@@ -403,14 +403,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const subjectFilter = registration.subjectFilter;
 
         if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {
-            let subjectRegistrations;
             for (let i = 0, len = subjectFilter.length; i < len; i++) {
-                subjectRegistrations = this.subjectSubscriptions.get(subjectFilter[i]);
-                if (!subjectRegistrations) {
-                    this.subjectSubscriptions.set(subjectFilter[i], [registration]);
-                } else {
-                    subjectRegistrations.push(registration);
+                if (!this.subjectSubscriptions[subjectFilter[i].sI]) {
+                    this.subjectSubscriptions[subjectFilter[i].sI] = [];
                 }
+                this.subjectSubscriptions[subjectFilter[i].sI].push(registration);
             }
 
             return (): void => {
@@ -486,11 +483,27 @@ export class LinkedRenderStore<T> implements Dispatcher {
             return Promise.resolve();
         }
 
+        const work = this.store.flush();
+        const subjects = work
+            .reduce((acc, w) => acc.includes(w.subject.sI) ? acc : acc.concat(w.subject.sI), [] as number[]);
+        const subjectRegs = subjects
+            .flatMap((sI) => this.subjectSubscriptions[sI])
+            .filter((reg) => reg
+                && !reg.markedForDelete
+                && (reg.subjectFilter
+                    ? reg.subjectFilter.some((s) => subjects.includes(s.sI))
+                    : true));
+
+        if (this.bulkSubscriptions.length === 0 && subjectRegs.length === 0) {
+            return Promise.resolve();
+        }
+
         return this.currentBroadcast = new ProcessBroadcast({
             bulkSubscriptions: this.bulkSubscriptions.slice(),
-            subjectSubscriptions: this.subjectSubscriptions,
+            changedSubjects: subjects,
+            subjectSubscriptions: subjectRegs,
             timeout: maxTimeout,
-            work: this.store.flush(),
+            work,
         }).run()
           .then(() => {
               this.currentBroadcast = undefined;
@@ -507,20 +520,16 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
         this.cleanupTimer = window.setTimeout(() => {
             this.cleanupTimer = undefined;
-            let reg;
-            for (const [ k, registrations ] of this.subjectSubscriptions.entries()) {
-                if (registrations.length === 1 && registrations[0].markedForDelete) {
-                    this.subjectSubscriptions.delete(k);
-                    continue;
-                }
-
+            this.subjectSubscriptions.forEach((registrations) => {
                 for (let i = 0; i < registrations.length; i++) {
-                    reg = registrations[i];
-                    if (reg.markedForDelete) {
+                    if (registrations[i].markedForDelete) {
                         registrations.splice(i, 1);
                     }
+                    if (registrations.length === 0) {
+                        delete registrations[i];
+                    }
                 }
-            }
+            });
         }, 500);
     }
 

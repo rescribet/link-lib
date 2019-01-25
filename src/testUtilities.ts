@@ -20,6 +20,7 @@ export class ComponentStoreTestProxy<T> extends ComponentStore<T> {
 export interface ExplodedLRS<T> {
     api: LinkedDataAPI;
     dispatch: MiddlewareActionHandler;
+    forceBroadcast: () => Promise<void>;
     processor: DataProcessor;
     lrs: LinkedRenderStore<T>;
     mapping: ComponentStoreTestProxy<T>;
@@ -46,6 +47,7 @@ export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicC
 
     return {
         dispatch: lrs.dispatch,
+        forceBroadcast: (): Promise<void> => (lrs as any).broadcast(false, 0),
         lrs,
         mapping,
         processor,
