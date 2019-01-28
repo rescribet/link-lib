@@ -23,6 +23,7 @@ import {
     DataTuple,
     DeltaProcessor,
     EmptyRequestStatus,
+    ErrorReporter,
     FailedResponse,
     FulfilledRequestStatus,
     LinkedActionResponse,
@@ -151,6 +152,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private _fetcher: Fetcher | undefined;
     private _dispatch?: MiddlewareActionHandler;
     private readonly bulkEndpoint: string;
+    private report: ErrorReporter;
     private deltas: Quadruple[][] = [];
     private readonly requestInitGenerator: RequestInitGenerator;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
@@ -181,7 +183,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this._fetcher = v;
     }
 
-    public constructor(opts: DataProcessorOpts = {} as DataProcessorOpts) {
+    public constructor(opts: DataProcessorOpts) {
         this.accept = opts.accept || {
             default: "",
         };
@@ -189,6 +191,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this._dispatch = opts.dispatch;
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
+        this.report = opts.report;
         this.requestMap = new Map();
         this.statusMap = new Map();
         this.store = opts.store;
@@ -327,7 +330,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     public flush(): Statement[] {
         for (let i = 0; i < this.deltas.length; i++) {
-            this.processDelta(this.deltas[i]);
+            try {
+                this.processDelta(this.deltas[i]);
+            } catch (e) {
+                this.report(e);
+            }
         }
         this.deltas = [];
 

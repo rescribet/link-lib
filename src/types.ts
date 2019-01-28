@@ -57,6 +57,8 @@ export interface FailedResponse {
     res: Response | undefined;
 }
 
+export type ErrorReporter = (e: Error, ...args: any) => void;
+
 export interface FetchOpts {
     /** Force-reload the resource discarding any previously held data. */
     reload: boolean;
@@ -70,6 +72,7 @@ export interface LinkedRenderStoreOptions<T> {
     dispatch?: MiddlewareActionHandler;
     mapping?: ComponentStore<T> | undefined;
     namespaces?: NamespaceMap | undefined;
+    report: ErrorReporter;
     schema?: Schema | undefined;
     store?: RDFStore | undefined;
 }
@@ -194,6 +197,7 @@ export interface DataProcessorOpts {
     requestInitGenerator?: RequestInitGenerator;
     fetcher?: Fetcher;
     mapping?: { [k: string]: ResponseTransformer[] };
+    report: ErrorReporter;
     store: RDFStore;
 }
 

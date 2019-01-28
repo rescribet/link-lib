@@ -31,8 +31,9 @@ export interface ExplodedLRS<T> {
 export type GetBasicStoreOpts = Partial<ExplodedLRS<BasicComponent>>;
 
 export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicComponent> => {
+    const report = (e: Error): void => { throw e; };
     const store = opts.store || new RDFStore();
-    const processor = opts.processor || new DataProcessor({ store });
+    const processor = opts.processor || new DataProcessor({ report, store });
     const api = opts.api || processor;
     const schema = opts.schema || new Schema(store);
     const mapping = opts.mapping || new ComponentStoreTestProxy<BasicComponent>(schema);
@@ -40,6 +41,7 @@ export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicC
     const conf = {
         api,
         mapping,
+        report,
         schema,
         store,
     } as LinkedRenderStoreOptions<BasicComponent>;

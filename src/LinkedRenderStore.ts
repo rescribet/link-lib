@@ -19,6 +19,7 @@ import {
     DeltaProcessor,
     Dispatcher,
     EmptyRequestStatus,
+    ErrorReporter,
     FetchOpts,
     FulfilledRequestStatus,
     LazyNNArgument,
@@ -53,6 +54,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /** Whenever a resource has no type, assume it to be this. */
     public defaultType: NamedNode = defaultNS.schema("Thing");
     public deltaProcessors: DeltaProcessor[];
+    public report: ErrorReporter;
     public namespaces: NamespaceMap = {...defaultNS};
 
     private _dispatch?: MiddlewareActionHandler;
@@ -71,13 +73,15 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private resourceQueueHandle: number | undefined;
 
     // tslint:disable-next-line no-object-literal-type-assertion
-    public constructor(opts: LinkedRenderStoreOptions<T> = {} as LinkedRenderStoreOptions<T>) {
+    public constructor(opts: LinkedRenderStoreOptions<T> = { report: (e): void => { throw e; } }) {
         if (opts.store) {
             this.store = opts.store;
         }
 
+        this.report = opts.report;
         this.api = opts.api || new DataProcessor({
             dispatch: opts.dispatch,
+            report: this.report,
             store: this.store,
         });
         this.deltaProcessors = [this.api, this.store];
@@ -573,8 +577,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 .then(() => this.broadcast());
         } else {
             for (let i = 0; i < queue.length; i++) {
-                const [iri, opts] = queue[i];
-                this.getEntity(iri, opts);
+                try {
+                    const [iri, opts] = queue[i];
+                    this.getEntity(iri, opts);
+                } catch (e) {
+                    this.report(e);
+                }
             }
         }
     }
