@@ -244,9 +244,10 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const quadArr = delta[0] instanceof Statement
             ? (delta as Statement[]).map((s: Statement) => s.toQuad())
             : delta as Quadruple[];
+        const subjects = quadArr.reduce((acc, [s]) => acc.includes(s.sI) ? acc : acc.concat(s.sI), [] as number[]);
 
         for (const dp of this.deltaProcessors) {
-            dp.queueDelta(quadArr);
+            dp.queueDelta(quadArr, subjects);
         }
 
         return this.broadcast(!expedite, expedite ? 0 : 500);

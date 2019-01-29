@@ -207,12 +207,12 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             // @ts-ignore
             const map = store.processor.statusMap;
-            map.set(defaultNS.example("test"), emptyRequest);
+            map[defaultNS.example("test").sI] = emptyRequest;
 
-            expect(map.size).toEqual(1);
+            expect(map.filter(Boolean).length).toEqual(1);
             // @ts-ignore
             store.processor.invalidateCache(defaultNS.example("test"));
-            expect(map.size).toEqual(0);
+            expect(map.filter(Boolean).length).toEqual(0);
         });
     });
 

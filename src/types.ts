@@ -78,7 +78,7 @@ export interface LinkedRenderStoreOptions<T> {
 }
 
 export interface DeltaProcessor {
-    queueDelta: (delta: Quadruple[]) => void;
+    queueDelta: (delta: Quadruple[], subjects: number[]) => void;
     flush: () => Statement[];
     processDelta: (delta: Quadruple[]) => Statement[];
 }

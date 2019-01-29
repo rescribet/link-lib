@@ -1,6 +1,7 @@
 import {
     BAD_REQUEST,
     INTERNAL_SERVER_ERROR,
+    NON_AUTHORITATIVE_INFORMATION,
     NOT_FOUND,
 } from "http-status-codes";
 import {
@@ -145,6 +146,13 @@ const timedOutRequest = (totalRequested: number): FulfilledRequestStatus => Obje
     timesRequested: totalRequested,
 }) as FulfilledRequestStatus;
 
+const queuedDeltaStatus = (totalRequested: number): FulfilledRequestStatus => Object.freeze({
+    lastRequested: new Date(),
+    requested: true,
+    status: NON_AUTHORITATIVE_INFORMATION,
+    timesRequested: totalRequested,
+}) as FulfilledRequestStatus;
+
 export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     public accept: { [k: string]: string };
     public timeout: number = 30000;
@@ -156,8 +164,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private deltas: Quadruple[][] = [];
     private readonly requestInitGenerator: RequestInitGenerator;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
-    private readonly requestMap: Map<NamedNode, Promise<Statement[]> | undefined>;
-    private readonly statusMap: Map<NamedNode, EmptyRequestStatus | FulfilledRequestStatus>;
+    private readonly requestMap: Map<number, Promise<Statement[]>>;
+    private readonly statusMap: Array<EmptyRequestStatus | FulfilledRequestStatus | undefined>;
     private readonly store: RDFStore;
 
     private get fetcher(): Fetcher {
@@ -193,7 +201,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this.mapping = opts.mapping || {};
         this.report = opts.report;
         this.requestMap = new Map();
-        this.statusMap = new Map();
+        this.statusMap = [];
         this.store = opts.store;
         if (opts.fetcher) {
             this.fetcher = opts.fetcher;
@@ -379,8 +387,9 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const url = new URL(iri.value);
         url.hash = "";
         const requestIRI = NamedNode.find(url.toString());
-        if (this.requestMap.has(requestIRI)) {
-            return this.requestMap.get(requestIRI) || [];
+        const existing = this.requestMap.get(requestIRI.sI);
+        if (existing) {
+            return existing;
         }
 
         let preExistingData: Statement[] = [];
@@ -396,7 +405,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                     this.store.removeStatements(preExistingData);
                     return this.feedResponse(res);
                 }); // TODO: feedResponse might only be necessary for non-rdflib fetcher requests.
-            this.requestMap.set(requestIRI, req);
+            this.requestMap.set(requestIRI.sI, req);
             return await req;
         } catch (e) {
             if (typeof e.res === "undefined") {
@@ -408,7 +417,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
             return responseQuads;
         } finally {
-            this.requestMap.delete(requestIRI);
+            this.requestMap.delete(requestIRI.sI);
         }
     }
 
@@ -417,9 +426,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      */
     public getStatus(iri: NamedNode): EmptyRequestStatus | FulfilledRequestStatus {
         const irl = this.fetchableURLFromIRI(iri);
+        const existing = this.statusMap[irl.sI];
 
-        if (this.statusMap.has(irl)) {
-            return this.statusMap.get(irl)!;
+        if (existing) {
+            return existing;
         }
         const fetcherStatus = this.fetcher.requested[irl.value];
 
@@ -524,8 +534,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         });
     }
 
-    public queueDelta(delta: Quadruple[]): void {
+    public queueDelta(delta: Quadruple[], subjects: number[]): void {
         this.deltas.push(delta);
+        const status = queuedDeltaStatus(1);
+        for (const s of subjects) {
+            if (!this.statusMap[s]) {
+                this.statusMap[s] = status;
+            }
+        }
     }
 
     public setAcceptForHost(origin: string, acceptValue: string): void {
@@ -550,13 +566,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private invalidateCache(iri: string | NamedNode, _err?: Error): boolean {
-        this.statusMap.delete(typeof iri === "string" ? NamedNode.find(iri) : iri);
+        this.statusMap[(typeof iri === "string" ? NamedNode.find(iri) : iri).sI] = undefined;
+
         return true;
     }
 
     private memoizeStatus(iri: NamedNode,
                           s: EmptyRequestStatus | FulfilledRequestStatus): EmptyRequestStatus | FulfilledRequestStatus {
-        this.statusMap.set(iri, s);
+        this.statusMap[iri.sI] = s;
 
         return s;
     }
@@ -575,7 +592,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     private setStatus(iri: NamedNode, status: number): void {
         const url = this.fetchableURLFromIRI(iri);
-        const prevStatus = this.statusMap.get(url);
+        const prevStatus = this.statusMap[url.sI];
         this.store.touch(url);
         this.store.touch(iri);
 
