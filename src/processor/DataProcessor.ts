@@ -206,6 +206,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         if (opts.fetcher) {
             this.fetcher = opts.fetcher;
         }
+        this.execExecHeader = this.execExecHeader.bind(this);
         this.processExecAction = this.processExecAction.bind(this);
         this.feedResponse = this.feedResponse.bind(this);
     }
@@ -337,14 +338,16 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     public flush(): Statement[] {
-        for (let i = 0; i < this.deltas.length; i++) {
+        const deltas = this.deltas;
+        this.deltas = [];
+
+        for (let i = 0; i < deltas.length; i++) {
             try {
-                this.processDelta(this.deltas[i]);
+                this.processDelta(deltas[i]);
             } catch (e) {
                 this.report(e);
             }
         }
-        this.deltas = [];
 
         return [];
     }
@@ -517,6 +520,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
             if (s[1] === defaultNS.http("statusCode")) {
                 this.setStatus(s[0] as NamedNode, Number.parseInt(s[2].value, 10));
+            } else if (s[1] === defaultNS.httph("Exec-Action")) {
+                this.execExecHeader(s[2].value);
             }
         }
 
@@ -546,6 +551,15 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     public setAcceptForHost(origin: string, acceptValue: string): void {
         this.accept[new URL(origin).origin] = acceptValue;
+    }
+
+    private execExecHeader(actionsHeader: string | null | undefined): void {
+        if (actionsHeader) {
+            const actions = actionsHeader.split(", ");
+            for (let i = 0; i < actions.length; i++) {
+                this.dispatch(NamedNode.find(actions[i]), undefined);
+            }
+        }
     }
 
     private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Statement[]> {
@@ -580,12 +594,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     private processExecAction(res: Response): Promise<Response> {
         const actionsHeader = getHeader(res, "Exec-Action");
-        if (actionsHeader) {
-            const actions = actionsHeader.split(", ");
-            for (let i = 0; i < actions.length; i++) {
-                this.dispatch(NamedNode.find(actions[i]), undefined);
-            }
-        }
+        this.execExecHeader(actionsHeader);
 
         return Promise.resolve(res);
     }

@@ -107,10 +107,12 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @return Statements held in memory since the last flush.
      */
     public flush(): Statement[] {
-        for (let i = 0; i < this.deltas.length; i++) {
-            this.processDelta(this.deltas[i]);
-        }
+        const deltas = this.deltas;
         this.deltas = [];
+
+        for (let i = 0; i < deltas.length; i++) {
+            this.processDelta(deltas[i]);
+        }
 
         if (this.changeBufferCount === 0) {
             return EMPTY_ST_ARR as Statement[];

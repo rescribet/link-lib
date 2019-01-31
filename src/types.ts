@@ -79,6 +79,10 @@ export interface LinkedRenderStoreOptions<T> {
 
 export interface DeltaProcessor {
     queueDelta: (delta: Quadruple[], subjects: number[]) => void;
+    /**
+     * Process all queued deltas
+     * @note: Be sure to assign a new buffer array before starting processing to prevent infinite loops.
+     */
     flush: () => Statement[];
     processDelta: (delta: Quadruple[]) => Statement[];
 }
