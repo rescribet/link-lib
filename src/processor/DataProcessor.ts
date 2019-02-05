@@ -251,7 +251,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
         const targetMethod = this.store.getResourceProperty(target, defaultNS.schema("httpMethod"));
         const method = typeof targetMethod !== "undefined" ? targetMethod.toString() : "GET";
-        const opts = this.requestInitGenerator.generate(method, this.accept[new URL(url.value).origin]);
+        const opts = this.requestInitGenerator.generate(method, this.acceptForHost(url));
 
         if (opts.headers instanceof Headers) {
             opts.headers.set("Request-Referrer", subject.value);
@@ -305,8 +305,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     public async fetchResource(iri: NamedNode | string, opts?: FetchOpts): Promise<ResponseAndFallbacks> {
-        const iriString = typeof iri === "string" ? iri : iri.value;
-        const accept = this.accept[new URL(iriString).origin] || this.accept.default;
+        const accept = this.acceptForHost(iri);
         if (accept) {
             this.fetcher.mediatypes = {[accept]: {q: 1.0}};
         }
@@ -362,7 +361,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             }
             url.searchParams.append("resource", encodeURIComponent(resource[0].value));
         }
-        const opts = this.requestInitGenerator.generate("GET", this.accept[url.origin]);
+        const opts = this.requestInitGenerator.generate("GET", this.acceptForHost(url.toString()));
 
         return fetch(url.toString(), opts)
             .then(this.feedResponse)
@@ -551,6 +550,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     public setAcceptForHost(origin: string, acceptValue: string): void {
         this.accept[new URL(origin).origin] = acceptValue;
+    }
+
+    private acceptForHost(iri: NamedNode | string): string {
+        return this.accept[new URL(typeof iri === "string" ? iri : iri.value).origin]
+            || this.accept.default;
     }
 
     private execExecHeader(actionsHeader: string | null | undefined): void {
