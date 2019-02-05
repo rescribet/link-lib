@@ -508,12 +508,12 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             .then(this.feedResponse);
     }
 
-    public processDelta(delta: Quadruple[]): Statement[] {
-        let s: Quadruple;
+    public processDelta(delta: Array<Quadruple|void>): Statement[] {
+        let s: Quadruple|void;
         for (let i = 0, len = delta.length; i < len; i++) {
             s = delta[i];
 
-            if (s[3] !== defaultNS.ll("meta")) {
+            if (!s || s[3] !== defaultNS.ll("meta")) {
                 continue;
             }
 

@@ -2983,10 +2983,15 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
 
-n-quads-parser@>=1.2.0, n-quads-parser@^1.2.0:
+n-quads-parser@>=1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/n-quads-parser/-/n-quads-parser-1.2.0.tgz#b866eb610d6c5fd1b9857a8d6b92b599a7b3721e"
   integrity sha512-2IYzvNm+cFht0Z8gWgF1Z9wunq7jaSIpb32+7fVgQJdZ1w6bu5HDsNaqfjcGn2n1uhugFzJSkUVb8s61QOtKQg==
+
+n-quads-parser@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/n-quads-parser/-/n-quads-parser-1.2.1.tgz#2ad48e8dbb3d4d74d588825a36ae55475b9c1f1a"
+  integrity sha512-DgRLnTMknq692s/Hi0I0+bPJSu+ZyBfADAWBIU5AW7f6hn0Z4HkaqdzScFXhtdFuwKI6FP4Gx4qau0YB0FB3NA==
 
 n3@^0.4.1:
   version "0.4.5"

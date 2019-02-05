@@ -240,7 +240,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         this.scheduleResourceQueue();
     }
 
-    public queueDelta(delta: Quadruple[] | Statement[], expedite = false): Promise<void> {
+    public queueDelta(delta: Array<Quadruple|void> | Statement[], expedite = false): Promise<void> {
         const quadArr = delta[0] instanceof Statement
             ? (delta as Statement[]).map((s: Statement) => s.toQuad())
             : delta as Quadruple[];
@@ -334,7 +334,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.api.getStatus(iri);
     }
 
-    public processDelta(delta: Quadruple[] | Statement[], expedite = false): Promise<Statement[]> {
+    public processDelta(delta: Array<Quadruple|void> | Statement[], expedite = false): Promise<Statement[]> {
         const quadArr = delta[0] instanceof Statement
             ? (delta as Statement[]).map((s: Statement) => s.toQuad())
             : delta as Quadruple[];

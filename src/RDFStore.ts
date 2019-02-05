@@ -143,15 +143,28 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public processDelta(delta: Quadruple[]): Statement[] {
-        const addables = delta.filter(([, , , why]) => this.addGraphIRIS.includes(why));
-        const replacables = delta.filter(([, , , why]) => this.replaceGraphIRIS.includes(why));
-        const removables = delta
-            .filter(([, , , why]) => this.removeGraphIRIS.includes(why))
-            .reduce((tot: Statement[], [subject, predicate]) => {
-                const matches = this.store.match(subject, predicate, null, null);
+        const addables = [];
+        const replacables = [];
+        const removables = [];
 
-                return tot.concat(matches);
-            }, []);
+        let quad;
+        for (let i = 0, len = delta.length; i < len; i++) {
+            quad = delta[i];
+
+            if (!quad) {
+                continue;
+            }
+
+            if (this.addGraphIRIS.includes(quad[3])) {
+                addables.push(quad);
+            } else if (this.replaceGraphIRIS.includes(quad[3])) {
+                replacables.push(quad);
+            } else if (this.removeGraphIRIS.includes(quad[3])) {
+                const matches = this.store.match(quad[0], quad[1], null, null);
+                removables.push(...matches);
+            }
+        }
+
         this.removeStatements(removables);
 
         return this.replaceMatches(replacables).concat(this.addQuads(addables));
