@@ -366,11 +366,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return fetch(url.toString(), opts)
             .then(this.feedResponse)
             .catch((err) => {
-                if (err instanceof Error) {
-                    throw err;
-                }
-
-                const status = Literal.fromNumber(err.status);
+                const status = Literal.fromNumber(err instanceof Error ? 499 : err.status);
                 const delta = resources
                     .map(([s]) => [s, defaultNS.http("statusCode"), status, defaultNS.ll("meta")] as Quadruple);
 
