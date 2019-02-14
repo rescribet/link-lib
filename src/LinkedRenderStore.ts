@@ -164,6 +164,35 @@ export class LinkedRenderStore<T> implements Dispatcher {
     }
 
     /**
+     * Resolve the values at the end of the path
+     * @param subject The resource to start descending on
+     * @param path A list of linked predicates to descend on.
+     */
+    public dig(subject: SomeNode, path: NamedNode[]): SomeTerm[] {
+        if (path.length === 0) {
+            return [];
+        }
+
+        const remaining = path.slice();
+        const pred = remaining.shift();
+
+        if (remaining.length === 0) {
+            return this.getResourceProperties(subject, pred!);
+        }
+
+        const props = this.getResourceProperties(subject, pred!);
+        if (props) {
+            return props
+                .map((term) => (term.termType === "NamedNode" || term.termType === "BlankNode")
+                    && this.dig(term, remaining))
+                .flat(1)
+                .filter(Boolean);
+        }
+
+        return [];
+    }
+
+    /**
      * Retrieve the subjects from {subject} to find all resources which have an object at the
      * end of the {path} which matches {match}.
      * @param subject The resource to start descending on.
