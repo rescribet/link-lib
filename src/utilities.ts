@@ -7,6 +7,9 @@ import {
 } from "rdflib";
 
 import { SomeNode } from "./types";
+import { defaultNS } from "./utilities/constants";
+
+const memberPrefix = defaultNS.rdf("_").value;
 
 /**
  * Filters {obj} to only include statements where the subject equals {predicate}.
@@ -17,6 +20,10 @@ import { SomeNode } from "./types";
 export function allRDFPropertyStatements(obj: Statement[] | undefined, predicate: SomeNode): Statement[] {
     if (typeof obj === "undefined") {
         return [];
+    }
+
+    if (predicate === defaultNS.rdfs("member")) {
+        return obj.filter((s) => s.predicate.value.startsWith(memberPrefix));
     }
 
     return obj.filter((s) => s.predicate.equals(predicate));
@@ -43,7 +50,10 @@ export function anyRDFValue(obj: Statement[] | undefined, predicate: SomeNode): 
         return undefined;
     }
 
-    const match = obj.find((s) => s.predicate.equals(predicate));
+    const match = predicate === defaultNS.rdfs("member")
+        ? obj.find((s) => s.predicate.value.startsWith(memberPrefix))
+        :  obj.find((s) => s.predicate.equals(predicate));
+
     if (typeof match === "undefined") {
         return undefined;
     }
