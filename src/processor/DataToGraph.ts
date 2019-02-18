@@ -47,7 +47,11 @@ export function processObject(subject: SomeNode,
         const items = new Collection();
         for (const subResource of datum) {
             const bn = new BlankNode();
-            blobs = blobs.concat(processObject(bn, predicate, subResource, graph));
+            if (isPlainObject(subResource)) {
+                blobs = blobs.concat(processDataObject(bn, subResource as DataObject, graph));
+            } else {
+                blobs = blobs.concat(processObject(bn, predicate, subResource, graph));
+            }
             items.append(bn);
         }
         items.close();

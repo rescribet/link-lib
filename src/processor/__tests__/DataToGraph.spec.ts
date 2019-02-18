@@ -53,7 +53,7 @@ describe("DataToGraph", () => {
 
     describe("data type conversions", () => {
         it("handles arrays", () => {
-            const data = { "example:property": ["1", 2, true] };
+            const data = { "example:property": [{ "example:nestedProp": "1" }, 2, true] };
             const [graph] = dataToGraphTuple(data);
 
             const stmt = graph.anyStatementMatching(defaultNS.ll("targetResource"), defaultNS.example("property"));
