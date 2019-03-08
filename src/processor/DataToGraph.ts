@@ -46,13 +46,13 @@ export function processObject(subject: SomeNode,
     if (isIterable(datum)) {
         const items = new Collection();
         for (const subResource of datum) {
-            const bn = new BlankNode();
+            const id = (subResource as DataObject)["@id"] as SomeNode | undefined || new BlankNode();
             if (isPlainObject(subResource)) {
-                blobs = blobs.concat(processDataObject(bn, subResource as DataObject, graph));
+                blobs = blobs.concat(processDataObject(id, subResource as DataObject, graph));
             } else {
-                blobs = blobs.concat(processObject(bn, predicate, subResource, graph));
+                blobs = blobs.concat(processObject(id, predicate, subResource, graph));
             }
-            items.append(bn);
+            items.append(id);
         }
         items.close();
         graph.add(subject, predicate, items);
@@ -67,9 +67,9 @@ export function processObject(subject: SomeNode,
         blobs.push([f, datum as File]);
         graph.add(file);
     } else if (isPlainObject(datum)) {
-        const bn = new BlankNode();
-        blobs = blobs.concat(processDataObject(bn, datum, graph));
-        graph.add(subject, predicate, bn);
+        const id = datum["@id"] as SomeNode | undefined || new BlankNode();
+        blobs = blobs.concat(processDataObject(id, datum, graph));
+        graph.add(subject, predicate, id);
     } else if (datum && datum.termType === "NamedNode") {
         graph.add(subject, predicate, NamedNode.find(datum.value));
     } else if (datum && datum.termType === "Literal") {
@@ -93,6 +93,7 @@ function processDataObject(subject: SomeNode, data: DataObject, graph: IndexedFo
     let blobs: NamedBlobTuple[] = [];
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
+        if (keys[i] === "@id") { continue; }
         const predicate = expandProperty(keys[i], defaultNS);
         const datum = data[keys[i]];
 
