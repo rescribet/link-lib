@@ -9,6 +9,7 @@ export default {
         "http-status-codes",
         "jsonld",
         "ml-disjoint-set",
+        "n-quads-parser",
         "node-fetch",
         "rdflib",
         "solid-auth-client",
