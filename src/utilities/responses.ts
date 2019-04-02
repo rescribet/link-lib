@@ -25,7 +25,8 @@ export function getContentType(res: ResponseAndFallbacks): string {
         return "";
     }
     const contentType: string = contentTypeRaw.split(";")[0];
-    const urlMatch = new URL(getURL(res)).href.match(/\.([a-zA-Z0-9]{1,8})($|\?|#)/);
+    const url = getURL(res);
+    const urlMatch = url && new URL(url).href.match(/\.([a-zA-Z0-9]{1,8})($|\?|#)/);
     const ext = urlMatch ? urlMatch[1] : "";
     if (contentType) {
         const matched = contentTypeByMimeString(contentType, ext);

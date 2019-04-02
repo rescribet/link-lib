@@ -36,7 +36,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     private deltas: Quadruple[][] = [];
     private replaceGraphIRIS: any[];
     private removeGraphIRIS: any[];
-    private langPrefs: string[] = Array.from(typeof navigator !== undefined
+    private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
     private store: IndexedFormula = graph();
