@@ -30,8 +30,9 @@ export class RequestInitGenerator {
         });
     }
 
-    public generate(method = "GET", accept = "text/turtle"): RequestInit {
+    public generate(method = "GET", accept = "text/turtle", body?: BodyInit|null): RequestInit {
         return {
+            body,
             credentials: "include",
             headers: this.authenticityHeader({
                 Accept: accept,

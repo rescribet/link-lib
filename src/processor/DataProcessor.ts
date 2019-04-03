@@ -353,17 +353,18 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     public getEntities(resources: ResourceQueueItem[]): Promise<Statement[]> {
         const reload: NamedNode[] = [];
-        const url = new URL(this.bulkEndpoint);
+
+        const body = new URLSearchParams();
         for (let i = 0; i < resources.length; i++) {
             const resource = resources[i];
             if (resource[1] && resource[1].reload) {
                 reload.push(resource[0]);
             }
-            url.searchParams.append("resource", encodeURIComponent(resource[0].value));
+            body.append("resource[]", encodeURIComponent(resource[0].value));
         }
-        const opts = this.requestInitGenerator.generate("GET", this.acceptForHost(url.toString()));
+        const opts = this.requestInitGenerator.generate("POST", this.acceptForHost(this.bulkEndpoint), body);
 
-        return fetch(url.toString(), opts)
+        return fetch(this.bulkEndpoint, opts)
             .then(this.feedResponse)
             .catch((err) => {
                 const status = Literal.fromNumber(err instanceof Error ? 499 : err.status);
