@@ -23,7 +23,7 @@ export class RequestInitGenerator {
         this.xRequestedWith = opts.xRequestedWith;
     }
 
-    public authenticityHeader(options = {}): HeadersInit {
+    public authenticityHeader(options = {}): Record<string, string> {
         return Object.assign({}, options, {
             "X-CSRF-Token": this.getAuthenticityToken(),
             "X-Requested-With": this.xRequestedWith,
@@ -31,12 +31,16 @@ export class RequestInitGenerator {
     }
 
     public generate(method = "GET", accept = "text/turtle", body?: BodyInit|null): RequestInit {
+        const isFormEncoded = body instanceof URLSearchParams;
+        const headers = this.authenticityHeader({ Accept: accept });
+        if (isFormEncoded) {
+            headers["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8";
+        }
+
         return {
-            body,
+            body: isFormEncoded ? body!.toString() : body,
             credentials: "include",
-            headers: this.authenticityHeader({
-                Accept: accept,
-            }),
+            headers,
             method: method.toUpperCase(),
             mode: "same-origin",
         };
