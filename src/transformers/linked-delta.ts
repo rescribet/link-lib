@@ -1,7 +1,12 @@
 import { NQuadsParser } from "n-quads-parser";
 import { Statement } from "rdflib";
 import { LinkedRenderStore } from "../LinkedRenderStore";
-import { ResponseAndFallbacks, ResponseTransformer } from "../types";
+import {
+    ExtensionResponse,
+    RDFLibFetcherRequest,
+    ResponseAndFallbacks,
+    ResponseTransformer,
+} from "../types";
 
 /**
  * Processes linked-delta responses.
@@ -12,10 +17,10 @@ export function linkedDeltaProcessor(lrs: LinkedRenderStore<any>): ResponseTrans
         let data: string;
         if (response instanceof Response) {
             data = response.bodyUsed ? "" : await response.text();
-        } else if (response instanceof XMLHttpRequest) {
+        } else if (typeof XMLHttpRequest !== "undefined" && response instanceof XMLHttpRequest) {
             data = response.responseText;
         } else {
-            data = response.body;
+            data = (response as RDFLibFetcherRequest | ExtensionResponse).body;
         }
 
         if (!data || data.length === 0) {

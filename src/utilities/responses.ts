@@ -1,4 +1,4 @@
-import { ErrorResponse, ResponseAndFallbacks } from "../types";
+import { ErrorResponse, ExtensionResponse, RDFLibFetcherRequest, ResponseAndFallbacks } from "../types";
 
 import {
     F_JSONLD,
@@ -54,10 +54,10 @@ export async function getJSON(res: ResponseAndFallbacks): Promise<object | Error
 export function getHeader(res: ResponseAndFallbacks, header: string): string | null {
     if (res instanceof Response) {
         return res.headers.get(header);
-    } else if (res instanceof XMLHttpRequest) {
-        return res.getResponseHeader(header) || null;
-    } else if (res && res.headers) {
-        const headerValue = res.headers[header];
+    } else if (typeof XMLHttpRequest !== "undefined" && res instanceof XMLHttpRequest) {
+        return (res as XMLHttpRequest).getResponseHeader(header) || null;
+    } else if (res && (res as ExtensionResponse | RDFLibFetcherRequest).headers) {
+        const headerValue = (res as ExtensionResponse | RDFLibFetcherRequest).headers[header];
         return headerValue || null;
     }
 
@@ -65,13 +65,13 @@ export function getHeader(res: ResponseAndFallbacks, header: string): string | n
 }
 
 export function getURL(res: ResponseAndFallbacks): string {
-    if (res instanceof XMLHttpRequest) {
+    if (typeof XMLHttpRequest !== "undefined" && res instanceof XMLHttpRequest) {
         return res.responseURL;
     } else if ("requestedURI" in res) {
         return res.requestedURI;
     }
 
-    return res.url;
+    return (res as Response | ExtensionResponse).url;
 }
 
 export function contentTypeByExtention(ext: string): string {

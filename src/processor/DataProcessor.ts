@@ -171,7 +171,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private get fetcher(): Fetcher {
         if (typeof this._fetcher === "undefined") {
             this._fetcher = new Fetcher(this.store.getInternalStore(), {
-                fetch: window && window.fetch.bind(window),
+                fetch: typeof window !== "undefined" && window.fetch.bind(window) || undefined,
                 timeout: this.timeout,
             });
             FETCHER_CALLBACKS.forEach((hook) => {
@@ -195,7 +195,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this.accept = opts.accept || {
             default: "",
         };
-        this.bulkEndpoint = `${window.location.origin}/link-lib/bulk`;
+        this.bulkEndpoint = `${typeof window !== "undefined" ? window.location.origin : ""}/link-lib/bulk`;
         this._dispatch = opts.dispatch;
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
