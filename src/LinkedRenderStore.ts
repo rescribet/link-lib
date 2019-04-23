@@ -260,8 +260,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     }
 
     public queueEntity(iri: NamedNode, opts?: FetchOpts): void {
-        if (!(opts && opts.reload)
-            && (this.store.changeTimestamps[iri.sI] !== 0 || this.resourceQueue.find(([i]) => i === iri))) {
+        if (!(opts && opts.reload) && !this.shouldLoadResource(iri)) {
             return;
         }
 
@@ -269,6 +268,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         this.scheduleResourceQueue();
     }
 
+    /**
+     * Queue a linked-delta to be processed.
+     *
+     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     */
     public queueDelta(delta: Array<Quadruple|void> | Statement[], expedite = false): Promise<void> {
         const quadArr = delta[0] instanceof Statement
             ? (delta as Statement[]).map((s: Statement) => s.toQuad())
@@ -279,7 +283,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             dp.queueDelta(quadArr, subjects);
         }
 
-        return this.broadcast(!expedite, expedite ? 0 : 500);
+        return this.broadcastWithExpedite(expedite);
     }
 
     /**
@@ -370,7 +374,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const statements = this.deltaProcessors
             .reduce((acc: Statement[], dp: DeltaProcessor) => acc.concat(dp.processDelta(quadArr)), []);
 
-        return this.broadcast(!expedite, expedite ? 0 : 500)
+        return this.broadcastWithExpedite(expedite)
             .then(() => statements);
     }
 
@@ -391,6 +395,18 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 registerItem(components[i] as ComponentRegistration<T>);
             }
         }
+    }
+
+    /**
+     * Remove a resource from the store, when views are still rendered the resource will be re-fetched.
+     *
+     * @unstable
+     */
+    public removeResource(subject: NamedNode, expedite = false): Promise<void> {
+        this.api.invalidate(subject);
+        this.store.removeResource(subject);
+
+        return this.broadcastWithExpedite(expedite);
     }
 
     /**
@@ -437,6 +453,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
             RENDER_CLASS_NAME,
             topology || DEFAULT_TOPOLOGY,
         );
+    }
+
+    /** @unstable */
+    public shouldLoadResource(subject: SomeNode): boolean {
+        return (this.store.changeTimestamps[subject.sI] === 0 || this.api.isInvalid(subject))
+            && !this.resourceQueue.find(([i]) => i === subject);
     }
 
     /**
@@ -562,6 +584,10 @@ export class LinkedRenderStore<T> implements Dispatcher {
                   this.broadcast();
               }
           });
+    }
+
+    private broadcastWithExpedite(expedite: boolean): Promise<void> {
+        return this.broadcast(!expedite, expedite ? 0 : 500);
     }
 
     private markForCleanup(): void {

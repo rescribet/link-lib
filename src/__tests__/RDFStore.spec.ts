@@ -7,6 +7,7 @@ import {
 } from "rdflib";
 
 import { RDFStore } from "../RDFStore";
+import { getBasicStore } from "../testUtilities";
 import { defaultNS as NS } from "../utilities/constants";
 
 const schemaT = NS.schema("Thing");
@@ -228,6 +229,50 @@ describe("RDFStore", () => {
 
             // @ts-ignore TS-2341
             expect(store.typeCache[NS.ex("1").sI]).toEqual([NS.ex("type2")]);
+        });
+    });
+
+    describe("#removeResource", () => {
+        it("bumps the changeTimestamp", async () => {
+            const store = getBasicStore();
+            const resource = NS.example("test");
+            store.store.addStatements([
+                new Statement(resource, NS.rdf("type"), NS.schema("Person")),
+            ]);
+            store.store.flush();
+            const before = store.store.changeTimestamps[resource.sI];
+
+            await new Promise((resolve): void => { window.setTimeout(resolve, 100); });
+
+            store.store.removeResource(resource);
+            expect(store.store.changeTimestamps[resource.sI]).toBeGreaterThan(before);
+        });
+
+        it("clears the type cache", () => {
+            const store = getBasicStore();
+            const resource = NS.example("test");
+            store.store.addStatements([
+                new Statement(resource, NS.rdf("type"), NS.schema("Person")),
+            ]);
+
+            expect(store.store.typeCache[resource.sI]).toHaveLength(1);
+            store.store.removeResource(resource);
+            expect(store.store.typeCache[resource.sI]).toHaveLength(0);
+        });
+
+        it("removes the resource data", () => {
+            const store = getBasicStore();
+            const resource = NS.example("test");
+            store.store.addStatements([
+                new Statement(resource, NS.rdf("type"), NS.schema("Person")),
+                new Statement(resource, NS.schema("name"), new Literal("Name")),
+                new Statement(resource, NS.schema("author"), NS.ex("3")),
+                new Statement(NS.example("other"), NS.schema("author"), NS.ex("3")),
+            ]);
+
+            expect(store.store.statementsFor(resource)).toHaveLength(3);
+            store.store.removeResource(resource);
+            expect(store.store.statementsFor(resource)).toHaveLength(0);
         });
     });
 

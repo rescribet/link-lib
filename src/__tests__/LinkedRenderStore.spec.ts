@@ -482,4 +482,126 @@ describe("LinkedRenderStore", () => {
             expect(r.length).toEqual(12);
         });
     });
+
+    describe("#reset", () => {
+        const store = getBasicStore();
+        store.lrs.reset();
+        const openStore = store.lrs as any;
+
+        it("reinitialized the store", () => expect(openStore.store).not.toEqual(store.store));
+        it("reinitialized the schema", () => expect(openStore.schema).not.toEqual(store.schema));
+        it("reinitialized the mapping", () => expect(openStore.mapping).not.toEqual(store.mapping));
+    });
+
+    describe("#resourcePropertyComponent", () => {
+        const store = getBasicStore();
+        const resource = NS.example("test");
+        const property = NS.schema("name");
+        const nameComp = (): undefined => undefined;
+
+        it("returns undefined when no view is registered", () => {
+            expect(store.lrs.resourcePropertyComponent(resource, property)).toBeUndefined();
+        });
+
+        it("returns the view when one is registered", () => {
+            store.lrs.registerAll(LinkedRenderStore.registerRenderer(nameComp, NS.schema("Thing"), property));
+            store.store.addStatements([
+                new Statement(resource, NS.rdf("type"), NS.schema("Thing")),
+            ]);
+
+            expect(store.lrs.resourcePropertyComponent(resource, property)).toEqual(nameComp);
+        });
+    });
+
+    describe("#resourceComponent", () => {
+        const store = getBasicStore();
+        const resource = NS.example("test");
+        const thingComp = (): undefined => undefined;
+
+        it("returns undefined when no view is registered", () => {
+            expect(store.lrs.resourceComponent(resource)).toBeUndefined();
+        });
+
+        it("returns the view when one is registered", () => {
+            store.lrs.registerAll(LinkedRenderStore.registerRenderer(thingComp, NS.schema("Thing")));
+            store.store.addStatements([
+                new Statement(resource, NS.rdf("type"), NS.schema("Thing")),
+            ]);
+
+            expect(store.lrs.resourceComponent(resource)).toEqual(thingComp);
+        });
+    });
+
+    describe("#shouldLoadResource", () => {
+        const resource = NS.example("test");
+
+        it("should load nonexistent resources", () => {
+            const store = getBasicStore();
+            store.store.flush();
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeTruthy();
+        });
+
+        it("should load invalidated resources", () => {
+            const store = getBasicStore();
+            store.store.addStatements([
+                new Statement(resource, NS.rdfs("label"), new Literal("test")),
+            ]);
+            store.store.flush();
+            store.processor.invalidate(resource);
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeTruthy();
+        });
+
+        it("should not load existent resources", () => {
+            const store = getBasicStore();
+            store.store.addStatements([
+                new Statement(resource, NS.rdfs("label"), new Literal("test")),
+            ]);
+            store.store.flush();
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
+        });
+
+        it("should not load queued resources", () => {
+            const store = getBasicStore();
+            store.store.flush();
+            store.lrs.queueEntity(resource);
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
+        });
+
+        it("should not load invalidated queued resources", () => {
+            const store = getBasicStore();
+            store.store.flush();
+            store.store.addStatements([
+                new Statement(resource, NS.rdfs("label"), new Literal("test")),
+            ]);
+            store.store.flush();
+            store.processor.invalidate(resource);
+            store.lrs.queueEntity(resource);
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
+        });
+    });
+
+    describe("#tryEntity", () => {
+        it("resolves statements for the resource", () => {
+            const store = getBasicStore();
+            const resource = NS.ex("1");
+            const testData = [
+                new Statement(resource, NS.rdf("type"), NS.ex("Organization")),
+                new Statement(resource, NS.schema("name"), new Literal("Some org")),
+                new Statement(resource, NS.schema("employee"), NS.ex("2")),
+            ];
+            store.store.addStatements(testData);
+            store.store.flush();
+
+            const data = store.lrs.tryEntity(resource);
+            expect(data).toHaveLength(3);
+            expect(data).toContain(testData[0]);
+            expect(data).toContain(testData[1]);
+            expect(data).toContain(testData[2]);
+        });
+    });
 });

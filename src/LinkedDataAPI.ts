@@ -63,6 +63,12 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      */
     getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus;
 
+    /** @unstable */
+    invalidate(iri: string | NamedNode, error?: Error): boolean;
+
+    /** @unstable */
+    isInvalid(iri: SomeNode): boolean;
+
     /** Register a transformer so it can be used to interact with API's. */
     registerTransformer(processor: ResponseTransformer,
                         mediaType: string | string[],

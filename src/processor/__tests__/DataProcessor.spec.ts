@@ -197,10 +197,10 @@ describe("DataProcessor", () => {
         });
     });
 
-    describe("#invalidateCache", () => {
+    describe("#invalidate", () => {
         it("returns true to resubscribe", () => {
             // @ts-ignore
-            expect(getBasicStore().processor.invalidateCache(defaultNS.example("test"))).toEqual(true);
+            expect(getBasicStore().processor.invalidate(defaultNS.example("test"))).toEqual(true);
         });
 
         it("removes the item from the map", () => {
@@ -211,8 +211,29 @@ describe("DataProcessor", () => {
 
             expect(map.filter(Boolean).length).toEqual(1);
             // @ts-ignore
-            store.processor.invalidateCache(defaultNS.example("test"));
+            store.processor.invalidate(defaultNS.example("test"));
             expect(map.filter(Boolean).length).toEqual(0);
+        });
+
+        it("marks the resource as invalidated", () => {
+            const store = getBasicStore();
+            expect(store.processor.isInvalid(defaultNS.example("test"))).toBeFalsy();
+            store.processor.invalidate(defaultNS.example("test"));
+            expect(store.processor.isInvalid(defaultNS.example("test"))).toBeTruthy();
+        });
+    });
+
+    describe("#isInvalid", () => {
+        it("returns true for invalidated resources", () => {
+            const store = getBasicStore();
+            store.processor.invalidate(defaultNS.example("test"));
+            expect(store.processor.isInvalid(defaultNS.example("test"))).toBeTruthy();
+        });
+
+        it("returns false for non-invalidated resources", () => {
+            const store = getBasicStore();
+            store.processor.invalidate(defaultNS.example("other"));
+            expect(store.processor.isInvalid(defaultNS.example("test"))).toBeFalsy();
         });
     });
 
@@ -299,6 +320,43 @@ describe("DataProcessor", () => {
 
             const res = new Response(null, { status: INTERNAL_SERVER_ERROR });
             expect(store.processor.processExternalResponse(res)).rejects.toBeTruthy();
+        });
+    });
+
+    describe("#processDelta", () => {
+        const resource = defaultNS.ex("1");
+
+        it("processes empty deltas", () => {
+            const store = getBasicStore();
+            store.processor.processDelta([]);
+        });
+
+        it("ignores other deltas", () => {
+            const store = getBasicStore();
+            store.processor.processDelta([
+                [resource, defaultNS.rdf("type"), defaultNS.schema("Thing"), new BlankNode("chrome:theSession")],
+            ]);
+        });
+
+        describe("when processing http:statusCode", () => {
+            it("sets the status codes", () => {
+                const store = getBasicStore();
+                store.processor.processDelta([
+                    [resource, defaultNS.http("statusCode"), new Literal(200), defaultNS.ll("meta")],
+                ]);
+
+                expect(store.processor.getStatus(resource).status).toEqual(200);
+            });
+
+            it("clears the invalidation", () => {
+                const store = getBasicStore();
+                store.processor.invalidate(resource);
+                store.processor.processDelta([
+                    [resource, defaultNS.http("statusCode"), new Literal(200), defaultNS.ll("meta")],
+                ]);
+
+                expect(store.processor.isInvalid(resource)).toBeFalsy();
+            });
         });
     });
 

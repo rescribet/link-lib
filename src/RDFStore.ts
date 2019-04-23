@@ -170,6 +170,12 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return this.replaceMatches(replacables).concat(this.addQuads(addables));
     }
 
+    public removeResource(subject: SomeNode): void {
+        this.touch(subject);
+        this.typeCache[subject.sI] = [];
+        this.removeStatements(this.statementsFor(subject));
+    }
+
     public removeStatements(statements: Statement[]): void {
         this.store.remove(statements.slice());
     }

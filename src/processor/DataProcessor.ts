@@ -32,6 +32,7 @@ import {
     ResourceQueueItem,
     ResponseAndFallbacks,
     ResponseTransformer,
+    SomeNode,
 } from "../types";
 import { anyRDFValue } from "../utilities";
 import {
@@ -162,8 +163,9 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private readonly bulkEndpoint: string;
     private report: ErrorReporter;
     private deltas: Quadruple[][] = [];
-    private readonly requestInitGenerator: RequestInitGenerator;
+    private readonly invalidationMap: Map<number, void>;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
+    private readonly requestInitGenerator: RequestInitGenerator;
     private readonly requestMap: Map<number, Promise<Statement[]>>;
     private readonly statusMap: Array<EmptyRequestStatus | FulfilledRequestStatus | undefined>;
     private readonly store: RDFStore;
@@ -176,7 +178,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             });
             FETCHER_CALLBACKS.forEach((hook) => {
                 const hookIRI = defaultNS.ll(`data/rdflib/${hook}`);
-                this._fetcher!.addCallback(hook, this.invalidateCache.bind(this));
+                this._fetcher!.addCallback(hook, this.invalidate.bind(this));
                 this._fetcher!.addCallback(hook, (iri: string | NamedNode, _err?: Error) => {
                     this.dispatch(hookIRI, [typeof iri === "string" ? NamedNode.find(iri) : iri, _err]);
 
@@ -197,6 +199,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         };
         this.bulkEndpoint = `${typeof window !== "undefined" ? window.location.origin : ""}/link-lib/bulk`;
         this._dispatch = opts.dispatch;
+        this.invalidationMap = new Map();
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
         this.mapping = opts.mapping || {};
         this.report = opts.report;
@@ -398,6 +401,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
 
         try {
+            this.removeInvalidation(iri);
+            this.removeInvalidation(requestIRI);
             const req = this
                 .fetchResource(requestIRI, opts)
                 .then((res) => {
@@ -500,6 +505,19 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         );
     }
 
+    public invalidate(iri: string | NamedNode, _err?: Error): boolean {
+        const id = (typeof iri === "string" ? NamedNode.find(iri) : iri).sI;
+        this.invalidationMap.set(id);
+        // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
+        this.statusMap[id] = undefined;
+
+        return true;
+    }
+
+    public isInvalid(iri: SomeNode): boolean {
+        return this.invalidationMap.has(iri.sI);
+    }
+
     public processExternalResponse(response: Response): Promise<Statement[] | undefined> {
         return handleStatus(response)
             .then(this.feedResponse);
@@ -515,6 +533,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             }
 
             if (s[1] === defaultNS.http("statusCode")) {
+                this.removeInvalidation(s[0] as NamedNode);
                 this.setStatus(s[0] as NamedNode, Number.parseInt(s[2].value, 10));
             } else if (s[1] === defaultNS.httph("Exec-Action")) {
                 this.execExecHeader(s[2].value);
@@ -580,12 +599,6 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return processor(res);
     }
 
-    private invalidateCache(iri: string | NamedNode, _err?: Error): boolean {
-        this.statusMap[(typeof iri === "string" ? NamedNode.find(iri) : iri).sI] = undefined;
-
-        return true;
-    }
-
     private memoizeStatus(iri: NamedNode,
                           s: EmptyRequestStatus | FulfilledRequestStatus): EmptyRequestStatus | FulfilledRequestStatus {
         this.statusMap[iri.sI] = s;
@@ -598,6 +611,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this.execExecHeader(actionsHeader);
 
         return Promise.resolve(res);
+    }
+
+    private removeInvalidation(subject: NamedNode): void {
+        this.invalidationMap.delete(subject.sI);
     }
 
     private setStatus(iri: NamedNode, status: number): void {
