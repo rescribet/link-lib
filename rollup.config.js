@@ -16,8 +16,17 @@ export default {
     ],
     input: "src/link-lib.ts",
     output: [
-        { file: "dist/link-lib.umd.js", name: "linkLib", format: "umd" },
-        { file: "dist/link-lib.es6.js", format: "es" },
+        {
+            file: "dist/link-lib.umd.js",
+            name: "linkLib",
+            format: "umd",
+            sourcemap: true,
+        },
+        {
+            file: "dist/link-lib.es6.js",
+            format: "es",
+            sourcemap: true,
+        },
     ],
     plugins: [
         // Compile TypeScript files
@@ -34,7 +43,6 @@ export default {
         // Resolve source maps to the original source
         sourceMaps(),
     ],
-    sourcemap: true,
     watch: {
         include: "src/**",
     },

@@ -60,17 +60,17 @@ describe("ProcessBroadcast", () => {
 
     describe("with bulk subject combination", () => {
         describe("and work", () => {
-            const bulk1 = jest.fn<ReadonlyArray<Statement>>();
-            const bulk2 = jest.fn<ReadonlyArray<Statement>>();
+            const bulk1 = jest.fn<void, any[]>();
+            const bulk2 = jest.fn<void, any[]>();
 
-            const st = jest.fn<ReadonlyArray<Statement>>();
-            const stb = jest.fn<ReadonlyArray<Statement>>();
-            const r1 = jest.fn<ReadonlyArray<Statement>>();
-            const r2 = jest.fn<ReadonlyArray<Statement>>();
-            const r4a = jest.fn<ReadonlyArray<Statement>>();
-            const r4b = jest.fn<ReadonlyArray<Statement>>();
-            const r5 = jest.fn<ReadonlyArray<Statement>>();
-            const r6 = jest.fn<ReadonlyArray<Statement>>();
+            const st = jest.fn<void, any[]>();
+            const stb = jest.fn<void, any[]>();
+            const r1 = jest.fn<void, any[]>();
+            const r2 = jest.fn<void, any[]>();
+            const r4a = jest.fn<void, any[]>();
+            const r4b = jest.fn<void, any[]>();
+            const r5 = jest.fn<void, any[]>();
+            const r6 = jest.fn<void, any[]>();
 
             const processor = new ProcessBroadcast(getOpts(
                 mixedWork,
