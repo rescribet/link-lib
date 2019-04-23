@@ -2,6 +2,7 @@ import "jest";
 import {
     IndexedFormula,
     Literal,
+    NamedNode,
     Quadruple,
     Statement,
 } from "rdflib";
@@ -77,6 +78,20 @@ describe("RDFStore", () => {
     });
 
     describe("#processDelta", () => {
+        it("handles empty values", () => {
+            const store = new RDFStore();
+
+            expect(store.processDelta(new Array(1))).toEqual([]);
+        });
+
+        describe("ll:replace", () => {
+            it("replaces existing", () => {
+                const store = new RDFStore();
+
+                expect(store.processDelta(new Array(1))).toEqual([]);
+            });
+        });
+
         describe("ll:remove", () => {
             it("removes one", () => {
                 const store = new RDFStore();
@@ -121,14 +136,49 @@ describe("RDFStore", () => {
     //     });
     // });
     //
-    // describe("#getResourcePropertyRaw", () => {
-    //     it("works", () => {
-    //         const expected = undefined;
-    //         expect(new RDFStore().getResourcePropertyRaw())
-    //             .toEqual(expected);
-    //     });
-    // });
-    //
+    describe("#getResourcePropertyRaw", () => {
+        const store = new RDFStore();
+        store.addStatements([
+            new Statement(NS.ex("a"), NS.ex("p"), NS.ex("x")),
+            new Statement(NS.ex("a"), NS.ex("r"), NS.ex("y")),
+
+            new Statement(NS.ex("b"), NS.ex("p"), NS.ex("xx")),
+            new Statement(NS.ex("b"), NS.ex("p"), NS.ex("yy")),
+        ]);
+
+        it("resolves empty values for single property", () => {
+            expect(store.getResourcePropertyRaw(NS.ex("none"), NS.ex("p")))
+                .toEqual([]);
+        });
+
+        it("resolves empty values for multiple properties", () => {
+            expect(store.getResourcePropertyRaw(NS.ex("none"), [NS.ex("p"), NS.ex("q")]))
+                .toEqual([]);
+        });
+
+        it("resolves values for single property", () => {
+            expect(store.getResourcePropertyRaw(NS.ex("b"), NS.ex("p")))
+                .toEqual([
+                    new Statement(NS.ex("b"), NS.ex("p"), NS.ex("xx"), new NamedNode("chrome:theSession")),
+                    new Statement(NS.ex("b"), NS.ex("p"), NS.ex("yy"), new NamedNode("chrome:theSession")),
+                ]);
+        });
+
+        it("resolves value for multiple properties one existent", () => {
+            expect(store.getResourcePropertyRaw(NS.ex("a"), [NS.ex("p"), NS.ex("q")]))
+                .toEqual([
+                    new Statement(NS.ex("a"), NS.ex("p"), NS.ex("x"), new NamedNode("chrome:theSession")),
+                ]);
+        });
+
+        it("resolves value for multiple properties multiple existent", () => {
+            expect(store.getResourcePropertyRaw(NS.ex("a"), [NS.ex("r"), NS.ex("p")]))
+                .toEqual([
+                    new Statement(NS.ex("a"), NS.ex("r"), NS.ex("y"), new NamedNode("chrome:theSession")),
+                ]);
+        });
+    });
+
     // describe("#getResourceProperties", () => {
     //     it("works", () => {
     //         const expected = undefined;

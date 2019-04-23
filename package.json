@@ -63,7 +63,7 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 65,
+        "branches": 80,
         "functions": 80,
         "lines": 80,
         "statements": 80
@@ -83,7 +83,7 @@
     ],
     "testURL": "http://example.org/resources/5",
     "transform": {
-      "\\.ts$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      "\\.ts$": "ts-jest"
     }
   }
 }

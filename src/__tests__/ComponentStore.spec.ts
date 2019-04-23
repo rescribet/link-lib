@@ -1,6 +1,7 @@
 import "jest";
 
 import { ComponentStore } from "../ComponentStore";
+import { getBasicStore } from "../testUtilities";
 import { defaultNS as NS } from "../utilities/constants";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
@@ -68,6 +69,17 @@ describe("ComponentStore", () => {
                     [DT, undefined!],
                 );
             }).toThrowError(TypeError);
+        });
+
+        it ("returns undefined when no property is given", () => {
+            const store = getBasicStore();
+
+            expect(store.mapping.registerRenderer(
+                () => undefined,
+                NS.schema("Thing").sI,
+                undefined,
+                undefined,
+            )).toBeUndefined();
         });
     });
 });

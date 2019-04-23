@@ -1,7 +1,9 @@
 import "jest";
 import {
+    BlankNode,
     Literal,
     NamedNode,
+    Quadruple,
     Statement,
 } from "rdflib";
 
@@ -268,6 +270,82 @@ describe("LinkedRenderStore", () => {
         });
     });
 
+    describe("#dig", () => {
+        const store = getBasicStore();
+        const start = NS.ex("1");
+        const bn = new BlankNode();
+        store.store.addStatements([
+            new Statement(start, NS.ex("oneToOne"), NS.ex("1.1")),
+
+            new Statement(start, NS.ex("oneToOneLiteral"), NS.ex("1.2")),
+
+            new Statement(start, NS.ex("oneToOneBN"), bn),
+
+            new Statement(start, NS.ex("oneToOneMissing"), NS.ex("1.3")),
+
+            new Statement(start, NS.ex("oneToMany"), NS.ex("1.4")),
+            new Statement(start, NS.ex("oneToMany"), NS.ex("1.5")),
+
+            new Statement(start, NS.ex("oneToManyHoley"), NS.ex("1.6")),
+            new Statement(start, NS.ex("oneToManyHoley"), NS.ex("1.7")),
+            new Statement(start, NS.ex("oneToManyHoley"), NS.ex("1.8")),
+
+            new Statement(NS.ex("1.2"), NS.ex("p"), new Literal("value", "en")),
+
+            new Statement(bn, NS.ex("p"), new Literal("test")),
+
+            new Statement(NS.ex("1.2"), NS.ex("p"), new Literal("value", "nl")),
+
+            new Statement(NS.ex("1.2"), NS.ex("p"), NS.ex("2.3")),
+
+            new Statement(NS.ex("1.4"), NS.ex("p"), NS.ex("2.4")),
+            new Statement(NS.ex("1.5"), NS.ex("p"), NS.ex("2.5")),
+
+            new Statement(NS.ex("1.6"), NS.ex("p"), NS.ex("2.6")),
+            new Statement(NS.ex("1.7"), NS.ex("p"), NS.ex("2.7")),
+            new Statement(NS.ex("1.8"), NS.ex("p"), NS.ex("2.8")),
+
+            new Statement(NS.ex("2.6"), NS.ex("q"), NS.ex("3.6")),
+            new Statement(NS.ex("2.7"), NS.ex("other"), NS.ex("3.7")),
+            new Statement(NS.ex("2.8"), NS.ex("q"), NS.ex("3.8")),
+        ]);
+        store.store.flush();
+
+        it("is empty without path", () => expect(store.lrs.dig(start, [])).toEqual([]));
+
+        it("resolves oneToOne", () => expect(store.lrs.dig(start, [NS.ex("oneToOne")])).toEqual([NS.ex("1.1")]));
+
+        it("resolves literals through oneToOne", () => {
+            expect(store.lrs.dig(start, [NS.ex("oneToOneLiteral"), NS.ex("p")]))
+                .toEqual([new Literal("value", "en"), new Literal("value", "nl"), NS.ex("2.3")]);
+        });
+
+        it("resolves blank nodes through oneToOne", () => {
+            expect(store.lrs.dig(start, [NS.ex("oneToOneBN"), NS.ex("p")]))
+                .toEqual([new Literal("test")]);
+        });
+
+        it("resolves oneToMany", () => {
+            expect(store.lrs.dig(start, [NS.ex("oneToMany")]))
+                .toEqual([NS.ex("1.4"), NS.ex("1.5")]);
+        });
+
+        it("resolves values through oneToMany", () => {
+            expect(store.lrs.dig(start, [NS.ex("oneToMany"), NS.ex("p")]))
+                .toEqual([NS.ex("2.4"), NS.ex("2.5")]);
+        });
+
+        it("resolves values through holey oneToMany", () => {
+            expect(store.lrs.dig(start, [NS.ex("oneToManyHoley"), NS.ex("p"), NS.ex("q")]))
+                .toEqual([NS.ex("3.6"), NS.ex("3.8")]);
+        });
+
+        it("resolves empty through holey oneToMany without end value", () => {
+            expect(store.lrs.dig(start, [NS.ex("oneToManyHoley"), NS.ex("p"), NS.ex("nonexistent")]))
+                .toEqual([]);
+        });
+    });
+
     describe("#execActionByIRI", () => {
         const store = getBasicStore();
         const action = NS.example("location/everest/pictures/create");
@@ -368,6 +446,84 @@ describe("LinkedRenderStore", () => {
                 [bill, alternativeTitle],
             );
             expect(answer).toEqual([NS.ex("3")]);
+        });
+    });
+
+    describe("#getStatus", () => {
+        it("resolves empty status for blank nodes", () => {
+            const store = getBasicStore();
+            const resource = new BlankNode();
+            const status = store.lrs.getStatus(resource);
+
+            expect(status).toHaveProperty("status", null);
+        });
+
+        it("resolves queued status for resources in the queue", () => {
+            const store = getBasicStore();
+            const resource = NS.example("test");
+            store.lrs.queueEntity(resource);
+            const status = store.lrs.getStatus(resource);
+
+            expect(status).toHaveProperty("status", 202);
+        });
+
+        it("delegates to the api for other resources", () => {
+            const store = getBasicStore();
+            const resource = NS.example("test");
+            const exStatus = { status: 259 };
+            (store.processor as any).statusMap[resource.sI] = exStatus;
+            const status = store.lrs.getStatus(resource);
+
+            expect(status).toHaveProperty("status", 259);
+        });
+    });
+
+    describe("#queueDelta", () => {
+        const quadDelta = [
+            [NS.ex("1"), NS.ex("p"), NS.ex("2"), NS.ll("add")],
+            [NS.ex("1"), NS.ex("t"), new Literal("Test"), NS.ll("add")],
+            [NS.ex("2"), NS.ex("t"), new Literal("Value"), NS.ll("add")],
+        ] as Quadruple[];
+
+        it("queues an empty delta", () => {
+            const store = getBasicStore();
+
+            store.lrs.queueDelta([]);
+        });
+
+        it("queues a quadruple delta", () => {
+            const processor = {
+                flush: jest.fn(),
+                processDelta: jest.fn(),
+                queueDelta: jest.fn(),
+            };
+            const store = getBasicStore();
+            store.lrs.deltaProcessors.push(processor);
+
+            store.lrs.queueDelta(quadDelta);
+
+            expect(processor.queueDelta).toHaveBeenCalledTimes(1);
+            expect(processor.queueDelta).toHaveBeenCalledWith(quadDelta, [NS.ex("1").sI, NS.ex("2").sI]);
+        });
+
+        it("queues a statement delta", () => {
+            const processor = {
+                flush: jest.fn(),
+                processDelta: jest.fn(),
+                queueDelta: jest.fn(),
+            };
+            const store = getBasicStore();
+            store.lrs.deltaProcessors.push(processor);
+
+            const delta = [
+                new Statement(NS.ex("1"), NS.ex("p"), NS.ex("2"), NS.ll("add")),
+                new Statement(NS.ex("1"), NS.ex("t"), new Literal("Test"), NS.ll("add")),
+                new Statement(NS.ex("2"), NS.ex("t"), new Literal("Value"), NS.ll("add")),
+            ];
+            store.lrs.queueDelta(delta);
+
+            expect(processor.queueDelta).toHaveBeenCalledTimes(1);
+            expect(processor.queueDelta).toHaveBeenCalledWith(quadDelta, [NS.ex("1").sI, NS.ex("2").sI]);
         });
     });
 
@@ -480,6 +636,51 @@ describe("LinkedRenderStore", () => {
         it("registers combinations", () => {
             const r = LinkedRenderStore.registerRenderer(func, types, props, topologies);
             expect(r.length).toEqual(12);
+        });
+    });
+
+    describe("#removeResource", () => {
+        it("resolves after removal", () => {
+            const store = getBasicStore();
+            store.store.addStatements([
+                ...thingStatements,
+                ...creativeWorkStatements,
+            ]);
+            store.store.flush();
+            const res = store.lrs.removeResource(schemaT);
+
+            expect(res).resolves.toBeUndefined();
+        });
+
+        it("removes the resource", () => {
+            const store = getBasicStore();
+            store.store.addStatements([
+                ...thingStatements,
+                ...creativeWorkStatements,
+            ]);
+            store.store.flush();
+            store.lrs.removeResource(schemaT);
+
+            expect(store.lrs.tryEntity(schemaT)).toHaveLength(0);
+        });
+
+        it("calls the subscriber", async () => {
+            const store = getBasicStore();
+            const sub = jest.fn();
+            store.lrs.subscribe({
+                callback: sub,
+                markedForDelete: false,
+                onlySubjects: true,
+                subjectFilter: [schemaT],
+            });
+            store.store.addStatements([
+                ...thingStatements,
+                ...creativeWorkStatements,
+            ]);
+            store.store.flush();
+            await store.lrs.removeResource(schemaT, true);
+
+            expect(sub).toHaveBeenCalledTimes(1);
         });
     });
 

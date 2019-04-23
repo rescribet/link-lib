@@ -128,6 +128,31 @@ describe("DataProcessor", () => {
         });
     });
 
+    describe("#feedResponse", () => {
+        it("rejects error responses", () => {
+            const store = getBasicStore();
+            const res = { status: 500 };
+
+            expect((store.processor as any).feedResponse(res)).rejects.toEqual(res);
+        });
+
+        it("processes valid responses", () => {
+            const store = getBasicStore();
+            const processor = jest.fn();
+            const res = {
+                headers: {
+                    "Content-Type": "application/n-quads",
+                },
+                status: 200,
+            };
+
+            store.processor.registerTransformer(processor, "application/n-quads", 1);
+            (store.processor as any).feedResponse(res);
+
+            expect(processor).toHaveBeenCalledWith(res);
+        });
+    });
+
     describe("#fetchResource", () => {
         it("calls processExecAction", async () => {
             const store = getBasicStore();
@@ -160,6 +185,30 @@ describe("DataProcessor", () => {
         });
     });
 
+    describe("#getEntities", () => {
+        beforeEach(() => {
+            (fetch as any).resetMocks();
+        });
+
+        it("requests the resources iris in the body", async () => {
+            const fetchMock = (fetch as any);
+            fetchMock.mockResponse("/link-lib/bulk", 200);
+            const store = getBasicStore();
+
+            await store.processor.getEntities([
+                [defaultNS.ex("a"), undefined],
+                [defaultNS.ex("b"), { reload: true }],
+            ]);
+
+            expect(fetchMock.mock.calls[0]).toBeDefined();
+            const body = new URLSearchParams(fetchMock.mock.calls[0][1].body);
+            const resources = body.getAll("resource[]");
+            expect(resources).toHaveLength(2);
+            expect(resources).toContain(encodeURIComponent(defaultNS.ex("a").value));
+            expect(resources).toContain(encodeURIComponent(defaultNS.ex("b").value));
+        });
+    });
+
     describe("#getStatus", () => {
         it("returns the empty status if unfetched", () => {
             const store = getBasicStore();
@@ -172,7 +221,7 @@ describe("DataProcessor", () => {
 
         it("returns a memoized status if present", () => {
             const store = getBasicStore();
-            const subject = defaultNS.example("resource/1");
+            const subject = defaultNS.example("resource/2");
             const request = getFulfilledRequest();
 
             // @ts-ignore
@@ -185,15 +234,170 @@ describe("DataProcessor", () => {
 
         it("checks for the base document", () => {
             const store = getBasicStore();
-            const subject = defaultNS.example("resource/1#subDocument");
+            const subject = defaultNS.example("resource/3#subDocument");
             const request = getFulfilledRequest();
 
             // @ts-ignore
-            store.processor.memoizeStatus(defaultNS.example("resource/1"), request);
+            store.processor.memoizeStatus(defaultNS.example("resource/3"), request);
 
             const status = store.processor.getStatus(subject);
 
             expect(status).toEqual(request);
+        });
+
+        it("resolves an empty request when not touched by the fetcher", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/4");
+
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", false);
+            expect(status).toHaveProperty("status", null);
+        });
+
+        it("resolves an empty request when not processed by the fetcher", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/5");
+
+            (store.processor as any).fetcher.requested[subject.value] = "";
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", false);
+            expect(status).toHaveProperty("status", null);
+        });
+
+        it("resolves a failed status when the fetcher has explicit empty status", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/5");
+
+            (store.processor as any).fetcher.requested[subject.value] = undefined;
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", true);
+            expect(status).toHaveProperty("status", 499);
+        });
+
+        it("resolves accepted when the fetcher has a true status", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/6");
+
+            store.store.addStatements([
+                new Statement(new BlankNode(), defaultNS.link("requestedURI"), new Literal(subject.value)),
+            ]);
+            (store.processor as any).fetcher.requested[subject.value] = true;
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", true);
+            expect(status).toHaveProperty("status", 202);
+        });
+
+        it("resolves empty with fetcher info but without request object", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/6");
+
+            const requestInfo = new BlankNode();
+            store.store.addStatements([
+                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
+            ]);
+            (store.processor as any).fetcher.requested[subject.value] = "other";
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", false);
+            expect(status).toHaveProperty("status", null);
+        });
+
+        it("resolves a timeout status when the fetcher has a timeout status", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/6");
+
+            store.store.addStatements([
+                new Statement(new BlankNode(), defaultNS.link("requestedURI"), new Literal(subject.value)),
+            ]);
+            (store.processor as any).fetcher.requested[subject.value] = "timeout";
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", true);
+            expect(status).toHaveProperty("status", 408);
+        });
+
+        it("resolves a timeout when the fetcher has a done status without a store status", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/6");
+
+            const response = new BlankNode();
+            const requestInfo = new BlankNode();
+            const requestDate = new Date();
+            store.store.addStatements([
+                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
+                new Statement(requestInfo, defaultNS.link("response"), response),
+                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+            ]);
+            (store.processor as any).fetcher.requested[subject.value] = "done";
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", true);
+            expect(status).toHaveProperty("status", 408);
+        });
+
+        it("resolves a timeout when the fetcher has an other status without a store status", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/6");
+
+            const response = new BlankNode();
+            const requestInfo = new BlankNode();
+            const requestDate = new Date();
+            store.store.addStatements([
+                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
+                new Statement(requestInfo, defaultNS.link("response"), response),
+                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+            ]);
+            (store.processor as any).fetcher.requested[subject.value] = "other";
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", false);
+            expect(status).toHaveProperty("status", null);
+        });
+
+        it("resolves the request status when the fetcher has a done status", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/6");
+
+            const response = new BlankNode();
+            const requestInfo = new BlankNode();
+            const requestDate = new Date();
+            store.store.addStatements([
+                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
+                new Statement(requestInfo, defaultNS.link("response"), response),
+                new Statement(response, defaultNS.httph("status"), new Literal(259)),
+                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+            ]);
+            (store.processor as any).fetcher.requested[subject.value] = "done";
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", true);
+            expect(status).toHaveProperty("status", 259);
+            expect(status).toHaveProperty("lastRequested", requestDate);
+        });
+
+        it("resolves the request status when the fetcher has a done status", () => {
+            const store = getBasicStore();
+            const subject = defaultNS.example("resource/6");
+
+            const response = new BlankNode();
+            const requestInfo = new BlankNode();
+            const requestDate = new Date();
+            store.store.addStatements([
+                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
+                new Statement(requestInfo, defaultNS.link("response"), response),
+                new Statement(response, defaultNS.httph("status"), new Literal(259)),
+                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+            ]);
+            (store.processor as any).fetcher.requested[subject.value] = "done";
+            const status = store.processor.getStatus(subject);
+
+            expect(status).toHaveProperty("requested", true);
+            expect(status).toHaveProperty("status", 259);
+            expect(status).toHaveProperty("lastRequested", requestDate);
         });
     });
 
@@ -357,6 +561,18 @@ describe("DataProcessor", () => {
 
                 expect(store.processor.isInvalid(resource)).toBeFalsy();
             });
+        });
+    });
+
+    describe("#queueDelta", () => {
+        const resource = defaultNS.example("1");
+
+        it("sets the status", () => {
+            const store = getBasicStore();
+            store.processor.queueDelta([], [resource.sI]);
+
+            expect(store.processor.getStatus(resource)).toHaveProperty("status", 203);
+            expect(store.processor.getStatus(resource)).toHaveProperty("timesRequested", 1);
         });
     });
 

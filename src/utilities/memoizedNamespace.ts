@@ -1,9 +1,6 @@
 import {
-    BlankNode,
-    Literal,
     NamedNamespace,
     NamedNode,
-    SomeTerm,
     TermIsh,
 } from "rdflib";
 
@@ -13,19 +10,6 @@ import { defaultNS } from "./constants";
 
 const CI_MATCH_PREFIX = 0;
 const CI_MATCH_SUFFIX = 1;
-
-export function normalizeTerm(term: SomeTerm | undefined): SomeTerm | undefined {
-    if (term && term.termType === "NamedNode" && term.sI === undefined) {
-        return NamedNode.find(term.value) || term;
-    }
-    if (term && term.termType === "BlankNode" && term.sI === undefined) {
-        return BlankNode.find(term.value) || term;
-    }
-    if (term && term.termType === "Literal" && term.datatype && term.datatype.sI === undefined) {
-        return Literal.find(term.value, term.language, NamedNode.find(term.datatype.value));
-    }
-    return term;
-}
 
 /**
  * Expands a property if it's in short-form while preserving long-form.

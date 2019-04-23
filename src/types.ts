@@ -72,7 +72,7 @@ export interface LinkedRenderStoreOptions<T> {
     dispatch?: MiddlewareActionHandler;
     mapping?: ComponentStore<T> | undefined;
     namespaces?: NamespaceMap | undefined;
-    report: ErrorReporter;
+    report?: ErrorReporter;
     schema?: Schema | undefined;
     store?: RDFStore | undefined;
 }

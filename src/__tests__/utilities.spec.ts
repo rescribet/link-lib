@@ -12,8 +12,9 @@ import {
     anyRDFValue,
     getPropBestLang,
     getPropBestLangRaw,
+    getTermBestLang,
     isDifferentOrigin,
-    } from "../utilities";
+} from "../utilities";
 import { defaultNS } from "../utilities/constants";
 import { expandProperty } from "../utilities/memoizedNamespace";
 
@@ -55,6 +56,25 @@ describe("utilities", () => {
                 new Statement(ex("c"), ex("p"), ex("d")),
             ], ex("p"))).toHaveLength(2);
         });
+
+        it("returns all rdfs:member properties", () => {
+            const stmts = [
+                new Statement(ex("a"), ex("b"), ex("c")),
+                new Statement(ex("c"), defaultNS.rdf("_1"), ex("1")),
+                new Statement(ex("c"), defaultNS.rdf("_0"), ex("0")),
+                new Statement(ex("c"), defaultNS.rdf("_2"), ex("2")),
+                new Statement(ex("c"), defaultNS.rdf("_3"), ex("3")),
+                new Statement(ex("c"), defaultNS.rdf("_5"), ex("5")),
+            ];
+            expect(allRDFValues(stmts, defaultNS.rdfs("member")))
+                .toEqual([
+                    ex("1"),
+                    ex("0"),
+                    ex("2"),
+                    ex("3"),
+                    ex("5"),
+                ]);
+        });
     });
 
     describe("#anyRDFValue", () => {
@@ -74,6 +94,16 @@ describe("utilities", () => {
                 new Statement(ex("d"), ex("b"), ex("g")),
             ];
             expect(anyRDFValue(stmts, ex("b"))).toEqual(ex("c"));
+        });
+
+        it("returns all rdfs:member properties", () => {
+            const stmts = [
+                new Statement(ex("a"), ex("b"), ex("c")),
+                new Statement(ex("c"), defaultNS.rdf("_1"), ex("1")),
+                new Statement(ex("c"), defaultNS.rdf("_0"), ex("0")),
+                new Statement(ex("c"), defaultNS.rdf("_2"), ex("2")),
+            ];
+            expect(anyRDFValue(stmts, defaultNS.rdfs("member"))).toEqual(ex("1"));
         });
     });
 
@@ -185,6 +215,29 @@ describe("utilities", () => {
             const c = new Statement(ex("a"), ex("b"), ex("c"));
             const d = new Statement(ex("a"), ex("b"), ex("d"));
             expect(getPropBestLangRaw([c, d], langs)).toEqual(c);
+        });
+    });
+
+    describe("getTermBestLang", () => {
+        const langs = ["en", "nl", "de", "fr"];
+        const deString = new Literal("Wert", "de");
+        const enString = new Literal("value", "en");
+        const nlString = new Literal("waarde", "nl");
+
+        it("returns plain terms", () => {
+            expect(getTermBestLang(deString, langs)).toEqual(deString);
+        });
+
+        it("returns the only term", () => {
+            expect(getTermBestLang([enString], langs)).toEqual(enString);
+        });
+
+        it("selects the preferred term", () => {
+            expect(getTermBestLang([deString, enString, nlString], langs)).toEqual(enString);
+        });
+
+        it("returns the first if no match was found", () => {
+            expect(getTermBestLang([deString, enString, nlString], ["fr"])).toEqual(deString);
         });
     });
 

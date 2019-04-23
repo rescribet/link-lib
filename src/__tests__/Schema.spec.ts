@@ -116,4 +116,53 @@ describe("Schema", () => {
             });
         });
     });
+
+    describe("when filled", () => {
+        const schema = blankSchema();
+        schema.addStatements([
+            new Statement(NS.ex("A"), NS.rdfs("subClassOf"), NS.rdf("class")),
+
+            new Statement(NS.ex("B"), NS.rdfs("subClassOf"), NS.ex("A")),
+
+            new Statement(NS.ex("C"), NS.rdfs("subClassOf"), NS.ex("A")),
+
+            new Statement(NS.ex("D"), NS.rdfs("subClassOf"), NS.ex("C")),
+
+            new Statement(NS.ex("E"), NS.rdfs("subClassOf"), NS.rdf("class")),
+
+            new Statement(NS.ex("F"), NS.rdfs("subClassOf"), NS.rdf("class")),
+
+            new Statement(NS.ex("G"), NS.rdfs("subClassOf"), NS.rdf("E")),
+        ]);
+
+        describe("#sort", () => {
+            it("accounts for class inheritance", () => {
+                expect(schema.sort([
+                    NS.ex("D").sI,
+                    NS.ex("A").sI,
+                    NS.ex("C").sI,
+                ])).toEqual([
+                    NS.ex("D").sI, // 3
+                    NS.ex("C").sI, // 2
+                    NS.ex("A").sI, // 1
+                ]);
+            });
+
+            it("accounts for supertype depth", () => {
+                expect(schema.sort([
+                    NS.ex("G").sI,
+                    NS.ex("C").sI,
+                    NS.ex("B").sI,
+                    NS.ex("A").sI,
+                    NS.ex("D").sI,
+                ])).toEqual([
+                    NS.ex("D").sI, // 3
+                    NS.ex("C").sI, // 2
+                    NS.ex("B").sI, // 2
+                    NS.ex("G").sI, // 2
+                    NS.ex("A").sI, // 1
+                ]);
+            });
+        });
+    });
 });

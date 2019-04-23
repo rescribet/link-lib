@@ -30,6 +30,11 @@ const createTestMiddleware = (catchActions: boolean = true): ExplodedMiddleware 
 };
 
 describe("linkMiddleware", () => {
+    it("has coverage", () => {
+        // It really has, but doesn't seem to be accounted for since the function is called in a helper function
+        expect(linkMiddleware()).toBeDefined();
+    });
+
     it("calls touch for data events", async () => {
         const middleware = createTestMiddleware();
 

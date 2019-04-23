@@ -73,12 +73,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private resourceQueueHandle: number | undefined;
 
     // tslint:disable-next-line no-object-literal-type-assertion
-    public constructor(opts: LinkedRenderStoreOptions<T> = { report: (e): void => { throw e; } }) {
+    public constructor(opts: LinkedRenderStoreOptions<T> = {}) {
         if (opts.store) {
             this.store = opts.store;
         }
 
-        this.report = opts.report;
+        this.report = opts.report || ((e): void => { throw e; });
         this.api = opts.api || new DataProcessor({
             dispatch: opts.dispatch,
             report: this.report,
