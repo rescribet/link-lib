@@ -107,7 +107,8 @@ export type LazyIRIArgument = SomeNode | SomeNode[];
 
 export type NamedBlobTuple = [SomeNode, File];
 
-export type SerializablePrimitives = boolean | DataObject | Date | File | number | string | NamedNode | Literal;
+export type SerializablePrimitives = boolean | DataObject | Date | File | number | string
+    | NamedNode | BlankNode | Literal;
 
 export type SerializableDataTypes = SerializablePrimitives | SerializablePrimitives[];
 
@@ -116,6 +117,7 @@ export interface DataObject {
 }
 
 export type DataTuple = [IndexedFormula, NamedBlobTuple[]];
+export type ParsedObject = [SomeNode, IndexedFormula, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
     changeBuffer: Statement[];

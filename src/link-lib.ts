@@ -5,6 +5,11 @@ export { linkMiddleware } from "./linkMiddleware";
 export { RDFStore } from "./RDFStore";
 export { Schema } from "./Schema";
 export * from "./testUtilities";
+export {
+    list,
+    seq,
+    toGraph,
+} from "./processor/DataToGraph";
 export { transformers } from "./transformers/index";
 export * from "./types";
 export {

@@ -1,6 +1,5 @@
 import {
     BlankNode,
-    Collection,
     IndexedFormula,
     Literal,
     NamedNode,
@@ -11,6 +10,7 @@ import {
     DataObject,
     DataTuple,
     NamedBlobTuple,
+    ParsedObject,
     SerializableDataTypes,
     SomeNode,
 } from "../types";
@@ -36,6 +36,32 @@ function uploadIRI(): NamedNode {
     return defaultNS.ll(`blobs/a${Math.random().toString(BASE).substr(DEC_CUTOFF, IRI_LEN)}`);
 }
 
+/**
+ * Converts an array to an RDF list-shaped {DataObject} for serialization.
+ */
+export function list(arr: SerializableDataTypes[]): DataObject {
+    return arr.reduceRight((acc: DataObject, next: SerializableDataTypes) => ({
+        [defaultNS.rdf.first.toString()]: next,
+        [defaultNS.rdf.rest.toString()]: acc,
+    // @ts-ignore
+    }), defaultNS.rdf.nil);
+}
+
+/**
+ * Converts an array to an RDF sequence-shaped {DataObject} for serialization.
+ */
+export function seq<T = any>(arr: T[], id?: SomeNode): DataObject {
+    const base: DataObject = { [defaultNS.rdf.type.toString()]: defaultNS.rdf.Seq };
+    if (id) {
+        base["@id"] = id;
+    }
+
+    return arr.reduce(
+        (acc, next, n) => Object.assign(acc, { [defaultNS.rdf(`_${n}`).toString()]: next }),
+        base,
+    );
+}
+
 /** @private */
 export function processObject(subject: SomeNode,
                               predicate: NamedNode,
@@ -44,18 +70,15 @@ export function processObject(subject: SomeNode,
     let blobs: NamedBlobTuple[] = [];
 
     if (isIterable(datum)) {
-        const items = new Collection();
         for (const subResource of datum) {
-            const id = (subResource as DataObject)["@id"] as SomeNode | undefined || new BlankNode();
             if (isPlainObject(subResource)) {
+                const id = (subResource as DataObject)["@id"] as SomeNode | undefined || new BlankNode();
                 blobs = blobs.concat(processDataObject(id, subResource as DataObject, graph));
+                graph.add(subject, predicate, id);
             } else {
-                blobs = blobs.concat(processObject(id, predicate, subResource, graph));
+                blobs = blobs.concat(processObject(subject, predicate, subResource, graph));
             }
-            items.append(id);
         }
-        items.close();
-        graph.add(subject, predicate, items);
     } else if (typeof datum === "string"
         || typeof datum === "number"
         || typeof datum === "boolean"
@@ -98,7 +121,7 @@ function processDataObject(subject: SomeNode, data: DataObject, graph: IndexedFo
         const datum = data[keys[i]];
 
         if (predicate === undefined) {
-            throw new Error(`Unknown predicate ${keys[i]} given.`);
+            throw new Error(`Unknown predicate ${keys[i]} given (for subject '${subject}').`);
         }
 
         blobs = blobs.concat(processObject(subject, predicate, datum, graph));
@@ -113,4 +136,34 @@ export function dataToGraphTuple(data: DataObject): DataTuple {
     const blobs = processDataObject(MAIN_NODE_DEFAULT_IRI, data, g);
 
     return [g, blobs];
+}
+
+/**
+ * Convert a DataObject into a graph. Useful for writing test data in semi-plain JS objects
+ * @param iriOrData The data object or an iri for the top-level object.
+ * @param data The data object if an IRI was passed.
+ * @param graph A graph to write the statements into.
+ */
+export function toGraph(iriOrData: SomeNode | DataObject, data?: DataObject, graph?: IndexedFormula): ParsedObject {
+    const passedIRI = iriOrData instanceof BlankNode || iriOrData instanceof NamedNode;
+    if (passedIRI && !data) {
+        throw new TypeError("Only an IRI was passed to `toObject`, a valid data object has to be the second argument");
+    }
+    const embeddedIRI = ((passedIRI ? data : iriOrData) as DataObject)!["@id"];
+    let iri;
+    if (embeddedIRI) {
+        if (typeof embeddedIRI !== "string") {
+            throw new TypeError("Embedded IRI (`@id`) value must be of type string");
+        }
+        iri = new NamedNode(embeddedIRI);
+    } else {
+        iri = passedIRI ? (iriOrData as SomeNode) : new BlankNode();
+    }
+    const dataObj = passedIRI ? data! : (iriOrData as DataObject);
+
+    const g = graph || new IndexedFormula();
+
+    const blobs = processDataObject(iri, dataObj, g);
+
+    return [iri, g, blobs];
 }
