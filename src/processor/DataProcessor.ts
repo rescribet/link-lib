@@ -401,11 +401,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
 
         try {
-            this.removeInvalidation(iri);
-            this.removeInvalidation(requestIRI);
             const req = this
                 .fetchResource(requestIRI, opts)
                 .then((res) => {
+                    this.removeInvalidation(iri);
+                    this.removeInvalidation(requestIRI);
                     this.store.removeStatements(preExistingData);
                     return this.feedResponse(res);
                 }); // TODO: feedResponse might only be necessary for non-rdflib fetcher requests.
