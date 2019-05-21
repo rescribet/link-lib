@@ -20,6 +20,14 @@ const thingStatements = [
 
 describe("RDFStore", () => {
     describe("#addStatements", () => {
+        it("requires an array", () => {
+            const store = new RDFStore();
+
+            expect(() => {
+                store.addStatements("test" as any);
+            }).toThrowError(TypeError);
+        });
+
         it("works", () => {
             const store = new RDFStore();
             store.addStatements(thingStatements);
@@ -128,14 +136,19 @@ describe("RDFStore", () => {
         });
     });
 
-    // describe("#replaceStatements", () => {
-    //     it("works", () => {
-    //         const expected = undefined;
-    //         expect(new RDFStore().replaceStatements())
-    //             .toEqual(expected);
-    //     });
-    // });
-    //
+    describe("#replaceStatements", () => {
+        it("replaces statements", () => {
+            const old = [new Statement(NS.ex("a"), NS.ex("p"), NS.ex("x"))];
+            const next = [new Statement(NS.ex("a"), NS.ex("q"), NS.ex("x"))];
+            const store = new RDFStore();
+            store.addStatements(old);
+            store.replaceStatements(old, next);
+
+            expect(store.match(null, null, null, null)).toHaveLength(1);
+            expect(store.match(NS.ex("a"))[0]).toEqual(next[0]);
+        });
+    });
+
     describe("#getResourcePropertyRaw", () => {
         const store = new RDFStore();
         store.addStatements([

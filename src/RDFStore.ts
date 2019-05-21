@@ -190,7 +190,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param replacement The statements to add to the store.
      */
     public replaceStatements(original: Statement[], replacement: Statement[]): void {
-        const uniqueStatements = new Array(replacement.length);
+        const uniqueStatements = new Array(replacement.length).filter(Boolean);
         for (let i = 0; i < replacement.length; i++) {
             const cond = original.some(
                 (o) => o.subject.sameTerm(replacement[i].subject) && o.predicate.sameTerm(replacement[i].predicate),
