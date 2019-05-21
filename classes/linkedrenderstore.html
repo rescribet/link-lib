@@ -914,6 +914,9 @@ img { max-width: 100%; }
 					<a href="linkedrenderstore.html#constructor" class="tsd-kind-icon">constructor</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="linkedrenderstore.html#actions" class="tsd-kind-icon">actions</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
 					<a href="linkedrenderstore.html#defaulttype" class="tsd-kind-icon">default<wbr>Type</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-class">
@@ -1047,6 +1050,7 @@ img { max-width: 100%; }
 					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="linkedrenderstore.html#actions" class="tsd-kind-icon">actions</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class"><a href="linkedrenderstore.html#defaulttype" class="tsd-kind-icon">default<wbr>Type</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class"><a href="linkedrenderstore.html#deltaprocessors" class="tsd-kind-icon">delta<wbr>Processors</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-class"><a href="linkedrenderstore.html#report" class="tsd-kind-icon">report</a></li>
@@ -1110,7 +1114,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L73">LinkedRenderStore.ts:73</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L75">LinkedRenderStore.ts:75</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1127,12 +1131,30 @@ img { max-width: 100%; }
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Properties</h2>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="actions" class="tsd-anchor"></a>
+				<h3>actions</h3>
+				<div class="tsd-signature tsd-kind-icon">actions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L55">LinkedRenderStore.ts:55</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-type-declaration">
+					<h4>Type declaration</h4>
+					<ul class="tsd-parameters">
+						<li class="tsd-parameter-index-signature">
+							<h5><span class="tsd-signature-symbol">[</span>k: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="../interfaces/actionmap.html" class="tsd-signature-type">ActionMap</a></h5>
+						</li>
+					</ul>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="defaulttype" class="tsd-anchor"></a>
 				<h3>default<wbr>Type</h3>
 				<div class="tsd-signature tsd-kind-icon">default<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> =&nbsp;defaultNS.schema(&quot;Thing&quot;)</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L55">LinkedRenderStore.ts:55</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L57">LinkedRenderStore.ts:57</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1147,7 +1169,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">delta<wbr>Processors<span class="tsd-signature-symbol">:</span> <a href="../interfaces/deltaprocessor.html" class="tsd-signature-type">DeltaProcessor</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L56">LinkedRenderStore.ts:56</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L58">LinkedRenderStore.ts:58</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1157,7 +1179,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">report<span class="tsd-signature-symbol">:</span> <a href="../globals.html#errorreporter" class="tsd-signature-type">ErrorReporter</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L57">LinkedRenderStore.ts:57</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L59">LinkedRenderStore.ts:59</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1171,8 +1193,8 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Implementation of <a href="../interfaces/dispatcher.html">Dispatcher</a>.<a href="../interfaces/dispatcher.html#dispatch">dispatch</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L101">LinkedRenderStore.ts:101</a></li>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L109">LinkedRenderStore.ts:109</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L103">LinkedRenderStore.ts:103</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L111">LinkedRenderStore.ts:111</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1189,7 +1211,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L121">LinkedRenderStore.ts:121</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L123">LinkedRenderStore.ts:123</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1220,7 +1242,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L171">LinkedRenderStore.ts:171</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L173">LinkedRenderStore.ts:173</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1257,7 +1279,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L154">LinkedRenderStore.ts:154</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L156">LinkedRenderStore.ts:156</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1300,7 +1322,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L133">LinkedRenderStore.ts:133</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L135">LinkedRenderStore.ts:135</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1339,7 +1361,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L162">LinkedRenderStore.ts:162</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L164">LinkedRenderStore.ts:164</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1371,7 +1393,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L202">LinkedRenderStore.ts:202</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L204">LinkedRenderStore.ts:204</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1415,7 +1437,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L237">LinkedRenderStore.ts:237</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L239">LinkedRenderStore.ts:239</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1460,7 +1482,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L258">LinkedRenderStore.ts:258</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L260">LinkedRenderStore.ts:260</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1504,7 +1526,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L298">LinkedRenderStore.ts:298</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L300">LinkedRenderStore.ts:300</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1544,7 +1566,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L333">LinkedRenderStore.ts:333</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L335">LinkedRenderStore.ts:335</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1580,7 +1602,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L348">LinkedRenderStore.ts:348</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L350">LinkedRenderStore.ts:350</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1621,7 +1643,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L321">LinkedRenderStore.ts:321</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L323">LinkedRenderStore.ts:323</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1657,7 +1679,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L352">LinkedRenderStore.ts:352</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L354">LinkedRenderStore.ts:354</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1683,7 +1705,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L370">LinkedRenderStore.ts:370</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L372">LinkedRenderStore.ts:372</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1709,7 +1731,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L276">LinkedRenderStore.ts:276</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L278">LinkedRenderStore.ts:278</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1741,7 +1763,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L262">LinkedRenderStore.ts:262</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L264">LinkedRenderStore.ts:264</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1767,7 +1789,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L385">LinkedRenderStore.ts:385</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L387">LinkedRenderStore.ts:387</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1800,7 +1822,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L405">LinkedRenderStore.ts:405</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L407">LinkedRenderStore.ts:407</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1835,7 +1857,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L417">LinkedRenderStore.ts:417</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L419">LinkedRenderStore.ts:419</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1858,7 +1880,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L450">LinkedRenderStore.ts:450</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L452">LinkedRenderStore.ts:452</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1899,7 +1921,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L432">LinkedRenderStore.ts:432</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L434">LinkedRenderStore.ts:434</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1937,7 +1959,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L459">LinkedRenderStore.ts:459</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L461">LinkedRenderStore.ts:461</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1966,7 +1988,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L474">LinkedRenderStore.ts:474</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L476">LinkedRenderStore.ts:476</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -2008,7 +2030,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L500">LinkedRenderStore.ts:500</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L502">LinkedRenderStore.ts:502</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -2040,7 +2062,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L513">LinkedRenderStore.ts:513</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L515">LinkedRenderStore.ts:515</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -2074,7 +2096,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L39">LinkedRenderStore.ts:39</a></li>
+								<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L40">LinkedRenderStore.ts:40</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -2111,7 +2133,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">namespaces<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L58">LinkedRenderStore.ts:58</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/5e2e9d9/src/LinkedRenderStore.ts#L60">LinkedRenderStore.ts:60</a></li>
 					</ul>
 				</aside>
 			</section>
