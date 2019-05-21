@@ -17,6 +17,10 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { DisjointSet } from "./utilities/DisjointSet";
 
+export interface ActionMap {
+    [k: string]: (...args: any[]) => void|Promise<any>;
+}
+
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
 export interface SubscriptionRegistrationBase<T> {

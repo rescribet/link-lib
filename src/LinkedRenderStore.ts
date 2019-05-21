@@ -14,6 +14,7 @@ import { dataToGraphTuple } from "./processor/DataToGraph";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import {
+    ActionMap,
     ComponentRegistration,
     DataObject,
     DeltaProcessor,
@@ -51,6 +52,16 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return ComponentStore.registerRenderer(component, types, props, topologies);
     }
 
+    /**
+     * Map of {ActionMap} which hold action dispatchers. Calling a dispatcher should execute the action, causing them to
+     * be handled like any back-end sent action.
+     *
+     * Constructing action IRI's and dispatching them in user code was a bit hard, this object allows any middleware to
+     * define their actions (within their namespace) in a code-oriented fashion. The middleware has control over how the
+     * actions will be dispatched, but it should be the same as if a back-end would have executed the action (via the
+     * Exec-Action header).
+     */
+    public actions: { [k: string]: ActionMap } = {};
     /** Whenever a resource has no type, assume it to be this. */
     public defaultType: NamedNode = defaultNS.schema("Thing");
     public deltaProcessors: DeltaProcessor[];
