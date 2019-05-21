@@ -102,7 +102,7 @@ export type MiddlewareWithBoundLRS = (next: MiddlewareActionHandler) => Middlewa
 export type MiddlewareActionHandler = (action: NamedNode, args: any) => Promise<any>;
 
 export interface NamespaceMap {
-    [s: string]: NamedNamespace;
+    [s: string]: NamedNamespace<any>;
 }
 
 export type LazyNNArgument = NamedNode | NamedNode[];

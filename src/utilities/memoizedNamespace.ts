@@ -32,10 +32,13 @@ export function expandProperty(prop: NamedNode | TermIsh | string | undefined,
     }
 
     if (prop.indexOf("/") >= 1) {
+        if (prop.startsWith("<") && prop.endsWith(">")) {
+            return NamedNode.find(prop.slice(1, -1));
+        }
         return NamedNode.find(prop);
     }
     const matches = prop.split(":");
-    const constructor: NamedNamespace | undefined = namespaces[matches[CI_MATCH_PREFIX]];
+    const constructor: NamedNamespace<{}> | undefined = namespaces[matches[CI_MATCH_PREFIX]];
 
     return constructor && constructor(matches[CI_MATCH_SUFFIX]);
 }
