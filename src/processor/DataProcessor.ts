@@ -173,7 +173,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private get fetcher(): Fetcher {
         if (typeof this._fetcher === "undefined") {
             this._fetcher = new Fetcher(this.store.getInternalStore(), {
-                fetch: typeof window !== "undefined" && window.fetch.bind(window) || undefined,
+                // fetch: typeof window !== "undefined" && window.fetch.bind(window) || undefined,
                 timeout: this.timeout,
             });
             FETCHER_CALLBACKS.forEach((hook) => {
