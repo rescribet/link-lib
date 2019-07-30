@@ -532,14 +532,20 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         let s: Quadruple|void;
         for (let i = 0, len = delta.length; i < len; i++) {
             s = delta[i];
+            const subj = s ? s[0] : undefined;
+
+            const currentStatus = subj && this.statusMap[subj.sI];
+            if (subj && currentStatus && currentStatus.status === 203) {
+                this.statusMap[subj.sI] = undefined;
+            }
 
             if (!s || s[3] !== defaultNS.ll("meta")) {
                 continue;
             }
 
             if (s[1] === defaultNS.http("statusCode")) {
-                this.removeInvalidation(s[0] as NamedNode);
-                this.setStatus(s[0] as NamedNode, Number.parseInt(s[2].value, 10));
+                this.removeInvalidation(subj as NamedNode);
+                this.setStatus(subj as NamedNode, Number.parseInt(s[2].value, 10));
             } else if (s[1] === defaultNS.httph("Exec-Action")) {
                 this.execExecHeader(s[2].value);
             }
