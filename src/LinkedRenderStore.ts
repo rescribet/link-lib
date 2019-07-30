@@ -68,14 +68,15 @@ export class LinkedRenderStore<T> implements Dispatcher {
     public report: ErrorReporter;
     public namespaces: NamespaceMap = {...defaultNS};
 
+    public api: LinkedDataAPI;
+    public mapping: ComponentStore<T>;
+    public schema: Schema;
+    public store: RDFStore = new RDFStore();
+
     private _dispatch?: MiddlewareActionHandler;
-    private api: LinkedDataAPI;
     private bulkFetch: boolean = false;
     private cleanupTimer: number | undefined;
     private currentBroadcast: Promise<void> | undefined;
-    private mapping: ComponentStore<T>;
-    private schema: Schema;
-    private store: RDFStore = new RDFStore();
     private broadcastHandle: number | undefined;
     private bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [];
     private subjectSubscriptions: Array<Array<SubscriptionRegistrationBase<unknown>>> = [];
