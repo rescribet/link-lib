@@ -413,7 +413,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      *
      * @unstable
      */
-    public removeResource(subject: NamedNode, expedite = false): Promise<void> {
+    public removeResource(subject: SomeNode, expedite = false): Promise<void> {
         this.api.invalidate(subject);
         this.store.removeResource(subject);
 

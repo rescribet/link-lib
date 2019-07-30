@@ -64,7 +64,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
     getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus;
 
     /** @unstable */
-    invalidate(iri: string | NamedNode, error?: Error): boolean;
+    invalidate(iri: string | SomeNode, error?: Error): boolean;
 
     /** @unstable */
     isInvalid(iri: SomeNode): boolean;

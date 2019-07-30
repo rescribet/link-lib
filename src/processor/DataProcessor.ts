@@ -505,7 +505,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         );
     }
 
-    public invalidate(iri: string | NamedNode, _err?: Error): boolean {
+    public invalidate(iri: string | SomeNode, _err?: Error): boolean {
         const id = (typeof iri === "string" ? NamedNode.find(iri) : iri).sI;
         this.invalidationMap.set(id);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
