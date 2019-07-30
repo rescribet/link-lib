@@ -401,14 +401,19 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
 
         try {
-            const req = this
-                .fetchResource(requestIRI, opts)
-                .then((res) => {
-                    this.removeInvalidation(iri);
-                    this.removeInvalidation(requestIRI);
-                    this.store.removeStatements(preExistingData);
-                    return this.feedResponse(res);
-                }); // TODO: feedResponse might only be necessary for non-rdflib fetcher requests.
+            const reqOpts = this.requestInitGenerator.generate(
+                "GET",
+                this.acceptForHost(new URL(requestIRI.value).origin),
+            );
+            const req = fetch(requestIRI.value, reqOpts)
+                .then(this.feedResponse)
+                .catch((err) => {
+                    const status = Literal.fromNumber(err instanceof Error ? 499 : err.status);
+                    const delta: Quadruple[] = [
+                        [requestIRI, defaultNS.http("statusCode"), status, defaultNS.ll("meta")],
+                    ];
+                    return this.processDelta(delta);
+                });
             this.requestMap.set(requestIRI.sI, req);
             return await req;
         } catch (e) {

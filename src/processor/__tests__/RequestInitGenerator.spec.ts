@@ -46,6 +46,19 @@ describe("RequestInitGenerator", () => {
 
             const headers = subject.headers;
             it("sets the Accept header", () => expect(headers).toHaveProperty("Accept", "application/n-quads"));
+
+            it("sets the CSRF header", () => expect(headers).toHaveProperty("X-CSRF-Token"));
+        });
+
+        describe("without credentials", () => {
+            const subject = getGenerator({ credentials: "omit" }).generate("POST", "application/n-quads");
+
+            it("sets the method option", () => expect(subject).toHaveProperty("method", "POST"));
+
+            const headers = subject.headers;
+            it("sets the Accept header", () => expect(headers).toHaveProperty("Accept", "application/n-quads"));
+
+            it("skips the CSRF header", () => expect(headers).not.toHaveProperty("X-CSRF-Token"));
         });
     });
 });
