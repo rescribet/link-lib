@@ -178,7 +178,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             });
             FETCHER_CALLBACKS.forEach((hook) => {
                 const hookIRI = defaultNS.ll(`data/rdflib/${hook}`);
-                this._fetcher!.addCallback(hook, this.invalidate.bind(this));
+                this._fetcher!.addCallback(hook, this.invalidateStatus.bind(this));
                 this._fetcher!.addCallback(hook, (iri: string | NamedNode, _err?: Error) => {
                     this.dispatch(hookIRI, [typeof iri === "string" ? NamedNode.find(iri) : iri, _err]);
 
@@ -325,16 +325,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             opts,
         );
 
-        let res;
-        try {
-            res = await this.fetcher.load(iri, options);
-        } catch (e) {
-            if (typeof e.response !== "undefined") {
-                res =  e.response;
-            } else {
-                throw e;
-            }
-        }
+        const res = await this.fetcher.load(iri, options);
 
         return this.processExecAction(res);
     }
@@ -417,11 +408,13 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             this.requestMap.set(requestIRI.sI, req);
             return await req;
         } catch (e) {
-            if (typeof e.res === "undefined") {
+            this.invalidateStatus(iri.sI);
+            const response = e.res || e.response;
+            if (typeof response === "undefined") {
                 throw e;
             }
             this.store.removeStatements(preExistingData);
-            const responseQuads = processResponse(iri, e.res);
+            const responseQuads = processResponse(iri, response);
             this.store.addStatements(responseQuads);
 
             return responseQuads;
@@ -510,11 +503,18 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         );
     }
 
+    public invalidateStatus(iri: number | string | NamedNode): boolean {
+        const id = typeof iri === "number" ? iri : (typeof iri === "string" ? NamedNode.find(iri) : iri).sI;
+        // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
+        this.statusMap[id] = undefined;
+
+        return true;
+    }
+
     public invalidate(iri: string | SomeNode, _err?: Error): boolean {
         const id = (typeof iri === "string" ? NamedNode.find(iri) : iri).sI;
         this.invalidationMap.set(id);
-        // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
-        this.statusMap[id] = undefined;
+        this.invalidateStatus(id);
 
         return true;
     }
