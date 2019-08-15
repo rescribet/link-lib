@@ -91,6 +91,9 @@ export interface DeltaProcessor {
     processDelta: (delta: Quadruple[]) => Statement[];
 }
 
+export type StoreProcessorResult = [Quadruple[], Quadruple[], Statement[]];
+export type StoreProcessor = (delta: Quadruple[]) => StoreProcessorResult;
+
 export interface Dispatcher {
     dispatch: MiddlewareActionHandler;
 }

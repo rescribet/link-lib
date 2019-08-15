@@ -4,7 +4,8 @@ export { createStore } from "./createStore";
 export { linkMiddleware } from "./linkMiddleware";
 export { DataProcessor } from "./processor/DataProcessor";
 export { RequestInitGenerator } from "./processor/RequestInitGenerator";
-export { RDFStore } from "./RDFStore";
+export { RDFStore, RDFStoreOpts } from "./RDFStore";
+export { deltaProcessor } from "./store/deltaProcessor";
 export { Schema } from "./Schema";
 export * from "./testUtilities";
 export {

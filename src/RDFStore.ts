@@ -11,12 +11,17 @@ import {
     Term,
 } from "rdflib";
 
-import { ChangeBuffer, DeltaProcessor, SomeNode } from "./types";
+import { deltaProcessor } from "./store/deltaProcessor";
+import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
 import { defaultNS as NS } from "./utilities/constants";
 import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Statement> = Object.freeze([]);
+
+export interface RDFStoreOpts {
+    deltaProcessorOpts: {[k: string]: Array<NamedNode | undefined>};
+}
 
 /**
  * Provides a clean consistent interface to stored (RDF) data.
@@ -32,33 +37,39 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public changeTimestamps: Uint32Array = new Uint32Array(0x100000);
     public typeCache: NamedNode[][] = [];
 
-    private addGraphIRIS: any[];
     private deltas: Quadruple[][] = [];
-    private replaceGraphIRIS: any[];
-    private removeGraphIRIS: any[];
-    private purgeGraphIRIS: NamedNode[];
-    private sliceGraphIRIS: NamedNode[];
+    private deltaProcessor: StoreProcessor;
     private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
     private store: IndexedFormula = graph();
 
-    constructor() {
-        this.addGraphIRIS = [NS.ll("add")];
-        this.replaceGraphIRIS = [
-            undefined,
-            NS.ll("replace"),
-            this.store.defaultGraphIRI,
-        ];
-        this.removeGraphIRIS = [NS.ll("remove")];
-        this.sliceGraphIRIS = [NS.ll("slice")];
-        this.purgeGraphIRIS = [NS.ll("purge")];
+    constructor({ deltaProcessorOpts }: RDFStoreOpts = { deltaProcessorOpts: {} }) {
         this.processDelta = this.processDelta.bind(this);
 
         const g = graph();
         this.store = patchRDFLibStoreWithOverrides(g, this);
-
         this.store.newPropertyAction(NS.rdf("type"), this.processTypeStatement.bind(this));
+
+        const defaults =  {
+            addGraphIRIS: [NS.ll("add")],
+            purgeGraphIRIS: [NS.ll("purge")],
+            removeGraphIRIS: [NS.ll("remove")],
+            replaceGraphIRIS: [
+                undefined,
+                NS.ll("replace"),
+                this.store.defaultGraphIRI,
+            ],
+            sliceGraphIRIS: [NS.ll("slice")],
+        };
+
+        this.deltaProcessor = deltaProcessor(
+            deltaProcessorOpts.addGraphIRIS || defaults.addGraphIRIS,
+            deltaProcessorOpts.replaceGraphIRIS || defaults.replaceGraphIRIS,
+            deltaProcessorOpts.removeGraphIRIS || defaults.removeGraphIRIS,
+            deltaProcessorOpts.purgeGraphIRIS || defaults.purgeGraphIRIS,
+            deltaProcessorOpts.sliceGraphIRIS || defaults.sliceGraphIRIS,
+        )(this.store);
     }
 
     /**
@@ -147,63 +158,11 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public processDelta(delta: Quadruple[]): Statement[] {
-        const addables = [];
-        const replacables = [];
-        const removables = [];
-
-        let quad: Quadruple;
-        for (let i = 0, len = delta.length; i < len; i++) {
-            quad = delta[i];
-
-            if (!quad) {
-                continue;
-            }
-
-            if (this.addGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
-                const g = new URL(quad[3].value).searchParams.get("graph");
-                if (g) {
-                    addables.push([quad[0], quad[1], quad[2], new NamedNode(g)] as Quadruple);
-                } else {
-                    addables.push(quad);
-                }
-            } else if (
-                this.replaceGraphIRIS.includes(quad[3])
-                || this.replaceGraphIRIS.findIndex((v) => quad[3] === v
-                || quad[3].value.startsWith(v && v.value)) >= 0
-            ) {
-                const g = new URL(quad[3].value).searchParams.get("graph");
-                if (g) {
-                    replacables.push([quad[0], quad[1], quad[2], new NamedNode(g)] as Quadruple);
-                } else {
-                    replacables.push(quad);
-                }
-            } else if (this.removeGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
-                const g = new URL(quad[3].value).searchParams.get("graph");
-                if (g) {
-                    const matches = this.store.match(quad[0], quad[1], null, new NamedNode(g));
-                    removables.push(...matches);
-                } else {
-                    const matches = this.store.match(quad[0], quad[1], null, null);
-                    removables.push(...matches);
-                }
-            } else if (this.purgeGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
-                const g = new URL(quad[3].value).searchParams.get("graph");
-                if (g) {
-                    const matches = this.store.match(quad[0], null, null, new NamedNode(g));
-                    removables.push(...matches);
-                } else {
-                    const matches = this.store.match(quad[0], null, null, null);
-                    removables.push(...matches);
-                }
-            } else if (this.sliceGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
-                const g = new URL(quad[3].value).searchParams.get("graph");
-                if (g) {
-                    removables.push(...this.store.match(quad[0], quad[1], quad[2], new NamedNode(g)));
-                } else {
-                    removables.push(...this.store.match(quad[0], quad[1], quad[2], null));
-                }
-            }
-        }
+        const [
+            addables,
+            replacables,
+            removables,
+        ] = this.deltaProcessor(delta);
 
         this.removeStatements(removables);
 
