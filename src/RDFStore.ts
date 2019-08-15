@@ -36,6 +36,8 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     private deltas: Quadruple[][] = [];
     private replaceGraphIRIS: any[];
     private removeGraphIRIS: any[];
+    private purgeGraphIRIS: NamedNode[];
+    private sliceGraphIRIS: NamedNode[];
     private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
@@ -49,6 +51,8 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             this.store.defaultGraphIRI,
         ];
         this.removeGraphIRIS = [NS.ll("remove")];
+        this.sliceGraphIRIS = [NS.ll("slice")];
+        this.purgeGraphIRIS = [NS.ll("purge")];
         this.processDelta = this.processDelta.bind(this);
 
         const g = graph();
@@ -74,7 +78,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public addQuads(data: Quadruple[]): Statement[] {
         const statements = new Array(data.length);
         for (let i = 0, len = data.length; i < len; i++) {
-            statements[i] = this.store.add(data[i][0], data[i][1], data[i][2]);
+            statements[i] = this.store.add(data[i][0], data[i][1], data[i][2], data[i][3]);
         }
 
         return statements;
@@ -147,7 +151,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         const replacables = [];
         const removables = [];
 
-        let quad;
+        let quad: Quadruple;
         for (let i = 0, len = delta.length; i < len; i++) {
             quad = delta[i];
 
@@ -155,13 +159,49 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 continue;
             }
 
-            if (this.addGraphIRIS.includes(quad[3])) {
-                addables.push(quad);
-            } else if (this.replaceGraphIRIS.includes(quad[3])) {
-                replacables.push(quad);
-            } else if (this.removeGraphIRIS.includes(quad[3])) {
-                const matches = this.store.match(quad[0], quad[1], null, null);
-                removables.push(...matches);
+            if (this.addGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
+                const g = new URL(quad[3].value).searchParams.get("graph");
+                if (g) {
+                    addables.push([quad[0], quad[1], quad[2], new NamedNode(g)] as Quadruple);
+                } else {
+                    addables.push(quad);
+                }
+            } else if (
+                this.replaceGraphIRIS.includes(quad[3])
+                || this.replaceGraphIRIS.findIndex((v) => quad[3] === v
+                || quad[3].value.startsWith(v && v.value)) >= 0
+            ) {
+                const g = new URL(quad[3].value).searchParams.get("graph");
+                if (g) {
+                    replacables.push([quad[0], quad[1], quad[2], new NamedNode(g)] as Quadruple);
+                } else {
+                    replacables.push(quad);
+                }
+            } else if (this.removeGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
+                const g = new URL(quad[3].value).searchParams.get("graph");
+                if (g) {
+                    const matches = this.store.match(quad[0], quad[1], null, new NamedNode(g));
+                    removables.push(...matches);
+                } else {
+                    const matches = this.store.match(quad[0], quad[1], null, null);
+                    removables.push(...matches);
+                }
+            } else if (this.purgeGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
+                const g = new URL(quad[3].value).searchParams.get("graph");
+                if (g) {
+                    const matches = this.store.match(quad[0], null, null, new NamedNode(g));
+                    removables.push(...matches);
+                } else {
+                    const matches = this.store.match(quad[0], null, null, null);
+                    removables.push(...matches);
+                }
+            } else if (this.sliceGraphIRIS.findIndex((v) => quad[3] === v || quad[3].value.startsWith(v.value)) >= 0) {
+                const g = new URL(quad[3].value).searchParams.get("graph");
+                if (g) {
+                    removables.push(...this.store.match(quad[0], quad[1], quad[2], new NamedNode(g)));
+                } else {
+                    removables.push(...this.store.match(quad[0], quad[1], quad[2], null));
+                }
             }
         }
 
@@ -220,7 +260,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         }
         const matches = new Array(statements.length);
         for (let i = 0, len = statements.length; i < len; i++) {
-            matches[i] = this.store.add(statements[i][0], statements[i][1], statements[i][2]);
+            matches[i] = this.store.add(statements[i][0], statements[i][1], statements[i][2], statements[i][3]);
         }
 
         return matches;
