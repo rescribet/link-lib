@@ -23,7 +23,9 @@ export function allRDFPropertyStatements(obj: Statement[] | undefined, predicate
     }
 
     if (predicate === defaultNS.rdfs("member")) {
-        return obj.filter((s) => s.predicate.value.startsWith(memberPrefix));
+        return obj.filter((s) =>
+            s.predicate === defaultNS.rdfs("member")
+            || s.predicate.value.startsWith(memberPrefix));
     }
 
     return obj.filter((s) => s.predicate.equals(predicate));

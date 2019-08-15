@@ -65,6 +65,7 @@ describe("utilities", () => {
                 new Statement(ex("c"), defaultNS.rdf("_2"), ex("2")),
                 new Statement(ex("c"), defaultNS.rdf("_3"), ex("3")),
                 new Statement(ex("c"), defaultNS.rdf("_5"), ex("5")),
+                new Statement(ex("c"), defaultNS.rdfs("member"), ex("6")),
             ];
             expect(allRDFValues(stmts, defaultNS.rdfs("member")))
                 .toEqual([
@@ -73,6 +74,7 @@ describe("utilities", () => {
                     ex("2"),
                     ex("3"),
                     ex("5"),
+                    ex("6"),
                 ]);
         });
     });
