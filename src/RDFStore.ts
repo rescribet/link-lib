@@ -258,12 +258,8 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 undefined,
             ));
         }
-        const matches = new Array(statements.length);
-        for (let i = 0, len = statements.length; i < len; i++) {
-            matches[i] = this.store.add(statements[i][0], statements[i][1], statements[i][2], statements[i][3]);
-        }
 
-        return matches;
+        return this.addQuads(statements);
     }
 
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Statement[] {
