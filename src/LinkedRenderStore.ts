@@ -36,6 +36,13 @@ import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
 import { expandProperty } from "./utilities/memoizedNamespace";
 
+/**
+ * Main entrypoint into the functionality of link-lib.
+ *
+ * Before using the methods for querying data and views here, search through your render library (e.g. link-redux) to
+ * see if it exposes an API which covers your use-case. Skipping the render library might cause unexpected behaviour and
+ * hard to solve bugs.
+ */
 export class LinkedRenderStore<T> implements Dispatcher {
     public static registerRenderer<T>(
         component: T,
@@ -129,6 +136,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
      *
      * Adding information after the initial render currently conflicts with the caching and will result in inconsistent
      * results.
+     *
+     * Statements added here will also be added to the data store so views can access the statements.
      */
     public addOntologySchematics(items: Statement[]): void {
         this.schema.addStatements(items);
@@ -240,7 +249,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Finds the best render component for a given property in respect to a topology.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param type The type(s) of the resource to render.
      * @param predicate The predicate(s) (property(s)) to render.
      * @param [topology] The topology of the resource, if any
@@ -261,7 +270,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Finds the best render component for a type in respect to a topology.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @see LinkedRenderStore#getComponentForProperty
      * @param type The type(s) of the resource to render.
      * @param [topology] The topology of the resource, if any
@@ -271,6 +280,13 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.getComponentForProperty(type, RENDER_CLASS_NAME, topology);
     }
 
+    /**
+     * Efficiently queues a resource to be fetched later.
+     *
+     * This skips the overhead of creating a promise and allows the subsystem to retrieve multiple resource in one
+     * round trip, sacrificing loading status for performance.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
+     */
     public queueEntity(iri: NamedNode, opts?: FetchOpts): void {
         if (!(opts && opts.reload) && !this.shouldLoadResource(iri)) {
             return;
@@ -283,7 +299,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Queue a linked-delta to be processed.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * Note: This should only be used by render-libraries (e.g. link-redux), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      */
     public queueDelta(delta: Array<Quadruple|void> | Statement[], expedite = false): Promise<void> {
         const quadArr = delta[0] instanceof Statement
@@ -302,7 +319,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * Will fetch the entity with the URL {iri}. When a resource under that subject is already present, it will not
      * be fetched again.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param iri The SomeNode of the resource
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
@@ -325,7 +342,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Resolves all the properties {property} of resource {subject} to their statements.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param {SomeNode} subject The resource to get the properties for.
      * @param {SomeNode | SomeNode[]} property
      * @return {Statement[]} All the statements of {property} on {subject}, or an empty array when none are present.
@@ -337,7 +354,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Resolves all the properties {property} of resource {subject} to a value.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param {SomeNode} subject The resource to get the properties for.
      * @param {SomeNode | SomeNode[]} property
      * @return {SomeTerm[]} The resolved values of {property}, or an empty array when none are present.
@@ -352,7 +369,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * When more than one statement on {property} is present, a random one will be chosen. See
      * {LinkedResourceContainer#getResourceProperties} to retrieve all the values.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param {SomeNode} subject The resource to get the properties for.
      * @param {SomeNode | SomeNode[]} property
      * @return {SomeTerm | undefined} The resolved value of {property}, or undefined when none are present.
@@ -361,6 +378,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.store.getResourceProperty(subject, property);
     }
 
+    /**
+     * Retrieve the (network) status of the resource {iri}.
+     *
+     * Status 202 indicates that the resource has been queued for fetching (subject to change).
+     */
     public getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus {
         if (iri.termType === "BlankNode") {
             return emptyRequest as EmptyRequestStatus;
@@ -379,6 +401,14 @@ export class LinkedRenderStore<T> implements Dispatcher {
         return this.api.getStatus(iri);
     }
 
+    /**
+     * Process a linked-delta onto the store.
+     *
+     * This should generally only be called from the middleware or the data api
+     * @param delta An array of [s, p, o, g] arrays containing the delta.
+     * @param expedite Will immediately process the delta rather than waiting for an idle moment, useful in conjunction
+     *  with event handlers within the UI needing immediate feedback. Might cause jumpy interfaces.
+     */
     public processDelta(delta: Array<Quadruple|void> | Statement[], expedite = false): Promise<Statement[]> {
         const quadArr = delta[0] instanceof Statement
             ? (delta as Statement[]).map((s: Statement) => s.toQuad())
@@ -424,7 +454,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Resets the render store mappings and the schema graph.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * Note: This should only be used by render-libraries (e.g. link-redux), not by application code.
      */
     public reset(): void {
         this.store = new RDFStore();
@@ -435,7 +465,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Get a render component for a rendering {property} on resource {subject}.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary
      * @param {SomeNode} subject
      * @param {NamedNode | NamedNode[]} predicate
      * @param {NamedNode} topology
@@ -454,7 +484,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Get a render component for {subject}.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary
      * @param {SomeNode} subject The resource to get the renderer for.
      * @param {"rdflib".NamedNode} topology The topology to take into account when picking the renderer.
      * @return {T | undefined}
@@ -467,7 +497,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
         );
     }
 
-    /** @unstable */
+    /**
+     * Determine if it makes sense to load a resource.
+     *
+     * @renderlibrary
+     * @unstable
+     */
     public shouldLoadResource(subject: SomeNode): boolean {
         return (this.store.changeTimestamps[subject.sI] === 0 || this.api.isInvalid(subject))
             && !this.resourceQueue.find(([i]) => i === subject);
@@ -476,7 +511,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     /**
      * Listen for data changes by subscribing to store changes.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param registration
      * @param registration[0] Will be called with the new statements as its argument.
      * @param registration[1] Options for the callback.
@@ -518,7 +553,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * Returns an entity from the cache directly.
      * This won't cause any network requests even if the entity can't be found.
      *
-     * Note: This should only be used by render-libraries (e.g. link-lib), not by application code.
+     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param iri The SomeNode of the resource.
      * @returns The object if found, or undefined.
      */
