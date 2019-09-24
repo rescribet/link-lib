@@ -594,7 +594,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Statement[]> {
-        if (res.status >= INTERNAL_SERVER_ERROR) {
+        if (res.status >= BAD_REQUEST) {
             return Promise.reject(res);
         }
         const format = getContentType(res);
