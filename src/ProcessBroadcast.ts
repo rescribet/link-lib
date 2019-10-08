@@ -1,4 +1,4 @@
-import { Statement } from "rdflib";
+import { Quad } from "./rdf";
 
 import { SubscriptionRegistrationBase } from "./types";
 
@@ -25,7 +25,7 @@ export interface ProcessBroadcastOpts {
     subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
     timeout: number;
     /** Statements which have changed in the store */
-    work: Statement[] | ReadonlyArray<Statement>;
+    work: Quad[] | ReadonlyArray<Quad>;
 }
 
 /**
@@ -38,7 +38,7 @@ export class ProcessBroadcast {
     private readonly hasRequestAnimationFrame: boolean;
     private readonly regUpdateTime: number;
     private subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
-    private readonly work: ReadonlyArray<Statement>;
+    private readonly work: ReadonlyArray<Quad>;
     private resolve: () => void;
     private readonly timeout: number;
 

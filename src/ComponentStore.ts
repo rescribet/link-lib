@@ -1,5 +1,4 @@
-import { NamedNode } from "rdflib";
-
+import { NamedNode } from "./rdf";
 import { Schema } from "./Schema";
 import { ComponentRegistration } from "./types";
 import { DEFAULT_TOPOLOGY, defaultNS } from "./utilities/constants";
@@ -22,9 +21,9 @@ export class ComponentStore<T> {
      * @see LinkedRenderStore#registerAll
      */
     public static registerRenderer<T>(component: T,
-                                      types: number[],
-                                      properties: number[],
-                                      topologies: number[]): Array<ComponentRegistration<T>> {
+                                      types: NamedNode[],
+                                      properties: NamedNode[],
+                                      topologies: NamedNode[]): Array<ComponentRegistration<T>> {
         if (typeof component === "undefined") {
             throw new Error(`Undefined component was given for (${types}, ${properties}, ${topologies}).`);
         }
@@ -60,7 +59,7 @@ export class ComponentStore<T> {
 
     public constructor(schema: Schema) {
         this.schema = schema;
-        this.mapping[RENDER_CLASS_NAME.sI] = [];
+        this.mapping[RENDER_CLASS_NAME.id] = [];
     }
 
     /**
@@ -87,10 +86,10 @@ export class ComponentStore<T> {
 
         const possibleComponents = this.possibleComponents(predicates, topology);
         if (possibleComponents.length === 0) {
-            if (topology === DEFAULT_TOPOLOGY.sI) {
+            if (topology === DEFAULT_TOPOLOGY.id) {
                 return undefined;
             }
-            const foundComponent = this.getRenderComponent(oTypes, predicates, DEFAULT_TOPOLOGY.sI, defaultType);
+            const foundComponent = this.getRenderComponent(oTypes, predicates, DEFAULT_TOPOLOGY.id, defaultType);
             if (!foundComponent) {
                 return undefined;
             }
@@ -127,8 +126,8 @@ export class ComponentStore<T> {
      */
     public registerRenderer(component: T,
                             type: number,
-                            property: number = RENDER_CLASS_NAME.sI,
-                            topology: number = DEFAULT_TOPOLOGY.sI): void {
+                            property: number = RENDER_CLASS_NAME.id,
+                            topology: number = DEFAULT_TOPOLOGY.id): void {
         if (!property || !type) {
             return;
         }

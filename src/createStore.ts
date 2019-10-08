@@ -1,7 +1,6 @@
-import { NamedNode } from "rdflib";
-
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { linkMiddleware } from "./linkMiddleware";
+import { NamedNode } from "./rdf";
 import { LinkedRenderStoreOptions, MiddlewareActionHandler, MiddlewareFn } from "./types";
 
 function applyMiddleware<T>(lrs: LinkedRenderStore<T>, ...layers: Array<MiddlewareFn<T>>): MiddlewareActionHandler {

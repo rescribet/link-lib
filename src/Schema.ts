@@ -1,12 +1,18 @@
-import { IndexedFormula, NamedNode, Statement } from "rdflib";
-import { RDFStore } from "./RDFStore";
+import rdf from "@ontologies/rdf";
+import rdfs from "@ontologies/rdfs";
+import { IndexedFormula, Statement } from "rdflib";
 
+import rdfFactory, { NamedNode, Quad, Term } from "./rdf";
+import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";
-import { nsRDFSResource, RDFS } from "./schema/rdfs";
+import { RDFS } from "./schema/rdfs";
 
-import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "./types";
-import { defaultNS as NS } from "./utilities/constants";
+import {
+    SomeNode,
+    VocabularyProcessingContext,
+    VocabularyProcessor,
+} from "./types";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 /**
@@ -35,7 +41,7 @@ export class Schema extends IndexedFormula {
     }
 
     /** Push statements onto the graph so it can be used by the render store for component determination. */
-    public addStatements(statements: Statement[]): void {
+    public addStatements(statements: Quad[]): void {
         const unique = statements.filter((s) => !this.holdsStatement(s));
         const eligible = unique.filter(this.process.bind(this));
         if (eligible.length === 0) {
@@ -67,11 +73,11 @@ export class Schema extends IndexedFormula {
     }
 
     public isInstanceOf(resource: number, superClass: number): boolean {
-        return this.holdsStatement(Statement.from(
-            NamedNode.findByStoreIndex(resource)!,
-            NS.rdf("type"),
-            NamedNode.findByStoreIndex(superClass)!,
-        ));
+        return this.holdsStatement(rdfFactory.quad(
+            rdfFactory.findById(resource) as NamedNode,
+            rdf.type,
+            rdfFactory.findById(superClass) as Term,
+        ) as unknown as Statement);
     }
 
     public isSubclassOf(resource: number, superClass: number): boolean {
@@ -100,15 +106,15 @@ export class Schema extends IndexedFormula {
      */
     public mineForTypes(lookupTypes: number[]): number[] {
         if (lookupTypes.length === 0) {
-            return [nsRDFSResource.sI];
+            return [rdfs.Resource.id];
         }
 
         const canonicalTypes: number[] = [];
         for (let i = 0; i < lookupTypes.length; i++) {
-            const canon = (this.liveStore.canon(NamedNode.findByStoreIndex(lookupTypes[i])!) as SomeNode).sI;
+            const canon = (this.liveStore.canon(rdfFactory.findById(lookupTypes[i])!) as SomeNode).id;
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
-                    Schema.vocabularies[j].processType(NamedNode.findByStoreIndex(canon)!, this.getProcessingCtx());
+                    Schema.vocabularies[j].processType(rdfFactory.findById(canon)!, this.getProcessingCtx());
                 }
                 this.processedTypes.push(canon);
             }
@@ -160,7 +166,7 @@ export class Schema extends IndexedFormula {
         });
     }
 
-    private process(item: Statement): Statement[] | null {
+    private process(item: Quad): Quad[] | null {
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             const res = Schema.vocabularies[i].processStatement(item, this.getProcessingCtx());
             if (res !== null) {

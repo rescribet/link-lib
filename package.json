@@ -1,6 +1,6 @@
 {
   "name": "link-lib",
-  "version": "1.0.0-rc4",
+  "version": "1.0.0-rc4-datafactory",
   "description": "The Link library for creating information based applications",
   "main": "dist/link-lib.umd.js",
   "module": "dist/link-lib.es6.js",
@@ -28,14 +28,29 @@
   },
   "author": "Fletcher91 <thom@argu.co>",
   "license": "LGPL-3.0",
-  "dependencies": {},
+  "dependencies": {
+    "murmurhash-js": "^1.0.0"
+  },
   "peerDependencies": {
+    "@ontologies/as": ">=1.0.1",
+    "@ontologies/core": ">=1.5.0",
+    "@ontologies/schema": ">=1.0.0",
+    "@ontologies/shacl": ">=1.0.0",
+    "@ontologies/xsd": ">=1.0.0",
     "http-status-codes": ">= 1.x",
     "rdflib": ">= 0.19.x"
   },
   "devDependencies": {
+    "@ontologies/as": "^1.0.1",
+    "@ontologies/core": "=1.5.1-generic",
+    "@ontologies/rdf": "^1.0.0",
+    "@ontologies/rdfs": "^1.0.0",
+    "@ontologies/schema": "^1.0.0",
+    "@ontologies/shacl": "^1.0.0",
+    "@ontologies/xsd": "^1.0.0",
     "@types/firefox-webext-browser": "^67.0.2",
     "@types/jest": "^24.0.15",
+    "@types/murmurhash-js": "^1.0.3",
     "@types/node": "^11.13.7",
     "core-js": "^3.1.4",
     "esdoc": "^1.1.0",
@@ -44,7 +59,7 @@
     "jest": "^24.8.0",
     "jest-fetch-mock": "^2.1.2",
     "n-quads-parser": "^2.0.3",
-    "rdflib": "npm:link-rdflib@0.19.1-20190515T091246",
+    "rdflib": "npm:link-rdflib@1.0.4-datafactory-6",
     "rollup": "^1.16.7",
     "rollup-plugin-commonjs": "^10.0.1",
     "rollup-plugin-node-resolve": "^5.2.0",

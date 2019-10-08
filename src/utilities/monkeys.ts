@@ -1,8 +1,8 @@
 import {
     IndexedFormula,
     Serializer,
-    Statement,
 } from "rdflib";
+import { Quad } from "../rdf";
 import { ChangeBuffer } from "../types";
 
 /**
@@ -10,7 +10,7 @@ import { ChangeBuffer } from "../types";
  * @see https://github.com/linkeddata/rdflib.js/pull/282
  * @monkey
  */
-export function patchRDFLibSerializer(serializer: Serializer, fallback: string): void {
+export function patchRDFLibSerializer<T>(serializer: Serializer<T>, fallback: string): void {
     const old = serializer.stringToN3;
     serializer.stringToN3 = function stringToN3(str: string, flags: string): string {
         let flagsWithFallback = flags;
@@ -26,7 +26,8 @@ export function patchRDFLibSerializer(serializer: Serializer, fallback: string):
  * Patch rdflib with memoized versions of terms by overriding certain object methods.
  * For browsers that don't support Proxy.
  */
-export function patchRDFLibStoreWithOverrides(graph: IndexedFormula, changeBufferTarget: ChangeBuffer): IndexedFormula {
+export function patchRDFLibStoreWithOverrides<T>(graph: IndexedFormula<T>,
+                                                 changeBufferTarget: ChangeBuffer): IndexedFormula<T> {
     // Don't try this at home, kids!
     graph.statements.push = (...elems: any): number => {
         let elem;
@@ -38,7 +39,7 @@ export function patchRDFLibStoreWithOverrides(graph: IndexedFormula, changeBuffe
         return Array.prototype.push.call(graph.statements, ...elems);
     };
 
-    graph.statements.splice = (index: any, len: any): Statement[] => {
+    graph.statements.splice = (index: any, len: any): Array<Quad<T>> => {
         const rem = Array.prototype.splice.call(graph.statements, index, len);
         changeBufferTarget.changeBuffer.push(...rem);
         changeBufferTarget.changeBufferCount += len;

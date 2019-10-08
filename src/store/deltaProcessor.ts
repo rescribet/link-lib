@@ -1,6 +1,10 @@
-import { Quadruple } from "n-quads-parser";
-import { IndexedFormula, NamedNode, Node } from "rdflib";
+import { IndexedFormula } from "rdflib";
 
+import rdfFactory, {
+    NamedNode,
+    Node,
+    Quadruple,
+} from "../rdf";
 import { StoreProcessor, StoreProcessorResult } from "../types";
 
 const matchSingle = (graphIRI: NamedNode | undefined): (graph: Node) => boolean => {
@@ -50,21 +54,21 @@ export const deltaProcessor = (
             if (isAdd(quad[3])) {
                 const g = new URL(quad[3].value).searchParams.get("graph");
                 if (g) {
-                    addable.push([quad[0], quad[1], quad[2], new NamedNode(g)] as Quadruple);
+                    addable.push([quad[0], quad[1], quad[2], rdfFactory.namedNode(g)] as Quadruple);
                 } else {
                     addable.push(quad);
                 }
             } else if (isReplace(quad[3])) {
                 const g = new URL(quad[3].value).searchParams.get("graph");
                 if (g) {
-                    replaceable.push([quad[0], quad[1], quad[2], new NamedNode(g)] as Quadruple);
+                    replaceable.push([quad[0], quad[1], quad[2], rdfFactory.namedNode(g)] as Quadruple);
                 } else {
                     replaceable.push(quad);
                 }
             } else if (isRemove(quad[3])) {
                 const g = new URL(quad[3].value).searchParams.get("graph");
                 if (g) {
-                    const matches = store.match(quad[0], quad[1], null, new NamedNode(g));
+                    const matches = store.match(quad[0], quad[1], null, rdfFactory.namedNode(g));
                     removable.push(...matches);
                 } else {
                     const matches = store.match(quad[0], quad[1], null, null);
@@ -73,7 +77,7 @@ export const deltaProcessor = (
             } else if (isPurge(quad[3])) {
                 const g = new URL(quad[3].value).searchParams.get("graph");
                 if (g) {
-                    const matches = store.match(quad[0], null, null, new NamedNode(g));
+                    const matches = store.match(quad[0], null, null, rdfFactory.namedNode(g));
                     removable.push(...matches);
                 } else {
                     const matches = store.match(quad[0], null, null, null);
@@ -82,7 +86,7 @@ export const deltaProcessor = (
             } else if (isSlice(quad[3])) {
                 const g = new URL(quad[3].value).searchParams.get("graph");
                 if (g) {
-                    removable.push(...store.match(quad[0], quad[1], quad[2], new NamedNode(g)));
+                    removable.push(...store.match(quad[0], quad[1], quad[2], rdfFactory.namedNode(g)));
                 } else {
                     removable.push(...store.match(quad[0], quad[1], quad[2], null));
                 }

@@ -1,9 +1,9 @@
+import rdf, { Node } from "@ontologies/core";
 import {
     BlankNode,
     IndexedFormula,
     Literal,
     NamedNode,
-    Statement,
 } from "rdflib";
 
 import {
@@ -63,7 +63,7 @@ export function seq<T = any>(arr: T[], id?: SomeNode): DataObject {
 }
 
 /** @private */
-export function processObject(subject: SomeNode,
+export function processObject(subject: Node,
                               predicate: NamedNode,
                               datum: DataObject | SerializableDataTypes | null | undefined,
                               graph: IndexedFormula): NamedBlobTuple[] {
@@ -72,7 +72,7 @@ export function processObject(subject: SomeNode,
     if (isIterable(datum)) {
         for (const subResource of datum) {
             if (isPlainObject(subResource)) {
-                const id = (subResource as DataObject)["@id"] as SomeNode | undefined || new BlankNode();
+                const id = (subResource as DataObject)["@id"] as SomeNode | undefined || rdf.blankNode();
                 blobs = blobs.concat(processDataObject(id, subResource as DataObject, graph));
                 graph.add(subject, predicate, id);
             } else {
@@ -86,23 +86,22 @@ export function processObject(subject: SomeNode,
         graph.add(subject, predicate, Literal.fromValue(datum));
     } else if (datum instanceof File) {
         const f = uploadIRI();
-        const file = new Statement(subject, predicate, f);
+        const file = rdf.quad(subject, predicate, f);
         blobs.push([f, datum as File]);
         graph.add(file);
     } else if (isPlainObject(datum)) {
-        const id = datum["@id"] as SomeNode | undefined || new BlankNode();
+        const id = datum["@id"] as SomeNode | undefined || rdf.blankNode();
         blobs = blobs.concat(processDataObject(id, datum, graph));
         graph.add(subject, predicate, id);
     } else if (datum && datum.termType === "NamedNode") {
-        graph.add(subject, predicate, NamedNode.find(datum.value));
+        graph.add(subject, predicate, rdf.namedNode(datum.value));
     } else if (datum && datum.termType === "Literal") {
         graph.add(
             subject,
             predicate,
-            Literal.find(
+            rdf.literal(
                 datum.value,
-                (datum as Literal).language,
-                NamedNode.find((datum as Literal).datatype.value),
+                (datum as Literal).language || rdf.namedNode((datum as Literal).datatype.value),
             ),
         );
     } else if (datum !== null && datum !== undefined) {
@@ -112,7 +111,7 @@ export function processObject(subject: SomeNode,
     return blobs;
 }
 
-function processDataObject(subject: SomeNode, data: DataObject, graph: IndexedFormula): NamedBlobTuple[] {
+function processDataObject(subject: Node, data: DataObject, graph: IndexedFormula): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
@@ -155,9 +154,9 @@ export function toGraph(iriOrData: SomeNode | DataObject, data?: DataObject, gra
         if (typeof embeddedIRI !== "string") {
             throw new TypeError("Embedded IRI (`@id`) value must be of type string");
         }
-        iri = new NamedNode(embeddedIRI);
+        iri = rdf.namedNode(embeddedIRI);
     } else {
-        iri = passedIRI ? (iriOrData as SomeNode) : new BlankNode();
+        iri = passedIRI ? (iriOrData as SomeNode) : rdf.blankNode();
     }
     const dataObj = passedIRI ? data! : (iriOrData as DataObject);
 
