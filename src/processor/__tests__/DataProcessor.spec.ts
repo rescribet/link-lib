@@ -1,10 +1,15 @@
+import "../../__tests__/useHashFactory";
+
+import rdfFactory from "@ontologies/core";
 import {
     BAD_REQUEST,
     INTERNAL_SERVER_ERROR,
     NOT_FOUND,
 } from "http-status-codes";
 import "jest";
-import { BlankNode, IndexedFormula, Literal, Statement } from "rdflib";
+
+import { rdflib, RequestInitGenerator } from "../../link-lib";
+import { Quad } from "../../rdf";
 
 import { getBasicStore } from "../../testUtilities";
 import { FulfilledRequestStatus, ResponseAndFallbacks } from "../../types";
@@ -39,7 +44,7 @@ describe("DataProcessor", () => {
             const subject = defaultNS.example("actions/5");
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new IndexedFormula(), []]);
+                await store.processor.execActionByIRI(subject, [new rdflib.IndexedFormula(), []]);
             } catch (e) {
                 error = e;
             }
@@ -53,13 +58,13 @@ describe("DataProcessor", () => {
 
             const subject = defaultNS.example("actions/5");
             store.store.addStatements([
-                new Statement(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
-                new Statement(subject, defaultNS.schema("target"), new Literal("targets/5")),
+                rdfFactory.quad(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
+                rdfFactory.quad(subject, defaultNS.schema("target"), rdfFactory.literal("targets/5")),
             ]);
 
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new IndexedFormula(), []]);
+                await store.processor.execActionByIRI(subject, [new rdflib.IndexedFormula(), []]);
             } catch (e) {
                 error = e;
             }
@@ -73,13 +78,13 @@ describe("DataProcessor", () => {
 
             const subject = defaultNS.example("actions/5");
             store.store.addStatements([
-                new Statement(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
-                new Statement(subject, defaultNS.schema("target"), defaultNS.example("targets/5")),
+                rdfFactory.quad(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
+                rdfFactory.quad(subject, defaultNS.schema("target"), defaultNS.example("targets/5")),
             ]);
 
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new IndexedFormula(), []]);
+                await store.processor.execActionByIRI(subject, [new rdflib.IndexedFormula(), []]);
             } catch (e) {
                 error = e;
             }
@@ -93,14 +98,14 @@ describe("DataProcessor", () => {
 
             const subject = defaultNS.example("actions/5");
             store.store.addStatements([
-                new Statement(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
-                new Statement(subject, defaultNS.schema("target"), defaultNS.example("targets/5")),
-                new Statement(defaultNS.example("targets/5"), defaultNS.schema("url"), new BlankNode()),
+                rdfFactory.quad(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
+                rdfFactory.quad(subject, defaultNS.schema("target"), defaultNS.example("targets/5")),
+                rdfFactory.quad(defaultNS.example("targets/5"), defaultNS.schema("url"), rdfFactory.blankNode()),
             ]);
 
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new IndexedFormula(), []]);
+                await store.processor.execActionByIRI(subject, [new rdflib.IndexedFormula(), []]);
             } catch (e) {
                 error = e;
             }
@@ -113,16 +118,16 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("actions/5");
             store.store.addStatements([
-                new Statement(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
-                new Statement(subject, defaultNS.schema("target"), defaultNS.example("targets/5")),
-                new Statement(defaultNS.example("targets/5"), defaultNS.schema("url"), defaultNS.example("test")),
+                rdfFactory.quad(subject, defaultNS.schema("object"), defaultNS.example("objects/1")),
+                rdfFactory.quad(subject, defaultNS.schema("target"), defaultNS.example("targets/5")),
+                rdfFactory.quad(defaultNS.example("targets/5"), defaultNS.schema("url"), defaultNS.example("test")),
             ]);
 
             const process = jest.fn((res) => Promise.resolve(res));
             // @ts-ignore
             store.processor.processExecAction = process;
 
-            await store.processor.execActionByIRI(subject, [new IndexedFormula(), []]);
+            await store.processor.execActionByIRI(subject, [new rdflib.IndexedFormula(), []]);
 
             expect(process).toHaveBeenCalledTimes(1);
         });
@@ -153,35 +158,31 @@ describe("DataProcessor", () => {
         });
     });
 
-    describe("#fetchResource", () => {
-        it("calls processExecAction", async () => {
-            const store = getBasicStore();
-
-            const process = jest.fn((res) => Promise.resolve(res));
-            // @ts-ignore
-            store.processor.processExecAction = process;
-
-            await store.processor.fetchResource(defaultNS.example("test"));
-
-            expect(process).toHaveBeenCalledTimes(1);
-        });
-
-        it("processes error responses", async () => {
-            const result = new Response(null, {
-                status: 401,
-                statusText: "unauthorized",
+    describe("#getEntity", () => {
+        it("non-fetchable url with CORS", async () => {
+            const store = getBasicStore({
+                apiOpts: {
+                    fetch: (_, __): Promise<Response> => {
+                        throw new Error("Test triggered error");
+                    },
+                    requestInitGenerator: new RequestInitGenerator({
+                        credentials: "include",
+                        csrfFieldName: "",
+                        mode: "cors",
+                        xRequestedWith: "XMLHttpRequest",
+                    }),
+                },
             });
 
-            (fetch as any).mockRejectOnce(result);
+            try {
+                const res = await store
+                    .processor
+                    .getEntity(rdfFactory.namedNode("about:bookmarks"));
 
-            const store = getBasicStore();
-            const process = jest.fn((res) => Promise.resolve(res));
-            // @ts-ignore
-            store.processor.processExecAction = process;
-
-            await store.processor.fetchResource(defaultNS.example("test"));
-
-            expect(process).toHaveBeenCalled();
+                expect(res).toBeInstanceOf(Array);
+            } catch (e) {
+                expect(e).toBeFalsy();
+            }
         });
     });
 
@@ -282,7 +283,11 @@ describe("DataProcessor", () => {
             const subject = defaultNS.example("resource/6");
 
             store.store.addStatements([
-                new Statement(new BlankNode(), defaultNS.link("requestedURI"), new Literal(subject.value)),
+                rdfFactory.quad(
+                    rdfFactory.blankNode(),
+                    defaultNS.link("requestedURI"),
+                    rdfFactory.literal(subject.value),
+                ),
             ]);
             (store.processor as any).fetcher.requested[subject.value] = true;
             const status = store.processor.getStatus(subject);
@@ -295,9 +300,9 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("resource/6");
 
-            const requestInfo = new BlankNode();
+            const requestInfo = rdfFactory.blankNode();
             store.store.addStatements([
-                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
             ]);
             (store.processor as any).fetcher.requested[subject.value] = "other";
             const status = store.processor.getStatus(subject);
@@ -311,7 +316,11 @@ describe("DataProcessor", () => {
             const subject = defaultNS.example("resource/6");
 
             store.store.addStatements([
-                new Statement(new BlankNode(), defaultNS.link("requestedURI"), new Literal(subject.value)),
+                rdfFactory.quad(
+                    rdfFactory.blankNode(),
+                    defaultNS.link("requestedURI"),
+                    rdfFactory.literal(subject.value),
+                ),
             ]);
             (store.processor as any).fetcher.requested[subject.value] = "timeout";
             const status = store.processor.getStatus(subject);
@@ -324,13 +333,13 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("resource/6");
 
-            const response = new BlankNode();
-            const requestInfo = new BlankNode();
+            const response = rdfFactory.blankNode();
+            const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
             store.store.addStatements([
-                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
-                new Statement(requestInfo, defaultNS.link("response"), response),
-                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+                rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
+                rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher.requested[subject.value] = "done";
             const status = store.processor.getStatus(subject);
@@ -343,13 +352,13 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("resource/6");
 
-            const response = new BlankNode();
-            const requestInfo = new BlankNode();
+            const response = rdfFactory.blankNode();
+            const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
             store.store.addStatements([
-                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
-                new Statement(requestInfo, defaultNS.link("response"), response),
-                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+                rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
+                rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher.requested[subject.value] = "other";
             const status = store.processor.getStatus(subject);
@@ -362,14 +371,14 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("resource/6");
 
-            const response = new BlankNode();
-            const requestInfo = new BlankNode();
+            const response = rdfFactory.blankNode();
+            const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
             store.store.addStatements([
-                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
-                new Statement(requestInfo, defaultNS.link("response"), response),
-                new Statement(response, defaultNS.httph("status"), new Literal(259)),
-                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+                rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
+                rdfFactory.quad(response, defaultNS.httph("status"), rdfFactory.literal(259)),
+                rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher.requested[subject.value] = "done";
             const status = store.processor.getStatus(subject);
@@ -383,14 +392,14 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("resource/6");
 
-            const response = new BlankNode();
-            const requestInfo = new BlankNode();
+            const response = rdfFactory.blankNode();
+            const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
             store.store.addStatements([
-                new Statement(requestInfo, defaultNS.link("requestedURI"), new Literal(subject.value)),
-                new Statement(requestInfo, defaultNS.link("response"), response),
-                new Statement(response, defaultNS.httph("status"), new Literal(259)),
-                new Statement(response, defaultNS.httph("date"), new Literal(requestDate.toISOString())),
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+                rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
+                rdfFactory.quad(response, defaultNS.httph("status"), rdfFactory.literal(259)),
+                rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher.requested[subject.value] = "done";
             const status = store.processor.getStatus(subject);
@@ -411,12 +420,12 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             // @ts-ignore
             const map = store.processor.statusMap;
-            map[defaultNS.example("test").sI] = emptyRequest;
+            map[rdfFactory.id(defaultNS.example("test"))] = emptyRequest;
 
-            expect(map.filter(Boolean).length).toEqual(1);
+            expect(Object.values(map).filter(Boolean).length).toEqual(1);
             // @ts-ignore
             store.processor.invalidate(defaultNS.example("test"));
-            expect(map.filter(Boolean).length).toEqual(0);
+            expect(Object.values(map).filter(Boolean).length).toEqual(0);
         });
 
         it("marks the resource as invalidated", () => {
@@ -538,7 +547,7 @@ describe("DataProcessor", () => {
         it("ignores other deltas", () => {
             const store = getBasicStore();
             store.processor.processDelta([
-                [resource, defaultNS.rdf("type"), defaultNS.schema("Thing"), new BlankNode("chrome:theSession")],
+                [resource, defaultNS.rdf("type"), defaultNS.schema("Thing"), rdfFactory.blankNode("chrome:theSession")],
             ]);
         });
 
@@ -546,7 +555,7 @@ describe("DataProcessor", () => {
             it("sets the status codes", () => {
                 const store = getBasicStore();
                 store.processor.processDelta([
-                    [resource, defaultNS.http("statusCode"), new Literal(200), defaultNS.ll("meta")],
+                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), defaultNS.ll("meta")],
                 ]);
 
                 expect(store.processor.getStatus(resource).status).toEqual(200);
@@ -556,7 +565,7 @@ describe("DataProcessor", () => {
                 const store = getBasicStore();
                 store.processor.invalidate(resource);
                 store.processor.processDelta([
-                    [resource, defaultNS.http("statusCode"), new Literal(200), defaultNS.ll("meta")],
+                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), defaultNS.ll("meta")],
                 ]);
 
                 expect(store.processor.isInvalid(resource)).toBeFalsy();
@@ -569,7 +578,7 @@ describe("DataProcessor", () => {
 
         it("sets the status", () => {
             const store = getBasicStore();
-            store.processor.queueDelta([], [resource.sI]);
+            store.processor.queueDelta([], [rdfFactory.id(resource)]);
 
             expect(store.processor.getStatus(resource)).toHaveProperty("status", 203);
             expect(store.processor.getStatus(resource)).toHaveProperty("timesRequested", 1);
@@ -582,7 +591,7 @@ describe("DataProcessor", () => {
             // @ts-ignore
             const mapping = store.processor.mapping;
 
-            const transformer = (_res: ResponseAndFallbacks): Promise<Statement[]> => Promise.resolve([]);
+            const transformer = (_res: ResponseAndFallbacks): Promise<Quad[]> => Promise.resolve([]);
 
             store.processor.registerTransformer(transformer, "text/n3", 0.9);
 

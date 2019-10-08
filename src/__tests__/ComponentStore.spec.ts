@@ -1,12 +1,15 @@
 import "jest";
+import "./useHashFactory";
+
+import rdfFactory from "@ontologies/core";
+import schema from "@ontologies/schema";
 
 import { ComponentStore } from "../ComponentStore";
 import { getBasicStore } from "../testUtilities";
-import { defaultNS as NS } from "../utilities/constants";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
-const DT = DEFAULT_TOPOLOGY.sI;
-const RCN = RENDER_CLASS_NAME.sI;
+const DT = rdfFactory.id(DEFAULT_TOPOLOGY);
+const RCN = rdfFactory.id(RENDER_CLASS_NAME);
 
 describe("ComponentStore", () => {
     describe("registerRenderer", () => {
@@ -14,7 +17,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     undefined,
-                    [NS.schema("Thing").sI],
+                    [rdfFactory.id(schema.Thing)],
                     [RCN],
                     [DT],
                 );
@@ -25,7 +28,7 @@ describe("ComponentStore", () => {
             const comp = (): string => "a";
             const reg = ComponentStore.registerRenderer(
                 comp,
-                [NS.schema("Thing").sI],
+                [rdfFactory.id(schema.Thing)],
                 [RCN],
                 [DT],
             );
@@ -34,7 +37,7 @@ describe("ComponentStore", () => {
                 component: comp,
                 property: RCN,
                 topology: DT,
-                type: NS.schema("Thing").sI,
+                type: rdfFactory.id(schema.Thing),
             }]);
         });
 
@@ -42,7 +45,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [NS.schema("Thing").sI, undefined!],
+                    [rdfFactory.id(schema.Thing), undefined!],
                     [RCN],
                     [DT],
                 );
@@ -53,7 +56,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [NS.schema("Thing").sI],
+                    [rdfFactory.id(schema.Thing)],
                     [RCN, undefined!],
                     [DT],
                 );
@@ -64,7 +67,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [NS.schema("Thing").sI],
+                    [rdfFactory.id(schema.Thing)],
                     [RCN],
                     [DT, undefined!],
                 );
@@ -76,7 +79,7 @@ describe("ComponentStore", () => {
 
             expect(store.mapping.registerRenderer(
                 () => undefined,
-                NS.schema("Thing").sI,
+                rdfFactory.id(schema.Thing),
                 undefined,
                 undefined,
             )).toBeUndefined();

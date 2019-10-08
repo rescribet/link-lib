@@ -1,8 +1,5 @@
-import {
-    IndexedFormula,
-    Serializer,
-    Statement,
-} from "rdflib";
+import { Quad } from "@ontologies/core";
+import { Serializer, Store } from "../rdflib";
 import { ChangeBuffer } from "../types";
 
 /**
@@ -26,7 +23,8 @@ export function patchRDFLibSerializer(serializer: Serializer, fallback: string):
  * Patch rdflib with memoized versions of terms by overriding certain object methods.
  * For browsers that don't support Proxy.
  */
-export function patchRDFLibStoreWithOverrides(graph: IndexedFormula, changeBufferTarget: ChangeBuffer): IndexedFormula {
+export function patchRDFLibStoreWithOverrides(graph: Store,
+                                              changeBufferTarget: ChangeBuffer): Store {
     // Don't try this at home, kids!
     graph.statements.push = (...elems: any): number => {
         let elem;
@@ -38,7 +36,7 @@ export function patchRDFLibStoreWithOverrides(graph: IndexedFormula, changeBuffe
         return Array.prototype.push.call(graph.statements, ...elems);
     };
 
-    graph.statements.splice = (index: any, len: any): Statement[] => {
+    graph.statements.splice = (index: any, len: any): Quad[] => {
         const rem = Array.prototype.splice.call(graph.statements, index, len);
         changeBufferTarget.changeBuffer.push(...rem);
         changeBufferTarget.changeBufferCount += len;

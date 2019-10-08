@@ -1,4 +1,9 @@
-import { ErrorResponse, ExtensionResponse, RDFLibFetcherRequest, ResponseAndFallbacks } from "../types";
+import {
+    ErrorResponse,
+    ExtensionResponse,
+    RDFLibFetcherRequest,
+    ResponseAndFallbacks,
+} from "../types";
 
 import {
     F_JSONLD,

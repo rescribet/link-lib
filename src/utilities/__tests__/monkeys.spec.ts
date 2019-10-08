@@ -1,10 +1,8 @@
-import {
-    IndexedFormula,
-    Literal,
-    NamedNode,
-    Serializer,
-    Statement,
-} from "rdflib";
+import "../../__tests__/useHashFactory";
+
+import rdfFactory from "@ontologies/core";
+
+import { IndexedFormula, RDFSerializer, Store } from "../../rdflib";
 import { ChangeBuffer } from "../../types";
 
 import { defaultNS as NS } from "../constants";
@@ -12,9 +10,9 @@ import { patchRDFLibSerializer, patchRDFLibStoreWithOverrides } from "../monkeys
 
 function serializeString(str: string, patch = true): string {
     const g = new IndexedFormula();
-    g.add(new Statement(NS.ex("1"), NS.ex("prop"), new Literal(str)));
+    g.add(rdfFactory.quad(NS.ex("1"), NS.ex("prop"), rdfFactory.literal(str)));
 
-    const s = new Serializer(new IndexedFormula());
+    const s = new RDFSerializer(new IndexedFormula());
     if (patch) {
         patchRDFLibSerializer(s, "deinprstux");
     }
@@ -23,7 +21,7 @@ function serializeString(str: string, patch = true): string {
     return s.statementsToNTriples(g.statements);
 }
 
-function getStorePair(): [IndexedFormula, ChangeBuffer] {
+function getStorePair(): [Store, ChangeBuffer] {
     const g = new IndexedFormula();
 
     const changeBuffer = {
@@ -42,12 +40,12 @@ describe("monkeys", () => {
 
         it("patches the rdflib bug", () => {
             expect(serializeString(failing))
-                .toEqual(`${prefix}"testtesttest\\n\\ntesttesttest" .\n`);
+                .toEqual(`${prefix}"testtesttest\\n\\ntesttesttest"^^<http://www.w3.org/2001/XMLSchema#string> .\n`);
         });
 
         it("keeps normal strings in tact", () => {
             expect(serializeString(succeeding))
-                .toEqual(`${prefix}"test\\n\\ntest" .\n`);
+                .toEqual(`${prefix}"test\\n\\ntest"^^<http://www.w3.org/2001/XMLSchema#string> .\n`);
         });
 
         it("is still required", () => {
@@ -67,7 +65,7 @@ describe("monkeys", () => {
         it("increments the changebuffer", () => {
             const [ g, changeBuffer ] = getStorePair();
             patchRDFLibStoreWithOverrides(g, changeBuffer);
-            g.statements.push(new Statement(NS.ex("1"), NS.ex("p"), NS.ex("2")));
+            g.statements.push(rdfFactory.quad(NS.ex("1"), NS.ex("p"), NS.ex("2")));
 
             expect(changeBuffer.changeBufferCount).toEqual(1);
         });
@@ -77,19 +75,19 @@ describe("monkeys", () => {
             const [ g, changeBuffer ] = getStorePair();
             patchRDFLibStoreWithOverrides(g, changeBuffer);
             g.add([
-                new Statement(
-                    new NamedNode("http://example.com/1"),
-                    new NamedNode("http://example.com/p"),
-                    new NamedNode("http://example.com/2"),
+                rdfFactory.quad(
+                    rdfFactory.namedNode("http://example.com/1"),
+                    rdfFactory.namedNode("http://example.com/p"),
+                    rdfFactory.namedNode("http://example.com/2"),
                 ),
-                new Statement(
-                    new NamedNode("http://example.com/3"),
-                    new NamedNode("http://example.com/p"),
-                    new NamedNode("http://example.com/4"),
+                rdfFactory.quad(
+                    rdfFactory.namedNode("http://example.com/3"),
+                    rdfFactory.namedNode("http://example.com/p"),
+                    rdfFactory.namedNode("http://example.com/4"),
                 ),
             ]);
 
-            expect(g.statements[0].subject).toHaveProperty("sI");
+            expect(g.statements[0].subject).toHaveProperty("id");
         });
     });
 });

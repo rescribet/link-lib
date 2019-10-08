@@ -1,5 +1,8 @@
-import { NamedNode } from "rdflib";
+import "../../__tests__/useHashFactory";
 
+import rdfFactory from "@ontologies/core";
+
+import { NamedNode } from "../../rdf";
 import { defaultNS as NS } from "../../utilities/constants";
 import { expandProperty } from "../memoizedNamespace";
 
@@ -10,7 +13,7 @@ describe("memoizedNamespace", () => {
         });
 
         it("returns identity when passed NamedNode", () => {
-            const n = new NamedNode("http://example.com");
+            const n = rdfFactory.namedNode("http://example.com");
             expect(expandProperty(n)).toEqual(n);
         });
 
@@ -19,7 +22,7 @@ describe("memoizedNamespace", () => {
                 termType: "NamedNode",
                 value: "http://example.com/ns#1",
             };
-            expect(expandProperty((n as NamedNode))).toEqual(NS.ex("1"));
+            expect(expandProperty(n)).toEqual(NS.ex("1"));
         });
 
         it("returns undefined when passed a random plain object", () => {

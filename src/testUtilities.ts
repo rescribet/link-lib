@@ -5,20 +5,26 @@ import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
-import { LinkedRenderStoreOptions, MiddlewareActionHandler } from "./types";
+import {
+    DataProcessorOpts,
+    Indexable,
+    LinkedRenderStoreOptions,
+    MiddlewareActionHandler,
+} from "./types";
 
 export type BasicComponent = () => string | undefined;
 
 export class ComponentStoreTestProxy<T> extends ComponentStore<T> {
-    public publicLookup(predicate: number,
-                        obj: number,
-                        topology: number): T | undefined {
+    public publicLookup(predicate: Indexable,
+                        obj: Indexable,
+                        topology: Indexable): T | undefined {
         return this.lookup(predicate, obj, topology);
     }
 }
 
 export interface ExplodedLRS<T> {
     api: LinkedDataAPI;
+    apiOpts: Partial<DataProcessorOpts>;
     dispatch: MiddlewareActionHandler;
     forceBroadcast: () => Promise<void>;
     processor: DataProcessor;
@@ -33,7 +39,7 @@ export type GetBasicStoreOpts = Partial<ExplodedLRS<BasicComponent>>;
 export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicComponent> => {
     const report = (e: Error): void => { throw e; };
     const store = opts.store || new RDFStore();
-    const processor = opts.processor || new DataProcessor({ report, store });
+    const processor = opts.processor || new DataProcessor({ report, store, ...opts.apiOpts });
     const api = opts.api || processor;
     const schema = opts.schema || new Schema(store);
     const mapping = opts.mapping || new ComponentStoreTestProxy<BasicComponent>(schema);

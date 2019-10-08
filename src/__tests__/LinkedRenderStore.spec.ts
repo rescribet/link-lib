@@ -1,60 +1,78 @@
 import "jest";
-import {
-    BlankNode,
-    Literal,
+import "./useHashFactory";
+
+import rdfFactory, {
     NamedNode,
+    Quad,
     Quadruple,
-    Statement,
-} from "rdflib";
+} from "@ontologies/core";
+import dcterms from "@ontologies/dcterms";
+import owl from "@ontologies/owl";
+import rdf from "@ontologies/rdf";
+import rdfs from "@ontologies/rdfs";
+import schema from "@ontologies/schema";
 
 import {
     LinkedRenderStore,
 } from "../LinkedRenderStore";
+import { createNS } from "../rdf";
 import { getBasicStore } from "../testUtilities";
 import { ComponentRegistration, SomeNode, SubscriptionRegistrationBase } from "../types";
 import { defaultNS as NS } from "../utilities/constants";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
-const DT = DEFAULT_TOPOLOGY.sI;
-const RCN = RENDER_CLASS_NAME.sI;
+const DT = rdfFactory.id(DEFAULT_TOPOLOGY);
+const RCN = rdfFactory.id(RENDER_CLASS_NAME);
 
-const schemaT = NS.schema("Thing");
+const schemaT = schema.Thing;
 const thingStatements = [
-    new Statement(schemaT, NS.rdf("type"), NS.rdfs("Class")),
-    new Statement(schemaT, NS.rdfs("comment"), new Literal("The most generic type of item.")),
-    new Statement(schemaT, NS.rdfs("label"), new Literal("Thing.")),
+    rdfFactory.quad(schemaT, rdf.type, rdfs.Class),
+    rdfFactory.quad(schemaT, rdfs.comment, rdfFactory.literal("The most generic type of item.")),
+    rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing.")),
 ];
 
-const schemaCW = NS.schema("CreativeWork");
+const schemaCW = schema.CreativeWork;
 const creativeWorkStatements = [
-    new Statement(schemaCW, NS.rdf("type"), NS.rdfs("Class")),
-    new Statement(schemaCW, NS.rdfs("label"), new Literal("CreativeWork")),
-    new Statement(schemaCW, NS.rdfs("subClassOf"), schemaT),
-    new Statement(
+    rdfFactory.quad(schemaCW, rdf.type, rdfs.Class),
+    rdfFactory.quad(schemaCW, rdfs.label, rdfFactory.literal("CreativeWork")),
+    rdfFactory.quad(schemaCW, rdfs.subClassOf, schemaT),
+    rdfFactory.quad(
         schemaCW,
-        NS.dc("source"),
-        NamedNode.find("http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_rNews"),
+        dcterms.source,
+        rdfFactory.namedNode("http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_rNews"),
     ),
-    new Statement(
+    rdfFactory.quad(
         schemaCW,
-        NS.rdfs("comment"),
-        new Literal("The most generic kind of creative work, including books, movies, [...], etc."),
+        rdfs.comment,
+        rdfFactory.literal("The most generic kind of creative work, including books, movies, [...], etc."),
     ),
 ];
+
+const example = createNS("http://example.com/");
+const ex = createNS("http://example.com/ns#");
+const ldNS = createNS("http://purl.org/linked-delta/");
+const ld = {
+    add: ldNS("add"),
+    purge: ldNS("purge"),
+    remove: ldNS("remove"),
+    replace: ldNS("replace"),
+    slice: ldNS("slice"),
+    supplant: ldNS("supplant"),
+};
 
 describe("LinkedRenderStore", () => {
     describe("adds new graph items", () => {
         it("add a single graph item", () => {
             const store = getBasicStore();
             store.lrs.addOntologySchematics(thingStatements);
-            expect(store.schema.isInstanceOf(schemaT.sI, NS.rdfs("Class").sI)).toBeTruthy();
+            expect(store.schema.isInstanceOf(rdfFactory.id(schemaT), rdfFactory.id(rdfs.Class))).toBeTruthy();
         });
 
         it("adds multiple graph items", () => {
             const store = getBasicStore();
             store.lrs.addOntologySchematics(thingStatements.concat(creativeWorkStatements));
-            expect(store.schema.isInstanceOf(schemaT.sI, NS.rdfs("Class").sI)).toBeTruthy();
-            expect(store.schema.isInstanceOf(schemaCW.sI, NS.rdfs("Class").sI)).toBeTruthy();
+            expect(store.schema.isInstanceOf(rdfFactory.id(schemaT), rdfFactory.id(rdfs.Class))).toBeTruthy();
+            expect(store.schema.isInstanceOf(rdfFactory.id(schemaCW), rdfFactory.id(rdfs.Class))).toBeTruthy();
         });
     });
 
@@ -62,12 +80,12 @@ describe("LinkedRenderStore", () => {
         it("registers with full notation", () => {
             const store = getBasicStore();
             const comp = (): string => "a";
-            store.lrs.registerAll(LinkedRenderStore.registerRenderer(comp, NS.schema("Thing")));
+            store.lrs.registerAll(LinkedRenderStore.registerRenderer(comp, schema.Thing));
             const thingComp = store.mapping.getRenderComponent(
-                [NS.schema("Thing").sI],
+                [rdfFactory.id(schema.Thing)],
                 [RCN],
                 DT,
-                NS.rdfs("Resource").sI,
+                rdfFactory.id(rdfs.Resource),
             );
             expect(thingComp).toEqual(comp);
         });
@@ -77,20 +95,20 @@ describe("LinkedRenderStore", () => {
             const comp = (): string => "a";
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(
                 comp,
-                [NS.schema("Thing"), NS.schema("CreativeWork")],
+                [schema.Thing, schema.CreativeWork],
             ));
             const thingComp = store.mapping.getRenderComponent(
-                [NS.schema("Thing").sI],
+                [rdfFactory.id(schema.Thing)],
                 [RCN],
                 DT,
-                NS.rdfs("Resource").sI,
+                rdfFactory.id(rdfs.Resource),
             );
             expect(thingComp).toEqual(comp);
             const cwComp = store.mapping.getRenderComponent(
-                [NS.schema("CreativeWork").sI],
+                [rdfFactory.id(schema.CreativeWork)],
                 [RCN],
                 DT,
-                NS.rdfs("Resource").sI,
+                rdfFactory.id(rdfs.Resource),
             );
             expect(cwComp).toEqual(comp);
         });
@@ -100,12 +118,12 @@ describe("LinkedRenderStore", () => {
         it("registers with full notation", () => {
             const store = getBasicStore();
             const ident = (): string => "a";
-            store.lrs.registerAll(LinkedRenderStore.registerRenderer(ident, NS.schema("Thing"), NS.schema("name")));
+            store.lrs.registerAll(LinkedRenderStore.registerRenderer(ident, schema.Thing, schema.name));
             const nameComp = store.mapping.getRenderComponent(
-                [NS.schema("Thing").sI],
-                [NS.schema("name").sI],
+                [rdfFactory.id(schema.Thing)],
+                [rdfFactory.id(schema.name)],
                 DT,
-                NS.rdfs("Resource").sI,
+                rdfFactory.id(rdfs.Resource),
             );
             expect(nameComp).toEqual(ident);
         });
@@ -115,15 +133,15 @@ describe("LinkedRenderStore", () => {
             const ident = (): string => "a";
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(
                 ident,
-                NS.schema("Thing"),
-                [NS.schema("name"), NS.rdfs("label")],
+                schema.Thing,
+                [schema.name, rdfs.label],
             ));
-            [NS.schema("name"), NS.rdfs("label")].forEach((prop) => {
+            [schema.name, rdfs.label].forEach((prop) => {
                 const nameComp = store.mapping.getRenderComponent(
-                    [NS.schema("Thing").sI],
-                    [prop.sI],
+                    [rdfFactory.id(schema.Thing)],
+                    [rdfFactory.id(prop)],
                     DT,
-                    NS.rdfs("Resource").sI,
+                    rdfFactory.id(rdfs.Resource),
                 );
                 expect(nameComp).toEqual(ident);
                 expect(nameComp).not.toEqual((): string => "b");
@@ -134,11 +152,11 @@ describe("LinkedRenderStore", () => {
     describe("returns renderer for", () => {
         it("class renders", () => {
             const LRS = new LinkedRenderStore();
-            expect(LRS.getComponentForType(NS.schema("Thing"))).toBeUndefined();
+            expect(LRS.getComponentForType(schema.Thing)).toBeUndefined();
             const ident = (a: string): string => a;
-            const registrations = LinkedRenderStore.registerRenderer(ident, NS.schema("Thing"));
+            const registrations = LinkedRenderStore.registerRenderer(ident, schema.Thing);
             LRS.registerAll(registrations);
-            const klass = LRS.getComponentForType(NS.schema("Thing"));
+            const klass = LRS.getComponentForType(schema.Thing);
             expect(klass).toEqual(ident);
             expect(klass).not.toEqual((a: string): string => a);
         });
@@ -148,11 +166,11 @@ describe("LinkedRenderStore", () => {
             const ident = (a: string): string => a;
             const registrations = LinkedRenderStore.registerRenderer(
                 ident,
-                NS.schema("Thing"),
-                NS.schema("name"),
+                schema.Thing,
+                schema.name,
             );
             LRS.registerAll(registrations);
-            const klass = LRS.getComponentForProperty(NS.schema("Thing"), NS.schema("name"));
+            const klass = LRS.getComponentForProperty(schema.Thing, schema.name);
             expect(klass).toEqual(ident);
             expect(klass).not.toEqual((a: string): string => a);
         });
@@ -162,23 +180,23 @@ describe("LinkedRenderStore", () => {
         it("combines sameAs declarations", async () => {
             const store = getBasicStore();
 
-            const id = NS.example("sameFirst");
-            const idSecond = NS.example("sameSecond");
+            const id = example("sameFirst");
+            const idSecond = example("sameSecond");
             const testData = [
-                new Statement(id, NS.rdf("type"), NS.schema("CreativeWork")),
-                new Statement(id, NS.schema("text"), new Literal("text")),
-                new Statement(id, NS.schema("author"), NamedNode.find("http://example.org/people/0")),
+                rdfFactory.quad(id, rdf.type, schema.CreativeWork),
+                rdfFactory.quad(id, schema.text, rdfFactory.literal("text")),
+                rdfFactory.quad(id, schema.author, rdfFactory.namedNode("http://example.org/people/0")),
 
-                new Statement(idSecond, NS.rdf("type"), NS.schema("CreativeWork")),
-                new Statement(idSecond, NS.schema("name"), new Literal("other")),
+                rdfFactory.quad(idSecond, rdf.type, schema.CreativeWork),
+                rdfFactory.quad(idSecond, schema.name, rdfFactory.literal("other")),
 
-                new Statement(idSecond, NS.owl("sameAs"), id),
+                rdfFactory.quad(idSecond, owl.sameAs, id),
             ];
 
             store.store.addStatements(testData);
-            const entity = await store.lrs.tryEntity(id) as Statement[];
+            const entity = await store.lrs.tryEntity(id) as Quad[];
 
-            expect(entity.map((s) => s.object.toString())).toContainEqual("other");
+            expect(entity.map((s) => s.object.value)).toContainEqual("other");
         });
     });
 
@@ -260,10 +278,10 @@ describe("LinkedRenderStore", () => {
                 store.lrs.subscribe(reg);
                 expect(callback).not.toHaveBeenCalled();
 
-                store.store.addStatements([Statement.from(schemaT, NS.schema("name"), new Literal("Thing"))]);
+                store.store.addStatements([rdfFactory.quad(schemaT, schema.name, rdfFactory.literal("Thing"))]);
                 await store.forceBroadcast();
                 expect(callback).toHaveBeenCalledTimes(1);
-                expect(callback.mock.calls[0][0]).toEqual([schemaT.sI]);
+                expect(callback.mock.calls[0][0]).toEqual([rdfFactory.id(schemaT)]);
                 expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
                 expect(callback.mock.calls[0][1]).toBeLessThan(Date.now());
             });
@@ -272,96 +290,96 @@ describe("LinkedRenderStore", () => {
 
     describe("#dig", () => {
         const store = getBasicStore();
-        const start = NS.ex("1");
-        const bn = new BlankNode();
+        const start = ex("1");
+        const bn = rdfFactory.blankNode();
         store.store.addStatements([
-            new Statement(start, NS.ex("oneToOne"), NS.ex("1.1")),
+            rdfFactory.quad(start, ex("oneToOne"), ex("1.1")),
 
-            new Statement(start, NS.ex("oneToOneLiteral"), NS.ex("1.2")),
+            rdfFactory.quad(start, ex("oneToOneLiteral"), ex("1.2")),
 
-            new Statement(start, NS.ex("oneToOneBN"), bn),
+            rdfFactory.quad(start, ex("oneToOneBN"), bn),
 
-            new Statement(start, NS.ex("oneToOneMissing"), NS.ex("1.3")),
+            rdfFactory.quad(start, ex("oneToOneMissing"), ex("1.3")),
 
-            new Statement(start, NS.ex("oneToMany"), NS.ex("1.4")),
-            new Statement(start, NS.ex("oneToMany"), NS.ex("1.5")),
+            rdfFactory.quad(start, ex("oneToMany"), ex("1.4")),
+            rdfFactory.quad(start, ex("oneToMany"), ex("1.5")),
 
-            new Statement(start, NS.ex("oneToManyHoley"), NS.ex("1.6")),
-            new Statement(start, NS.ex("oneToManyHoley"), NS.ex("1.7")),
-            new Statement(start, NS.ex("oneToManyHoley"), NS.ex("1.8")),
+            rdfFactory.quad(start, ex("oneToManyHoley"), ex("1.6")),
+            rdfFactory.quad(start, ex("oneToManyHoley"), ex("1.7")),
+            rdfFactory.quad(start, ex("oneToManyHoley"), ex("1.8")),
 
-            new Statement(NS.ex("1.2"), NS.ex("p"), new Literal("value", "en")),
+            rdfFactory.quad(ex("1.2"), ex("p"), rdfFactory.literal("value", "en")),
 
-            new Statement(bn, NS.ex("p"), new Literal("test")),
+            rdfFactory.quad(bn, ex("p"), rdfFactory.literal("test")),
 
-            new Statement(NS.ex("1.2"), NS.ex("p"), new Literal("value", "nl")),
+            rdfFactory.quad(ex("1.2"), ex("p"), rdfFactory.literal("value", "nl")),
 
-            new Statement(NS.ex("1.2"), NS.ex("p"), NS.ex("2.3")),
+            rdfFactory.quad(ex("1.2"), ex("p"), ex("2.3")),
 
-            new Statement(NS.ex("1.4"), NS.ex("p"), NS.ex("2.4")),
-            new Statement(NS.ex("1.5"), NS.ex("p"), NS.ex("2.5")),
+            rdfFactory.quad(ex("1.4"), ex("p"), ex("2.4")),
+            rdfFactory.quad(ex("1.5"), ex("p"), ex("2.5")),
 
-            new Statement(NS.ex("1.6"), NS.ex("p"), NS.ex("2.6")),
-            new Statement(NS.ex("1.7"), NS.ex("p"), NS.ex("2.7")),
-            new Statement(NS.ex("1.8"), NS.ex("p"), NS.ex("2.8")),
+            rdfFactory.quad(ex("1.6"), ex("p"), ex("2.6")),
+            rdfFactory.quad(ex("1.7"), ex("p"), ex("2.7")),
+            rdfFactory.quad(ex("1.8"), ex("p"), ex("2.8")),
 
-            new Statement(NS.ex("2.6"), NS.ex("q"), NS.ex("3.6")),
-            new Statement(NS.ex("2.7"), NS.ex("other"), NS.ex("3.7")),
-            new Statement(NS.ex("2.8"), NS.ex("q"), NS.ex("3.8")),
+            rdfFactory.quad(ex("2.6"), ex("q"), ex("3.6")),
+            rdfFactory.quad(ex("2.7"), ex("other"), ex("3.7")),
+            rdfFactory.quad(ex("2.8"), ex("q"), ex("3.8")),
         ]);
         store.store.flush();
 
         it("is empty without path", () => expect(store.lrs.dig(start, [])).toEqual([]));
 
-        it("resolves oneToOne", () => expect(store.lrs.dig(start, [NS.ex("oneToOne")])).toEqual([NS.ex("1.1")]));
+        it("resolves oneToOne", () => expect(store.lrs.dig(start, [ex("oneToOne")])).toEqual([ex("1.1")]));
 
         it("resolves literals through oneToOne", () => {
-            expect(store.lrs.dig(start, [NS.ex("oneToOneLiteral"), NS.ex("p")]))
-                .toEqual([new Literal("value", "en"), new Literal("value", "nl"), NS.ex("2.3")]);
+            expect(store.lrs.dig(start, [ex("oneToOneLiteral"), ex("p")]))
+                .toEqual([rdfFactory.literal("value", "en"), rdfFactory.literal("value", "nl"), ex("2.3")]);
         });
 
         it("resolves blank nodes through oneToOne", () => {
-            expect(store.lrs.dig(start, [NS.ex("oneToOneBN"), NS.ex("p")]))
-                .toEqual([new Literal("test")]);
+            expect(store.lrs.dig(start, [ex("oneToOneBN"), ex("p")]))
+                .toEqual([rdfFactory.literal("test")]);
         });
 
         it("resolves oneToMany", () => {
-            expect(store.lrs.dig(start, [NS.ex("oneToMany")]))
-                .toEqual([NS.ex("1.4"), NS.ex("1.5")]);
+            expect(store.lrs.dig(start, [ex("oneToMany")]))
+                .toEqual([ex("1.4"), ex("1.5")]);
         });
 
         it("resolves values through oneToMany", () => {
-            expect(store.lrs.dig(start, [NS.ex("oneToMany"), NS.ex("p")]))
-                .toEqual([NS.ex("2.4"), NS.ex("2.5")]);
+            expect(store.lrs.dig(start, [ex("oneToMany"), ex("p")]))
+                .toEqual([ex("2.4"), ex("2.5")]);
         });
 
         it("resolves values through holey oneToMany", () => {
-            expect(store.lrs.dig(start, [NS.ex("oneToManyHoley"), NS.ex("p"), NS.ex("q")]))
-                .toEqual([NS.ex("3.6"), NS.ex("3.8")]);
+            expect(store.lrs.dig(start, [ex("oneToManyHoley"), ex("p"), ex("q")]))
+                .toEqual([ex("3.6"), ex("3.8")]);
         });
 
         it("resolves empty through holey oneToMany without end value", () => {
-            expect(store.lrs.dig(start, [NS.ex("oneToManyHoley"), NS.ex("p"), NS.ex("nonexistent")]))
+            expect(store.lrs.dig(start, [ex("oneToManyHoley"), ex("p"), ex("nonexistent")]))
                 .toEqual([]);
         });
     });
 
     describe("#execActionByIRI", () => {
         const store = getBasicStore();
-        const action = NS.example("location/everest/pictures/create");
-        const entryPoint = NS.example("location/everest/pictures/create#entrypoint");
+        const action = example("location/everest/pictures/create");
+        const entryPoint = example("location/everest/pictures/create#entrypoint");
         const actionStatements = [
-            new Statement(action, NS.rdf("type"), NS.schema("CreateAction")),
-            new Statement(action, NS.schema("name"), new Literal("Upload a picture of Mt. Everest!")),
-            new Statement(action, NS.schema("object"), NS.example("location/everest")),
-            new Statement(action, NS.schema("result"), NS.schema("ImageObject")),
-            new Statement(action, NS.schema("target"), NS.example("location/everest/pictures/create#entrypoint")),
+            rdfFactory.quad(action, rdf.type, schema.CreateAction),
+            rdfFactory.quad(action, schema.name, rdfFactory.literal("Upload a picture of Mt. Everest!")),
+            rdfFactory.quad(action, schema.object, example("location/everest")),
+            rdfFactory.quad(action, schema.result, schema.ImageObject),
+            rdfFactory.quad(action, schema.target, example("location/everest/pictures/create#entrypoint")),
 
-            new Statement(entryPoint, NS.rdf("type"), NS.schema("Entrypoint")),
-            new Statement(entryPoint, NS.schema("httpMethod"), new Literal("POST")),
-            new Statement(entryPoint, NS.schema("url"), NS.example("location/everest/pictures")),
-            new Statement(entryPoint, NS.schema("image"), NamedNode.find("http://fontawesome.io/icon/plus")),
-            new Statement(entryPoint, NS.schema("name"), new Literal("Add a picture")),
+            rdfFactory.quad(entryPoint, rdf.type, schema.EntryPoint),
+            rdfFactory.quad(entryPoint, schema.httpMethod, rdfFactory.literal("POST")),
+            rdfFactory.quad(entryPoint, schema.url, example("location/everest/pictures")),
+            rdfFactory.quad(entryPoint, schema.image, rdfFactory.namedNode("http://fontawesome.io/icon/plus")),
+            rdfFactory.quad(entryPoint, schema.name, rdfFactory.literal("Add a picture")),
         ];
         store.store.addStatements(actionStatements);
 
@@ -381,78 +399,78 @@ describe("LinkedRenderStore", () => {
 
     describe("#findSubject", () => {
         const store = getBasicStore();
-        const bill = new Literal("Bill");
-        const bookTitle = new Literal("His first work");
-        const alternativeTitle = new Literal("Some alternative title");
+        const bill = rdfFactory.literal("Bill");
+        const bookTitle = rdfFactory.literal("His first work");
+        const alternativeTitle = rdfFactory.literal("Some alternative title");
         const testData = [
-            new Statement(NS.ex("1"), NS.rdf("type"), NS.ex("Organization")),
-            new Statement(NS.ex("1"), NS.schema("name"), new Literal("Some org")),
-            new Statement(NS.ex("1"), NS.schema("employee"), NS.ex("2")),
+            rdfFactory.quad(ex("1"), rdf.type, ex("Organization")),
+            rdfFactory.quad(ex("1"), schema.name, rdfFactory.literal("Some org")),
+            rdfFactory.quad(ex("1"), schema.employee, ex("2")),
 
-            new Statement(NS.ex("2"), NS.rdf("type"), NS.schema("Person")),
-            new Statement(NS.ex("2"), NS.schema("name"), bill),
-            new Statement(NS.ex("2"), NS.schema("author"), NS.ex("3")),
-            new Statement(NS.ex("2"), NS.schema("author"), NS.ex("4")),
+            rdfFactory.quad(ex("2"), rdf.type, schema.Person),
+            rdfFactory.quad(ex("2"), schema.name, bill),
+            rdfFactory.quad(ex("2"), schema.author, ex("3")),
+            rdfFactory.quad(ex("2"), schema.author, ex("4")),
 
-            new Statement(NS.ex("3"), NS.rdf("type"), NS.schema("Book")),
-            new Statement(NS.ex("3"), NS.schema("name"), bookTitle),
-            new Statement(NS.ex("3"), NS.schema("name"), alternativeTitle),
-            new Statement(NS.ex("3"), NS.schema("numberOfPages"), Literal.fromNumber(75)),
+            rdfFactory.quad(ex("3"), rdf.type, schema.Book),
+            rdfFactory.quad(ex("3"), schema.name, bookTitle),
+            rdfFactory.quad(ex("3"), schema.name, alternativeTitle),
+            rdfFactory.quad(ex("3"), schema.numberOfPages, rdfFactory.literal(75)),
 
-            new Statement(NS.ex("4"), NS.rdf("type"), NS.schema("Book")),
-            new Statement(NS.ex("4"), NS.schema("name"), new Literal("His second work")),
-            new Statement(NS.ex("4"), NS.schema("numberOfPages"), Literal.fromNumber(475)),
-            new Statement(NS.ex("4"), NS.schema("bookEdition"), new Literal("1st")),
+            rdfFactory.quad(ex("4"), rdf.type, schema.Book),
+            rdfFactory.quad(ex("4"), schema.name, rdfFactory.literal("His second work")),
+            rdfFactory.quad(ex("4"), schema.numberOfPages, rdfFactory.literal(475)),
+            rdfFactory.quad(ex("4"), schema.bookEdition, rdfFactory.literal("1st")),
         ];
         store.store.addStatements(testData);
 
         it("resolves an empty path to nothing", () => {
-            const answer = store.lrs.findSubject(NS.ex("1"), [], NS.ex("2"));
+            const answer = store.lrs.findSubject(ex("1"), [], ex("2"));
             expect(answer).toHaveLength(0);
         });
 
         it("resolves unknown subject to nothing", () => {
-            const answer = store.lrs.findSubject(NS.ex("x"), [NS.schema("name")], bill);
+            const answer = store.lrs.findSubject(ex("x"), [schema.name], bill);
             expect(answer).toHaveLength(0);
         });
 
         it("resolves first order matches", () => {
-            const answer = store.lrs.findSubject(NS.ex("2"), [NS.schema("name")], bill);
-            expect(answer).toEqual([NS.ex("2")]);
+            const answer = store.lrs.findSubject(ex("2"), [schema.name], bill);
+            expect(answer).toEqual([ex("2")]);
         });
 
         it("resolves second order matches", () => {
             const answer = store.lrs.findSubject(
-                NS.ex("1"),
-                [NS.schema("employee"), NS.schema("name")],
-                new Literal("Bill"),
+                ex("1"),
+                [schema.employee, schema.name],
+                rdfFactory.literal("Bill"),
             );
-            expect(answer).toEqual([NS.ex("2")]);
+            expect(answer).toEqual([ex("2")]);
         });
 
         it("resolves third order matches", () => {
             const answer = store.lrs.findSubject(
-                NS.ex("1"),
-                [NS.schema("employee"), NS.schema("author"), NS.schema("name")],
+                ex("1"),
+                [schema.employee, schema.author, schema.name],
                 bookTitle,
             );
-            expect(answer).toEqual([NS.ex("3")]);
+            expect(answer).toEqual([ex("3")]);
         });
 
         it("resolves third order array matches", () => {
             const answer = store.lrs.findSubject(
-                NS.ex("1"),
-                [NS.schema("employee"), NS.schema("author"), NS.schema("name")],
+                ex("1"),
+                [schema.employee, schema.author, schema.name],
                 [bill, alternativeTitle],
             );
-            expect(answer).toEqual([NS.ex("3")]);
+            expect(answer).toEqual([ex("3")]);
         });
     });
 
     describe("#getStatus", () => {
         it("resolves empty status for blank nodes", () => {
             const store = getBasicStore();
-            const resource = new BlankNode();
+            const resource = rdfFactory.blankNode();
             const status = store.lrs.getStatus(resource);
 
             expect(status).toHaveProperty("status", null);
@@ -460,7 +478,7 @@ describe("LinkedRenderStore", () => {
 
         it("resolves queued status for resources in the queue", () => {
             const store = getBasicStore();
-            const resource = NS.example("test");
+            const resource = example("test");
             store.lrs.queueEntity(resource);
             const status = store.lrs.getStatus(resource);
 
@@ -469,9 +487,9 @@ describe("LinkedRenderStore", () => {
 
         it("delegates to the api for other resources", () => {
             const store = getBasicStore();
-            const resource = NS.example("test");
+            const resource = example("test");
             const exStatus = { status: 259 };
-            (store.processor as any).statusMap[resource.sI] = exStatus;
+            (store.processor as any).statusMap[rdfFactory.id(resource)] = exStatus;
             const status = store.lrs.getStatus(resource);
 
             expect(status).toHaveProperty("status", 259);
@@ -480,9 +498,9 @@ describe("LinkedRenderStore", () => {
 
     describe("#queueDelta", () => {
         const quadDelta = [
-            [NS.ex("1"), NS.ex("p"), NS.ex("2"), NS.ll("add")],
-            [NS.ex("1"), NS.ex("t"), new Literal("Test"), NS.ll("add")],
-            [NS.ex("2"), NS.ex("t"), new Literal("Value"), NS.ll("add")],
+            [ex("1"), ex("p"), ex("2"), ld.add],
+            [ex("1"), ex("t"), rdfFactory.literal("Test"), ld.add],
+            [ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add],
         ] as Quadruple[];
 
         it("queues an empty delta", () => {
@@ -503,7 +521,10 @@ describe("LinkedRenderStore", () => {
             store.lrs.queueDelta(quadDelta);
 
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
-            expect(processor.queueDelta).toHaveBeenCalledWith(quadDelta, [NS.ex("1").sI, NS.ex("2").sI]);
+            expect(processor.queueDelta).toHaveBeenCalledWith(
+                quadDelta,
+                [rdfFactory.id(ex("1")), rdfFactory.id(ex("2"))],
+            );
         });
 
         it("queues a statement delta", () => {
@@ -516,29 +537,32 @@ describe("LinkedRenderStore", () => {
             store.lrs.deltaProcessors.push(processor);
 
             const delta = [
-                new Statement(NS.ex("1"), NS.ex("p"), NS.ex("2"), NS.ll("add")),
-                new Statement(NS.ex("1"), NS.ex("t"), new Literal("Test"), NS.ll("add")),
-                new Statement(NS.ex("2"), NS.ex("t"), new Literal("Value"), NS.ll("add")),
+                rdfFactory.quad(ex("1"), ex("p"), ex("2"), ld.add),
+                rdfFactory.quad(ex("1"), ex("t"), rdfFactory.literal("Test"), ld.add),
+                rdfFactory.quad(ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add),
             ];
             store.lrs.queueDelta(delta);
 
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
-            expect(processor.queueDelta).toHaveBeenCalledWith(quadDelta, [NS.ex("1").sI, NS.ex("2").sI]);
+            expect(processor.queueDelta).toHaveBeenCalledWith(
+                quadDelta,
+                [rdfFactory.id(ex("1")), rdfFactory.id(ex("2"))],
+            );
         });
     });
 
     describe("#registerAll", () => {
         const reg1 = {
             component: (): string => "1",
-            property: NS.schema("text").sI,
+            property: rdfFactory.id(schema.text),
             topology: DT,
-            type: NS.schema("Thing").sI,
+            type: rdfFactory.id(schema.Thing),
         } as ComponentRegistration<() => string>;
         const reg2 = {
             component: (): string => "2",
-            property: NS.schema("name").sI,
-            topology: NS.argu("collection").sI,
-            type: NS.schema("Person").sI,
+            property: rdfFactory.id(schema.name),
+            topology: rdfFactory.id(NS.argu("collection")),
+            type: rdfFactory.id(schema.Person),
         } as ComponentRegistration<() => string>;
 
         it("stores multiple ComponentRegistration objects", () => {
@@ -565,10 +589,10 @@ describe("LinkedRenderStore", () => {
 
     describe("::registerRenderer", () => {
         const func = (): void => undefined;
-        const type = NS.schema("Thing");
-        const types = [NS.schema("Thing"), NS.schema("Person")];
-        const prop = NS.schema("name");
-        const props = [NS.schema("name"), NS.schema("text"), NS.schema("dateCreated")];
+        const type = schema.Thing;
+        const types = [schema.Thing, schema.Person];
+        const prop = schema.name;
+        const props = [schema.name, schema.text, schema.dateCreated];
         const topology = NS.argu("collection");
         const topologies = [NS.argu("collection"), NS.argu("collection")];
 
@@ -578,13 +602,13 @@ describe("LinkedRenderStore", () => {
                                       p: NamedNode,
                                       top: SomeNode): void {
             expect(r.component).toEqual(c);
-            expect(r.type).toEqual(t.sI);
-            expect(r.property).toEqual(p.sI);
-            expect(r.topology).toEqual(top.sI);
+            expect(r.type).toEqual(rdfFactory.id(t));
+            expect(r.property).toEqual(rdfFactory.id(p));
+            expect(r.topology).toEqual(rdfFactory.id(top));
         }
 
         it("does not register without component", () => {
-            const defaultMsg = `Undefined component was given for (${type.sI}, ${RCN}, ${DT}).`;
+            const defaultMsg = `Undefined component was given for (${rdfFactory.id(type)}, ${RCN}, ${DT}).`;
             try {
                 LinkedRenderStore.registerRenderer(undefined, type);
                 expect(true).toBeFalsy();
@@ -696,8 +720,8 @@ describe("LinkedRenderStore", () => {
 
     describe("#resourcePropertyComponent", () => {
         const store = getBasicStore();
-        const resource = NS.example("test");
-        const property = NS.schema("name");
+        const resource = example("test");
+        const property = schema.name;
         const nameComp = (): undefined => undefined;
 
         it("returns undefined when no view is registered", () => {
@@ -705,9 +729,9 @@ describe("LinkedRenderStore", () => {
         });
 
         it("returns the view when one is registered", () => {
-            store.lrs.registerAll(LinkedRenderStore.registerRenderer(nameComp, NS.schema("Thing"), property));
+            store.lrs.registerAll(LinkedRenderStore.registerRenderer(nameComp, schema.Thing, property));
             store.store.addStatements([
-                new Statement(resource, NS.rdf("type"), NS.schema("Thing")),
+                rdfFactory.quad(resource, rdf.type, schema.Thing),
             ]);
 
             expect(store.lrs.resourcePropertyComponent(resource, property)).toEqual(nameComp);
@@ -716,7 +740,7 @@ describe("LinkedRenderStore", () => {
 
     describe("#resourceComponent", () => {
         const store = getBasicStore();
-        const resource = NS.example("test");
+        const resource = example("test");
         const thingComp = (): undefined => undefined;
 
         it("returns undefined when no view is registered", () => {
@@ -724,9 +748,9 @@ describe("LinkedRenderStore", () => {
         });
 
         it("returns the view when one is registered", () => {
-            store.lrs.registerAll(LinkedRenderStore.registerRenderer(thingComp, NS.schema("Thing")));
+            store.lrs.registerAll(LinkedRenderStore.registerRenderer(thingComp, schema.Thing));
             store.store.addStatements([
-                new Statement(resource, NS.rdf("type"), NS.schema("Thing")),
+                rdfFactory.quad(resource, rdf.type, schema.Thing),
             ]);
 
             expect(store.lrs.resourceComponent(resource)).toEqual(thingComp);
@@ -734,7 +758,7 @@ describe("LinkedRenderStore", () => {
     });
 
     describe("#shouldLoadResource", () => {
-        const resource = NS.example("test");
+        const resource = example("test");
 
         it("should load nonexistent resources", () => {
             const store = getBasicStore();
@@ -746,7 +770,7 @@ describe("LinkedRenderStore", () => {
         it("should load invalidated resources", () => {
             const store = getBasicStore();
             store.store.addStatements([
-                new Statement(resource, NS.rdfs("label"), new Literal("test")),
+                rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
             store.processor.invalidate(resource);
@@ -757,7 +781,7 @@ describe("LinkedRenderStore", () => {
         it("should not load existent resources", () => {
             const store = getBasicStore();
             store.store.addStatements([
-                new Statement(resource, NS.rdfs("label"), new Literal("test")),
+                rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
 
@@ -776,7 +800,7 @@ describe("LinkedRenderStore", () => {
             const store = getBasicStore();
             store.store.flush();
             store.store.addStatements([
-                new Statement(resource, NS.rdfs("label"), new Literal("test")),
+                rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
             store.processor.invalidate(resource);
@@ -789,11 +813,11 @@ describe("LinkedRenderStore", () => {
     describe("#tryEntity", () => {
         it("resolves statements for the resource", () => {
             const store = getBasicStore();
-            const resource = NS.ex("1");
+            const resource = ex("1");
             const testData = [
-                new Statement(resource, NS.rdf("type"), NS.ex("Organization")),
-                new Statement(resource, NS.schema("name"), new Literal("Some org")),
-                new Statement(resource, NS.schema("employee"), NS.ex("2")),
+                rdfFactory.quad(resource, rdf.type, ex("Organization")),
+                rdfFactory.quad(resource, schema.name, rdfFactory.literal("Some org")),
+                rdfFactory.quad(resource, schema.employee, ex("2")),
             ];
             store.store.addStatements(testData);
             store.store.flush();

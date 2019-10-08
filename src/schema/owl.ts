@@ -1,10 +1,10 @@
-import { NamedNode, Statement } from "rdflib";
+import rdfFactory, { NamedNode, Quad } from "@ontologies/core";
+import owl from "@ontologies/owl";
 
 import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
-import { defaultNS as NS } from "../utilities/constants";
 
 /*
- * TODO: All of them...
+ * TODO: Basically all of them...
  */
 // const nsOWLAllDifferent = NS.owl("AllDifferent");
 // const nsOWLAllDisjointClasses = NS.owl("AllDisjointClasses");
@@ -69,7 +69,7 @@ import { defaultNS as NS } from "../utilities/constants";
 // const nsOWLqualifiedCardinality = NS.owl("qualifiedCardinality");
 // const nsOWLReflexiveProperty = NS.owl("ReflexiveProperty");
 // const nsOWLRestriction = NS.owl("Restriction");
-const nsOWLsameAs = NS.owl("sameAs");
+const nsOWLsameAs = owl.sameAs;
 // const nsOWLsomeValuesFrom = NS.owl("someValuesFrom");
 // const nsOWLsourceIndividual = NS.owl("sourceIndividual");
 // const nsOWLSymmetricProperty = NS.owl("SymmetricProperty");
@@ -87,10 +87,10 @@ const nsOWLsameAs = NS.owl("sameAs");
 export const OWL = {
     axioms: [],
 
-    processStatement(item: Statement, ctx: VocabularyProcessingContext): Statement[] | null {
-        if (item.predicate.equals(nsOWLsameAs)) {
-            const a = ctx.equivalenceSet.add((item.object as SomeNode).sI);
-            const b = ctx.equivalenceSet.add(item.subject.sI);
+    processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
+        if (rdfFactory.equals(item.predicate, nsOWLsameAs)) {
+            const a = ctx.equivalenceSet.add((item.object as SomeNode).id as number);
+            const b = ctx.equivalenceSet.add(item.subject.id as number);
             ctx.equivalenceSet.union(a, b);
 
             return [item];

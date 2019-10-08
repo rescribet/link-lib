@@ -1,7 +1,10 @@
+import "./useHashFactory";
+
+import rdfFactory from "@ontologies/core";
 import "jest";
-import { Literal, Statement } from "rdflib";
 
 import { ProcessBroadcast, ProcessBroadcastOpts } from "../ProcessBroadcast";
+import { Quad } from "../rdf";
 import { SubscriptionRegistrationBase } from "../types";
 import { defaultNS as NS} from "../utilities/constants";
 
@@ -14,26 +17,31 @@ const resource5 = NS.ex("5");
 const resource6 = NS.ex("6");
 
 const mixedWork = [
-    new Statement(resource5, NS.ex("prop"), NS.ex("unknown"), NS.example("why")),
-    new Statement(schemaT, NS.rdf("type"), NS.rdfs("Class"), NS.example("why")),
-    new Statement(schemaT, NS.rdf("label"), new Literal("A class"), NS.example("why")),
-    new Statement(resource2, NS.schema("name"), new Literal("resource 1"), NS.example("why")),
-    new Statement(resource2, NS.schema("name"), new Literal("resource 2"), NS.example("why")),
-    new Statement(resource3, NS.rdf("label"), new Literal("D. Adams"), NS.example("why")),
-    new Statement(resource4, NS.schema("name"), new Literal("Resource Name"), NS.example("why")),
-    new Statement(resource4, NS.schema("text"), new Literal("Resource text"), NS.example("why")),
-    new Statement(resource4, NS.schema("author"), resource3, NS.example("why")),
-    new Statement(resource6, NS.schema("text"), new Literal("Should contain only deleted regs"), NS.example("why")),
+    rdfFactory.quad(resource5, NS.ex("prop"), NS.ex("unknown"), NS.example("why")),
+    rdfFactory.quad(schemaT, NS.rdf("type"), NS.rdfs("Class"), NS.example("why")),
+    rdfFactory.quad(schemaT, NS.rdf("label"), rdfFactory.literal("A class"), NS.example("why")),
+    rdfFactory.quad(resource2, NS.schema("name"), rdfFactory.literal("resource 1"), NS.example("why")),
+    rdfFactory.quad(resource2, NS.schema("name"), rdfFactory.literal("resource 2"), NS.example("why")),
+    rdfFactory.quad(resource3, NS.rdf("label"), rdfFactory.literal("D. Adams"), NS.example("why")),
+    rdfFactory.quad(resource4, NS.schema("name"), rdfFactory.literal("Resource Name"), NS.example("why")),
+    rdfFactory.quad(resource4, NS.schema("text"), rdfFactory.literal("Resource text"), NS.example("why")),
+    rdfFactory.quad(resource4, NS.schema("author"), resource3, NS.example("why")),
+    rdfFactory.quad(
+        resource6,
+        NS.schema("text"),
+        rdfFactory.literal("Should contain only deleted regs"),
+        NS.example("why"),
+    ),
 ];
 
 const getOpts = (
-    work: Statement[] = [],
+    work: Quad[] = [],
     bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [],
     subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [],
 ): ProcessBroadcastOpts => ({
     bulkSubscriptions,
     changedSubjects: work.reduce(
-        (acc, cur) => acc.includes(cur.subject.sI) ? acc : acc.concat(cur.subject.sI),
+        (acc, cur) => acc.includes(rdfFactory.id(cur.subject)) ? acc : acc.concat(rdfFactory.id(cur.subject)),
         [] as number[],
     ),
     subjectSubscriptions,
@@ -51,7 +59,7 @@ describe("ProcessBroadcast", () => {
 
         describe("and work", () => {
             const processor = new ProcessBroadcast(getOpts([
-                new Statement(schemaT, NS.rdf("type"), NS.rdfs("Class"), NS.example("why")),
+                rdfFactory.quad(schemaT, NS.rdf("type"), NS.rdfs("Class"), NS.example("why")),
             ]));
 
             it("is done", () => expect(processor.done()).toBeTruthy());

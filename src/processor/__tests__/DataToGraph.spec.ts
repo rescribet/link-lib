@@ -1,12 +1,13 @@
 /* @globals set, generator, init */
+import "../../__tests__/useHashFactory";
+
+import rdfFactory, { TermType } from "@ontologies/core";
+import rdf from "@ontologies/rdf";
+import schema from "@ontologies/schema";
 import "jest";
-import {
-    BlankNode,
-    IndexedFormula,
-    Literal,
-    NamedNode,
-    Statement,
-} from "rdflib";
+
+import { rdflib } from "../../link-lib";
+import { Node } from "../../rdf";
 
 import { defaultNS } from "../../utilities/constants";
 
@@ -37,17 +38,17 @@ describe("DataToGraph", () => {
         it("parses an embedded iri", () => {
             const [iri] = toGraph({ "@id": "https://example.com/1" });
 
-            expect(iri).toEqual(NamedNode.find("https://example.com/1"));
+            expect(iri).toEqual(rdfFactory.namedNode("https://example.com/1"));
         });
 
         it("creates a blank node when no IRI was given", () => {
             const [iri] = toGraph({});
 
-            expect(iri).toBeInstanceOf(BlankNode);
+            expect(iri.termType).toEqual(TermType.BlankNode);
         });
 
         it("allows a custom graph to be passed", () => {
-            const g = new IndexedFormula();
+            const g = new rdflib.IndexedFormula();
             const [, graph] = toGraph({}, undefined, g);
 
             expect(graph).toEqual(g);
@@ -63,8 +64,8 @@ describe("DataToGraph", () => {
             const name = graph.statements[0];
             expect(name).toBeTruthy();
             expect(name.subject).toEqual(defaultNS.ll("targetResource"));
-            expect(name.predicate).toEqual(defaultNS.schema("name"));
-            expect(name.object).toEqual(Literal.find("Some name"));
+            expect(name.predicate).toEqual(schema.name);
+            expect(name.object).toEqual(rdfFactory.literal("Some name"));
         });
 
         it("handles shortened strings", () => {
@@ -75,8 +76,8 @@ describe("DataToGraph", () => {
             const name = graph.statements[0];
             expect(name).toBeTruthy();
             expect(name.subject).toEqual(defaultNS.ll("targetResource"));
-            expect(name.predicate).toEqual(defaultNS.schema("name"));
-            expect(name.object).toEqual(Literal.find("Some name"));
+            expect(name.predicate).toEqual(schema.name);
+            expect(name.object).toEqual(rdfFactory.literal("Some name"));
         });
 
         it("raises on bad strings", () => {
@@ -94,7 +95,7 @@ describe("DataToGraph", () => {
                     "example:nestedProp": "1",
                 },
                 2,
-                defaultNS.schema.name,
+                schema.name,
             ]};
             const [graph] = dataToGraphTuple(data);
 
@@ -106,7 +107,7 @@ describe("DataToGraph", () => {
             expect(bn.predicate).toEqual(defaultNS.example("property"));
             expect(bn.object).toEqual(defaultNS.example("nested"));
 
-            const nestedProp = graph.statementsMatching(bn.object, defaultNS.example("nestedProp"));
+            const nestedProp = graph.statementsMatching(bn.object as Node, defaultNS.example("nestedProp"));
             expect(nestedProp).toHaveLength(1);
             expect(nestedProp[0].object.termType).toEqual("Literal");
             expect(nestedProp[0].object.value).toEqual("1");
@@ -131,7 +132,7 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
-            expect(stmt.object).toEqual(Literal.fromBoolean(true));
+            expect(stmt.object).toEqual(rdfFactory.literal(true));
         });
 
         it("handles dates", () => {
@@ -141,7 +142,7 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
-            expect(stmt.object).toEqual(Literal.fromDate(data["example:property"]));
+            expect(stmt.object).toEqual(rdfFactory.literal(data["example:property"]));
         });
 
         it("handles decimals", () => {
@@ -151,7 +152,7 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
-            expect(stmt.object).toEqual(Literal.fromNumber(2.5));
+            expect(stmt.object).toEqual(rdfFactory.literal(2.5));
         });
 
         it("handles files", () => {
@@ -174,7 +175,7 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
-            expect(stmt.object).toEqual(Literal.fromNumber(45));
+            expect(stmt.object).toEqual(rdfFactory.literal(45));
         });
 
         it("handles nested resources", () => {
@@ -194,10 +195,10 @@ describe("DataToGraph", () => {
             expect(stmt!.predicate).toEqual(defaultNS.example("property"));
             expect(stmt!.object.termType).toEqual("BlankNode");
 
-            const match = Statement.from(
-                (stmt!.object as BlankNode),
-                defaultNS.schema("name"),
-                Literal.fromValue("Some string"),
+            const match = rdfFactory.quad(
+                (stmt!.object as Node),
+                schema.name,
+                rdfFactory.literal("Some string"),
             );
             expect(graph.holdsStatement(match)).toBeTruthy();
         });
@@ -209,41 +210,41 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
-            expect(stmt.object).toEqual(Literal.find("Some string"));
+            expect(stmt.object).toEqual(rdfFactory.literal("Some string"));
         });
     });
 
     describe("processObject", () => {
         it("handles undefined", () => {
-            const g = new IndexedFormula();
+            const g = new rdflib.IndexedFormula();
             processObject(defaultNS.example("a"), defaultNS.example("property"), null, g);
             expect(g.statements).toHaveLength(0);
         });
 
         it("handles null", () => {
-            const g = new IndexedFormula();
+            const g = new rdflib.IndexedFormula();
             processObject(defaultNS.example("a"), defaultNS.example("property"), null, g);
             expect(g.statements).toHaveLength(0);
         });
 
         it("handles rdf literals", () => {
-            const g = new IndexedFormula();
-            processObject(defaultNS.example("a"), defaultNS.example("property"), Literal.fromNumber(1), g);
+            const g = new rdflib.IndexedFormula();
+            processObject(defaultNS.example("a"), defaultNS.example("property"), rdfFactory.literal(1), g);
             expect(g.statements).toHaveLength(1);
-            expect(g.statements[0].object).toEqual(Literal.fromNumber(1));
+            expect(g.statements[0].object).toEqual(rdfFactory.literal(1));
         });
     });
 
     describe("list", () => {
         it("returns an empty list for an empty array", () => {
-            expect(list([])).toEqual(defaultNS.rdf.nil);
+            expect(list([])).toEqual(rdf.nil);
         });
     });
 
     describe("seq", () => {
         it("returns an empty sequence for an empty array", () => {
             expect(seq([])).toEqual({
-                [defaultNS.rdf.type.toString()]: defaultNS.rdf.Seq,
+                [rdf.type.toString()]: rdf.Seq,
             });
         });
 
@@ -251,21 +252,21 @@ describe("DataToGraph", () => {
             const d = new Date();
 
             expect(seq([
-                Literal.fromValue(1),
-                Literal.fromValue("2"),
-                Literal.fromValue(d),
+                rdfFactory.literal(1),
+                rdfFactory.literal("2"),
+                rdfFactory.literal(d),
                 defaultNS.ex("t"),
             ])).toEqual({
-                [defaultNS.rdf.type.toString()]: defaultNS.rdf.Seq,
-                [defaultNS.rdf("_0").toString()]: Literal.fromValue(1),
-                [defaultNS.rdf("_1").toString()]: Literal.fromValue("2"),
-                [defaultNS.rdf("_2").toString()]: Literal.fromValue(d),
-                [defaultNS.rdf("_3").toString()]: defaultNS.ex("t"),
+                [rdf.type.toString()]: rdf.Seq,
+                [rdf.ns("_0").toString()]: rdfFactory.literal(1),
+                [rdf.ns("_1").toString()]: rdfFactory.literal("2"),
+                [rdf.ns("_2").toString()]: rdfFactory.literal(d),
+                [rdf.ns("_3").toString()]: defaultNS.ex("t"),
             });
         });
 
         it("sets a given id", () => {
-            const id = new BlankNode();
+            const id = rdfFactory.blankNode();
 
             expect(seq([], id)).toHaveProperty("@id", id);
         });

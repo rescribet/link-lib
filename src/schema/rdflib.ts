@@ -1,4 +1,6 @@
-import { NamedNode, Namespace, Statement } from "rdflib";
+import rdfFactory, { createNS, NamedNode, Quad } from "@ontologies/core";
+import { Resource, subClassOf } from "@ontologies/rdfs";
+
 import { VocabularyProcessingContext } from "../types";
 
 import {
@@ -12,10 +14,8 @@ import {
     F_RDF_XML,
     F_TURTLE,
 } from "../utilities/constants";
-import { nsRDFSResource } from "./rdfs";
 
-const nsRDFSsubClassOf = NS.rdfs("subClassOf");
-const ianaMT = Namespace("http://www.w3.org/ns/iana/media-types/");
+const ianaMT = createNS("http://www.w3.org/ns/iana/media-types/");
 const ianaJSONResource = ianaMT(`${F_JSON}#Resource`);
 const ianaJSONLDResource = ianaMT(`${F_JSONLD}#Resource`);
 const ianaN3Resource = ianaMT(`${F_N3}#Resource`);
@@ -30,18 +30,18 @@ const ianaTTLResource = ianaMT(`${F_TURTLE}#Resource`);
  */
 export const RDFLIB = {
     axioms: [
-        new Statement(NS.link("Document"), nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaJSONResource, nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaJSONLDResource, nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaN3Resource, nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaNTResource, nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaNQResource, nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaPlainResource, nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaRDFXMLResource, nsRDFSsubClassOf, nsRDFSResource),
-        new Statement(ianaTTLResource, nsRDFSsubClassOf, nsRDFSResource),
+        rdfFactory.quad(NS.link("Document"), subClassOf, Resource),
+        rdfFactory.quad(ianaJSONResource, subClassOf, Resource),
+        rdfFactory.quad(ianaJSONLDResource, subClassOf, Resource),
+        rdfFactory.quad(ianaN3Resource, subClassOf, Resource),
+        rdfFactory.quad(ianaNTResource, subClassOf, Resource),
+        rdfFactory.quad(ianaNQResource, subClassOf, Resource),
+        rdfFactory.quad(ianaPlainResource, subClassOf, Resource),
+        rdfFactory.quad(ianaRDFXMLResource, subClassOf, Resource),
+        rdfFactory.quad(ianaTTLResource, subClassOf, Resource),
     ],
 
-    processStatement(_: Statement, __: VocabularyProcessingContext): Statement[] | null {
+    processStatement(_: Quad, __: VocabularyProcessingContext): Quad[] | null {
         return null;
     },
 

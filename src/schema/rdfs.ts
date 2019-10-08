@@ -1,17 +1,10 @@
-import { BlankNode, NamedNode, Statement } from "rdflib";
+import rdfFactory, { NamedNode, Quad, TermType } from "@ontologies/core";
+import rdf from "@ontologies/rdf";
+import rdfs from "@ontologies/rdfs";
+import { Term } from "../rdf";
+import { Store } from "../rdflib";
 
-import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
-import { defaultNS as NS } from "../utilities/constants";
-
-const nsRDFProperty = NS.rdf("Property");
-const nsRDFSClass = NS.rdfs("Class");
-export const nsRDFSResource = NS.rdfs("Resource");
-
-const nsRDFSsubClassOf = NS.rdfs("subClassOf");
-const nsRDFSdomain = NS.rdfs("domain");
-const nsRDFSrange = NS.rdfs("range");
-const nsRDFSsubPropertyOf = NS.rdfs("subPropertyOf");
-const nsRDFtype = NS.rdf("type");
+import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 /**
  * Implements the RDF/RDFS axioms and rules.
@@ -19,100 +12,114 @@ const nsRDFtype = NS.rdf("type");
  */
 export const RDFS = {
     axioms: [
-        new Statement(nsRDFtype, nsRDFSdomain, nsRDFSResource),
-        new Statement(nsRDFSdomain, nsRDFSdomain, nsRDFProperty),
-        new Statement(nsRDFSrange, nsRDFSdomain, nsRDFProperty),
-        new Statement(nsRDFSsubPropertyOf, nsRDFSdomain, nsRDFProperty),
-        new Statement(nsRDFSsubClassOf, nsRDFSdomain, nsRDFSClass),
-        new Statement(NS.rdf("subject"), nsRDFSdomain, NS.rdf("Statement")),
-        new Statement(NS.rdf("predicate"), nsRDFSdomain, NS.rdf("Statement")),
-        new Statement(NS.rdf("object"), nsRDFSdomain, NS.rdf("Statement")),
-        new Statement(NS.rdfs("member"), nsRDFSdomain, nsRDFSResource),
-        new Statement(NS.rdf("first"), nsRDFSdomain, NS.rdf("List")),
-        new Statement(NS.rdf("rest"), nsRDFSdomain, NS.rdf("List")),
-        new Statement(NS.rdfs("seeAlso"), nsRDFSdomain, nsRDFSResource),
-        new Statement(NS.rdfs("isDefinedBy"), nsRDFSdomain, nsRDFSResource),
-        new Statement(NS.rdfs("comment"), nsRDFSdomain, nsRDFSResource),
-        new Statement(NS.rdfs("label"), nsRDFSdomain, nsRDFSResource),
-        new Statement(NS.rdf("value"), nsRDFSdomain, nsRDFSResource),
+        rdfFactory.quad(rdf.type, rdfs.domain, rdfs.Resource),
+        rdfFactory.quad(rdfs.domain, rdfs.domain, rdf.Property),
+        rdfFactory.quad(rdfs.range, rdfs.domain, rdf.Property),
+        rdfFactory.quad(rdfs.subPropertyOf, rdfs.domain, rdf.Property),
+        rdfFactory.quad(rdfs.subClassOf, rdfs.domain, rdfs.Class),
+        rdfFactory.quad(rdf.subject, rdfs.domain, rdf.Statement),
+        rdfFactory.quad(rdf.predicate, rdfs.domain, rdf.Statement),
+        rdfFactory.quad(rdf.object, rdfs.domain, rdf.Statement),
+        rdfFactory.quad(rdfs.member, rdfs.domain, rdfs.Resource),
+        rdfFactory.quad(rdf.first, rdfs.domain, rdf.List),
+        rdfFactory.quad(rdf.rest, rdfs.domain, rdf.List),
+        rdfFactory.quad(rdfs.seeAlso, rdfs.domain, rdfs.Resource),
+        rdfFactory.quad(rdfs.isDefinedBy, rdfs.domain, rdfs.Resource),
+        rdfFactory.quad(rdfs.comment, rdfs.domain, rdfs.Resource),
+        rdfFactory.quad(rdfs.label, rdfs.domain, rdfs.Resource),
+        rdfFactory.quad(rdf.value, rdfs.domain, rdfs.Resource),
 
-        new Statement(nsRDFtype, nsRDFSrange, nsRDFSClass),
-        new Statement(nsRDFSdomain, nsRDFSrange, nsRDFSClass),
-        new Statement(nsRDFSrange, nsRDFSrange, nsRDFSClass),
-        new Statement(nsRDFSsubPropertyOf, nsRDFSrange, nsRDFProperty),
-        new Statement(nsRDFSsubClassOf, nsRDFSrange, nsRDFSClass),
-        new Statement(NS.rdf("subject"), nsRDFSrange, nsRDFSResource),
-        new Statement(NS.rdf("predicate"), nsRDFSrange, nsRDFSResource),
-        new Statement(NS.rdf("object"), nsRDFSrange, nsRDFSResource),
-        new Statement(NS.rdfs("member"), nsRDFSrange, nsRDFSResource),
-        new Statement(NS.rdf("first"), nsRDFSrange, nsRDFSResource),
-        new Statement(NS.rdf("rest"), nsRDFSrange, NS.rdf("List")),
-        new Statement(NS.rdfs("seeAlso"), nsRDFSrange, nsRDFSResource),
-        new Statement(NS.rdfs("isDefinedBy"), nsRDFSrange, nsRDFSResource),
-        new Statement(NS.rdfs("comment"), nsRDFSrange, NS.rdfs("Literal")),
-        new Statement(NS.rdfs("label"), nsRDFSrange, NS.rdfs("Literal")),
-        new Statement(NS.rdf("value"), nsRDFSrange, nsRDFSResource),
+        rdfFactory.quad(rdf.type, rdfs.range, rdfs.Class),
+        rdfFactory.quad(rdfs.domain, rdfs.range, rdfs.Class),
+        rdfFactory.quad(rdfs.range, rdfs.range, rdfs.Class),
+        rdfFactory.quad(rdfs.subPropertyOf, rdfs.range, rdf.Property),
+        rdfFactory.quad(rdfs.subClassOf, rdfs.range, rdfs.Class),
+        rdfFactory.quad(rdf.subject, rdfs.range, rdfs.Resource),
+        rdfFactory.quad(rdf.predicate, rdfs.range, rdfs.Resource),
+        rdfFactory.quad(rdf.object, rdfs.range, rdfs.Resource),
+        rdfFactory.quad(rdfs.member, rdfs.range, rdfs.Resource),
+        rdfFactory.quad(rdf.first, rdfs.range, rdfs.Resource),
+        rdfFactory.quad(rdf.rest, rdfs.range, rdf.List),
+        rdfFactory.quad(rdfs.seeAlso, rdfs.range, rdfs.Resource),
+        rdfFactory.quad(rdfs.isDefinedBy, rdfs.range, rdfs.Resource),
+        rdfFactory.quad(rdfs.comment, rdfs.range, rdfs.Literal),
+        rdfFactory.quad(rdfs.label, rdfs.range, rdfs.Literal),
+        rdfFactory.quad(rdf.value, rdfs.range, rdfs.Resource),
 
-        new Statement(NS.rdf("Alt"), nsRDFSsubClassOf, NS.rdfs("Container")),
-        new Statement(NS.rdf("Bag"), nsRDFSsubClassOf, NS.rdfs("Container")),
-        new Statement(NS.rdf("Seq"), nsRDFSsubClassOf, NS.rdfs("Container")),
-        new Statement(NS.rdfs("ContainerMembershipProperty"), nsRDFSsubClassOf, nsRDFProperty),
+        rdfFactory.quad(rdf.Alt, rdfs.subClassOf, rdfs.Container),
+        rdfFactory.quad(rdf.Bag, rdfs.subClassOf, rdfs.Container),
+        rdfFactory.quad(rdf.Seq, rdfs.subClassOf, rdfs.Container),
+        rdfFactory.quad(rdfs.ContainerMembershipProperty, rdfs.subClassOf, rdf.Property),
 
-        new Statement(NS.rdfs("isDefinedBy"), nsRDFSsubPropertyOf, NS.rdfs("seeAlso")),
+        rdfFactory.quad(rdfs.isDefinedBy, rdfs.subPropertyOf, rdfs.seeAlso),
 
-        new Statement(NS.rdfs("Datatype"), nsRDFSsubClassOf, nsRDFSClass),
+        rdfFactory.quad(rdfs.Datatype, rdfs.subClassOf, rdfs.Class),
 
-        new Statement(nsRDFSResource, nsRDFtype, nsRDFSClass),
-        new Statement(nsRDFSClass, nsRDFtype, nsRDFSClass),
+        rdfFactory.quad(rdfs.Resource, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdfs.Class, rdf.type, rdfs.Class),
     ],
 
-    processStatement(item: Statement, ctx: VocabularyProcessingContext): Statement[] | null {
+    processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
         const result = [item];
 
-        const domainStatements = ctx.store.statementsMatching(item.predicate, nsRDFSdomain);
+        const domainStatements = ctx.store.statementsMatching(item.predicate, rdfs.domain);
         if (domainStatements.length > 0) {
             for (let i = 0; i < domainStatements.length; i++) {
-                result.push(new Statement(item.subject as NamedNode, nsRDFtype, domainStatements[i].object));
+                result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, domainStatements[i].object));
             }
         }
 
-        const rangeStatements = ctx.store.statementsMatching(item.predicate, nsRDFSrange);
+        const rangeStatements = ctx.store.statementsMatching(item.predicate, rdfs.range);
         if (rangeStatements.length > 0) {                                                     // P rdfs:range C..Cn
             for (let i = 0; i < rangeStatements.length; i++) {
-                result.push(new Statement(item.object as NamedNode, nsRDFtype, rangeStatements[i].object));
+                result.push(rdfFactory.quad(item.object as NamedNode, rdf.type, rangeStatements[i].object));
             }
         }
 
-        if (nsRDFSdomain.equals(item.predicate)) {
-            if (!(item.object instanceof NamedNode)) {
-                throw new TypeError(`A non IRI was passed as object to rdfs:domain (was: ${item.object}).`);
-            }
-            result.push(new Statement(item.subject, nsRDFtype, nsRDFProperty));     // P rdf:type rdf:Property
-            result.push(new Statement(item.object, nsRDFtype, nsRDFSClass));        // C rdf:type rdfs:Class
+        if (rdfFactory.equals(rdfs.domain, item.predicate)) {
+            result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
+            result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
             const dereferences = ctx.store.statementsMatching(item.subject);
             for (let i = 0; i < dereferences.length; i++) {
-                result.push(new Statement(item.subject as NamedNode, nsRDFtype, dereferences[i].object));
+                result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, dereferences[i].object));
             }
-        } else if (nsRDFSrange.equals(item.predicate)) {
-            if (!(item.object instanceof NamedNode)) {
-                throw new TypeError(`A non IRI was passed as object to rdfs:domain (was: ${item.object}).`);
+
+            if (!rdfFactory.equals(item.subject, rdf.type)) {
+                ctx.dataStore.getInternalStore().newPropertyAction(
+                    item.subject as NamedNode,
+                    (_: Store, subj: SomeNode) => {
+                        ctx.store.addStatements([rdfFactory.quad(subj, rdf.type, item.object)]);
+                        return true;
+                    },
+                );
             }
-            result.push(new Statement(item.subject, nsRDFtype, nsRDFProperty));     // P rdf:type rdf:Property
-            result.push(new Statement(item.object, nsRDFtype, nsRDFSClass));        // C rdf:type rdfs:Class
+        } else if (rdfFactory.equals(rdfs.range, item.predicate)) {
+            result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
+            result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
             const dereferences = ctx.store.statementsMatching(undefined, undefined, item.subject);
             for (let i = 0; i < dereferences.length; i++) {
-                result.push(new Statement(dereferences[i].subject, nsRDFtype, item.object));
+                result.push(rdfFactory.quad(dereferences[i].subject, rdf.type, item.object));
             }
-        } else if (nsRDFSsubClassOf.equals(item.predicate)) {                                   // C1 rdfs:subClassOf C2
-            if (!(item.object instanceof NamedNode || item.object instanceof BlankNode)) {
+
+            if (!rdfFactory.equals(item.subject, rdf.type)) {
+                ctx.dataStore.getInternalStore().newPropertyAction(
+                    item.subject as NamedNode,
+                    (_: Store, __: SomeNode, ___, obj: Term) => {
+                        ctx.store.addStatements([rdfFactory.quad(obj, rdf.type, item.object)]);
+                        return true;
+                    },
+                );
+            }
+        } else if (rdfFactory.equals(rdfs.subClassOf, item.predicate)) {            // C1 rdfs:subClassOf C2
+            if (!(item.object.termType === TermType.NamedNode || item.object.termType === TermType.BlankNode)) {
                 throw new Error("Object of subClassOf statement must be a NamedNode");
             }
-            const iSubject = item.subject.sI;
-            const iObject = item.object.sI;
+            const iSubject = rdfFactory.id(item.subject) as number;
+            const iObject = rdfFactory.id(item.object) as number;
             if (!ctx.superMap.has(iObject)) {
-                ctx.superMap.set(iObject, new Set([nsRDFSResource.sI]));
+                ctx.superMap.set(iObject, new Set([rdfFactory.id(rdfs.Resource) as number]));
             }
 
             let parents = ctx.superMap.get(iObject);
@@ -131,7 +138,7 @@ export const RDFS = {
                     itemVal.forEach(v.add, v);
                 }
             });
-        } else if (nsRDFSsubPropertyOf.equals(item.predicate)) {
+        } else if (rdfFactory.equals(rdfs.subPropertyOf, item.predicate)) {
             // TODO: Implement
             return result;
         }
@@ -140,8 +147,8 @@ export const RDFS = {
     },
 
     processType(type: NamedNode, ctx: VocabularyProcessingContext): boolean {
-        RDFS.processStatement(new Statement(type, nsRDFSsubClassOf, nsRDFSResource), ctx);
-        ctx.store.add(new Statement(type, nsRDFtype, nsRDFSClass));
+        RDFS.processStatement(rdfFactory.quad(type, rdfs.subClassOf, rdfs.Resource), ctx);
+        ctx.store.add(rdfFactory.quad(type, rdf.type, rdfs.Class));
         return false;
     },
 } as VocabularyProcessor;

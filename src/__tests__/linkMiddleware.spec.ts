@@ -1,4 +1,5 @@
 import "jest";
+import "./useHashFactory";
 
 import { LinkedRenderStore } from "../LinkedRenderStore";
 import { linkMiddleware } from "../linkMiddleware";

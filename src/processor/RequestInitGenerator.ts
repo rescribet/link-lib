@@ -1,6 +1,7 @@
 export interface RequestInitGeneratorOpts {
     credentials: "include" | "same-origin" | "omit" | undefined;
     csrfFieldName: string;
+    headers?: { [k: string]: string };
     mode: "same-origin" | "navigate" | "no-cors" | "cors" | undefined;
     xRequestedWith: string;
 }
@@ -8,6 +9,7 @@ export interface RequestInitGeneratorOpts {
 export class RequestInitGenerator {
     public readonly credentials: "include" | "same-origin" | "omit" | undefined;
     public readonly csrfFieldName: string;
+    public readonly baseHeaders: { [k: string]: string };
     public readonly mode: "same-origin" | "navigate" | "no-cors" | "cors" | undefined;
     public readonly xRequestedWith: string;
 
@@ -17,6 +19,7 @@ export class RequestInitGenerator {
         mode: "same-origin",
         xRequestedWith: "XMLHttpRequest",
     }) {
+        this.baseHeaders = opts.headers || {};
         this.csrfFieldName = opts.csrfFieldName;
         this.credentials = opts.credentials;
         this.mode = opts.mode;
@@ -47,7 +50,7 @@ export class RequestInitGenerator {
     }
 
     private getHeaders(accept: string): Record<string, string> {
-        const acceptHeader = { Accept: accept };
+        const acceptHeader = Object.assign({}, this.baseHeaders, { Accept: accept });
         if (this.credentials === "include" || this.credentials === "same-origin") {
             return this.authenticityHeader(acceptHeader);
         }

@@ -1,6 +1,5 @@
-import { NamedNode } from "rdflib";
-
 import { LinkedRenderStore } from "./LinkedRenderStore";
+import { NamedNode } from "./rdf";
 import { MiddlewareActionHandler, MiddlewareFn, MiddlewareWithBoundLRS } from "./types";
 import { defaultNS } from "./utilities/constants";
 
