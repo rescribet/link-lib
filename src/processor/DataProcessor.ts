@@ -11,6 +11,7 @@ import {
     Fetcher,
     FetchOpts,
     IndexedFormula,
+    NamedNode as RDFLibNamedNode,
     Serializer,
     uri as Uri,
 } from "rdflib";
@@ -21,7 +22,6 @@ import {
     NamedNode,
     Quad,
     Quadruple,
-    RDFObjectBase,
 } from "../rdf";
 import { RDFStore } from "../RDFStore";
 import {
@@ -106,11 +106,11 @@ function pushToMap<T>(map: { [key: string]: T[] }, k: string, v: T): void {
  * @param res The (fetch) response object from the request.
  * @returns A graph with metadata about the response.
  */
-function processResponse(iri: string | NamedNode, res: Response): Array<Quad<RDFBase>> {
+function processResponse(iri: string | NamedNode, res: Response): Quad[] {
     const rawURL = getURL(res);
     const origin = typeof iri === "string"
         ? rdfFactory.namedNode(new URL(rawURL).origin)
-        : iri.site();
+        : RDFLibNamedNode.site(iri);
 
     if (rawURL && iri !== rawURL) {
         return [
@@ -157,34 +157,32 @@ const queuedDeltaStatus = (totalRequested: number): FulfilledRequestStatus => Ob
     timesRequested: totalRequested,
 }) as FulfilledRequestStatus;
 
-export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
-    implements LinkedDataAPI<RDFBase>, DeltaProcessor<RDFBase> {
-
+export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     public accept: { [k: string]: string };
     public timeout: number = 30000;
 
-    private _fetcher: Fetcher<RDFObjectBase> | undefined;
-    private _dispatch?: MiddlewareActionHandler<RDFBase>;
+    private _fetcher: Fetcher | undefined;
+    private _dispatch?: MiddlewareActionHandler;
     private readonly bulkEndpoint: string;
     private report: ErrorReporter;
-    private deltas: Array<Array<Quadruple<RDFBase>>> = [];
+    private deltas: Quadruple[][] = [];
     private readonly invalidationMap: Map<number, void>;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
     private readonly requestInitGenerator: RequestInitGenerator;
-    private readonly requestMap: Map<number, Promise<Array<Quad<RDFBase>>>>;
+    private readonly requestMap: Map<number, Promise<Quad[]>>;
     private readonly statusMap: Array<EmptyRequestStatus | FulfilledRequestStatus | undefined>;
-    private readonly store: RDFStore<RDFBase>;
+    private readonly store: RDFStore;
 
-    private get fetcher(): Fetcher<RDFBase> {
+    private get fetcher(): Fetcher {
         if (typeof this._fetcher === "undefined") {
-            this._fetcher = new Fetcher<RDFBase>(this.store.getInternalStore(), {
+            this._fetcher = new Fetcher(this.store.getInternalStore(), {
                 fetch: typeof window !== "undefined" && window.fetch.bind(window) || undefined,
                 timeout: this.timeout,
             });
             FETCHER_CALLBACKS.forEach((hook) => {
                 const hookIRI = defaultNS.ll(`data/rdflib/${hook}`);
                 this._fetcher!.addCallback(hook, this.invalidate.bind(this));
-                this._fetcher!.addCallback(hook, (iri: string | NamedNode<RDFBase>, _err?: Error) => {
+                this._fetcher!.addCallback(hook, (iri: string | NamedNode | BlankNode, _err?: Error) => {
                     this.dispatch(hookIRI, [typeof iri === "string" ? rdfFactory.namedNode(iri) : iri, _err]);
 
                     return true;
@@ -194,11 +192,11 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         return this._fetcher;
     }
 
-    private set fetcher(v: Fetcher<RDFBase>) {
+    private set fetcher(v: Fetcher) {
         this._fetcher = v;
     }
 
-    public constructor(opts: DataProcessorOpts<RDFBase>) {
+    public constructor(opts: DataProcessorOpts) {
         this.accept = opts.accept || {
             default: "",
         };
@@ -219,7 +217,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         this.feedResponse = this.feedResponse.bind(this);
     }
 
-    public get dispatch(): MiddlewareActionHandler<RDFBase> {
+    public get dispatch(): MiddlewareActionHandler {
         if (typeof this._dispatch === "undefined") {
             throw new Error("Invariant: cannot call `dispatch` before initialization is complete");
         }
@@ -227,12 +225,11 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         return this._dispatch;
     }
 
-    public set dispatch(value: MiddlewareActionHandler<RDFBase>) {
+    public set dispatch(value: MiddlewareActionHandler) {
         this._dispatch = value;
     }
 
-    public async execActionByIRI(subject: NamedNode<RDFBase>,
-                                 dataTuple: DataTuple<RDFBase>): Promise<LinkedActionResponse<RDFBase>> {
+    public async execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse> {
 
         const [graph, blobs = []] = dataTuple;
 
@@ -250,7 +247,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
             throw new ProcessorError(MSG_INCORRECT_TARGET);
         }
 
-        const urls = this.store.getResourceProperty(target as SomeNode<RDFBase>, defaultNS.schema.url);
+        const urls = this.store.getResourceProperty(target as SomeNode, defaultNS.schema.url);
         const url = Array.isArray(urls) ? urls[0] : urls;
         if (!url) {
             throw new ProcessorError(MSG_URL_UNDEFINED);
@@ -258,7 +255,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         if (url.termType !== "NamedNode") {
             throw new ProcessorError(MSG_URL_UNRESOLVABLE);
         }
-        const targetMethod = this.store.getResourceProperty(target as SomeNode<RDFBase>, defaultNS.schema.httpMethod);
+        const targetMethod = this.store.getResourceProperty(target as SomeNode, defaultNS.schema.httpMethod);
         const method = typeof targetMethod !== "undefined" ? targetMethod.toString() : "GET";
         const opts = this.requestInitGenerator.generate(method, this.acceptForHost(url));
 
@@ -309,13 +306,11 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         };
     }
 
-    public fetchableURLFromIRI(iri: NamedNode<RDFBase>): NamedNode<RDFBase> {
+    public fetchableURLFromIRI(iri: NamedNode): NamedNode {
         return rdfFactory.namedNode(iri.value.split("#").shift()!);
     }
 
-    public async fetchResource(iri: NamedNode<RDFBase> | string,
-                               opts?: FetchOpts<RDFBase>): Promise<ResponseAndFallbacks> {
-
+    public async fetchResource(iri: NamedNode | string, opts?: FetchOpts): Promise<ResponseAndFallbacks> {
         const accept = this.acceptForHost(iri);
         if (accept) {
             this.fetcher.mediatypes = {[accept]: {q: 1.0}};
@@ -347,7 +342,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         return this.processExecAction(res);
     }
 
-    public flush(): Array<Quad<RDFBase>> {
+    public flush(): Quad[] {
         const deltas = this.deltas;
         this.deltas = [];
 
@@ -362,7 +357,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         return [];
     }
 
-    public getEntities(resources: ResourceQueueItem[]): Promise<Array<Quad<RDFBase>>> {
+    public getEntities(resources: ResourceQueueItem[]): Promise<Quad[]> {
         const reload: NamedNode[] = [];
 
         const body = new URLSearchParams();
@@ -393,7 +388,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public async getEntity(iri: NamedNode<RDFBase>, opts?: FetchOpts<RDFBase>): Promise<Array<Quad<RDFBase>>> {
+    public async getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Quad[]> {
         const url = new URL(iri.value);
         url.hash = "";
         const requestIRI = rdfFactory.namedNode(url.toString());
@@ -402,7 +397,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
             return existing;
         }
 
-        let preExistingData: Array<Quad<RDFBase>> = [];
+        let preExistingData: Quad[] = [];
         if (opts && opts.clearPreviousData) {
             preExistingData = this.store.statementsFor(iri);
             preExistingData = preExistingData.concat(this.store.statementsFor(requestIRI));
@@ -441,9 +436,9 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
     /**
      * @see LinkedDataAPI#getStatus for documentation
      */
-    public getStatus(iri: NamedNode<RDFBase>): EmptyRequestStatus | FulfilledRequestStatus {
+    public getStatus(iri: NamedNode): EmptyRequestStatus | FulfilledRequestStatus {
         const irl = this.fetchableURLFromIRI(iri);
-        const existing = this.statusMap[irl.id];
+        const existing = this.statusMap[rdfFactory.id(irl)];
 
         if (existing) {
             return existing;
@@ -481,7 +476,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         if (fetcherStatus === "timeout") {
             return this.memoizeStatus(irl, timedOutRequest(totalRequested));
         }
-        const requestIRI = requests.pop()!.subject as BlankNode<RDFBase>;
+        const requestIRI = requests.pop()!.subject as BlankNode;
         const requestObj = anyRDFValue(
             this.store.statementsFor(requestIRI),
             defaultNS.link("response"),
@@ -518,7 +513,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         );
     }
 
-    public invalidate(iri: string | SomeNode<RDFBase>, _err?: Error): boolean {
+    public invalidate(iri: string | SomeNode, _err?: Error): boolean {
         const id = (typeof iri === "string" ? rdfFactory.namedNode(iri) : iri).sI;
         this.invalidationMap.set(id);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
@@ -528,23 +523,23 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
     }
 
     public isInvalid(iri: SomeNode): boolean {
-        return this.invalidationMap.has(iri.id);
+        return this.invalidationMap.has(rdfFactory.id(iri));
     }
 
-    public processExternalResponse(response: Response): Promise<Array<Quad<RDFBase>> | undefined> {
+    public processExternalResponse(response: Response): Promise<Quad[] | undefined> {
         return handleStatus(response)
             .then(this.feedResponse);
     }
 
-    public processDelta(delta: Array<Quadruple<RDFBase>|void>): Array<Quad<RDFBase>> {
+    public processDelta(delta: Array<Quadruple|void>): Quad[] {
         let s: Quadruple|void;
         for (let i = 0, len = delta.length; i < len; i++) {
             s = delta[i];
             const subj = s ? s[0] : undefined;
 
-            const currentStatus = subj && this.statusMap[subj.id];
+            const currentStatus = subj && this.statusMap[rdfFactory.id(subj)];
             if (subj && currentStatus && currentStatus.status === 203) {
-                this.statusMap[subj.id] = undefined;
+                this.statusMap[rdfFactory.id(subj)] = undefined;
             }
 
             if (!s || s[3] !== defaultNS.ll("meta")) {
@@ -552,8 +547,8 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
             }
 
             if (s[1] === defaultNS.http("statusCode")) {
-                this.removeInvalidation(subj as NamedNode<RDFBase>);
-                this.setStatus(subj as NamedNode<RDFBase>, Number.parseInt(s[2].value, 10));
+                this.removeInvalidation(subj as NamedNode);
+                this.setStatus(subj as NamedNode, Number.parseInt(s[2].value, 10));
             } else if (s[1] === defaultNS.httph("Exec-Action")) {
                 this.execExecHeader(s[2].value);
             }
@@ -573,7 +568,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         });
     }
 
-    public queueDelta(delta: Array<Quadruple<RDFBase>>, subjects: number[]): void {
+    public queueDelta(delta: Quadruple[], subjects: number[]): void {
         this.deltas.push(delta);
         const status = queuedDeltaStatus(1);
         for (const s of subjects) {
@@ -601,7 +596,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
         }
     }
 
-    private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Array<Quad<RDFBase>>> {
+    private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Quad[]> {
         if (res.status >= INTERNAL_SERVER_ERROR) {
             return Promise.reject(res);
         }
@@ -620,7 +615,7 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
 
     private memoizeStatus(iri: NamedNode,
                           s: EmptyRequestStatus | FulfilledRequestStatus): EmptyRequestStatus | FulfilledRequestStatus {
-        this.statusMap[iri.id] = s;
+        this.statusMap[rdfFactory.id(iri)] = s;
 
         return s;
     }
@@ -633,12 +628,12 @@ export class DataProcessor<RDFBase extends RDFObjectBase = RDFObjectBase>
     }
 
     private removeInvalidation(subject: NamedNode): void {
-        this.invalidationMap.delete(subject.id);
+        this.invalidationMap.delete(rdfFactory.id(subject));
     }
 
-    private setStatus(iri: NamedNode<RDFBase>, status: number): void {
+    private setStatus(iri: NamedNode, status: number): void {
         const url = this.fetchableURLFromIRI(iri);
-        const prevStatus = this.statusMap[url.id];
+        const prevStatus = this.statusMap[rdfFactory.id(url)];
         this.store.touch(url);
         this.store.touch(iri);
 

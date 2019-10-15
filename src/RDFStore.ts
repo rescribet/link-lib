@@ -11,7 +11,6 @@ import rdfFactory, {
     OptionalNode,
     Quad,
     Quadruple,
-    RDFObjectBase,
     Term,
 } from "./rdf";
 import { deltaProcessor } from "./store/deltaProcessor";
@@ -20,7 +19,7 @@ import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
 import { defaultNS as NS } from "./utilities/constants";
 import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 
-const EMPTY_ST_ARR: ReadonlyArray<Quad<any>> = Object.freeze([]);
+const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 
 export interface RDFStoreOpts {
     deltaProcessorOpts: {[k: string]: Array<NamedNode | undefined>};
@@ -29,8 +28,8 @@ export interface RDFStoreOpts {
 /**
  * Provides a clean consistent interface to stored (RDF) data.
  */
-export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, DeltaProcessor<RDFBase> {
-    public changeBuffer: Array<Quad<RDFBase>> = new Array(100);
+export class RDFStore implements ChangeBuffer, DeltaProcessor {
+    public changeBuffer: Quad[] = new Array(100);
     public changeBufferCount: number = 0;
     /**
      * Record of the last time a resource was flushed.
@@ -38,20 +37,20 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
      * @note Not to be confused with the last change in the store, which might be later than the flush time.
      */
     public changeTimestamps: Uint32Array = new Uint32Array(0x100000);
-    public typeCache: Array<Array<NamedNode<RDFBase>>> = [];
+    public typeCache: NamedNode[][] = [];
 
-    private deltas: Array<Array<Quadruple<RDFBase>>> = [];
-    private deltaProcessor: StoreProcessor<RDFBase>;
+    private deltas: Quadruple[][] = [];
+    private deltaProcessor: StoreProcessor;
     private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
-    private store: IndexedFormula<RDFBase> = graph();
+    private store: IndexedFormula = graph();
 
     constructor({ deltaProcessorOpts }: RDFStoreOpts = { deltaProcessorOpts: {} }) {
         this.processDelta = this.processDelta.bind(this);
 
-        const g = graph<RDFBase>();
-        this.store = patchRDFLibStoreWithOverrides<RDFBase>(g, this);
+        const g = graph();
+        this.store = patchRDFLibStoreWithOverrides(g, this);
         this.store.newPropertyAction(rdf.type, this.processTypeStatement.bind(this));
 
         const defaults =  {
@@ -79,7 +78,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
      * Add statements to the store.
      * @param data Data to parse and add to the store.
      */
-    public addStatements(data: Array<Quad<RDFBase>>): void {
+    public addStatements(data: Quad[]): void {
         if (!Array.isArray(data)) {
             throw new TypeError("An array of statements must be passed to addStatements");
         }
@@ -89,7 +88,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
         }
     }
 
-    public addQuads(data: Array<Quadruple<RDFBase>>): Array<Quad<RDFBase>> {
+    public addQuads(data: Quadruple[]): Quad[] {
         const statements = new Array(data.length);
         for (let i = 0, len = data.length; i < len; i++) {
             statements[i] = this.store.add(data[i][0], data[i][1], data[i][2], data[i][3]);
@@ -99,29 +98,29 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
     }
 
     public any(
-        subj: OptionalNode<RDFBase>,
-        pred?: OptionalNode<RDFBase>,
-        obj?: OptionalNode<RDFBase>,
-        why?: OptionalNode<RDFBase>,
-    ): Term<RDFBase> | undefined {
+        subj: OptionalNode,
+        pred?: OptionalNode,
+        obj?: OptionalNode,
+        why?: OptionalNode,
+    ): Term | undefined {
         return this.store.any(subj, pred, obj, why);
     }
 
-    public anyStatementMatching(subj: OptionalNode<RDFBase>,
-                                pred?: OptionalNode<RDFBase>,
-                                obj?: OptionalNode<RDFBase>,
-                                why?: OptionalNode<RDFBase>): Quad<RDFBase> | undefined {
+    public anyStatementMatching(subj: OptionalNode,
+                                pred?: OptionalNode,
+                                obj?: OptionalNode,
+                                why?: OptionalNode): Quad | undefined {
         return this.store.anyStatementMatching(subj, pred, obj, why);
     }
 
-    public anyValue(subj: OptionalNode<RDFBase>,
-                    pred?: OptionalNode<RDFBase>,
-                    obj?: OptionalNode<RDFBase>,
-                    why?: OptionalNode<RDFBase>): string | undefined {
+    public anyValue(subj: OptionalNode,
+                    pred?: OptionalNode,
+                    obj?: OptionalNode,
+                    why?: OptionalNode): string | undefined {
         return this.store.anyValue(subj, pred, obj, why);
     }
 
-    public canon(term: Node<RDFBase>): Node<RDFBase> {
+    public  canon(term: SomeNode): SomeNode {
         return this.store.canon(term);
     }
 
@@ -129,7 +128,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
      * Flushes the change buffer to the return value.
      * @return Statements held in memory since the last flush.
      */
-    public flush(): Array<Quad<RDFBase>> {
+    public flush(): Quad[] {
         const deltas = this.deltas;
         this.deltas = [];
 
@@ -138,7 +137,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
         }
 
         if (this.changeBufferCount === 0) {
-            return EMPTY_ST_ARR as Array<Quad<RDFBase>>;
+            return EMPTY_ST_ARR as Quad[];
         }
         const processingBuffer = this.changeBuffer;
         this.changeBuffer = new Array(100);
@@ -146,7 +145,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
         const changeStamp = Date.now();
         processingBuffer
             .filter((s) => {
-                this.changeTimestamps[s.subject.id] = changeStamp;
+                this.changeTimestamps[rdfFactory.id(s.subject)] = changeStamp;
                 return s.predicate === rdf.type;
             })
             .map((s) => this.processTypeStatement(undefined, s.subject, s.predicate, undefined, undefined));
@@ -155,18 +154,18 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
     }
 
     /** @private */
-    public getInternalStore(): IndexedFormula<RDFBase> {
+    public getInternalStore(): IndexedFormula {
         return this.store;
     }
 
-    public match(subj: OptionalNode<RDFBase>,
-                 pred?: OptionalNode<RDFBase>,
-                 obj?: OptionalNode<RDFBase>,
-                 why?: OptionalNode<RDFBase>): Array<Quad<RDFBase>> {
+    public match(subj: OptionalNode,
+                 pred?: OptionalNode,
+                 obj?: OptionalNode,
+                 why?: OptionalNode): Quad[] {
         return this.store.match(subj, pred, obj, why) || [];
     }
 
-    public processDelta(delta: Array<Quadruple<RDFBase>>): Array<Quad<RDFBase>> {
+    public processDelta(delta: Quadruple[]): Quad[] {
         const [
             addables,
             replacables,
@@ -178,13 +177,13 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
         return this.replaceMatches(replacables).concat(this.addQuads(addables));
     }
 
-    public removeResource(subject: SomeNode<RDFBase>): void {
+    public removeResource(subject: SomeNode): void {
         this.touch(subject);
-        this.typeCache[subject.id] = [];
+        this.typeCache[rdfFactory.id(subject)] = [];
         this.removeStatements(this.statementsFor(subject));
     }
 
-    public removeStatements(statements: Array<Quad<RDFBase>>): void {
+    public removeStatements(statements: Quad[]): void {
         this.store.remove(statements.slice());
     }
 
@@ -197,7 +196,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
      * @param original The statements to remove from the store.
      * @param replacement The statements to add to the store.
      */
-    public replaceStatements(original: Array<Quad<RDFBase>>, replacement: Array<Quad<RDFBase>>): void {
+    public replaceStatements(original: Quad[], replacement: Quad[]): void {
         const uniqueStatements = new Array(replacement.length).filter(Boolean);
         for (let i = 0; i < replacement.length; i++) {
             const cond = original.some(
@@ -218,7 +217,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
         return this.addStatements(replacement);
     }
 
-    public replaceMatches(statements: Array<Quadruple<RDFBase>>): Array<Quad<RDFBase>> {
+    public replaceMatches(statements: Quadruple[]): Quad[] {
         for (let i = 0; i < statements.length; i++) {
             this.removeStatements(this.match(
                 statements[i][0],
@@ -231,9 +230,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
         return this.addQuads(statements);
     }
 
-    public getResourcePropertyRaw(subject: SomeNode<RDFBase>,
-                                  property: SomeNode<RDFBase> | Array<SomeNode<RDFBase>>): Array<Quad<RDFBase>> {
-
+    public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Quad[] {
         const props = this.statementsFor(subject);
         if (Array.isArray(property)) {
             for (let i = 0; i < property.length; i++) {
@@ -243,17 +240,15 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
                 }
             }
 
-            return EMPTY_ST_ARR as Array<Quad<RDFBase>>;
+            return EMPTY_ST_ARR as Quad[];
         }
 
         return allRDFPropertyStatements(props, property);
     }
 
-    public getResourceProperties(subject: SomeNode<RDFBase>,
-                                 property: SomeNode<RDFBase> | Array<SomeNode<RDFBase>>): Array<Term<RDFBase>> {
-
+    public getResourceProperties(subject: SomeNode, property: SomeNode | SomeNode[]): Term[] {
         if (property === rdf.type) {
-            return this.typeCache[subject.id] || [];
+            return this.typeCache[rdfFactory.id(subject)] || [];
         }
 
         return this
@@ -261,10 +256,9 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
             .map((s) => s.object);
     }
 
-    public getResourceProperty(subject: SomeNode<RDFBase>,
-                               property: SomeNode<RDFBase> | Array<SomeNode<RDFBase>>): Term | undefined {
+    public getResourceProperty(subject: SomeNode, property: SomeNode | SomeNode[]): Term | undefined {
         if (property === rdf.type) {
-            const entry = this.typeCache[subject.id];
+            const entry = this.typeCache[rdfFactory.id(subject)];
             return entry ? entry[0] : undefined;
         }
         const rawProp = this.getResourcePropertyRaw(subject, property);
@@ -275,7 +269,7 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
         return getPropBestLang(rawProp, this.langPrefs);
     }
 
-    public queueDelta(delta: Array<Quadruple<RDFBase>>): void {
+    public queueDelta(delta: Quadruple[]): void {
         this.deltas.push(delta);
     }
 
@@ -283,17 +277,17 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
      * Searches the store for all the statements on {iri} (so not all statements relating to {iri}).
      * @param subject The identifier of the resource.
      */
-    public statementsFor(subject: SomeNode<RDFBase>): Array<Quad<RDFBase>> {
-        const canon = (this.store.canon(subject) as Term).id;
+    public statementsFor(subject: SomeNode): Quad[] {
+        const canon = rdfFactory.id(this.store.canon(subject));
 
         return typeof this.store.subjectIndex[canon] !== "undefined"
             ? this.store.subjectIndex[canon]
-            : EMPTY_ST_ARR as Array<Quad<RDFBase>>;
+            : EMPTY_ST_ARR as Quad[];
     }
 
-    public touch(iri: SomeNode<RDFBase>): void {
-        this.changeTimestamps[iri.id] = Date.now();
-        this.changeBuffer.push(rdfFactory.quad(iri, NS.ll("nop"), NS.ll("nop")) as Quad<RDFBase>);
+    public touch(iri: SomeNode): void {
+        this.changeTimestamps[rdfFactory.id(iri)] = Date.now();
+        this.changeBuffer.push(rdfFactory.quad(iri, NS.ll("nop"), NS.ll("nop")));
         this.changeBufferCount++;
     }
 
@@ -304,20 +298,21 @@ export class RDFStore<RDFBase extends RDFObjectBase> implements ChangeBuffer, De
     /**
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
-    private processTypeStatement(_formula: Formula<RDFBase> | undefined,
-                                 subj: SomeNode<RDFBase>,
-                                 _pred: NamedNode<RDFBase>,
-                                 obj?: Term<RDFBase>,
-                                 _why?: Node<RDFBase>): boolean {
-        if (!Array.isArray(this.typeCache[subj.id])) {
-            this.typeCache[subj.id] = [obj as NamedNode<RDFBase>];
+    private processTypeStatement(_formula: Formula | undefined,
+                                 subj: SomeNode,
+                                 _pred: NamedNode,
+                                 obj?: Term,
+                                 _why?: Node): boolean {
+        const subjId = rdfFactory.id(subj);
+        if (!Array.isArray(this.typeCache[subjId])) {
+            this.typeCache[subjId] = [obj as NamedNode];
             return false;
         }
-        this.typeCache[subj.id] = this.statementsFor((subj as NamedNode<RDFBase>))
+        this.typeCache[subjId] = this.statementsFor((subj as NamedNode))
             .filter((s) => s.predicate === rdf.type)
-            .map((s) => s.object as NamedNode<RDFBase>);
+            .map((s) => s.object as NamedNode);
         if (obj) {
-            this.typeCache[subj.id].push((obj as NamedNode<RDFBase>));
+            this.typeCache[subjId].push((obj as NamedNode));
         }
         return false;
     }

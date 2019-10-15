@@ -1,9 +1,8 @@
-import rdf, { Node } from "@ontologies/core";
+import rdfFactory, { Literal, NamedNode, Node, TermType } from "@ontologies/core";
+import rdf from "@ontologies/rdf";
 import {
-    BlankNode,
     IndexedFormula,
-    Literal,
-    NamedNode,
+    Literal as RDFLibLiteral,
 } from "rdflib";
 
 import {
@@ -57,7 +56,7 @@ export function seq<T = any>(arr: T[], id?: SomeNode): DataObject {
     }
 
     return arr.reduce(
-        (acc, next, n) => Object.assign(acc, { [defaultNS.rdf(`_${n}`).toString()]: next }),
+        (acc, next, n) => Object.assign(acc, { [rdf.ns(`_${n}`).toString()]: next }),
         base,
     );
 }
@@ -72,7 +71,7 @@ export function processObject(subject: Node,
     if (isIterable(datum)) {
         for (const subResource of datum) {
             if (isPlainObject(subResource)) {
-                const id = (subResource as DataObject)["@id"] as SomeNode | undefined || rdf.blankNode();
+                const id = (subResource as DataObject)["@id"] as SomeNode | undefined || rdfFactory.blankNode();
                 blobs = blobs.concat(processDataObject(id, subResource as DataObject, graph));
                 graph.add(subject, predicate, id);
             } else {
@@ -83,29 +82,29 @@ export function processObject(subject: Node,
         || typeof datum === "number"
         || typeof datum === "boolean"
         || datum instanceof Date) {
-        graph.add(subject, predicate, Literal.fromValue(datum));
+        graph.add(subject, predicate, RDFLibLiteral.fromValue(datum));
     } else if (datum instanceof File) {
         const f = uploadIRI();
-        const file = rdf.quad(subject, predicate, f);
+        const file = rdfFactory.quad(subject, predicate, f);
         blobs.push([f, datum as File]);
         graph.add(file);
     } else if (isPlainObject(datum)) {
-        const id = datum["@id"] as SomeNode | undefined || rdf.blankNode();
+        const id = datum["@id"] as SomeNode | undefined || rdfFactory.blankNode();
         blobs = blobs.concat(processDataObject(id, datum, graph));
         graph.add(subject, predicate, id);
     } else if (datum && datum.termType === "NamedNode") {
-        graph.add(subject, predicate, rdf.namedNode(datum.value));
+        graph.add(subject, predicate, rdfFactory.namedNode(datum.value));
     } else if (datum && datum.termType === "Literal") {
         graph.add(
             subject,
             predicate,
-            rdf.literal(
+            rdfFactory.literal(
                 datum.value,
-                (datum as Literal).language || rdf.namedNode((datum as Literal).datatype.value),
+                (datum as Literal).language || rdfFactory.namedNode((datum as Literal).datatype.value),
             ),
         );
     } else if (datum !== null && datum !== undefined) {
-        graph.add(subject, predicate, Literal.fromValue(datum));
+        graph.add(subject, predicate, RDFLibLiteral.fromValue(datum));
     }
 
     return blobs;
@@ -144,7 +143,7 @@ export function dataToGraphTuple(data: DataObject): DataTuple {
  * @param graph A graph to write the statements into.
  */
 export function toGraph(iriOrData: SomeNode | DataObject, data?: DataObject, graph?: IndexedFormula): ParsedObject {
-    const passedIRI = iriOrData instanceof BlankNode || iriOrData instanceof NamedNode;
+    const passedIRI = iriOrData.termType === TermType.BlankNode || iriOrData.termType === TermType.NamedNode;
     if (passedIRI && !data) {
         throw new TypeError("Only an IRI was passed to `toObject`, a valid data object has to be the second argument");
     }
@@ -154,9 +153,9 @@ export function toGraph(iriOrData: SomeNode | DataObject, data?: DataObject, gra
         if (typeof embeddedIRI !== "string") {
             throw new TypeError("Embedded IRI (`@id`) value must be of type string");
         }
-        iri = rdf.namedNode(embeddedIRI);
+        iri = rdfFactory.namedNode(embeddedIRI);
     } else {
-        iri = passedIRI ? (iriOrData as SomeNode) : rdf.blankNode();
+        iri = passedIRI ? (iriOrData as SomeNode) : rdfFactory.blankNode();
     }
     const dataObj = passedIRI ? data! : (iriOrData as DataObject);
 

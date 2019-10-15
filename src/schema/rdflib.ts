@@ -1,7 +1,6 @@
 import { Resource, subClassOf } from "@ontologies/rdfs";
-import { Statement } from "rdflib";
 
-import rdf, { createNS, NamedNode } from "../rdf";
+import rdf, { createNS, NamedNode, Quad } from "../rdf";
 import { VocabularyProcessingContext } from "../types";
 
 import {
@@ -42,7 +41,7 @@ export const RDFLIB = {
         rdf.quad(ianaTTLResource, subClassOf, Resource),
     ],
 
-    processStatement(_: Statement, __: VocabularyProcessingContext): Statement[] | null {
+    processStatement(_: Quad, __: VocabularyProcessingContext): Quad[] | null {
         return null;
     },
 

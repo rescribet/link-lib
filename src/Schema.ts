@@ -1,15 +1,15 @@
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
-import { IndexedFormula, Statement } from "rdflib";
+import { IndexedFormula, SomeTerm, Statement } from "rdflib";
 
-import rdfFactory, { NamedNode, Quad, Term } from "./rdf";
+import rdfFactory, { NamedNode, Quad } from "./rdf";
 import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";
 import { RDFS } from "./schema/rdfs";
 
 import {
-    SomeNode,
+    Indexable,
     VocabularyProcessingContext,
     VocabularyProcessor,
 } from "./types";
@@ -21,19 +21,19 @@ import { DisjointSet } from "./utilities/DisjointSet";
  * Basically duplicates some functionality already present in {IndexedFormula} IIRC, but this API should be more
  * optimized so it can be used in real-time by low-power devices as well.
  */
-export class Schema extends IndexedFormula {
+export class Schema<IndexType = number | string> extends IndexedFormula {
     private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
 
-    private equivalenceSet: DisjointSet<number> = new DisjointSet();
-    private expansionCache: number[][];
+    private equivalenceSet: DisjointSet<Indexable> = new DisjointSet();
+    private expansionCache: { [k: string]: Indexable[] };
     private liveStore: RDFStore;
-    private superMap: Map<number, Set<number>> = new Map();
-    private processedTypes: number[] = [];
+    private superMap: Map<Indexable, Set<Indexable>> = new Map();
+    private processedTypes: Indexable[] = [];
 
     public constructor(liveStore: RDFStore) {
         super();
         this.liveStore = liveStore;
-        this.expansionCache = [];
+        this.expansionCache = {};
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             this.addStatements(Schema.vocabularies[i].axioms);
@@ -52,16 +52,17 @@ export class Schema extends IndexedFormula {
         return this.liveStore.addStatements(eligible);
     }
 
-    public expand(types: number[]): number[] {
+    public expand(types: Indexable[]): IndexType[] {
         if (types.length === 1) {
-            const existing = this.expansionCache[types[0]];
-
-            return this.expansionCache[types[0]] = existing
+            const existing = this.expansionCache[types[0] as unknown as string];
+            this.expansionCache[types[0] as unknown as string] = existing
                 ? existing
-                : this.sort(this.mineForTypes(types));
+                : this.sort(this.mineForTypes(types) as unknown as Indexable[]) as unknown as Indexable[];
+
+            return this.expansionCache[types[0] as unknown as string] as unknown as IndexType[];
         }
 
-        return this.sort(this.mineForTypes(types));
+        return this.sort(this.mineForTypes(types) as unknown as Indexable[]);
     }
 
     public getProcessingCtx(): VocabularyProcessingContext {
@@ -72,15 +73,15 @@ export class Schema extends IndexedFormula {
         };
     }
 
-    public isInstanceOf(resource: number, superClass: number): boolean {
+    public isInstanceOf(resource: Indexable, superClass: Indexable): boolean {
         return this.holdsStatement(rdfFactory.quad(
             rdfFactory.findById(resource) as NamedNode,
             rdf.type,
-            rdfFactory.findById(superClass) as Term,
+            rdfFactory.findById(superClass) as SomeTerm,
         ) as unknown as Statement);
     }
 
-    public isSubclassOf(resource: number, superClass: number): boolean {
+    public isSubclassOf(resource: Indexable, superClass: Indexable): boolean {
         const resourceMap = this.superMap.get(resource);
 
         if (resourceMap) {
@@ -93,7 +94,7 @@ export class Schema extends IndexedFormula {
      * Returns the hierarchical depth of the type, or -1 if unknown.
      * @param type the type to check
      */
-    public superTypeDepth(type: number): number {
+    public superTypeDepth(type: Indexable): number {
         const superMap = this.superMap.get(type);
 
         return superMap ? superMap.size : -1;
@@ -104,17 +105,25 @@ export class Schema extends IndexedFormula {
      * This is done in multiple iterations until no new types are found.
      * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
      */
-    public mineForTypes(lookupTypes: number[]): number[] {
+    public mineForTypes(lookupTypes: Indexable[]): IndexType[] {
         if (lookupTypes.length === 0) {
-            return [rdfs.Resource.id];
+            return [rdfFactory.id(rdfs.Resource) as unknown as IndexType];
         }
 
-        const canonicalTypes: number[] = [];
+        const canonicalTypes: Indexable[] = [];
         for (let i = 0; i < lookupTypes.length; i++) {
-            const canon = (this.liveStore.canon(rdfFactory.findById(lookupTypes[i])!) as SomeNode).id;
+            const canon = rdfFactory.id(
+                this.liveStore.canon(
+                    rdfFactory.findById(lookupTypes[i]) as NamedNode,
+                ),
+            ) as unknown as Indexable;
+
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
-                    Schema.vocabularies[j].processType(rdfFactory.findById(canon)!, this.getProcessingCtx());
+                    Schema.vocabularies[j].processType(
+                        rdfFactory.findById(canon) as NamedNode,
+                        this.getProcessingCtx(),
+                    );
                 }
                 this.processedTypes.push(canon);
             }
@@ -146,7 +155,7 @@ export class Schema extends IndexedFormula {
         return this.sort(allTypes);
     }
 
-    public sort(types: number[]): number[] {
+    public sort(types: Indexable[]): IndexType[] {
         return types.sort((a, b) => {
             if (this.isSubclassOf(a, b)) {
                 return -1;
@@ -163,7 +172,7 @@ export class Schema extends IndexedFormula {
             }
 
             return 0;
-        });
+        }) as unknown as IndexType[];
     }
 
     private process(item: Quad): Quad[] | null {

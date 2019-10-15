@@ -1,3 +1,4 @@
+import { QuadPosition } from "@ontologies/core";
 import { IndexedFormula } from "rdflib";
 
 import rdfFactory, {
@@ -85,11 +86,12 @@ export const deltaProcessor = (
                 }
             } else if (isSlice(quad[3])) {
                 const g = new URL(quad[3].value).searchParams.get("graph");
-                if (g) {
-                    removable.push(...store.match(quad[0], quad[1], quad[2], rdfFactory.namedNode(g)));
-                } else {
-                    removable.push(...store.match(quad[0], quad[1], quad[2], null));
-                }
+                removable.push(...store.match(
+                    quad[QuadPosition.subject],
+                    quad[QuadPosition.predicate],
+                    quad[QuadPosition.object],
+                    g ? rdfFactory.namedNode(g) : null,
+                ));
             }
         }
 

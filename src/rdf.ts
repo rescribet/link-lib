@@ -3,37 +3,34 @@ import {
     createNS as basicCreateNS,
     Literal as BasicLiteral,
     NamedNode as BasicNamedNode,
-    NamespaceCreator,
     Node as BasicNode,
     Quad as BasicQuad,
     Quadruple as BasicQuadruple,
     RDFObject,
     Term as BasicTerm,
 } from "@ontologies/core";
-import { memoizedHashFactory } from "./memoizedHashFactory";
+import MemoizedHashFactory from "./memoizedHashFactory";
 
-export interface RDFObjectBase extends RDFObject {
-    id: number;
-}
+export type RDFObjectBase = RDFObject;
 
-export type AnyRDFObject = BlankNode | NamedNode | Node | Literal | Quad | Quadruple | Term;
+export type AnyRDFObject = BlankNode | NamedNode | Literal | Quad | Quadruple;
 
-export type BlankNode<T = RDFObjectBase> = BasicBlankNode<T>;
+export type BlankNode = BasicBlankNode;
 
-export type NamedNode<T = RDFObjectBase> = BasicNamedNode<T>;
+export type NamedNode = BasicNamedNode;
 
-export type Node<T = RDFObjectBase> = BasicNode<T>;
+export type Node = BasicNode;
 
-export type OptionalNode<T = RDFObjectBase> = Node<T> | undefined | null;
+export type OptionalNode = Node | undefined | null;
 
-export type Literal<T = RDFObjectBase> = BasicLiteral<T>;
+export type Literal = BasicLiteral;
 
-export type Quad<T = RDFObjectBase> = BasicQuad<T>;
+export type Quad = BasicQuad;
 
-export type Quadruple<T = RDFObjectBase> = BasicQuadruple<T>;
+export type Quadruple = BasicQuadruple;
 
-export type Term<T = RDFObjectBase> = BasicTerm<T>;
+export type Term = BasicTerm;
 
-export const createNS = basicCreateNS as NamespaceCreator<RDFObjectBase>;
+export const createNS = basicCreateNS;
 
-export default memoizedHashFactory;
+export default MemoizedHashFactory;

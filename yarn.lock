@@ -304,10 +304,15 @@
   resolved "https://registry.yarnpkg.com/@ontologies/as/-/as-1.0.1.tgz#f60489dcb1e3603d33d8bf7df73b325d8868b45e"
   integrity sha512-EqgREbZegZD2qH7byPLkpEk9cK/PV9ctpTt0qrqK4bMk7rumAdKI0Er4te5tZpejWBrTg+uWR193r+5zWl44dw==
 
-"@ontologies/core@=1.5.1-generic", "@ontologies/core@^1.5.1-generic":
-  version "1.5.1-generic"
-  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-1.5.1-generic.tgz#f415363cea8ae2dcadb80bbabcb314dc55991d54"
-  integrity sha512-2BPUGsd36nwnAEZmG31MwagMm2tHDYG1uo1WOHOHhg8zNinTFsG4WfA5kdD/wo2W5TmYLv3tQ4Ao/nPZ8JevaA==
+"@ontologies/core@=1.5.2-strict-6":
+  version "1.5.2-strict-6"
+  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-1.5.2-strict-6.tgz#1dc413f0ea9f040ef1088a02db1a808c8e8e2532"
+  integrity sha512-G2fxSwHYiQ6XGTFCvVMRtyQbNyH6HJykewhtcmfjW98/3qxpc+E+PhYfh2DVnXmSCfwp+BkZbRqIspyM6sLzUA==
+
+"@ontologies/core@^1.5.2-strict-3":
+  version "1.5.2-strict-3"
+  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-1.5.2-strict-3.tgz#b2eaceb1d2dfa262aabb1709e36a9108774764a4"
+  integrity sha512-C1wUqGt1mpC61DTGvg8RomvaaSxSf+Z/fJKg8XQsLqMQoSD/ot80hTo9kbgv4mo34iv0ssUbhdBsKWztP5kpOg==
 
 "@ontologies/rdf@^1.0.0":
   version "1.0.0"
@@ -4029,16 +4034,13 @@ rdf-canonize@^1.0.2:
     node-forge "^0.8.1"
     semver "^5.6.0"
 
-"rdflib@npm:link-rdflib@1.0.4-datafactory-6":
-  version "1.0.4-datafactory-6"
-  resolved "https://registry.yarnpkg.com/link-rdflib/-/link-rdflib-1.0.4-datafactory-6.tgz#0ff2a2be745be1580ccfb45ae72de2a4e2427dae"
-  integrity sha512-V/abWQ13YJTUV3YH1wZclyf4o22xVdexh1zzrMclScG6v87MhdoHqAzvYUs4wVFXpkcV41ppsqBZgmJmUcZtrw==
+"rdflib@npm:link-rdflib@1.0.4-datafactory-8":
+  version "1.0.4-datafactory-8"
+  resolved "https://registry.yarnpkg.com/link-rdflib/-/link-rdflib-1.0.4-datafactory-8.tgz#9151bfb5a10fbd8dfe00bd3ff83b5ccec862ca6b"
+  integrity sha512-LWA+bwrUe6AKU2Ahjdd8JsCXvWrb9IXTAHnL+RceBJqCeAYjTBcAbn4BfAhpD7lGpsdV4vGembR48baOMb6QgQ==
   dependencies:
     "@babel/runtime" "^7.5.5"
-    "@ontologies/core" "^1.5.1-generic"
-    "@ontologies/rdf" "^1.0.0"
-    "@ontologies/rdfs" "^1.0.0"
-    "@ontologies/xsd" "^1.0.0"
+    "@ontologies/core" "^1.5.2-strict-3"
     async "^3.1.x"
     jsonld "^1.6.2"
     n3 "^1.2.0"

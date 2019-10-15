@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@ontologies/as": "^1.0.1",
-    "@ontologies/core": "=1.5.1-generic",
+    "@ontologies/core": "=1.5.2-strict-6",
     "@ontologies/rdf": "^1.0.0",
     "@ontologies/rdfs": "^1.0.0",
     "@ontologies/schema": "^1.0.0",
@@ -59,7 +59,7 @@
     "jest": "^24.8.0",
     "jest-fetch-mock": "^2.1.2",
     "n-quads-parser": "^2.0.3",
-    "rdflib": "npm:link-rdflib@1.0.4-datafactory-6",
+    "rdflib": "npm:link-rdflib@1.0.4-datafactory-8",
     "rollup": "^1.16.7",
     "rollup-plugin-commonjs": "^10.0.1",
     "rollup-plugin-node-resolve": "^5.2.0",

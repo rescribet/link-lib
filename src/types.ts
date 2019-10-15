@@ -14,7 +14,6 @@ import {
     NamedNode,
     Quad,
     Quadruple,
-    RDFObjectBase,
 } from "./rdf";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
@@ -25,6 +24,10 @@ export interface ActionMap {
 }
 
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
+
+export type Indexable = number | string;
+
+export interface ComponentMapping<T> { [type: string]: { [obj: string]: { [topology: string]: T } }; }
 
 export interface SubscriptionRegistrationBase<T> {
     callback: SubscriptionCallback<T>;
@@ -48,9 +51,9 @@ export type SubscriptionRegistration = StatementSubscriptionRegistration | NodeS
 
 export interface ComponentRegistration<T> {
     component: T;
-    property: NamedNode;
-    topology: NamedNode;
-    type: NamedNode;
+    property: Indexable;
+    topology: Indexable;
+    type: Indexable;
 }
 
 export type ResponseTransformer = (response: ResponseAndFallbacks) => Promise<Quad[]>;
@@ -71,45 +74,41 @@ export interface FetchOpts {
     reload: boolean;
 }
 
-export type SomeNode<T = RDFObjectBase> = NamedNode<T> | BlankNode<T>;
+export type SomeNode = NamedNode | BlankNode;
 
-export interface LinkedRenderStoreOptions<RDFObject extends RDFObjectBase> {
+export interface LinkedRenderStoreOptions<T> {
     api?: LinkedDataAPI | undefined;
     defaultType?: NamedNode | undefined;
     dispatch?: MiddlewareActionHandler;
-    mapping?: ComponentStore<RDFObject> | undefined;
+    mapping?: ComponentStore<T> | undefined;
     namespaces?: NamespaceMap | undefined;
     report?: ErrorReporter;
     schema?: Schema | undefined;
-    store?: RDFStore<RDFObject> | undefined;
+    store?: RDFStore | undefined;
 }
 
-export interface DeltaProcessor<RDFBase> {
-    queueDelta: (delta: Array<Quadruple<RDFBase>>, subjects: number[]) => void;
+export interface DeltaProcessor {
+    queueDelta: (delta: Quadruple[], subjects: number[]) => void;
     /**
      * Process all queued deltas
      * @note: Be sure to assign a new buffer array before starting processing to prevent infinite loops.
      */
-    flush: () => Array<Quad<RDFBase>>;
-    processDelta: (delta: Array<Quadruple<RDFBase>>) => Array<Quad<RDFBase>>;
+    flush: () => Quad[];
+    processDelta: (delta: Quadruple[]) => Quad[];
 }
 
-export type StoreProcessorResult<RDFBase> = [
-    Array<Quadruple<RDFBase>>,
-    Array<Quadruple<RDFBase>>,
-    Array<Quad<RDFBase>>
-];
-export type StoreProcessor<RDFBase> = (delta: Array<Quadruple<RDFBase>>) => StoreProcessorResult<RDFBase>;
+export type StoreProcessorResult = [Quadruple[], Quadruple[], Quad[]];
+export type StoreProcessor = (delta: Quadruple[]) => StoreProcessorResult;
 
-export interface Dispatcher<RDFBase> {
-    dispatch: MiddlewareActionHandler<RDFBase>;
+export interface Dispatcher {
+    dispatch: MiddlewareActionHandler;
 }
 
-export type MiddlewareFn<T, RDFBase> = (store: LinkedRenderStore<T>) => MiddlewareWithBoundLRS<RDFBase>;
+export type MiddlewareFn<T> = (store: LinkedRenderStore<T>) => MiddlewareWithBoundLRS;
 
-export type MiddlewareWithBoundLRS<RDFBase> = (next: MiddlewareActionHandler<RDFBase>) => MiddlewareActionHandler<RDFBase>;
+export type MiddlewareWithBoundLRS = (next: MiddlewareActionHandler) => MiddlewareActionHandler;
 
-export type MiddlewareActionHandler<RDFBase> = (action: NamedNode<RDFBase>, args: any) => Promise<any>;
+export type MiddlewareActionHandler = (action: NamedNode, args: any) => Promise<any>;
 
 export interface NamespaceMap {
     [s: string]: NamedNamespace<any>;
@@ -130,17 +129,17 @@ export interface DataObject {
     [k: string]: SerializableDataTypes;
 }
 
-export type DataTuple<T = RDFObjectBase> = [IndexedFormula<T>, NamedBlobTuple[]];
-export type ParsedObject<T = RDFObjectBase> = [Node, IndexedFormula<T>, NamedBlobTuple[]];
+export type DataTuple = [IndexedFormula, NamedBlobTuple[]];
+export type ParsedObject = [Node, IndexedFormula, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
     changeBuffer: Quad[];
     changeBufferCount: number;
 }
 
-export interface LinkedActionResponse<T extends RDFObjectBase> {
+export interface LinkedActionResponse {
     /** The IRI of the created resource, based from the Location header. */
-    iri: NamedNode<T> | null;
+    iri: NamedNode | null;
     data: Quad[];
 }
 
@@ -193,32 +192,32 @@ export interface GetEntityMessage {
     };
 }
 
-export interface VocabularyProcessingContext<RDFBase = RDFObjectBase> {
-    equivalenceSet: DisjointSet<number>;
-    superMap: Map<number, Set<number>>;
-    store: IndexedFormula<RDFBase>;
+export interface VocabularyProcessingContext {
+    equivalenceSet: DisjointSet<Indexable>;
+    superMap: Map<Indexable, Set<Indexable>>;
+    store: IndexedFormula;
 }
 
-export interface VocabularyProcessor<RDFBase = RDFObjectBase> {
+export interface VocabularyProcessor {
     axioms: Quad[];
 
-    processStatement: (item: Quad, ctx: VocabularyProcessingContext<RDFBase>) => Quad[] | null;
+    processStatement: (item: Quad, ctx: VocabularyProcessingContext) => Quad[] | null;
 
     /**
      * Processes class instances (object to rdf:type). If an IRI is given, processors must assume the resource to be an
      * instance of rdfs:Class.
      */
-    processType: (type: NamedNode, ctx: VocabularyProcessingContext<RDFBase>) => boolean;
+    processType: (type: NamedNode, ctx: VocabularyProcessingContext) => boolean;
 }
 
-export interface DataProcessorOpts<RDFBase extends RDFObjectBase> {
+export interface DataProcessorOpts {
     accept?: { [k: string]: string };
     dispatch?: MiddlewareActionHandler;
     requestInitGenerator?: RequestInitGenerator;
-    fetcher?: Fetcher<RDFBase>;
+    fetcher?: Fetcher;
     mapping?: { [k: string]: ResponseTransformer[] };
     report: ErrorReporter;
-    store: RDFStore<RDFBase>;
+    store: RDFStore;
 }
 
 export type ResourceQueueItem = [NamedNode, FetchOpts|undefined];

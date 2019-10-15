@@ -1,6 +1,5 @@
 import { NamedNode, Quad } from "@ontologies/core";
 import { FetchOpts } from "rdflib";
-import { RDFObjectBase } from "./rdf";
 
 import {
     DataProcessorOpts,
@@ -17,10 +16,9 @@ import {
     SomeNode,
 } from "./types";
 
-export interface LinkedDataAPI<RDFBase extends RDFObjectBase = RDFObjectBase>
-    extends Dispatcher<RDFBase>, DeltaProcessor<RDFBase> {
+export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
 
-    execActionByIRI(subject: NamedNode<RDFBase>, dataTuple: DataTuple<RDFBase>): Promise<LinkedActionResponse<RDFBase>>;
+    execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
     /**
      * Loads a resource from the {iri}.
@@ -28,7 +26,7 @@ export interface LinkedDataAPI<RDFBase extends RDFObjectBase = RDFObjectBase>
      * @return The response from the server, or an response object from
      * the extension
      */
-    fetchResource(iri: NamedNode<RDFBase>): Promise<Response | object>;
+    fetchResource(iri: NamedNode): Promise<Response | object>;
 
     /** @private */
     getEntities(resources: ResourceQueueItem[]): Promise<Quad[]>;
@@ -42,7 +40,7 @@ export interface LinkedDataAPI<RDFBase extends RDFObjectBase = RDFObjectBase>
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    getEntity(iri: NamedNode<RDFBase>, opts?: FetchOpts<RDFBase>): Promise<Array<Quad<RDFBase>>>;
+    getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Quad[]>;
 
     /**
      * Retrieve the (network) status for a resource.
@@ -61,13 +59,13 @@ export interface LinkedDataAPI<RDFBase extends RDFObjectBase = RDFObjectBase>
      * @param {SomeNode} iri The resource to get the status on.
      * @return {EmptyRequestStatus | FulfilledRequestStatus}
      */
-    getStatus(iri: SomeNode<RDFBase>): EmptyRequestStatus | FulfilledRequestStatus;
+    getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus;
 
     /** @unstable */
-    invalidate(iri: string | SomeNode<RDFBase>, error?: Error): boolean;
+    invalidate(iri: string | SomeNode, error?: Error): boolean;
 
     /** @unstable */
-    isInvalid(iri: SomeNode<RDFBase>): boolean;
+    isInvalid(iri: SomeNode): boolean;
 
     /** Register a transformer so it can be used to interact with API's. */
     registerTransformer(processor: ResponseTransformer,

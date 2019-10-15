@@ -1,88 +1,94 @@
-import {
-    DataFactory,
-    PlainFactory,
-    Comparable,
-} from "@ontologies/core";
+import { Comparable, DataFactory, PlainFactory, TermType } from "@ontologies/core";
 import xsd from "@ontologies/xsd";
 import { murmur3 } from "murmurhash-js";
 
-import {
-    AnyRDFObject,
-    BlankNode,
-    Literal,
-    NamedNode,
-    Quad,
-    Quadruple,
-    RDFObjectBase,
-    Term,
-} from "./rdf";
+import { AnyRDFObject, BlankNode, Literal, NamedNode, Quad, RDFObjectBase } from "./rdf";
 
 interface MemoizedHashFactoryInternals {
     memoizationMap: { [k: string]: AnyRDFObject };
     seedBase: number;
 }
 
-export interface IdentityFactory<T, IndexType> extends DataFactory<T> {
+export interface IdentityFactory<IndexType> extends DataFactory {
     findById(id: IndexType): AnyRDFObject;
+    id(obj: AnyRDFObject): number;
+}
+
+export interface DataFactoryArgs {
+    bnIndex?: number;
+    memoizationMap?: {};
+    seedBase?: number;
 }
 
 /**
  * RDF DataFactory which stores every value once at most.
  *
- * This version uses hashing which might be more CPU consuming but has deterministic object creation.
+ * This version uses hashing which might be more CPU consuming but has deterministic id creation.
  */
-export const memoizedHashFactory: IdentityFactory<RDFObjectBase, number> & MemoizedHashFactoryInternals = {
-    ...(PlainFactory as DataFactory<RDFObjectBase>),
-
-    memoizationMap: {},
-
+class MemoizedHashFactory extends PlainFactory implements IdentityFactory<number>, MemoizedHashFactoryInternals {
+    public bnIndex: number;
     /**
      * The seed base is used as a modifiable base index.
      * We increase the number with a fixed amount per term type to generate different hashes for terms with the same
      * value but a different termType.
      */
-    seedBase: 0,
+    public seedBase: number;
+    public memoizationMap: { [k: string]: BlankNode | NamedNode | Literal | Quad };
 
-    blankNode(value: string): BlankNode {
+    constructor(opts: DataFactoryArgs = {}) {
+        super();
+
+        this.bnIndex = opts.bnIndex || 0;
+        this.memoizationMap = opts.memoizationMap || {};
+        this.seedBase = opts.seedBase || 0;
+    }
+
+    public blankNode(value: string): BlankNode {
         return {
-            id: murmur3(value, this.seedBase + 1),
-            termType: "BlankNode",
+            termType: TermType.BlankNode,
             value,
         };
-    },
+    }
 
-    namedNode(value: string): NamedNode {
+    public namedNode(value?: string): NamedNode {
         return {
-            id: murmur3(value, this.seedBase + 2),
-            termType: "NamedNode",
-            value,
+            termType: TermType.NamedNode,
+            value: value ? value : `${(this.bnIndex!!)++}`,
         };
-    },
+    }
 
-    defaultGraph(): NamedNode {
+    public defaultGraph(): NamedNode {
         return this.namedNode("rdf:defaultGraph");
-    },
+    }
 
-    literal(value: string, languageOrDatatype: string | NamedNode): Literal {
+    public literal(value: string, languageOrDatatype: string | NamedNode): Literal {
         const isLangString = typeof languageOrDatatype === "string";
-        const langOrDTId = isLangString
-            ? murmur3(languageOrDatatype as string, this.seedBase)
-            : (languageOrDatatype as NamedNode).id;
 
         return {
             datatype: !isLangString
                 ? (languageOrDatatype as NamedNode)
                 : xsd.string,
-            id: murmur3(value, this.seedBase + 4 + langOrDTId),
             language: isLangString ? (languageOrDatatype as string) : undefined,
-            termType: "Literal",
+            termType: TermType.Literal,
             value,
         };
-    },
+    }
 
-    quad(subject: NamedNode | BlankNode, predicate: NamedNode, object: Term, graph?: NamedNode): Quad & RDFObjectBase {
+    public quad(
+        subject: NamedNode | BlankNode,
+        predicate: NamedNode,
+        object: BlankNode | NamedNode | Literal,
+        graph?: NamedNode,
+    ): Quad & RDFObjectBase {
         return {
-            id: murmur3((subject.id + predicate.id + object.id + (graph ? graph.id : 0)).toString(), this.seedBase + 3),
+            id: murmur3(
+                (this.id(subject)
+                    + this.id(predicate)
+                    + this.id(object)
+                    + (graph ? this.id(graph) : 0)
+                ).toString(),
+                this.seedBase + 3,
+            ),
             termType: "Quad",
 
             // tslint:disable:object-literal-sort-keys
@@ -92,26 +98,63 @@ export const memoizedHashFactory: IdentityFactory<RDFObjectBase, number> & Memoi
             graph,
             // tslint:enable:object-literal-sort-keys
         };
-    },
+    }
 
-    equals(
-        a: Comparable<RDFObjectBase>,
-        b: Comparable<RDFObjectBase>,
+    public equals(
+        a: Comparable,
+        b: Comparable,
     ): boolean {
-        const bothArray = Array.isArray(a) && Array.isArray(b);
-        if (!bothArray) {
-            return (a as RDFObjectBase).id === (b as RDFObjectBase).id;
-        } else if (bothArray) {
-            return (a as Quadruple)[0].id === (b as Quadruple)[0].id
-                && (a as Quadruple)[1].id === (b as Quadruple)[1].id
-                && (a as Quadruple)[2].id === (b as Quadruple)[2].id
-                && (a as Quadruple)[3].id === (b as Quadruple)[3].id;
-        } else {
-            return false;
+        if (!a || !b) {
+            return a === b;
         }
-    },
 
-    findById(id: number): AnyRDFObject {
+        if (Array.isArray(a) && Array.isArray(b)) {
+            return this.id(a[0]) === this.id(b[0])
+                && this.id(a[1]) === this.id(b[1])
+                && this.id(a[2]) === this.id(b[2])
+                && this.id(a[3]) === this.id(b[3]);
+        }
+
+        return this.id(a) === this.id(b);
+    }
+
+    public findById(id: number | string): AnyRDFObject {
         return this.memoizationMap[id];
-    },
-};
+    }
+
+    public id(term: AnyRDFObject): number {
+        if (Array.isArray(term)) {
+            return -1;
+        }
+
+        if (this.isQuad(term)) {
+            return murmur3(
+                (
+                    this.id(term.subject)
+                    + this.id(term.predicate)
+                    + this.id(term.object)
+                    + (term.graph ? this.id(term.graph) : 0)
+                ).toString(),
+                this.seedBase + 3,
+            );
+        }
+
+        switch (term.termType) {
+            case TermType.BlankNode:
+                return murmur3(term.value, this.seedBase + 1);
+            case TermType.NamedNode:
+                return murmur3(term.value, this.seedBase + 2);
+            case TermType.Literal: {
+                const langOrDTId = term.language
+                    ? murmur3(term.language, this.seedBase)
+                    : this.id(term.datatype);
+
+                return murmur3(term.value, this.seedBase + 4 + langOrDTId);
+            }
+            default:
+                return -1;
+        }
+    }
+}
+
+export default new MemoizedHashFactory();
