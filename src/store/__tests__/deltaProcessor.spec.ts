@@ -1,9 +1,11 @@
-import "jest";
-import {
-    IndexedFormula, Literal,
-    NamedNode,
-} from "rdflib";
+import "../../__tests__/useHashFactory";
 
+import rdfFactory from "@ontologies/core";
+import rdf from "@ontologies/rdf";
+import schema from "@ontologies/schema";
+import "jest";
+
+import { IndexedFormula, Store } from "../../rdflib";
 import { defaultNS as NS } from "../../utilities/constants";
 import { deltaProcessor } from "../deltaProcessor";
 
@@ -13,27 +15,27 @@ describe("deltaProcessor", () => {
     const erin = NS.ex("person/erin");
 
     const defaultProcessor = deltaProcessor(
-        [NS.ll("add")],
+        [NS.ld("add")],
         [
             undefined,
-            NS.ll("replace"),
-            new NamedNode("chrome:theSession"),
+            NS.ld("replace"),
+            rdfFactory.namedNode("chrome:theSession"),
         ],
-        [NS.ll("remove")],
-        [NS.ll("purge")],
-        [NS.ll("slice")],
+        [NS.ld("remove")],
+        [NS.ld("purge")],
+        [NS.ld("slice")],
     );
-    const filledStore = (): IndexedFormula => {
+    const filledStore = (): Store => {
         const store = new IndexedFormula();
 
-        store.add(bob, NS.rdf.type, NS.schema.Person);
-        store.add(bob, NS.schema.name, new Literal("bob"));
-        store.add(bob, NS.schema.children, alice);
-        store.add(bob, NS.schema.children, NS.ex("person/charlie"));
-        store.add(bob, NS.schema.children, NS.ex("person/dave"));
+        store.add(bob, rdf.type, schema.Person);
+        store.add(bob, schema.name, rdfFactory.literal("bob"));
+        store.add(bob, schema.children, alice);
+        store.add(bob, schema.children, NS.ex("person/charlie"));
+        store.add(bob, schema.children, NS.ex("person/dave"));
 
-        store.add(alice, NS.rdf.type, NS.schema.Person);
-        store.add(alice, NS.schema.name, new Literal("Alice"));
+        store.add(alice, rdf.type, schema.Person);
+        store.add(alice, schema.name, rdfFactory.literal("Alice"));
 
         return store;
     };
@@ -56,7 +58,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, alice, NS.ll("add")],
+                [bob, schema.children, alice, NS.ld("add")],
             ]);
 
             expect(addable).toHaveLength(1);
@@ -70,7 +72,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, alice, NS.ll("replace")],
+                [bob, schema.children, alice, NS.ld("replace")],
             ]);
 
             expect(addable).toHaveLength(0);
@@ -84,7 +86,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, alice, NS.ll("remove")],
+                [bob, schema.children, alice, NS.ld("remove")],
             ]);
 
             expect(addable).toHaveLength(0);
@@ -98,7 +100,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, alice, NS.ll("purge")],
+                [bob, schema.children, alice, NS.ld("purge")],
             ]);
 
             expect(addable).toHaveLength(0);
@@ -112,7 +114,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, alice, NS.ll("slice")],
+                [bob, schema.children, alice, NS.ld("slice")],
             ]);
 
             expect(addable).toHaveLength(0);
@@ -128,7 +130,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, erin, NS.ll("add")],
+                [bob, schema.children, erin, NS.ld("add")],
             ]);
 
             expect(addable).toHaveLength(1);
@@ -142,7 +144,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, erin, NS.ll("replace")],
+                [bob, schema.children, erin, NS.ld("replace")],
             ]);
 
             expect(addable).toHaveLength(0);
@@ -156,7 +158,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, erin, NS.ll("remove")],
+                [bob, schema.children, erin, NS.ld("remove")],
             ]);
 
             expect(addable).toHaveLength(0);
@@ -170,7 +172,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, erin, NS.ll("purge")],
+                [bob, schema.children, erin, NS.ld("purge")],
             ]);
 
             expect(addable).toHaveLength(0);
@@ -184,7 +186,7 @@ describe("deltaProcessor", () => {
             const processor = defaultProcessor(store);
 
             const [ addable, replaceable, removable ] = processor([
-                [bob, NS.schema.children, erin, NS.ll("slice")],
+                [bob, schema.children, erin, NS.ld("slice")],
             ]);
 
             expect(addable).toHaveLength(0);

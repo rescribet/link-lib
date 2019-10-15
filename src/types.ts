@@ -1,8 +1,4 @@
-import {
-    Fetcher,
-    IndexedFormula,
-    NamedNamespace,
-} from "rdflib";
+import { Namespace } from "@ontologies/core";
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
@@ -15,12 +11,13 @@ import {
     Quad,
     Quadruple,
 } from "./rdf";
+import { Fetcher, Store } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 export interface ActionMap {
-    [k: string]: (...args: any[]) => void|Promise<any>;
+    [k: string]: (...args: any[]) => Promise<any>;
 }
 
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
@@ -78,6 +75,7 @@ export type SomeNode = NamedNode | BlankNode;
 
 export interface LinkedRenderStoreOptions<T> {
     api?: LinkedDataAPI | undefined;
+    apiOpts?: Partial<DataProcessorOpts> | undefined;
     defaultType?: NamedNode | undefined;
     dispatch?: MiddlewareActionHandler;
     mapping?: ComponentStore<T> | undefined;
@@ -111,7 +109,7 @@ export type MiddlewareWithBoundLRS = (next: MiddlewareActionHandler) => Middlewa
 export type MiddlewareActionHandler = (action: NamedNode, args: any) => Promise<any>;
 
 export interface NamespaceMap {
-    [s: string]: NamedNamespace<any>;
+    [s: string]: Namespace;
 }
 
 export type LazyNNArgument = NamedNode | NamedNode[];
@@ -129,8 +127,8 @@ export interface DataObject {
     [k: string]: SerializableDataTypes;
 }
 
-export type DataTuple = [IndexedFormula, NamedBlobTuple[]];
-export type ParsedObject = [Node, IndexedFormula, NamedBlobTuple[]];
+export type DataTuple = [Store, NamedBlobTuple[]];
+export type ParsedObject = [SomeNode, Store, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
     changeBuffer: Quad[];
@@ -143,11 +141,22 @@ export interface LinkedActionResponse {
     data: Quad[];
 }
 
+export interface SaveOpts extends RequestInit {
+    data?: Quad[];
+    url?: NamedNode;
+    useDefaultGraph?: boolean;
+}
+
 export interface ExtensionResponse {
     body: string;
     headers: { [k: string]: string };
     status: number;
     url: string;
+}
+
+export interface RDFLibFetcherResponse extends Response {
+    responseText: string;
+    req: BlankNode;
 }
 
 export interface RDFLibFetcherRequest {
@@ -178,7 +187,11 @@ export interface FulfilledRequestStatus extends RequestStatus {
     status: number;
 }
 
-export type ResponseAndFallbacks = Response | XMLHttpRequest | ExtensionResponse | RDFLibFetcherRequest;
+export type ResponseAndFallbacks = Response
+    | XMLHttpRequest
+    | ExtensionResponse
+    | RDFLibFetcherRequest
+    | RDFLibFetcherResponse;
 
 export interface WorkerMessageBase {
     method: string;
@@ -193,9 +206,10 @@ export interface GetEntityMessage {
 }
 
 export interface VocabularyProcessingContext {
+    dataStore: RDFStore;
     equivalenceSet: DisjointSet<Indexable>;
     superMap: Map<Indexable, Set<Indexable>>;
-    store: IndexedFormula;
+    store: Schema<any>;
 }
 
 export interface VocabularyProcessor {
@@ -210,12 +224,20 @@ export interface VocabularyProcessor {
     processType: (type: NamedNode, ctx: VocabularyProcessingContext) => boolean;
 }
 
+export interface TransformerRegistrationRequest {
+    acceptValue: number;
+    mediaType: string | string[];
+    transformer: ResponseTransformer;
+}
+
 export interface DataProcessorOpts {
     accept?: { [k: string]: string };
     dispatch?: MiddlewareActionHandler;
     requestInitGenerator?: RequestInitGenerator;
+    fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
     fetcher?: Fetcher;
     mapping?: { [k: string]: ResponseTransformer[] };
+    transformers?: TransformerRegistrationRequest[];
     report: ErrorReporter;
     store: RDFStore;
 }

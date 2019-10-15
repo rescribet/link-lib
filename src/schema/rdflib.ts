@@ -1,6 +1,6 @@
+import rdfFactory, { createNS, NamedNode, Quad } from "@ontologies/core";
 import { Resource, subClassOf } from "@ontologies/rdfs";
 
-import rdf, { createNS, NamedNode, Quad } from "../rdf";
 import { VocabularyProcessingContext } from "../types";
 
 import {
@@ -30,15 +30,15 @@ const ianaTTLResource = ianaMT(`${F_TURTLE}#Resource`);
  */
 export const RDFLIB = {
     axioms: [
-        rdf.quad(NS.link("Document"), subClassOf, Resource),
-        rdf.quad(ianaJSONResource, subClassOf, Resource),
-        rdf.quad(ianaJSONLDResource, subClassOf, Resource),
-        rdf.quad(ianaN3Resource, subClassOf, Resource),
-        rdf.quad(ianaNTResource, subClassOf, Resource),
-        rdf.quad(ianaNQResource, subClassOf, Resource),
-        rdf.quad(ianaPlainResource, subClassOf, Resource),
-        rdf.quad(ianaRDFXMLResource, subClassOf, Resource),
-        rdf.quad(ianaTTLResource, subClassOf, Resource),
+        rdfFactory.quad(NS.link("Document"), subClassOf, Resource),
+        rdfFactory.quad(ianaJSONResource, subClassOf, Resource),
+        rdfFactory.quad(ianaJSONLDResource, subClassOf, Resource),
+        rdfFactory.quad(ianaN3Resource, subClassOf, Resource),
+        rdfFactory.quad(ianaNTResource, subClassOf, Resource),
+        rdfFactory.quad(ianaNQResource, subClassOf, Resource),
+        rdfFactory.quad(ianaPlainResource, subClassOf, Resource),
+        rdfFactory.quad(ianaRDFXMLResource, subClassOf, Resource),
+        rdfFactory.quad(ianaTTLResource, subClassOf, Resource),
     ],
 
     processStatement(_: Quad, __: VocabularyProcessingContext): Quad[] | null {

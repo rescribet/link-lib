@@ -30,6 +30,11 @@ export {
     RENDER_CLASS_NAME,
 } from "./utilities/constants";
 
-export { LinkedRenderStore };
+import * as rdflib from "./rdflib";
+
+export {
+    LinkedRenderStore,
+    rdflib,
+};
 
 export default LinkedRenderStore; // tslint:disable-line no-default-export

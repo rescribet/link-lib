@@ -1,11 +1,12 @@
 import { NamedNode, Quad } from "@ontologies/core";
-import { FetchOpts } from "rdflib";
 
+import { RDFFetchOpts } from "./rdflib";
 import {
     DataProcessorOpts,
     DeltaProcessor,
     Dispatcher,
     ResourceQueueItem,
+    SaveOpts,
 } from "./types";
 import {
     DataTuple,
@@ -20,14 +21,6 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
 
     execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
-    /**
-     * Loads a resource from the {iri}.
-     * @param iri The SomeNode of the resource
-     * @return The response from the server, or an response object from
-     * the extension
-     */
-    fetchResource(iri: NamedNode): Promise<Response | object>;
-
     /** @private */
     getEntities(resources: ResourceQueueItem[]): Promise<Quad[]>;
 
@@ -40,7 +33,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    getEntity(iri: NamedNode, opts?: FetchOpts): Promise<Quad[]>;
+    getEntity(iri: NamedNode, opts?: RDFFetchOpts): Promise<Quad[]>;
 
     /**
      * Retrieve the (network) status for a resource.
@@ -71,6 +64,20 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
     registerTransformer(processor: ResponseTransformer,
                         mediaType: string | string[],
                         acceptValue: number): void;
+
+    /**
+     * Save a {graph} to {graph} (identity) or {opts.url}.
+     *
+     * When {graph} is a blank node {opts.url} must be given as well.
+     *
+     * @param graph
+     * @param opts
+     * @param {Quad[]} opts.data - Override default data collection for this data.
+     * @param {string} opts.url - Overrides the target to save the resource to.
+     * @param {boolean} opts.useDefaultGraph - Changes data collection to search for {graph} in the default graph rather
+     *  than the named graph {graph}.
+     */
+    save(graph: SomeNode, opts: SaveOpts): Promise<void>;
 
     /**
      * Overrides the `Accept` value for when a certain host doesn't respond well to multiple values.

@@ -1,9 +1,6 @@
 import rdfFactory, { Literal, NamedNode, Node, TermType } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
-import {
-    IndexedFormula,
-    Literal as RDFLibLiteral,
-} from "rdflib";
+import { graph as getGraph, Store } from "../rdflib";
 
 import {
     DataObject,
@@ -39,18 +36,18 @@ function uploadIRI(): NamedNode {
  * Converts an array to an RDF list-shaped {DataObject} for serialization.
  */
 export function list(arr: SerializableDataTypes[]): DataObject {
-    return arr.reduceRight((acc: DataObject, next: SerializableDataTypes) => ({
-        [defaultNS.rdf.first.toString()]: next,
-        [defaultNS.rdf.rest.toString()]: acc,
     // @ts-ignore
-    }), defaultNS.rdf.nil);
+    return arr.reduceRight((acc: DataObject, next: SerializableDataTypes) => ({
+        [rdf.first.toString()]: next,
+        [rdf.rest.toString()]: acc,
+    }), rdf.nil);
 }
 
 /**
  * Converts an array to an RDF sequence-shaped {DataObject} for serialization.
  */
 export function seq<T = any>(arr: T[], id?: SomeNode): DataObject {
-    const base: DataObject = { [defaultNS.rdf.type.toString()]: defaultNS.rdf.Seq };
+    const base: DataObject = { [rdf.type.toString()]: rdf.Seq };
     if (id) {
         base["@id"] = id;
     }
@@ -65,7 +62,7 @@ export function seq<T = any>(arr: T[], id?: SomeNode): DataObject {
 export function processObject(subject: Node,
                               predicate: NamedNode,
                               datum: DataObject | SerializableDataTypes | null | undefined,
-                              graph: IndexedFormula): NamedBlobTuple[] {
+                              graph: Store): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
 
     if (isIterable(datum)) {
@@ -82,7 +79,7 @@ export function processObject(subject: Node,
         || typeof datum === "number"
         || typeof datum === "boolean"
         || datum instanceof Date) {
-        graph.add(subject, predicate, RDFLibLiteral.fromValue(datum));
+        graph.add(subject, predicate, rdfFactory.literal(datum));
     } else if (datum instanceof File) {
         const f = uploadIRI();
         const file = rdfFactory.quad(subject, predicate, f);
@@ -92,9 +89,9 @@ export function processObject(subject: Node,
         const id = datum["@id"] as SomeNode | undefined || rdfFactory.blankNode();
         blobs = blobs.concat(processDataObject(id, datum, graph));
         graph.add(subject, predicate, id);
-    } else if (datum && datum.termType === "NamedNode") {
+    } else if (datum && datum.termType === TermType.NamedNode) {
         graph.add(subject, predicate, rdfFactory.namedNode(datum.value));
-    } else if (datum && datum.termType === "Literal") {
+    } else if (datum && datum.termType === TermType.Literal) {
         graph.add(
             subject,
             predicate,
@@ -104,13 +101,13 @@ export function processObject(subject: Node,
             ),
         );
     } else if (datum !== null && datum !== undefined) {
-        graph.add(subject, predicate, RDFLibLiteral.fromValue(datum));
+        graph.add(subject, predicate, rdfFactory.literal(datum));
     }
 
     return blobs;
 }
 
-function processDataObject(subject: Node, data: DataObject, graph: IndexedFormula): NamedBlobTuple[] {
+function processDataObject(subject: Node, data: DataObject, graph: Store): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
@@ -129,7 +126,7 @@ function processDataObject(subject: Node, data: DataObject, graph: IndexedFormul
 }
 
 export function dataToGraphTuple(data: DataObject): DataTuple {
-    const g = new IndexedFormula();
+    const g = getGraph();
 
     const blobs = processDataObject(MAIN_NODE_DEFAULT_IRI, data, g);
 
@@ -142,7 +139,7 @@ export function dataToGraphTuple(data: DataObject): DataTuple {
  * @param data The data object if an IRI was passed.
  * @param graph A graph to write the statements into.
  */
-export function toGraph(iriOrData: SomeNode | DataObject, data?: DataObject, graph?: IndexedFormula): ParsedObject {
+export function toGraph(iriOrData: SomeNode | DataObject, data?: DataObject, graph?: Store): ParsedObject {
     const passedIRI = iriOrData.termType === TermType.BlankNode || iriOrData.termType === TermType.NamedNode;
     if (passedIRI && !data) {
         throw new TypeError("Only an IRI was passed to `toObject`, a valid data object has to be the second argument");
@@ -159,7 +156,7 @@ export function toGraph(iriOrData: SomeNode | DataObject, data?: DataObject, gra
     }
     const dataObj = passedIRI ? data! : (iriOrData as DataObject);
 
-    const g = graph || new IndexedFormula();
+    const g = graph || getGraph();
 
     const blobs = processDataObject(iri, dataObj, g);
 

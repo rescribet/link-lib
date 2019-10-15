@@ -1,4 +1,6 @@
 /* @globals set, generator, init */
+import "../../__tests__/useHashFactory";
+
 import "jest";
 
 import { ProcessorError } from "../ProcessorError";

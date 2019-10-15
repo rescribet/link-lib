@@ -1,4 +1,6 @@
 import "jest";
+import "../../__tests__/useHashFactory";
+
 import { ResponseAndFallbacks } from "../../types";
 
 import {

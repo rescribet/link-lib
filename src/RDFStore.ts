@@ -1,9 +1,9 @@
+import { DataFactory } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import {
-    Formula,
     graph,
-    IndexedFormula,
-} from "rdflib";
+    Store,
+} from "./rdflib";
 
 import rdfFactory, {
     NamedNode,
@@ -22,7 +22,8 @@ import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 
 export interface RDFStoreOpts {
-    deltaProcessorOpts: {[k: string]: Array<NamedNode | undefined>};
+    deltaProcessorOpts?: {[k: string]: Array<NamedNode | undefined>};
+    innerStore?: Store;
 }
 
 /**
@@ -36,7 +37,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      *
      * @note Not to be confused with the last change in the store, which might be later than the flush time.
      */
-    public changeTimestamps: Uint32Array = new Uint32Array(0x100000);
+    public changeTimestamps: number[] = [];
     public typeCache: NamedNode[][] = [];
 
     private deltas: Quadruple[][] = [];
@@ -44,33 +45,41 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
-    private store: IndexedFormula = graph();
+    private store: Store = graph();
 
-    constructor({ deltaProcessorOpts }: RDFStoreOpts = { deltaProcessorOpts: {} }) {
+    public get rdfFactory(): DataFactory {
+        return this.store.rdfFactory;
+    }
+    public set rdfFactory(value: DataFactory) {
+        throw this.store.rdfFactory = value;
+    }
+
+    constructor({ deltaProcessorOpts, innerStore }: RDFStoreOpts = {}) {
         this.processDelta = this.processDelta.bind(this);
 
-        const g = graph();
+        const g = innerStore || graph();
         this.store = patchRDFLibStoreWithOverrides(g, this);
         this.store.newPropertyAction(rdf.type, this.processTypeStatement.bind(this));
 
         const defaults =  {
-            addGraphIRIS: [NS.ll("add")],
-            purgeGraphIRIS: [NS.ll("purge")],
-            removeGraphIRIS: [NS.ll("remove")],
+            addGraphIRIS: [NS.ll("add"), NS.ld("add")],
+            purgeGraphIRIS: [NS.ll("purge"), NS.ld("purge")],
+            removeGraphIRIS: [NS.ll("remove"), NS.ld("remove")],
             replaceGraphIRIS: [
                 undefined,
                 NS.ll("replace"),
-                this.store.defaultGraphIRI,
+                NS.ld("replace"),
+                this.store.rdfFactory.defaultGraph(),
             ],
-            sliceGraphIRIS: [NS.ll("slice")],
+            sliceGraphIRIS: [NS.ll("slice"), NS.ld("slice")],
         };
 
         this.deltaProcessor = deltaProcessor(
-            deltaProcessorOpts.addGraphIRIS || defaults.addGraphIRIS,
-            deltaProcessorOpts.replaceGraphIRIS || defaults.replaceGraphIRIS,
-            deltaProcessorOpts.removeGraphIRIS || defaults.removeGraphIRIS,
-            deltaProcessorOpts.purgeGraphIRIS || defaults.purgeGraphIRIS,
-            deltaProcessorOpts.sliceGraphIRIS || defaults.sliceGraphIRIS,
+            deltaProcessorOpts?.addGraphIRIS || defaults.addGraphIRIS,
+            deltaProcessorOpts?.replaceGraphIRIS || defaults.replaceGraphIRIS,
+            deltaProcessorOpts?.removeGraphIRIS || defaults.removeGraphIRIS,
+            deltaProcessorOpts?.purgeGraphIRIS || defaults.purgeGraphIRIS,
+            deltaProcessorOpts?.sliceGraphIRIS || defaults.sliceGraphIRIS,
         )(this.store);
     }
 
@@ -84,7 +93,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         }
 
         for (let i = 0, len = data.length; i < len; i++) {
-            this.store.addStatement(data[i]);
+            this.store.add(data[i].subject, data[i].predicate, data[i].object, data[i].graph);
         }
     }
 
@@ -120,8 +129,12 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return this.store.anyValue(subj, pred, obj, why);
     }
 
-    public  canon(term: SomeNode): SomeNode {
+    public canon(term: SomeNode): SomeNode {
         return this.store.canon(term);
+    }
+
+    public defaultGraph(): SomeNode {
+        return this.store.rdfFactory.defaultGraph();
     }
 
     /**
@@ -146,7 +159,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         processingBuffer
             .filter((s) => {
                 this.changeTimestamps[rdfFactory.id(s.subject)] = changeStamp;
-                return s.predicate === rdf.type;
+                return rdfFactory.equals(s.predicate, rdf.type);
             })
             .map((s) => this.processTypeStatement(undefined, s.subject, s.predicate, undefined, undefined));
 
@@ -154,7 +167,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     /** @private */
-    public getInternalStore(): IndexedFormula {
+    public getInternalStore(): Store {
         return this.store;
     }
 
@@ -246,27 +259,32 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return allRDFPropertyStatements(props, property);
     }
 
-    public getResourceProperties(subject: SomeNode, property: SomeNode | SomeNode[]): Term[] {
+    public getResourceProperties<TT extends Term = Term>(subject: SomeNode, property: SomeNode | SomeNode[]): TT[] {
         if (property === rdf.type) {
-            return this.typeCache[rdfFactory.id(subject)] || [];
+            return (this.typeCache[rdfFactory.id(subject)] || []) as TT[];
         }
 
         return this
             .getResourcePropertyRaw(subject, property)
-            .map((s) => s.object);
+            .map((s) => s.object as TT);
     }
 
-    public getResourceProperty(subject: SomeNode, property: SomeNode | SomeNode[]): Term | undefined {
-        if (property === rdf.type) {
+    public getResourceProperty<T extends Term = Term>(
+        subject: SomeNode,
+        property: SomeNode | SomeNode[],
+    ): T | undefined {
+
+        if (!Array.isArray(property) && rdfFactory.equals(property, rdf.type)) {
             const entry = this.typeCache[rdfFactory.id(subject)];
-            return entry ? entry[0] : undefined;
+
+            return entry ? entry[0] as T : undefined;
         }
         const rawProp = this.getResourcePropertyRaw(subject, property);
         if (rawProp.length === 0) {
             return undefined;
         }
 
-        return getPropBestLang(rawProp, this.langPrefs);
+        return getPropBestLang<T>(rawProp, this.langPrefs);
     }
 
     public queueDelta(delta: Quadruple[]): void {
@@ -298,7 +316,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     /**
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
-    private processTypeStatement(_formula: Formula | undefined,
+    private processTypeStatement(_formula: Store | undefined,
                                  subj: SomeNode,
                                  _pred: NamedNode,
                                  obj?: Term,
@@ -309,7 +327,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             return false;
         }
         this.typeCache[subjId] = this.statementsFor((subj as NamedNode))
-            .filter((s) => s.predicate === rdf.type)
+            .filter((s) => rdfFactory.equals(s.predicate, rdf.type))
             .map((s) => s.object as NamedNode);
         if (obj) {
             this.typeCache[subjId].push((obj as NamedNode));

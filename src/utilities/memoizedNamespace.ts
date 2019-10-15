@@ -1,5 +1,5 @@
 import rdfFactory, { Namespace } from "@ontologies/core";
-import { NamedNode, RDFObjectBase, Term } from "../rdf";
+import { NamedNode, Term } from "../rdf";
 
 import { NamespaceMap } from "../types";
 
@@ -17,11 +17,14 @@ const CI_MATCH_SUFFIX = 1;
  */
 export function expandProperty(prop: NamedNode | Term | string | undefined,
                                namespaces: NamespaceMap = defaultNS): NamedNode | undefined {
-    if (typeof prop === "undefined"
-        || Object.prototype.hasOwnProperty.call(prop, "termType")
+    if (!prop) {
+        return prop as undefined;
+    }
+    if (typeof prop !== "string"
+        && Object.prototype.hasOwnProperty.call(prop, "termType")
         && (prop as Term).termType === "NamedNode") {
 
-        return prop as undefined | NamedNode;
+        return rdfFactory.namedNode(prop.value);
     }
     if (typeof prop === "object") {
         if (prop.termType === "NamedNode") {
@@ -38,7 +41,7 @@ export function expandProperty(prop: NamedNode | Term | string | undefined,
         return rdfFactory.namedNode(prop);
     }
     const matches = prop.split(":");
-    const constructor: Namespace<RDFObjectBase> | undefined = namespaces[matches[CI_MATCH_PREFIX]];
+    const constructor: Namespace | undefined = namespaces[matches[CI_MATCH_PREFIX]];
 
     return constructor && constructor(matches[CI_MATCH_SUFFIX]);
 }

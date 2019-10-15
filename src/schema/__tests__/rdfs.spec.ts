@@ -1,7 +1,7 @@
+import "../../__tests__/useHashFactory";
+
+import rdfFactory from "@ontologies/core";
 import "jest";
-import {
-    Statement,
-} from "rdflib";
 
 import { RDFStore } from "../../RDFStore";
 import { Schema } from "../../Schema";
@@ -13,8 +13,8 @@ describe("RDFS", () => {
         it("infers type domain resource", () => {
             const schema = new Schema(new RDFStore());
 
-            const data = new Statement(NS.example("1"), NS.rdf("type"), NS.schema("Person"));
-            const inference = new Statement(NS.example("1"), NS.rdf("type"), NS.rdfs("Resource"));
+            const data = rdfFactory.quad(NS.example("1"), NS.rdf("type"), NS.schema("Person"));
+            const inference = rdfFactory.quad(NS.example("1"), NS.rdf("type"), NS.rdfs("Resource"));
 
             expect(schema.holdsStatement(inference)).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
@@ -25,8 +25,8 @@ describe("RDFS", () => {
         it("infers type range class", () => {
             const schema = new Schema(new RDFStore());
 
-            const data = new Statement(NS.example("1"), NS.rdf("type"), NS.schema("Person"));
-            const inference = new Statement(NS.schema("Person"), NS.rdf("type"), NS.rdfs("Class"));
+            const data = rdfFactory.quad(NS.example("1"), NS.rdf("type"), NS.schema("Person"));
+            const inference = rdfFactory.quad(NS.schema("Person"), NS.rdf("type"), NS.rdfs("Class"));
 
             expect(schema.holdsStatement(inference)).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
@@ -39,35 +39,35 @@ describe("RDFS", () => {
 
             const ctx = schema.getProcessingCtx();
 
-            expect(ctx.superMap.get(NS.schema("CreativeWork").sI)).toBeUndefined();
+            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork")))).toBeUndefined();
 
             RDFS.processStatement(
-                new Statement(NS.schema("BlogPost"), NS.rdfs("subClassOf"), NS.schema("CreativeWork")),
+                rdfFactory.quad(NS.schema("BlogPost"), NS.rdfs("subClassOf"), NS.schema("CreativeWork")),
                 ctx,
             );
-            expect(ctx.superMap.get(NS.schema("BlogPost").sI))
+            expect(ctx.superMap.get(rdfFactory.id(NS.schema("BlogPost"))))
                 .toEqual(new Set([
-                    NS.schema("BlogPost").sI,
-                    NS.schema("CreativeWork").sI,
-                    NS.rdfs("Resource").sI,
+                    rdfFactory.id(NS.schema("BlogPost")),
+                    rdfFactory.id(NS.schema("CreativeWork")),
+                    rdfFactory.id(NS.rdfs("Resource")),
                 ]));
 
             RDFS.processStatement(
-                new Statement(NS.schema("CreativeWork"), NS.rdfs("subClassOf"), NS.schema("Thing")),
+                rdfFactory.quad(NS.schema("CreativeWork"), NS.rdfs("subClassOf"), NS.schema("Thing")),
                 ctx,
             );
-            expect(ctx.superMap.get(NS.schema("CreativeWork").sI))
+            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork"))))
                 .toEqual(new Set([
-                    NS.schema("CreativeWork").sI,
-                    NS.schema("Thing").sI,
-                    NS.rdfs("Resource").sI,
+                    rdfFactory.id(NS.schema("CreativeWork")),
+                    rdfFactory.id(NS.schema("Thing")),
+                    rdfFactory.id(NS.rdfs("Resource")),
                 ]));
-            expect(ctx.superMap.get(NS.schema("BlogPost").sI))
+            expect(ctx.superMap.get(rdfFactory.id(NS.schema("BlogPost"))))
                 .toEqual(new Set([
-                    NS.schema("BlogPost").sI,
-                    NS.schema("CreativeWork").sI,
-                    NS.schema("Thing").sI,
-                    NS.rdfs("Resource").sI,
+                    rdfFactory.id(NS.schema("BlogPost")),
+                    rdfFactory.id(NS.schema("CreativeWork")),
+                    rdfFactory.id(NS.schema("Thing")),
+                    rdfFactory.id(NS.rdfs("Resource")),
                 ]));
         });
     });
@@ -81,7 +81,7 @@ describe("RDFS", () => {
             const schema = new Schema(new RDFStore());
 
             const ctx = schema.getProcessingCtx();
-            const inference = new Statement(NS.schema("CreativeWork"), NS.rdf("type"), NS.rdfs("Class"));
+            const inference = rdfFactory.quad(NS.schema("CreativeWork"), NS.rdf("type"), NS.rdfs("Class"));
 
             expect(schema.holdsStatement(inference)).toBeFalsy();
 
@@ -98,14 +98,14 @@ describe("RDFS", () => {
             const schema = new Schema(new RDFStore());
 
             const ctx = schema.getProcessingCtx();
-            expect(ctx.superMap.get(NS.schema("CreativeWork").sI)).toBeUndefined();
+            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork")))).toBeUndefined();
 
             RDFS.processType(NS.schema("CreativeWork"), ctx);
 
-            expect(ctx.superMap.get(NS.schema("CreativeWork").sI))
+            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork"))))
                 .toEqual(new Set([
-                    NS.schema("CreativeWork").sI,
-                    NS.rdfs("Resource").sI,
+                    rdfFactory.id(NS.schema("CreativeWork")),
+                    rdfFactory.id(NS.rdfs("Resource")),
                 ]));
         });
     });

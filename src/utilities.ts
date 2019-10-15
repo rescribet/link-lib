@@ -1,11 +1,12 @@
 /* global chrome */
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { TermType } from "@ontologies/core";
+import rdf from "@ontologies/rdf";
+import rdfs from "@ontologies/rdfs";
 import { Literal, Quad, Term } from "./rdf";
 
 import { SomeNode } from "./types";
-import { defaultNS } from "./utilities/constants";
 
-const memberPrefix = defaultNS.rdf.ns("_").value;
+const memberPrefix = rdf.ns("_").value;
 
 /**
  * Filters {obj} to only include statements where the subject equals {predicate}.
@@ -13,17 +14,17 @@ const memberPrefix = defaultNS.rdf.ns("_").value;
  * @param predicate The subject to filter for.
  * @return A possibly empty filtered array of statements.
  */
-export function allRDFPropertyStatements<RDFBase>(
-    obj: Array<Quad<RDFBase>> | undefined,
-    predicate: SomeNode<RDFBase>): Array<Quad<RDFBase>> {
+export function allRDFPropertyStatements(
+    obj: Quad[] | undefined,
+    predicate: SomeNode): Quad[] {
 
     if (typeof obj === "undefined") {
         return [];
     }
 
-    if (rdfFactory.equals(predicate, defaultNS.rdfs.ns("member"))) {
+    if (rdfFactory.equals(predicate, rdfs.member)) {
         return obj.filter((s) =>
-            rdfFactory.equals(s.predicate, defaultNS.rdfs.ns("member"))
+            rdfFactory.equals(s.predicate, rdfs.member)
             || s.predicate.value.startsWith(memberPrefix));
     }
 
@@ -51,7 +52,7 @@ export function anyRDFValue(obj: Quad[] | undefined, predicate: SomeNode): Term 
         return undefined;
     }
 
-    const match = predicate === defaultNS.rdfs.ns("member")
+    const match = rdfFactory.equals(predicate, rdfs.member)
         ? obj.find((s) => s.predicate.value.startsWith(memberPrefix))
         :  obj.find((s) => rdfFactory.equals(s.predicate, predicate));
 
@@ -62,22 +63,22 @@ export function anyRDFValue(obj: Quad[] | undefined, predicate: SomeNode): Term 
     return match.object;
 }
 
-export function getPropBestLang(rawProp: Quad | Quad[], langPrefs: string[]): Term {
+export function getPropBestLang<T extends Term = Term>(rawProp: Quad | Quad[], langPrefs: string[]): T {
     if (!Array.isArray(rawProp)) {
-        return rawProp.object;
+        return rawProp.object as T;
     }
     if (rawProp.length === 1) {
-        return rawProp[0].object;
+        return rawProp[0].object as T;
     }
     for (let i = 0; i < langPrefs.length; i++) {
         const pIndex = rawProp.findIndex((p) => "language" in p.object
             && (p.object as Literal).language === langPrefs[i]);
         if (pIndex >= 0) {
-            return rawProp[pIndex].object;
+            return rawProp[pIndex].object as T;
         }
     }
 
-    return rawProp[0].object;
+    return rawProp[0].object as T;
 }
 
 export function getPropBestLangRaw(statements: Quad | Quad[], langPrefs: string[]): Quad {
@@ -120,7 +121,7 @@ export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Te
  * @returns `true` if matches, `false` otherwise.
  */
 export function isDifferentOrigin(href: SomeNode | string): boolean {
-    if (typeof href !== "string" && href.termType === "BlankNode") {
+    if (typeof href !== "string" && href.termType === TermType.BlankNode) {
         return false;
     }
     const origin = typeof href !== "string" ? href.value : href;

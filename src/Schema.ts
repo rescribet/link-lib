@@ -1,8 +1,8 @@
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
-import { IndexedFormula, SomeTerm, Statement } from "rdflib";
 
-import rdfFactory, { NamedNode, Quad } from "./rdf";
+import rdfFactory, { NamedNode, Quad, SomeTerm } from "./rdf";
+import { IndexedFormula } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";
@@ -31,9 +31,10 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
     private processedTypes: Indexable[] = [];
 
     public constructor(liveStore: RDFStore) {
-        super();
+        super(undefined, { rdfFactory });
         this.liveStore = liveStore;
         this.expansionCache = {};
+        this.rdfFactory = rdfFactory;
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             this.addStatements(Schema.vocabularies[i].axioms);
@@ -67,6 +68,7 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
 
     public getProcessingCtx(): VocabularyProcessingContext {
         return {
+            dataStore: this.liveStore,
             equivalenceSet: this.equivalenceSet,
             store: this,
             superMap: this.superMap,
@@ -75,10 +77,10 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
 
     public isInstanceOf(resource: Indexable, superClass: Indexable): boolean {
         return this.holdsStatement(rdfFactory.quad(
-            rdfFactory.findById(resource) as NamedNode,
+            rdfFactory.fromId(resource) as NamedNode,
             rdf.type,
-            rdfFactory.findById(superClass) as SomeTerm,
-        ) as unknown as Statement);
+            rdfFactory.fromId(superClass) as SomeTerm,
+        ));
     }
 
     public isSubclassOf(resource: Indexable, superClass: Indexable): boolean {
@@ -114,14 +116,14 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
         for (let i = 0; i < lookupTypes.length; i++) {
             const canon = rdfFactory.id(
                 this.liveStore.canon(
-                    rdfFactory.findById(lookupTypes[i]) as NamedNode,
+                    rdfFactory.fromId(lookupTypes[i]) as NamedNode,
                 ),
             ) as unknown as Indexable;
 
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
                     Schema.vocabularies[j].processType(
-                        rdfFactory.findById(canon) as NamedNode,
+                        rdfFactory.fromId(canon) as NamedNode,
                         this.getProcessingCtx(),
                     );
                 }

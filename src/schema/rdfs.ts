@@ -1,12 +1,10 @@
+import rdfFactory, { NamedNode, Quad, TermType } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
+import { Term } from "../rdf";
+import { Store } from "../rdflib";
 
-import rdfFactory, {
-    BlankNode,
-    NamedNode,
-    Quad,
-} from "../rdf";
-import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
+import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 /**
  * Implements the RDF/RDFS axioms and rules.
@@ -78,10 +76,7 @@ export const RDFS = {
             }
         }
 
-        if (rdfs.domain.equals(item.predicate)) {
-            if (!(item.object instanceof NamedNode)) {
-                throw new TypeError(`A non IRI was passed as object to rdfs:domain (was: ${item.object}).`);
-            }
+        if (rdfFactory.equals(rdfs.domain, item.predicate)) {
             result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
             result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
@@ -89,10 +84,17 @@ export const RDFS = {
             for (let i = 0; i < dereferences.length; i++) {
                 result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, dereferences[i].object));
             }
-        } else if (rdfs.range.equals(item.predicate)) {
-            if (!(item.object.termType === "NamedNode")) {
-                throw new TypeError(`A non IRI was passed as object to rdfs:domain (was: ${item.object}).`);
+
+            if (!rdfFactory.equals(item.subject, rdf.type)) {
+                ctx.dataStore.getInternalStore().newPropertyAction(
+                    item.subject as NamedNode,
+                    (_: Store, subj: SomeNode) => {
+                        ctx.store.addStatements([rdfFactory.quad(subj, rdf.type, item.object)]);
+                        return true;
+                    },
+                );
             }
+        } else if (rdfFactory.equals(rdfs.range, item.predicate)) {
             result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
             result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
@@ -100,14 +102,24 @@ export const RDFS = {
             for (let i = 0; i < dereferences.length; i++) {
                 result.push(rdfFactory.quad(dereferences[i].subject, rdf.type, item.object));
             }
-        } else if (rdfs.subClassOf.equals(item.predicate)) {                                   // C1 rdfs:subClassOf C2
-            if (!(item.object.termType === "NamedNode" || item.object.termType === "BlankNode")) {
+
+            if (!rdfFactory.equals(item.subject, rdf.type)) {
+                ctx.dataStore.getInternalStore().newPropertyAction(
+                    item.subject as NamedNode,
+                    (_: Store, __: SomeNode, ___, obj: Term) => {
+                        ctx.store.addStatements([rdfFactory.quad(obj, rdf.type, item.object)]);
+                        return true;
+                    },
+                );
+            }
+        } else if (rdfFactory.equals(rdfs.subClassOf, item.predicate)) {            // C1 rdfs:subClassOf C2
+            if (!(item.object.termType === TermType.NamedNode || item.object.termType === TermType.BlankNode)) {
                 throw new Error("Object of subClassOf statement must be a NamedNode");
             }
-            const iSubject = item.subject.id;
-            const iObject = item.object.id;
+            const iSubject = rdfFactory.id(item.subject) as number;
+            const iObject = rdfFactory.id(item.object) as number;
             if (!ctx.superMap.has(iObject)) {
-                ctx.superMap.set(iObject, new Set([rdfs.Resource.id]));
+                ctx.superMap.set(iObject, new Set([rdfFactory.id(rdfs.Resource) as number]));
             }
 
             let parents = ctx.superMap.get(iObject);
@@ -126,7 +138,7 @@ export const RDFS = {
                     itemVal.forEach(v.add, v);
                 }
             });
-        } else if (rdfs.subPropertyOf.equals(item.predicate)) {
+        } else if (rdfFactory.equals(rdfs.subPropertyOf, item.predicate)) {
             // TODO: Implement
             return result;
         }
