@@ -8,10 +8,10 @@ import schema from "@ontologies/schema";
 import xsd from "@ontologies/xsd";
 import { rdflib } from "../link-lib";
 
+import ll from "../ontology/ll";
 import { createNS } from "../rdf";
 import { RDFStore } from "../RDFStore";
 import { getBasicStore } from "../testUtilities";
-import { ll } from "../utilities/constants";
 
 const example = createNS("http://example.com");
 const ex = createNS("http://example.com/ns#");

@@ -5,6 +5,8 @@ import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 import shacl from "@ontologies/shacl";
 
+import ll from "../ontology/ll";
+
 export const F_NTRIPLES = "application/n-triples";
 export const F_NQUADS = "application/n-quads";
 export const F_TURTLE = "text/turtle";
@@ -18,10 +20,6 @@ export const F_NTRIPLES_DEP = "text/ntriples";
 export const F_TURTLE_DEP = "application/x-turtle";
 
 export const NON_CONTENT_EXTS = ["php", "asp", "aspx", "cgi", "jsp"];
-
-export const ll = {
-    ns: createNS("http://purl.org/link-lib/"),
-};
 
 /** @deprecated Use the @ontologies/<ns> packages directly, these provide better typing and documentation */
 export const defaultNS = Object.freeze({
@@ -67,12 +65,12 @@ export const defaultNS = Object.freeze({
     xmlns: createNS("http://www.w3.org/2000/xmlns/"),
 });
 
-export const DEFAULT_TOPOLOGY: NamedNode = defaultNS.ll("defaultTopology");
+export const DEFAULT_TOPOLOGY: NamedNode = ll.defaultTopology;
 
 /** Constant used to determine that a class is used to render a type rather than a property. */
-export const RENDER_CLASS_NAME: NamedNode = defaultNS.ll("typeRenderClass");
+export const RENDER_CLASS_NAME: NamedNode = ll.typeRenderClass;
 
-export const MAIN_NODE_DEFAULT_IRI = defaultNS.ll("targetResource");
+export const MAIN_NODE_DEFAULT_IRI = ll.targetResource;
 // tslint:disable-next-line ban-types
 export const NON_DATA_OBJECTS_CTORS: Function[] = [
     Array,

@@ -1,10 +1,10 @@
 import rdfFactory, { createNS, NamedNode, Quad } from "@ontologies/core";
 import { Resource, subClassOf } from "@ontologies/rdfs";
+import link from "../ontology/link";
 
 import { VocabularyProcessingContext } from "../types";
 
 import {
-    defaultNS as NS,
     F_JSON,
     F_JSONLD,
     F_N3,
@@ -30,7 +30,7 @@ const ianaTTLResource = ianaMT(`${F_TURTLE}#Resource`);
  */
 export const RDFLIB = {
     axioms: [
-        rdfFactory.quad(NS.link("Document"), subClassOf, Resource),
+        rdfFactory.quad(link.Document, subClassOf, Resource),
         rdfFactory.quad(ianaJSONResource, subClassOf, Resource),
         rdfFactory.quad(ianaJSONLDResource, subClassOf, Resource),
         rdfFactory.quad(ianaN3Resource, subClassOf, Resource),

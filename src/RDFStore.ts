@@ -1,10 +1,12 @@
 import { DataFactory } from "@ontologies/core";
+import ld from "@ontologies/ld";
 import rdf from "@ontologies/rdf";
 import {
     graph,
     Store,
 } from "./rdflib";
 
+import ll from "./ontology/ll";
 import rdfFactory, {
     NamedNode,
     Node,
@@ -16,7 +18,6 @@ import rdfFactory, {
 import { deltaProcessor } from "./store/deltaProcessor";
 import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
-import { defaultNS as NS } from "./utilities/constants";
 import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
@@ -62,16 +63,16 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         this.store.newPropertyAction(rdf.type, this.processTypeStatement.bind(this));
 
         const defaults =  {
-            addGraphIRIS: [NS.ll("add"), NS.ld("add")],
-            purgeGraphIRIS: [NS.ll("purge"), NS.ld("purge")],
-            removeGraphIRIS: [NS.ll("remove"), NS.ld("remove")],
+            addGraphIRIS: [ll.add, ld.add],
+            purgeGraphIRIS: [ll.purge, ld.purge],
+            removeGraphIRIS: [ll.remove, ld.remove],
             replaceGraphIRIS: [
                 undefined,
-                NS.ll("replace"),
-                NS.ld("replace"),
-                this.store.rdfFactory.defaultGraph(),
+                ll.replace,
+                ld.replace,
+                rdfFactory.defaultGraph(),
             ],
-            sliceGraphIRIS: [NS.ll("slice"), NS.ld("slice")],
+            sliceGraphIRIS: [ll.slice, ld.slice],
         };
 
         this.deltaProcessor = deltaProcessor(
@@ -305,7 +306,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
 
     public touch(iri: SomeNode): void {
         this.changeTimestamps[rdfFactory.id(iri)] = Date.now();
-        this.changeBuffer.push(rdfFactory.quad(iri, NS.ll("nop"), NS.ll("nop")));
+        this.changeBuffer.push(rdfFactory.quad(iri, ll.nop, ll.nop));
         this.changeBufferCount++;
     }
 

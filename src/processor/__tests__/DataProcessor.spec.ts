@@ -9,6 +9,7 @@ import {
 import "jest";
 
 import { rdflib, RequestInitGenerator } from "../../link-lib";
+import ll from "../../ontology/ll";
 import { Quad } from "../../rdf";
 
 import { getBasicStore } from "../../testUtilities";
@@ -555,7 +556,7 @@ describe("DataProcessor", () => {
             it("sets the status codes", () => {
                 const store = getBasicStore();
                 store.processor.processDelta([
-                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), defaultNS.ll("meta")],
+                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), ll.meta],
                 ]);
 
                 expect(store.processor.getStatus(resource).status).toEqual(200);
@@ -565,7 +566,7 @@ describe("DataProcessor", () => {
                 const store = getBasicStore();
                 store.processor.invalidate(resource);
                 store.processor.processDelta([
-                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), defaultNS.ll("meta")],
+                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), ll.meta],
                 ]);
 
                 expect(store.processor.isInvalid(resource)).toBeFalsy();

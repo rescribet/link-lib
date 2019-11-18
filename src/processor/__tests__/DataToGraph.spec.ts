@@ -7,6 +7,7 @@ import schema from "@ontologies/schema";
 import "jest";
 
 import { rdflib } from "../../link-lib";
+import ll from "../../ontology/ll";
 import { Node } from "../../rdf";
 
 import { defaultNS } from "../../utilities/constants";
@@ -63,7 +64,7 @@ describe("DataToGraph", () => {
 
             const name = graph.statements[0];
             expect(name).toBeTruthy();
-            expect(name.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(name.subject).toEqual(ll.targetResource);
             expect(name.predicate).toEqual(schema.name);
             expect(name.object).toEqual(rdfFactory.literal("Some name"));
         });
@@ -75,7 +76,7 @@ describe("DataToGraph", () => {
 
             const name = graph.statements[0];
             expect(name).toBeTruthy();
-            expect(name.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(name.subject).toEqual(ll.targetResource);
             expect(name.predicate).toEqual(schema.name);
             expect(name.object).toEqual(rdfFactory.literal("Some name"));
         });
@@ -99,7 +100,7 @@ describe("DataToGraph", () => {
             ]};
             const [graph] = dataToGraphTuple(data);
 
-            const stmts = graph.statementsMatching(defaultNS.ll("targetResource"), defaultNS.example("property"));
+            const stmts = graph.match(ll.targetResource, defaultNS.example("property"), null, null);
             expect(stmts).toHaveLength(3);
 
             const bn = stmts[0]!;
@@ -113,13 +114,13 @@ describe("DataToGraph", () => {
             expect(nestedProp[0].object.value).toEqual("1");
 
             const nn = stmts[2]!;
-            expect(nn.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(nn.subject).toEqual(ll.targetResource);
             expect(nn.predicate).toEqual(defaultNS.example("property"));
             expect(nn.object.termType).toEqual("NamedNode");
             expect(nn.object.value).toEqual("http://schema.org/name");
 
             const lit = stmts[1]!;
-            expect(lit.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(lit.subject).toEqual(ll.targetResource);
             expect(lit.predicate).toEqual(defaultNS.example("property"));
             expect(lit.object.termType).toEqual("Literal");
             expect(lit.object.value).toEqual("2");
@@ -140,7 +141,7 @@ describe("DataToGraph", () => {
             const [graph] = dataToGraphTuple(data);
             const stmt = graph.statements[0];
             expect(stmt).toBeTruthy();
-            expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(data["example:property"]));
         });
@@ -150,7 +151,7 @@ describe("DataToGraph", () => {
             const [graph] = dataToGraphTuple(data);
             const stmt = graph.statements[0];
             expect(stmt).toBeTruthy();
-            expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(2.5));
         });
@@ -163,7 +164,7 @@ describe("DataToGraph", () => {
 
             const stmt = graph.statements[0];
             expect(stmt).toBeTruthy();
-            expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
             expect(stmt.object).toEqual(fileNode);
         });
@@ -173,7 +174,7 @@ describe("DataToGraph", () => {
             const [graph] = dataToGraphTuple(data);
             const stmt = graph.statements[0];
             expect(stmt).toBeTruthy();
-            expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(45));
         });
@@ -189,9 +190,9 @@ describe("DataToGraph", () => {
             expect(blobs).toHaveLength(1);
             expect(graph.statements).toHaveLength(3);
 
-            const stmt = graph.anyStatementMatching(defaultNS.ll("targetResource"), defaultNS.example("property"));
+            const stmt = graph.anyStatementMatching(ll.targetResource, defaultNS.example("property"));
             expect(stmt).toBeTruthy();
-            expect(stmt!.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(stmt!.subject).toEqual(ll.targetResource);
             expect(stmt!.predicate).toEqual(defaultNS.example("property"));
             expect(stmt!.object.termType).toEqual("BlankNode");
 
@@ -208,7 +209,7 @@ describe("DataToGraph", () => {
             const [graph] = dataToGraphTuple(data);
             const stmt = graph.statements[0];
             expect(stmt).toBeTruthy();
-            expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
             expect(stmt.object).toEqual(rdfFactory.literal("Some string"));
         });

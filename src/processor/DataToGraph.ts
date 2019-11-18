@@ -2,6 +2,8 @@ import rdfFactory, { Literal, NamedNode, Node, TermType } from "@ontologies/core
 import rdf from "@ontologies/rdf";
 import { graph as getGraph, Store } from "../rdflib";
 
+import ll from "../ontology/ll";
+
 import {
     DataObject,
     DataTuple,
@@ -29,7 +31,7 @@ function isIterable(o: any): o is any[] | Set<any> {
 }
 
 function uploadIRI(): NamedNode {
-    return defaultNS.ll(`blobs/a${Math.random().toString(BASE).substr(DEC_CUTOFF, IRI_LEN)}`);
+    return ll.ns(`blobs/a${Math.random().toString(BASE).substr(DEC_CUTOFF, IRI_LEN)}`);
 }
 
 /**

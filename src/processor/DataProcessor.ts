@@ -9,6 +9,8 @@ import {
 } from "http-status-codes";
 
 import { LinkedDataAPI } from "../LinkedDataAPI";
+import link from "../ontology/link";
+import ll from "../ontology/ll";
 import {
     BlankNode,
     NamedNode,
@@ -185,7 +187,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 timeout: this.timeout,
             });
             FETCHER_CALLBACKS.forEach((hook) => {
-                const hookIRI = defaultNS.ll(`data/rdflib/${hook}`);
+                const hookIRI = ll.ns(`data/rdflib/${hook}`);
                 this._fetcher!.addCallback(hook, this.invalidate.bind(this));
                 this._fetcher!.addCallback(hook, (iri: string | NamedNode | BlankNode, _err?: Error) => {
                     this.dispatch(hookIRI, [typeof iri === "string" ? rdfFactory.namedNode(iri) : iri, _err]);
@@ -294,7 +296,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             const data = new FormData();
             const rdfSerialization = this.serialize(graph.statements);
             data.append(
-                defaultNS.ll("graph").toString(),
+                ll.graph.toString(),
                 new Blob([rdfSerialization],
                     { type: F_NTRIPLES }),
             );
@@ -382,7 +384,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             .catch((err) => {
                 const status = rdfFactory.literal(err instanceof Error ? 499 : err.status, xsd.integer);
                 const delta = resources
-                    .map(([s]) => [s, defaultNS.http("statusCode"), status, defaultNS.ll("meta")] as Quadruple);
+                    .map(([s]) => [s, defaultNS.http("statusCode"), status, ll.meta] as Quadruple);
 
                 return this.processDelta(delta);
             });
@@ -420,7 +422,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 .catch((err) => {
                     const status = rdfFactory.literal(err instanceof Error ? 499 : err.status, xsd.integer);
                     const delta: Quadruple[] = [
-                        [requestIRI, defaultNS.http("statusCode"), status, defaultNS.ll("meta")],
+                        [requestIRI, defaultNS.http("statusCode"), status, ll.meta],
                     ];
                     return this.processDelta(delta);
                 });
@@ -461,7 +463,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const requests = this.store.match(
             null,
-            defaultNS.link("requestedURI"),
+            link.requestedURI,
             rdfFactory.literal(irl.value),
         );
         const totalRequested = requests.length;
@@ -486,7 +488,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const requestIRI = requests.pop()!.subject as BlankNode;
         const requestObj = anyRDFValue(
             this.store.statementsFor(requestIRI),
-            defaultNS.link("response"),
+            link.response,
         ) as BlankNode | undefined;
 
         if (!requestObj) {
@@ -549,7 +551,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 this.statusMap[rdfFactory.id(subj)] = undefined;
             }
 
-            if (!s || rdfFactory.equals(s[3], defaultNS.ll("meta"))) {
+            if (!s || rdfFactory.equals(s[3], ll.meta)) {
                 continue;
             }
 

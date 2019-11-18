@@ -3,6 +3,7 @@ import "./useHashFactory";
 
 import { LinkedRenderStore } from "../LinkedRenderStore";
 import { linkMiddleware } from "../linkMiddleware";
+import ll from "../ontology/ll";
 import { MiddlewareActionHandler } from "../types";
 import { defaultNS } from "../utilities/constants";
 
@@ -39,7 +40,7 @@ describe("linkMiddleware", () => {
     it("calls touch for data events", async () => {
         const middleware = createTestMiddleware();
 
-        await middleware.dispatch(defaultNS.ll("data/rdflib/done"), [defaultNS.example("test"), undefined]);
+        await middleware.dispatch(ll.ns("data/rdflib/done"), [defaultNS.example("test"), undefined]);
 
         expect(middleware.execActionByIRI).toHaveBeenCalledTimes(0);
         expect(middleware.next).toHaveBeenCalledTimes(0);

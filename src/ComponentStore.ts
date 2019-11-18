@@ -1,5 +1,6 @@
 import rdfFactory from "@ontologies/core";
 import rdfs from "@ontologies/rdfs";
+import ll from "./ontology/ll";
 import { NamedNode } from "./rdf";
 import { Schema } from "./Schema";
 import {
@@ -7,12 +8,12 @@ import {
     ComponentRegistration,
     Indexable,
 } from "./types";
-import { DEFAULT_TOPOLOGY, defaultNS } from "./utilities/constants";
+import { DEFAULT_TOPOLOGY } from "./utilities/constants";
 
 const MSG_TYPE_ERR = "Non-optimized NamedNode instance given. Please memoize your namespace correctly.";
 
 /** Constant used to determine that a component is used to render a type rather than a property. */
-export const RENDER_CLASS_NAME: NamedNode = defaultNS.ll("typeRenderClass");
+export const RENDER_CLASS_NAME: NamedNode = ll.typeRenderClass;
 
 function convertToCacheKey(types: Indexable[], props: Indexable[], topology: Indexable): string {
     return `${types.join()}[${props.join()}][${topology}]`;

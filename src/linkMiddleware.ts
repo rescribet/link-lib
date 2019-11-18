@@ -1,7 +1,7 @@
 import { LinkedRenderStore } from "./LinkedRenderStore";
+import ll from "./ontology/ll";
 import { NamedNode } from "./rdf";
 import { MiddlewareActionHandler, MiddlewareFn, MiddlewareWithBoundLRS } from "./types";
-import { defaultNS } from "./utilities/constants";
 
 /**
  * Binds various uris to link actions.
@@ -14,7 +14,7 @@ export const linkMiddleware = <T>(catchActions = true): MiddlewareFn<T> =>
         (next: MiddlewareActionHandler): MiddlewareActionHandler =>
             (action: NamedNode, args: any): Promise<any> => {
 
-    if (action.value.startsWith(defaultNS.ll("data/rdflib/").value)) {
+    if (action.value.startsWith(ll.ns("data/rdflib/").value)) {
         return Promise.resolve(lrs.touch(args[0], args[1]));
     }
 
