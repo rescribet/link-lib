@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>VocabularyProcessingContext | link-lib</title>
+	<title>BasicStore | link-lib</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -2370,20 +2370,59 @@ img {
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class="current tsd-kind-interface tsd-has-type-parameter">
-			<a href="vocabularyprocessingcontext.html" class="tsd-kind-icon">Vocabulary<wbr>Processing<wbr>Context</a>
+		<li class="current tsd-kind-class">
+			<a href="basicstore.html" class="tsd-kind-icon">Basic<wbr>Store</a>
 			<ul>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#datastore" class="tsd-kind-icon">data<wbr>Store</a>
+				<li class=" tsd-kind-constructor tsd-parent-kind-class">
+					<a href="basicstore.html#constructor" class="tsd-kind-icon">constructor</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#equivalenceset" class="tsd-kind-icon">equivalence<wbr>Set</a>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="basicstore.html#datacallbacks" class="tsd-kind-icon">data<wbr>Callbacks</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#store" class="tsd-kind-icon">store</a>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="basicstore.html#quads" class="tsd-kind-icon">quads</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#supermap" class="tsd-kind-icon">super<wbr>Map</a>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="basicstore.html#rdffactory" class="tsd-kind-icon">rdf<wbr>Factory</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="basicstore.html#removecallback" class="tsd-kind-icon">remove<wbr>Callback</a>
+				</li>
+				<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+					<a href="basicstore.html#length" class="tsd-kind-icon">length</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#add" class="tsd-kind-icon">add</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#adddatacallback" class="tsd-kind-icon">add<wbr>Data<wbr>Callback</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#addquad" class="tsd-kind-icon">add<wbr>Quad</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#addquadruple" class="tsd-kind-icon">add<wbr>Quadruple</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#addquadruples" class="tsd-kind-icon">add<wbr>Quadruples</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#addquads" class="tsd-kind-icon">add<wbr>Quads</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#match" class="tsd-kind-icon">match</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#rdfarrayremove" class="tsd-kind-icon">rdf<wbr>Array<wbr>Remove</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#remove" class="tsd-kind-icon">remove</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#removequad" class="tsd-kind-icon">remove<wbr>Quad</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class">
+					<a href="basicstore.html#removequads" class="tsd-kind-icon">remove<wbr>Quads</a>
 				</li>
 			</ul>
 		</li>
@@ -2391,20 +2430,25 @@ img {
 </nav>
 <div class="container container-main">
 	<div class="content-wrap">
-		<section class="tsd-panel tsd-type-parameters">
-			<h3>Type parameters</h3>
-			<ul class="tsd-type-parameters">
-				<li>
-					<h4>IndexType</h4>
-				</li>
-			</ul>
+		<section class="tsd-panel tsd-comment">
+			<div class="tsd-comment tsd-typography">
+				<div class="lead">
+					<p>Query and modify an array of quads.</p>
+				</div>
+			</div>
 		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">VocabularyProcessingContext</span>
+					<span class="target">BasicStore</span>
 				</li>
+			</ul>
+		</section>
+		<section class="tsd-panel">
+			<h3>Implements</h3>
+			<ul class="tsd-hierarchy">
+				<li><span class="tsd-signature-type">LowLevelStore</span></li>
 			</ul>
 		</section>
 		<section class="tsd-panel-group tsd-index-group">
@@ -2412,58 +2456,448 @@ img {
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
+						<h3>Constructors</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="basicstore.html#constructor" class="tsd-kind-icon">constructor</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#datastore" class="tsd-kind-icon">data<wbr>Store</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#equivalenceset" class="tsd-kind-icon">equivalence<wbr>Set</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#store" class="tsd-kind-icon">store</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#supermap" class="tsd-kind-icon">super<wbr>Map</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="basicstore.html#datacallbacks" class="tsd-kind-icon">data<wbr>Callbacks</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="basicstore.html#quads" class="tsd-kind-icon">quads</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="basicstore.html#rdffactory" class="tsd-kind-icon">rdf<wbr>Factory</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="basicstore.html#removecallback" class="tsd-kind-icon">remove<wbr>Callback</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Accessors</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="basicstore.html#length" class="tsd-kind-icon">length</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Methods</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#add" class="tsd-kind-icon">add</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#adddatacallback" class="tsd-kind-icon">add<wbr>Data<wbr>Callback</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#addquad" class="tsd-kind-icon">add<wbr>Quad</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#addquadruple" class="tsd-kind-icon">add<wbr>Quadruple</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#addquadruples" class="tsd-kind-icon">add<wbr>Quadruples</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#addquads" class="tsd-kind-icon">add<wbr>Quads</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#match" class="tsd-kind-icon">match</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#rdfarrayremove" class="tsd-kind-icon">rdf<wbr>Array<wbr>Remove</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#remove" class="tsd-kind-icon">remove</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#removequad" class="tsd-kind-icon">remove<wbr>Quad</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class"><a href="basicstore.html#removequads" class="tsd-kind-icon">remove<wbr>Quads</a></li>
 						</ul>
 					</section>
 				</div>
 			</section>
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Constructors</h2>
+			<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+				<a name="constructor" class="tsd-anchor"></a>
+				<h3>constructor</h3>
+				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">new <wbr>Basic<wbr>Store<span class="tsd-signature-symbol">(</span>opts<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/indexedformulaopts.html" class="tsd-signature-type">IndexedFormulaOpts</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="basicstore.html" class="tsd-signature-type">BasicStore</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:20</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> opts: <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/indexedformulaopts.html" class="tsd-signature-type">IndexedFormulaOpts</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="basicstore.html" class="tsd-signature-type">BasicStore</a></h4>
+					</li>
+				</ul>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Properties</h2>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="datastore" class="tsd-anchor"></a>
-				<h3>data<wbr>Store</h3>
-				<div class="tsd-signature tsd-kind-icon">data<wbr>Store<span class="tsd-signature-symbol">:</span> <a href="../classes/rdfstore.html" class="tsd-signature-type">RDFStore</a></div>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="datacallbacks" class="tsd-anchor"></a>
+				<h3>data<wbr>Callbacks</h3>
+				<div class="tsd-signature tsd-kind-icon">data<wbr>Callbacks<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L210">src/types.ts:210</a></li>
+						<li>Defined in src/store/BasicStore.ts:19</li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="equivalenceset" class="tsd-anchor"></a>
-				<h3>equivalence<wbr>Set</h3>
-				<div class="tsd-signature tsd-kind-icon">equivalence<wbr>Set<span class="tsd-signature-symbol">:</span> <a href="../classes/disjointset.html" class="tsd-signature-type">DisjointSet</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IndexType</span><span class="tsd-signature-symbol">&gt;</span></div>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="quads" class="tsd-anchor"></a>
+				<h3>quads</h3>
+				<div class="tsd-signature tsd-kind-icon">quads<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L211">src/types.ts:211</a></li>
+						<li>Defined in src/store/BasicStore.ts:18</li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="store" class="tsd-anchor"></a>
-				<h3>store</h3>
-				<div class="tsd-signature tsd-kind-icon">store<span class="tsd-signature-symbol">:</span> <a href="../classes/schema.html" class="tsd-signature-type">Schema</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="rdffactory" class="tsd-anchor"></a>
+				<h3>rdf<wbr>Factory</h3>
+				<div class="tsd-signature tsd-kind-icon">rdf<wbr>Factory<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">DataFactory</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L213">src/types.ts:213</a></li>
+						<li>Defined in src/store/BasicStore.ts:16</li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="supermap" class="tsd-anchor"></a>
-				<h3>super<wbr>Map</h3>
-				<div class="tsd-signature tsd-kind-icon">super<wbr>Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IndexType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IndexType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="removecallback" class="tsd-anchor"></a>
+				<h3>remove<wbr>Callback</h3>
+				<div class="tsd-signature tsd-kind-icon">remove<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L212">src/types.ts:212</a></li>
+						<li>Defined in src/store/BasicStore.ts:20</li>
 					</ul>
 				</aside>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Accessors</h2>
+			<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+				<a name="length" class="tsd-anchor"></a>
+				<h3>length</h3>
+				<div class="tsd-signature tsd-kind-icon">length<span class="tsd-signature-symbol">:</span> </div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in src/store/BasicStore.ts:79</li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Returns the number of quads in the store.</p>
+					</div>
+				</div>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Methods</h2>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="add" class="tsd-anchor"></a>
+				<h3>add</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>subject<span class="tsd-signature-symbol">: </span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a>, predicate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span>, object<span class="tsd-signature-symbol">: </span><a href="../globals.html#someterm" class="tsd-signature-type">SomeTerm</a>, graph<span class="tsd-signature-symbol">?: </span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:29</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Add a quad to the store.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>subject: <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a></h5>
+							</li>
+							<li>
+								<h5>predicate: <span class="tsd-signature-type">NamedNode</span></h5>
+							</li>
+							<li>
+								<h5>object: <a href="../globals.html#someterm" class="tsd-signature-type">SomeTerm</a></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> graph: <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol"> =&nbsp;this.rdfFactory.defaultGraph()</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Quad</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="adddatacallback" class="tsd-anchor"></a>
+				<h3>add<wbr>Data<wbr>Callback</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">add<wbr>Data<wbr>Callback<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:74</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>callback: <span class="tsd-signature-type">function</span></h5>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter-siganture">
+										<ul class="tsd-signatures tsd-kind-type-literal tsd-is-not-exported">
+											<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>q<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+										</ul>
+										<ul class="tsd-descriptions">
+											<li class="tsd-description">
+												<h4 class="tsd-parameters-title">Parameters</h4>
+												<ul class="tsd-parameters">
+													<li>
+														<h5>q: <span class="tsd-signature-type">Quad</span></h5>
+													</li>
+												</ul>
+												<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="addquad" class="tsd-anchor"></a>
+				<h3>add<wbr>Quad</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">add<wbr>Quad<span class="tsd-signature-symbol">(</span>quad<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:52</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>quad: <span class="tsd-signature-type">Quad</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Quad</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="addquadruple" class="tsd-anchor"></a>
+				<h3>add<wbr>Quadruple</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">add<wbr>Quadruple<span class="tsd-signature-symbol">(</span>qdr<span class="tsd-signature-symbol">: </span><a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:60</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>qdr: <a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="addquadruples" class="tsd-anchor"></a>
+				<h3>add<wbr>Quadruples</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">add<wbr>Quadruples<span class="tsd-signature-symbol">(</span>qdrs<span class="tsd-signature-symbol">: </span><a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a><span class="tsd-signature-symbol">[]</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:70</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>qdrs: <a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../globals.html#quadruple" class="tsd-signature-type">Quadruple</a><span class="tsd-signature-symbol">[]</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="addquads" class="tsd-anchor"></a>
+				<h3>add<wbr>Quads</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">add<wbr>Quads<span class="tsd-signature-symbol">(</span>quads<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:56</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>quads: <span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="match" class="tsd-anchor"></a>
+				<h3>match</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">match<span class="tsd-signature-symbol">(</span>subject<span class="tsd-signature-symbol">: </span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, predicate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, object<span class="tsd-signature-symbol">: </span><a href="../globals.html#someterm" class="tsd-signature-type">SomeTerm</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, graph<span class="tsd-signature-symbol">: </span><a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, justOne<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:118</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Search the Store</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>subject: <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+							</li>
+							<li>
+								<h5>predicate: <span class="tsd-signature-type">NamedNode</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+							</li>
+							<li>
+								<h5>object: <a href="../globals.html#someterm" class="tsd-signature-type">SomeTerm</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+							</li>
+							<li>
+								<h5>graph: <a href="../globals.html#somenode" class="tsd-signature-type">SomeNode</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> justOne: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="rdfarrayremove" class="tsd-anchor"></a>
+				<h3>rdf<wbr>Array<wbr>Remove</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">rdf<wbr>Array<wbr>Remove<span class="tsd-signature-symbol">(</span>arr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span>, quad<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:140</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>arr: <span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+							<li>
+								<h5>quad: <span class="tsd-signature-type">Quad</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="remove" class="tsd-anchor"></a>
+				<h3>remove</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">remove<span class="tsd-signature-symbol">(</span>st<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:84</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Remove a quad from the store</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>st: <span class="tsd-signature-type">Quad</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="removequad" class="tsd-anchor"></a>
+				<h3>remove<wbr>Quad</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">remove<wbr>Quad<span class="tsd-signature-symbol">(</span>quad<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:100</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Remove a quad from the store</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>quad: <span class="tsd-signature-type">Quad</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<a name="removequads" class="tsd-anchor"></a>
+				<h3>remove<wbr>Quads</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">remove<wbr>Quads<span class="tsd-signature-symbol">(</span>quads<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in src/store/BasicStore.ts:108</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>quads: <span class="tsd-signature-type">Quad</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
+					</li>
+				</ul>
 			</section>
 		</section>
 		<footer class="with-border-bottom">

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>VocabularyProcessingContext | link-lib</title>
+	<title>RDFLibFetcherResponse | link-lib</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -2370,20 +2370,65 @@ img {
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class="current tsd-kind-interface tsd-has-type-parameter">
-			<a href="vocabularyprocessingcontext.html" class="tsd-kind-icon">Vocabulary<wbr>Processing<wbr>Context</a>
+		<li class="current tsd-kind-interface">
+			<a href="rdflibfetcherresponse.html" class="tsd-kind-icon">RDFLib<wbr>Fetcher<wbr>Response</a>
 			<ul>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#datastore" class="tsd-kind-icon">data<wbr>Store</a>
+					<a href="rdflibfetcherresponse.html#response" class="tsd-kind-icon">Response</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#body" class="tsd-kind-icon">body</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#bodyused" class="tsd-kind-icon">body<wbr>Used</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#headers" class="tsd-kind-icon">headers</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#ok" class="tsd-kind-icon">ok</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#redirected" class="tsd-kind-icon">redirected</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#equivalenceset" class="tsd-kind-icon">equivalence<wbr>Set</a>
+					<a href="rdflibfetcherresponse.html#req" class="tsd-kind-icon">req</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#store" class="tsd-kind-icon">store</a>
+					<a href="rdflibfetcherresponse.html#responsetext" class="tsd-kind-icon">response<wbr>Text</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="vocabularyprocessingcontext.html#supermap" class="tsd-kind-icon">super<wbr>Map</a>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#status" class="tsd-kind-icon">status</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#statustext" class="tsd-kind-icon">status<wbr>Text</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#trailer" class="tsd-kind-icon">trailer</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#type" class="tsd-kind-icon">type</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#url" class="tsd-kind-icon">url</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#arraybuffer" class="tsd-kind-icon">array<wbr>Buffer</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#blob" class="tsd-kind-icon">blob</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#clone" class="tsd-kind-icon">clone</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#formdata" class="tsd-kind-icon">form<wbr>Data</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#json" class="tsd-kind-icon">json</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="rdflibfetcherresponse.html#text" class="tsd-kind-icon">text</a>
 				</li>
 			</ul>
 		</li>
@@ -2391,19 +2436,16 @@ img {
 </nav>
 <div class="container container-main">
 	<div class="content-wrap">
-		<section class="tsd-panel tsd-type-parameters">
-			<h3>Type parameters</h3>
-			<ul class="tsd-type-parameters">
-				<li>
-					<h4>IndexType</h4>
-				</li>
-			</ul>
-		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">VocabularyProcessingContext</span>
+					<span class="tsd-signature-type">Response</span>
+					<ul class="tsd-hierarchy">
+						<li>
+							<span class="target">RDFLibFetcherResponse</span>
+						</li>
+					</ul>
 				</li>
 			</ul>
 		</section>
@@ -2414,10 +2456,30 @@ img {
 					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#datastore" class="tsd-kind-icon">data<wbr>Store</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#equivalenceset" class="tsd-kind-icon">equivalence<wbr>Set</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#store" class="tsd-kind-icon">store</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="vocabularyprocessingcontext.html#supermap" class="tsd-kind-icon">super<wbr>Map</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="rdflibfetcherresponse.html#response" class="tsd-kind-icon">Response</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#body" class="tsd-kind-icon">body</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#bodyused" class="tsd-kind-icon">body<wbr>Used</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#headers" class="tsd-kind-icon">headers</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#ok" class="tsd-kind-icon">ok</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#redirected" class="tsd-kind-icon">redirected</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="rdflibfetcherresponse.html#req" class="tsd-kind-icon">req</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="rdflibfetcherresponse.html#responsetext" class="tsd-kind-icon">response<wbr>Text</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#status" class="tsd-kind-icon">status</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#statustext" class="tsd-kind-icon">status<wbr>Text</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#trailer" class="tsd-kind-icon">trailer</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#type" class="tsd-kind-icon">type</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#url" class="tsd-kind-icon">url</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section tsd-is-inherited">
+						<h3>Methods</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#arraybuffer" class="tsd-kind-icon">array<wbr>Buffer</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#blob" class="tsd-kind-icon">blob</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#clone" class="tsd-kind-icon">clone</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#formdata" class="tsd-kind-icon">form<wbr>Data</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#json" class="tsd-kind-icon">json</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="rdflibfetcherresponse.html#text" class="tsd-kind-icon">text</a></li>
 						</ul>
 					</section>
 				</div>
@@ -2426,44 +2488,326 @@ img {
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Properties</h2>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="datastore" class="tsd-anchor"></a>
-				<h3>data<wbr>Store</h3>
-				<div class="tsd-signature tsd-kind-icon">data<wbr>Store<span class="tsd-signature-symbol">:</span> <a href="../classes/rdfstore.html" class="tsd-signature-type">RDFStore</a></div>
+				<a name="response" class="tsd-anchor"></a>
+				<h3>Response</h3>
+				<div class="tsd-signature tsd-kind-icon">Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L210">src/types.ts:210</a></li>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12829</li>
+					</ul>
+				</aside>
+				<div class="tsd-type-declaration">
+					<h4>Type declaration</h4>
+					<ul class="tsd-parameters">
+						<li class="tsd-parameter">
+							<h5>constructor<span class="tsd-signature-symbol">: </span>function</h5>
+							<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-type-literal tsd-is-not-exported">
+								<li class="tsd-signature tsd-kind-icon">new __type<span class="tsd-signature-symbol">(</span>body<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">BodyInit</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, init<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ResponseInit</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Response</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<aside class="tsd-sources">
+										<ul>
+											<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12830</li>
+										</ul>
+									</aside>
+									<h4 class="tsd-parameters-title">Parameters</h4>
+									<ul class="tsd-parameters">
+										<li>
+											<h5><span class="tsd-flag ts-flagOptional">Optional</span> body: <span class="tsd-signature-type">BodyInit</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+										</li>
+										<li>
+											<h5><span class="tsd-flag ts-flagOptional">Optional</span> init: <span class="tsd-signature-type">ResponseInit</span></h5>
+										</li>
+									</ul>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Response</span></h4>
+								</li>
+						</ul>        </li>
+						<li class="tsd-parameter">
+							<h5>prototype<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Response</span></h5>
+						</li>
+						<li class="tsd-parameter">
+							<h5>error<span class="tsd-signature-symbol">: </span>function</h5>
+							<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal tsd-is-not-exported">
+								<li class="tsd-signature tsd-kind-icon">error<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Response</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<aside class="tsd-sources">
+										<ul>
+											<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12832</li>
+										</ul>
+									</aside>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Response</span></h4>
+								</li>
+						</ul>        </li>
+						<li class="tsd-parameter">
+							<h5>redirect<span class="tsd-signature-symbol">: </span>function</h5>
+							<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal tsd-is-not-exported">
+								<li class="tsd-signature tsd-kind-icon">redirect<span class="tsd-signature-symbol">(</span>url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, status<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Response</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<aside class="tsd-sources">
+										<ul>
+											<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12833</li>
+										</ul>
+									</aside>
+									<h4 class="tsd-parameters-title">Parameters</h4>
+									<ul class="tsd-parameters">
+										<li>
+											<h5>url: <span class="tsd-signature-type">string</span></h5>
+										</li>
+										<li>
+											<h5><span class="tsd-flag ts-flagOptional">Optional</span> status: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></h5>
+										</li>
+									</ul>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Response</span></h4>
+								</li>
+						</ul>        </li>
+					</ul>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="body" class="tsd-anchor"></a>
+				<h3>body</h3>
+				<div class="tsd-signature tsd-kind-icon">body<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Body.body</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:2531</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="bodyused" class="tsd-anchor"></a>
+				<h3>body<wbr>Used</h3>
+				<div class="tsd-signature tsd-kind-icon">body<wbr>Used<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Body.bodyUsed</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:2532</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="headers" class="tsd-anchor"></a>
+				<h3>headers</h3>
+				<div class="tsd-signature tsd-kind-icon">headers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Headers</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Response.headers</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12818</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="ok" class="tsd-anchor"></a>
+				<h3>ok</h3>
+				<div class="tsd-signature tsd-kind-icon">ok<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Response.ok</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12819</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="redirected" class="tsd-anchor"></a>
+				<h3>redirected</h3>
+				<div class="tsd-signature tsd-kind-icon">redirected<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Response.redirected</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12820</li>
 					</ul>
 				</aside>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="equivalenceset" class="tsd-anchor"></a>
-				<h3>equivalence<wbr>Set</h3>
-				<div class="tsd-signature tsd-kind-icon">equivalence<wbr>Set<span class="tsd-signature-symbol">:</span> <a href="../classes/disjointset.html" class="tsd-signature-type">DisjointSet</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IndexType</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<a name="req" class="tsd-anchor"></a>
+				<h3>req</h3>
+				<div class="tsd-signature tsd-kind-icon">req<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BlankNode</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L211">src/types.ts:211</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L160">src/types.ts:160</a></li>
 					</ul>
 				</aside>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="store" class="tsd-anchor"></a>
-				<h3>store</h3>
-				<div class="tsd-signature tsd-kind-icon">store<span class="tsd-signature-symbol">:</span> <a href="../classes/schema.html" class="tsd-signature-type">Schema</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<a name="responsetext" class="tsd-anchor"></a>
+				<h3>response<wbr>Text</h3>
+				<div class="tsd-signature tsd-kind-icon">response<wbr>Text<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L213">src/types.ts:213</a></li>
+						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L159">src/types.ts:159</a></li>
 					</ul>
 				</aside>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="supermap" class="tsd-anchor"></a>
-				<h3>super<wbr>Map</h3>
-				<div class="tsd-signature tsd-kind-icon">super<wbr>Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IndexType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IndexType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="status" class="tsd-anchor"></a>
+				<h3>status</h3>
+				<div class="tsd-signature tsd-kind-icon">status<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 				<aside class="tsd-sources">
+					<p>Inherited from Response.status</p>
 					<ul>
-						<li>Defined in <a href="https://github.com/fletcher91/link-lib/blob/d8a4a3a/src/types.ts#L212">src/types.ts:212</a></li>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12821</li>
 					</ul>
 				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="statustext" class="tsd-anchor"></a>
+				<h3>status<wbr>Text</h3>
+				<div class="tsd-signature tsd-kind-icon">status<wbr>Text<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Response.statusText</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12822</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="trailer" class="tsd-anchor"></a>
+				<h3>trailer</h3>
+				<div class="tsd-signature tsd-kind-icon">trailer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Headers</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Response.trailer</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12823</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="type" class="tsd-anchor"></a>
+				<h3>type</h3>
+				<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ResponseType</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Response.type</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12824</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<a name="url" class="tsd-anchor"></a>
+				<h3>url</h3>
+				<div class="tsd-signature tsd-kind-icon">url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<aside class="tsd-sources">
+					<p>Inherited from Response.url</p>
+					<ul>
+						<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12825</li>
+					</ul>
+				</aside>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<h2>Methods</h2>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="arraybuffer" class="tsd-anchor"></a>
+				<h3>array<wbr>Buffer</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">array<wbr>Buffer<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBuffer</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from Body.arrayBuffer</p>
+							<ul>
+								<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:2533</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBuffer</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="blob" class="tsd-anchor"></a>
+				<h3>blob</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">blob<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from Body.blob</p>
+							<ul>
+								<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:2534</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="clone" class="tsd-anchor"></a>
+				<h3>clone</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">clone<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Response</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from Response.clone</p>
+							<ul>
+								<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:12826</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Response</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="formdata" class="tsd-anchor"></a>
+				<h3>form<wbr>Data</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">form<wbr>Data<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">FormData</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from Body.formData</p>
+							<ul>
+								<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:2535</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">FormData</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="json" class="tsd-anchor"></a>
+				<h3>json</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">json<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from Body.json</p>
+							<ul>
+								<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:2536</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="text" class="tsd-anchor"></a>
+				<h3>text</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">text<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from Body.text</p>
+							<ul>
+								<li>Defined in node_modules/typescript/lib/lib.dom.d.ts:2537</li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
 			</section>
 		</section>
 		<footer class="with-border-bottom">
