@@ -1,4 +1,4 @@
-import { Namespace } from "@ontologies/core";
+import { LowLevelStore, Namespace } from "@ontologies/core";
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
@@ -11,9 +11,10 @@ import {
     Quad,
     Quadruple,
 } from "./rdf";
-import { Fetcher, Store } from "./rdflib";
+import { Fetcher } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
+import RDFIndex from "./store/RDFIndex";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 export interface ActionMap {
@@ -127,8 +128,8 @@ export interface DataObject {
     [k: string]: SerializableDataTypes;
 }
 
-export type DataTuple = [Store, NamedBlobTuple[]];
-export type ParsedObject = [SomeNode, Store, NamedBlobTuple[]];
+export type DataTuple = [RDFIndex, NamedBlobTuple[]];
+export type ParsedObject = [SomeNode, LowLevelStore, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
     changeBuffer: Quad[];
@@ -187,7 +188,11 @@ export interface FulfilledRequestStatus extends RequestStatus {
     status: number;
 }
 
-export type ResponseAndFallbacks = Response | XMLHttpRequest | ExtensionResponse | RDFLibFetcherRequest | RDFLibFetcherResponse;
+export type ResponseAndFallbacks = Response
+    | XMLHttpRequest
+    | ExtensionResponse
+    | RDFLibFetcherRequest
+    | RDFLibFetcherResponse;
 
 export interface WorkerMessageBase {
     method: string;
@@ -201,23 +206,23 @@ export interface GetEntityMessage {
     };
 }
 
-export interface VocabularyProcessingContext {
+export interface VocabularyProcessingContext<IndexType = Indexable> {
     dataStore: RDFStore;
-    equivalenceSet: DisjointSet<Indexable>;
-    superMap: Map<Indexable, Set<Indexable>>;
+    equivalenceSet: DisjointSet<IndexType>;
+    superMap: Map<IndexType, Set<IndexType>>;
     store: Schema<any>;
 }
 
 export interface VocabularyProcessor {
     axioms: Quad[];
 
-    processStatement: (item: Quad, ctx: VocabularyProcessingContext) => Quad[] | null;
+    processStatement: (item: Quad, ctx: VocabularyProcessingContext<any>) => Quad[] | null;
 
     /**
      * Processes class instances (object to rdf:type). If an IRI is given, processors must assume the resource to be an
      * instance of rdfs:Class.
      */
-    processType: (type: NamedNode, ctx: VocabularyProcessingContext) => boolean;
+    processType: (type: NamedNode, ctx: VocabularyProcessingContext<any>) => boolean;
 }
 
 export interface TransformerRegistrationRequest {

@@ -21,7 +21,11 @@ a back-end, so it's only a demo for the view rendering mechanism.
 
 ## Installation
 
-`yarn add link-lib rdflib@npm:link-rdflib`
+`yarn add link-lib`
+
+and some peer dependencies:
+
+`yarn add @ontologies/as @ontologies/core @ontologies/schema @ontologies/shacl @ontologies/xsd http-status-codes n-quads-parser`
 
 The package externalizes the Promise API, so make sure to include your own when targeting platforms without native
 support.

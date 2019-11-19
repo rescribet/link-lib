@@ -79,6 +79,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     public defaultType: NamedNode = schema.Thing;
     public deltaProcessors: DeltaProcessor[];
     public report: ErrorReporter;
+    /** @deprecated */
     public namespaces: NamespaceMap = {...defaultNS};
 
     public api: LinkedDataAPI;
@@ -349,7 +350,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             preExistingData = this.tryEntity(iri);
         }
         if (preExistingData !== undefined) {
-            this.store.removeStatements(preExistingData);
+            this.store.removeQuads(preExistingData);
         }
         await this.api.getEntity(iri, apiOpts);
         this.broadcast();
@@ -509,7 +510,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      *
      * @renderlibrary
      * @param {Node} subject The resource to get the renderer for.
-     * @param {"rdflib".NamedNode} topology The topology to take into account when picking the renderer.
+     * @param {NamedNode} topology The topology to take into account when picking the renderer.
      * @return {T | undefined}
      */
     public resourceComponent(subject: Node, topology?: NamedNode): T | undefined {

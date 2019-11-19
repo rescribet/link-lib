@@ -1,10 +1,8 @@
 import rdfFactory, { NamedNode, Quad, TermType } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
-import { Term } from "../rdf";
-import { Store } from "../rdflib";
 
-import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
+import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 /**
  * Implements the RDF/RDFS axioms and rules.
@@ -62,14 +60,14 @@ export const RDFS = {
     processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
         const result = [item];
 
-        const domainStatements = ctx.store.statementsMatching(item.predicate, rdfs.domain);
+        const domainStatements = ctx.store.match(item.predicate, rdfs.domain, null, null);
         if (domainStatements.length > 0) {
             for (let i = 0; i < domainStatements.length; i++) {
                 result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, domainStatements[i].object));
             }
         }
 
-        const rangeStatements = ctx.store.statementsMatching(item.predicate, rdfs.range);
+        const rangeStatements = ctx.store.match(item.predicate, rdfs.range, null, null);
         if (rangeStatements.length > 0) {                                                     // P rdfs:range C..Cn
             for (let i = 0; i < rangeStatements.length; i++) {
                 result.push(rdfFactory.quad(item.object as NamedNode, rdf.type, rangeStatements[i].object));
@@ -80,7 +78,7 @@ export const RDFS = {
             result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
             result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.statementsMatching(item.subject);
+            const dereferences = ctx.store.match(item.subject, null, null, null);
             for (let i = 0; i < dereferences.length; i++) {
                 result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, dereferences[i].object));
             }
@@ -88,8 +86,8 @@ export const RDFS = {
             if (!rdfFactory.equals(item.subject, rdf.type)) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
                     item.subject as NamedNode,
-                    (_: Store, subj: SomeNode) => {
-                        ctx.store.addStatements([rdfFactory.quad(subj, rdf.type, item.object)]);
+                    (quad: Quad) => {
+                        ctx.store.addStatements([rdfFactory.quad(quad.subject, rdf.type, item.object)]);
                         return true;
                     },
                 );
@@ -98,7 +96,7 @@ export const RDFS = {
             result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
             result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.statementsMatching(undefined, undefined, item.subject);
+            const dereferences = ctx.store.match(null, null, item.subject, null);
             for (let i = 0; i < dereferences.length; i++) {
                 result.push(rdfFactory.quad(dereferences[i].subject, rdf.type, item.object));
             }
@@ -106,8 +104,8 @@ export const RDFS = {
             if (!rdfFactory.equals(item.subject, rdf.type)) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
                     item.subject as NamedNode,
-                    (_: Store, __: SomeNode, ___, obj: Term) => {
-                        ctx.store.addStatements([rdfFactory.quad(obj, rdf.type, item.object)]);
+                    (quad: Quad) => {
+                        ctx.store.addStatements([rdfFactory.quad(quad.object, rdf.type, item.object)]);
                         return true;
                     },
                 );
@@ -148,7 +146,7 @@ export const RDFS = {
 
     processType(type: NamedNode, ctx: VocabularyProcessingContext): boolean {
         RDFS.processStatement(rdfFactory.quad(type, rdfs.subClassOf, rdfs.Resource), ctx);
-        ctx.store.add(rdfFactory.quad(type, rdf.type, rdfs.Class));
+        ctx.store.addQuad(rdfFactory.quad(type, rdf.type, rdfs.Class));
         return false;
     },
 } as VocabularyProcessor;

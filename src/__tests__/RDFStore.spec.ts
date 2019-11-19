@@ -6,11 +6,11 @@ import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 import xsd from "@ontologies/xsd";
-import { rdflib } from "../link-lib";
 
 import ll from "../ontology/ll";
 import { createNS } from "../rdf";
 import { RDFStore } from "../RDFStore";
+import RDFIndex from "../store/RDFIndex";
 import { getBasicStore } from "../testUtilities";
 
 const example = createNS("http://example.com");
@@ -29,15 +29,15 @@ describe("RDFStore", () => {
             const store = new RDFStore();
 
             expect(() => {
-                store.addStatements("test" as any);
+                store.addQuads("test" as any);
             }).toThrowError(TypeError);
         });
 
         it("works", () => {
             const store = new RDFStore();
-            store.addStatements(thingStatements);
+            store.addQuads(thingStatements);
 
-            const libStatements = store.getInternalStore().statements;
+            const libStatements = store.getInternalStore().quads;
             expect(libStatements).toHaveLength(3);
             expect(libStatements[0]).toEqual(thingStatements[0]);
             expect(libStatements[1]).toEqual(thingStatements[1]);
@@ -46,7 +46,7 @@ describe("RDFStore", () => {
 
         it("bumps the changeTimestamp", async () => {
             const store = getBasicStore();
-            store.store.addStatements([
+            store.store.addQuads([
                 thingStatements[0],
             ]);
             store.store.flush();
@@ -54,7 +54,7 @@ describe("RDFStore", () => {
 
             await new Promise((resolve): void => { window.setTimeout(resolve, 100); });
 
-            store.store.addStatements([
+            store.store.addQuads([
                 thingStatements[1],
                 thingStatements[2],
             ]);
@@ -66,7 +66,7 @@ describe("RDFStore", () => {
     describe("#flush", () => {
         it("is returns the work available", () => {
             const store = new RDFStore();
-            store.addStatements(thingStatements);
+            store.addQuads(thingStatements);
             const res = store.flush();
             expect(res[0]).toEqual(thingStatements[0]);
             expect(res[1]).toEqual(thingStatements[1]);
@@ -83,14 +83,14 @@ describe("RDFStore", () => {
     describe("#getInternalStore", () => {
         it("returns the store", () => {
             expect(new RDFStore().getInternalStore())
-                .toBeInstanceOf(rdflib.IndexedFormula);
+                .toBeInstanceOf(RDFIndex);
         });
     });
 
     describe("#replaceMatches", () => {
         it("replaces a statement", () => {
             const store = new RDFStore();
-            store.addStatements(thingStatements);
+            store.addQuads(thingStatements);
 
             const quads: Quadruple[] = [
                 [schemaT, rdfs.label, rdfFactory.literal("Thing!"), ll.ns("replace")],
@@ -126,7 +126,7 @@ describe("RDFStore", () => {
         describe("ll:remove", () => {
             it("removes one", () => {
                 const store = new RDFStore();
-                store.addStatements(thingStatements);
+                store.addQuads(thingStatements);
 
                 expect(store.match(null)).toHaveLength(thingStatements.length);
 
@@ -142,8 +142,8 @@ describe("RDFStore", () => {
 
             it("removes many", () => {
                 const store = new RDFStore();
-                store.addStatements(thingStatements);
-                store.addStatements([rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing gb", "en-gb"))]);
+                store.addQuads(thingStatements);
+                store.addQuads([rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing gb", "en-gb"))]);
 
                 expect(store.match(null)).toHaveLength(thingStatements.length + 1);
 
@@ -164,8 +164,8 @@ describe("RDFStore", () => {
             const old = [rdfFactory.quad(ex("a"), ex("p"), ex("x"), ex("g"))];
             const next = [rdfFactory.quad(ex("a"), ex("q"), ex("x"), ex("g"))];
             const store = new RDFStore();
-            store.addStatements(old);
-            store.replaceStatements(old, next);
+            store.addQuads(old);
+            store.replaceQuads(old, next);
 
             expect(store.match(null, null, null, null)).toHaveLength(1);
             expect(store.match(ex("a"))[0]).toEqual(next[0]);
@@ -174,7 +174,7 @@ describe("RDFStore", () => {
 
     describe("#getResourcePropertyRaw", () => {
         const store = new RDFStore();
-        store.addStatements([
+        store.addQuads([
             rdfFactory.quad(ex("a"), ex("p"), ex("x")),
             rdfFactory.quad(ex("a"), ex("r"), ex("y")),
 
@@ -233,7 +233,7 @@ describe("RDFStore", () => {
 
         it("returns the type for type statements", () => {
             const store = new RDFStore();
-            store.addStatements([
+            store.addQuads([
                 rdfFactory.quad(ex("2"), rdf.type, ex("SomeClass")),
             ]);
 
@@ -250,7 +250,7 @@ describe("RDFStore", () => {
 
         it("returns the object for other statements", () => {
             const store = new RDFStore();
-            store.addStatements([
+            store.addQuads([
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop")),
             ]);
 
@@ -260,7 +260,7 @@ describe("RDFStore", () => {
 
         it("picks the preferred language", () => {
             const store = new RDFStore();
-            store.addStatements([
+            store.addQuads([
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop", "de")),
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop", "nl")),
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop", "en")),
@@ -286,7 +286,7 @@ describe("RDFStore", () => {
 
             // @ts-ignore TS-2341
             expect(store.typeCache[rdfFactory.id(ex("1"))]).toBeUndefined();
-            store.addStatements([
+            store.addQuads([
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
             ]);
             // @ts-ignore TS-2341
@@ -295,7 +295,7 @@ describe("RDFStore", () => {
 
         it("adds new types for cached resources", () => {
             const store = new RDFStore();
-            store.addStatements([
+            store.addQuads([
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
                 rdfFactory.quad(ex("1"), rdf.type, ex("type2"), ex("_")),
             ]);
@@ -306,11 +306,11 @@ describe("RDFStore", () => {
 
         it("removes type statements after they are removed from the store", () => {
             const store = new RDFStore();
-            store.addStatements([
+            store.addQuads([
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
                 rdfFactory.quad(ex("1"), rdf.type, ex("type2"), ex("_")),
             ]);
-            store.removeStatements([rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_"))]);
+            store.removeQuads([rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_"))]);
             store.flush();
 
             // @ts-ignore TS-2341
@@ -322,7 +322,7 @@ describe("RDFStore", () => {
         it("bumps the changeTimestamp", async () => {
             const store = getBasicStore();
             const resource = example("test");
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdf.type, schema.Person),
             ]);
             store.store.flush();
@@ -337,7 +337,7 @@ describe("RDFStore", () => {
         it("clears the type cache", () => {
             const store = getBasicStore();
             const resource = example("test");
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdf.type, schema.Person),
             ]);
 
@@ -349,7 +349,7 @@ describe("RDFStore", () => {
         it("removes the resource data", () => {
             const store = getBasicStore();
             const resource = example("test");
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdf.type, schema.Person),
                 rdfFactory.quad(resource, schema.name, rdfFactory.literal("Name")),
                 rdfFactory.quad(resource, schema.author, ex("3")),
@@ -370,13 +370,13 @@ describe("RDFStore", () => {
         it("is more than zero work", () => {
             const store = new RDFStore();
             expect(store.workAvailable()).toEqual(0);
-            store.addStatements(thingStatements);
+            store.addQuads(thingStatements);
             expect(store.workAvailable()).toEqual(3);
         });
 
         it("is reset after #flush()", () => {
             const store = new RDFStore();
-            store.addStatements(thingStatements);
+            store.addQuads(thingStatements);
             expect(store.workAvailable()).toEqual(3);
             store.flush();
             expect(store.workAvailable()).toEqual(0);

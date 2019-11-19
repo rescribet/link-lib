@@ -25,8 +25,8 @@ describe("Schema", () => {
 
             it("processes the axioms", () => {
                 // TODO: verify
-                expect(schema.statements.length)
-                    .toEqual(42);
+                expect(schema.quads.length)
+                    .toEqual(49);
             });
 
             // TODO: Implement core rdf logic
@@ -50,7 +50,7 @@ describe("Schema", () => {
                     rdfs.Resource,
                 );
 
-                expect(schema.holdsStatement(expected))
+                expect(schema.holdsQuad(expected))
                     .toBeTruthy();
             });
         });
@@ -64,11 +64,11 @@ describe("Schema", () => {
                 const schema = blankSchema();
                 const personIsAClass = rdfFactory.quad(schemaNS.Person, rdf.type, rdfs.Class);
 
-                expect(schema.holdsStatement(personIsAClass)).toBeFalsy();
+                expect(schema.holdsQuad(personIsAClass)).toBeFalsy();
 
                 schema.addStatements([personIsAClass]);
 
-                expect(schema.holdsStatement(personIsAClass)).toBeTruthy();
+                expect(schema.holdsQuad(personIsAClass)).toBeTruthy();
             });
 
             it("doesn't add generic statements", () => {
@@ -77,7 +77,7 @@ describe("Schema", () => {
 
                 schema.addStatements([statement]);
 
-                expect(schema.holdsStatement(statement)).toBeFalsy();
+                expect(schema.holdsQuad(statement)).toBeFalsy();
             });
         });
 

@@ -1,21 +1,19 @@
-import { DataFactory } from "@ontologies/core";
+import { DataFactory, QuadPosition } from "@ontologies/core";
 import ld from "@ontologies/ld";
 import rdf from "@ontologies/rdf";
-import {
-    graph,
-    Store,
-} from "./rdflib";
 
 import ll from "./ontology/ll";
 import rdfFactory, {
     NamedNode,
-    Node,
+    OptionalNamedNode,
     OptionalNode,
+    OptionalTerm,
     Quad,
     Quadruple,
     Term,
 } from "./rdf";
 import { deltaProcessor } from "./store/deltaProcessor";
+import RDFIndex from "./store/RDFIndex";
 import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
 import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
@@ -24,7 +22,7 @@ const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 
 export interface RDFStoreOpts {
     deltaProcessorOpts?: {[k: string]: Array<NamedNode | undefined>};
-    innerStore?: Store;
+    innerStore?: RDFIndex;
 }
 
 /**
@@ -46,21 +44,21 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
-    private store: Store = graph();
+    private store: RDFIndex = new RDFIndex();
 
     public get rdfFactory(): DataFactory {
-        return this.store.rdfFactory;
+        return rdfFactory;
     }
-    public set rdfFactory(value: DataFactory) {
-        throw this.store.rdfFactory = value;
+    public set rdfFactory(_: DataFactory) {
+        throw new Error("Factory is global (see @ontologies/core)");
     }
 
     constructor({ deltaProcessorOpts, innerStore }: RDFStoreOpts = {}) {
         this.processDelta = this.processDelta.bind(this);
 
-        const g = innerStore || graph();
+        const g = innerStore || new RDFIndex();
+        g.addDataCallback(this.processTypeStatement.bind(this));
         this.store = patchRDFLibStoreWithOverrides(g, this);
-        this.store.newPropertyAction(rdf.type, this.processTypeStatement.bind(this));
 
         const defaults =  {
             addGraphIRIS: [ll.add, ld.add],
@@ -88,7 +86,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * Add statements to the store.
      * @param data Data to parse and add to the store.
      */
-    public addStatements(data: Quad[]): void {
+    public addQuads(data: Quad[]): void {
         if (!Array.isArray(data)) {
             throw new TypeError("An array of statements must be passed to addStatements");
         }
@@ -98,7 +96,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         }
     }
 
-    public addQuads(data: Quadruple[]): Quad[] {
+    public addQuadruples(data: Quadruple[]): Quad[] {
         const statements = new Array(data.length);
         for (let i = 0, len = data.length; i < len; i++) {
             statements[i] = this.store.add(data[i][0], data[i][1], data[i][2], data[i][3]);
@@ -107,35 +105,13 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return statements;
     }
 
-    public any(
-        subj: OptionalNode,
-        pred?: OptionalNode,
-        obj?: OptionalNode,
-        why?: OptionalNode,
-    ): Term | undefined {
-        return this.store.any(subj, pred, obj, why);
-    }
-
-    public anyStatementMatching(subj: OptionalNode,
-                                pred?: OptionalNode,
-                                obj?: OptionalNode,
-                                why?: OptionalNode): Quad | undefined {
-        return this.store.anyStatementMatching(subj, pred, obj, why);
-    }
-
-    public anyValue(subj: OptionalNode,
-                    pred?: OptionalNode,
-                    obj?: OptionalNode,
-                    why?: OptionalNode): string | undefined {
-        return this.store.anyValue(subj, pred, obj, why);
-    }
-
     public canon(term: SomeNode): SomeNode {
-        return this.store.canon(term);
+        // TODO
+        return term;
     }
 
     public defaultGraph(): SomeNode {
-        return this.store.rdfFactory.defaultGraph();
+        return rdfFactory.defaultGraph();
     }
 
     /**
@@ -162,21 +138,26 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 this.changeTimestamps[rdfFactory.id(s.subject)] = changeStamp;
                 return rdfFactory.equals(s.predicate, rdf.type);
             })
-            .map((s) => this.processTypeStatement(undefined, s.subject, s.predicate, undefined, undefined));
+            .map((s) => this.processTypeStatement(s));
 
         return processingBuffer;
     }
 
     /** @private */
-    public getInternalStore(): Store {
+    public getInternalStore(): RDFIndex {
         return this.store;
     }
 
     public match(subj: OptionalNode,
-                 pred?: OptionalNode,
-                 obj?: OptionalNode,
-                 why?: OptionalNode): Quad[] {
-        return this.store.match(subj, pred, obj, why) || [];
+                 pred?: OptionalNamedNode,
+                 obj?: OptionalTerm,
+                 graph?: OptionalNode): Quad[] {
+        return this.store.match(
+            subj || null,
+            pred || null,
+            obj || null,
+            graph || null,
+        ) || [];
     }
 
     public processDelta(delta: Quadruple[]): Quad[] {
@@ -186,19 +167,19 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             removables,
         ] = this.deltaProcessor(delta);
 
-        this.removeStatements(removables);
+        this.removeQuads(removables);
 
-        return this.replaceMatches(replacables).concat(this.addQuads(addables));
+        return this.replaceMatches(replacables).concat(this.addQuadruples(addables));
     }
 
     public removeResource(subject: SomeNode): void {
         this.touch(subject);
         this.typeCache[rdfFactory.id(subject)] = [];
-        this.removeStatements(this.statementsFor(subject));
+        this.removeQuads(this.statementsFor(subject));
     }
 
-    public removeStatements(statements: Quad[]): void {
-        this.store.remove(statements.slice());
+    public removeQuads(statements: Quad[]): void {
+        this.store.removeQuads(statements);
     }
 
     /**
@@ -210,7 +191,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param original The statements to remove from the store.
      * @param replacement The statements to add to the store.
      */
-    public replaceStatements(original: Quad[], replacement: Quad[]): void {
+    public replaceQuads(original: Quad[], replacement: Quad[]): void {
         const uniqueStatements = new Array(replacement.length).filter(Boolean);
         for (let i = 0; i < replacement.length; i++) {
             const cond = original.some(
@@ -222,18 +203,23 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             }
         }
 
-        this.removeStatements(original);
+        this.removeQuads(original);
         // Remove statements not in the old object. Useful for replacing data loosely related to the main resource.
         for (let i = 0; i < uniqueStatements.length; i++) {
-            this.store.removeMatches(uniqueStatements[i].subject, uniqueStatements[i].predicate);
+            this.store.removeMatches(
+                uniqueStatements[i].subject,
+                uniqueStatements[i].predicate,
+                null,
+                null,
+            );
         }
 
-        return this.addStatements(replacement);
+        return this.addQuads(replacement);
     }
 
     public replaceMatches(statements: Quadruple[]): Quad[] {
         for (let i = 0; i < statements.length; i++) {
-            this.removeStatements(this.match(
+            this.removeQuads(this.match(
                 statements[i][0],
                 statements[i][1],
                 undefined,
@@ -241,7 +227,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             ));
         }
 
-        return this.addQuads(statements);
+        return this.addQuadruples(statements);
     }
 
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Quad[] {
@@ -297,10 +283,11 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param subject The identifier of the resource.
      */
     public statementsFor(subject: SomeNode): Quad[] {
-        const canon = rdfFactory.id(this.store.canon(subject));
+        // TODO: Use the schema to replace canon
+        const id = rdfFactory.id(subject);
 
-        return typeof this.store.subjectIndex[canon] !== "undefined"
-            ? this.store.subjectIndex[canon]
+        return typeof this.store.indices[QuadPosition.subject][id] !== "undefined"
+            ? this.store.indices[QuadPosition.subject][id]
             : EMPTY_ST_ARR as Quad[];
     }
 
@@ -317,22 +304,17 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     /**
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
-    private processTypeStatement(_formula: Store | undefined,
-                                 subj: SomeNode,
-                                 _pred: NamedNode,
-                                 obj?: Term,
-                                 _why?: Node): boolean {
-        const subjId = rdfFactory.id(subj);
-        if (!Array.isArray(this.typeCache[subjId])) {
-            this.typeCache[subjId] = [obj as NamedNode];
+    private processTypeStatement(quad: Quad): boolean {
+        if (!rdfFactory.equals(quad.predicate, rdf.type)) {
             return false;
         }
-        this.typeCache[subjId] = this.statementsFor((subj as NamedNode))
+        const subjId = rdfFactory.id(quad.subject);
+        if (!Array.isArray(this.typeCache[subjId])) {
+            this.typeCache[subjId] = [];
+        }
+        this.typeCache[subjId] = this.statementsFor((quad.subject as NamedNode))
             .filter((s) => rdfFactory.equals(s.predicate, rdf.type))
             .map((s) => s.object as NamedNode);
-        if (obj) {
-            this.typeCache[subjId].push((obj as NamedNode));
-        }
         return false;
     }
 }

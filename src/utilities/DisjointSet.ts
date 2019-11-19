@@ -28,6 +28,34 @@ export class DisjointSet<T> {
         return node;
     }
 
+    public allValues(value: T): T[] {
+        const node = this.nodes.get(value);
+        if (!node) {
+            return [value];
+        }
+        let currentParent = this.find(node);
+        const entries = this.nodes.entries();
+        const parents: Array<DisjointSetNode<T>> = [];
+        const values: T[] = [];
+
+        const process = (obj: DisjointSetNode<T>): void => {
+            for (const [k, v] of entries) {
+                if (v.parent === obj && !parents.includes(v)) {
+                    values.push(k);
+                    parents.push(v);
+                }
+            }
+        };
+        process(currentParent);
+
+        for (let i = 0; i < parents.length; i++) {
+            currentParent = parents[i];
+            process(currentParent);
+        }
+
+        return values;
+    }
+
     /**
      * Merges the sets that contain x and y
      * @param {DisjointSetNode} x

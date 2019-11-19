@@ -6,9 +6,9 @@ import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
 import "jest";
 
-import { rdflib } from "../../link-lib";
 import ll from "../../ontology/ll";
 import { Node } from "../../rdf";
+import RDFIndex from "../../store/RDFIndex";
 
 import { defaultNS } from "../../utilities/constants";
 
@@ -17,7 +17,7 @@ import { dataToGraphTuple, list, processObject, seq, toGraph } from "../DataToGr
 describe("DataToGraph", () => {
     it("returns empty objects without data", () => {
         const [graph, blobs] = dataToGraphTuple({});
-        expect(graph.statements).toHaveLength(0);
+        expect(graph.quads).toHaveLength(0);
         expect(blobs).toHaveLength(0);
     });
 
@@ -49,7 +49,7 @@ describe("DataToGraph", () => {
         });
 
         it("allows a custom graph to be passed", () => {
-            const g = new rdflib.IndexedFormula();
+            const g = new RDFIndex();
             const [, graph] = toGraph({}, undefined, g);
 
             expect(graph).toEqual(g);
@@ -59,10 +59,10 @@ describe("DataToGraph", () => {
     describe("uri parsing", () => {
         it("handles uri strings", () => {
             const [graph, blobs] = dataToGraphTuple({ "http://schema.org/name": "Some name" });
-            expect(graph.statements).toHaveLength(1);
+            expect(graph.quads).toHaveLength(1);
             expect(blobs).toHaveLength(0);
 
-            const name = graph.statements[0];
+            const name = graph.quads[0];
             expect(name).toBeTruthy();
             expect(name.subject).toEqual(ll.targetResource);
             expect(name.predicate).toEqual(schema.name);
@@ -71,10 +71,10 @@ describe("DataToGraph", () => {
 
         it("handles shortened strings", () => {
             const [graph, blobs] = dataToGraphTuple({ "schema:name": "Some name" });
-            expect(graph.statements).toHaveLength(1);
+            expect(graph.quads).toHaveLength(1);
             expect(blobs).toHaveLength(0);
 
-            const name = graph.statements[0];
+            const name = graph.quads[0];
             expect(name).toBeTruthy();
             expect(name.subject).toEqual(ll.targetResource);
             expect(name.predicate).toEqual(schema.name);
@@ -104,11 +104,11 @@ describe("DataToGraph", () => {
             expect(stmts).toHaveLength(3);
 
             const bn = stmts[0]!;
-            expect(bn.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(bn.subject).toEqual(ll.targetResource);
             expect(bn.predicate).toEqual(defaultNS.example("property"));
             expect(bn.object).toEqual(defaultNS.example("nested"));
 
-            const nestedProp = graph.statementsMatching(bn.object as Node, defaultNS.example("nestedProp"));
+            const nestedProp = graph.match(bn.object as Node, defaultNS.example("nestedProp"), null, null);
             expect(nestedProp).toHaveLength(1);
             expect(nestedProp[0].object.termType).toEqual("Literal");
             expect(nestedProp[0].object.value).toEqual("1");
@@ -129,9 +129,9 @@ describe("DataToGraph", () => {
         it("handles booleans", () => {
             const data = { "example:property": true };
             const [graph] = dataToGraphTuple(data);
-            const stmt = graph.statements[0];
+            const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
-            expect(stmt.subject).toEqual(defaultNS.ll("targetResource"));
+            expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(true));
         });
@@ -139,7 +139,7 @@ describe("DataToGraph", () => {
         it("handles dates", () => {
             const data = { "example:property": new Date() };
             const [graph] = dataToGraphTuple(data);
-            const stmt = graph.statements[0];
+            const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
@@ -149,7 +149,7 @@ describe("DataToGraph", () => {
         it("handles decimals", () => {
             const data = { "example:property": 2.5 };
             const [graph] = dataToGraphTuple(data);
-            const stmt = graph.statements[0];
+            const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
@@ -162,7 +162,7 @@ describe("DataToGraph", () => {
             expect(blobs).toHaveLength(1);
             const fileNode = blobs[0][0];
 
-            const stmt = graph.statements[0];
+            const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
@@ -172,7 +172,7 @@ describe("DataToGraph", () => {
         it("handles integers", () => {
             const data = { "example:property": 45 };
             const [graph] = dataToGraphTuple(data);
-            const stmt = graph.statements[0];
+            const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
@@ -188,9 +188,9 @@ describe("DataToGraph", () => {
             };
             const [graph, blobs] = dataToGraphTuple(data);
             expect(blobs).toHaveLength(1);
-            expect(graph.statements).toHaveLength(3);
+            expect(graph.quads).toHaveLength(3);
 
-            const stmt = graph.anyStatementMatching(ll.targetResource, defaultNS.example("property"));
+            const stmt = graph.match(ll.targetResource, defaultNS.example("property"), null, null, true)?.[0];
             expect(stmt).toBeTruthy();
             expect(stmt!.subject).toEqual(ll.targetResource);
             expect(stmt!.predicate).toEqual(defaultNS.example("property"));
@@ -201,13 +201,13 @@ describe("DataToGraph", () => {
                 schema.name,
                 rdfFactory.literal("Some string"),
             );
-            expect(graph.holdsStatement(match)).toBeTruthy();
+            expect(graph.holdsQuad(match)).toBeTruthy();
         });
 
         it("handles strings", () => {
             const data = { "example:property": "Some string" };
             const [graph] = dataToGraphTuple(data);
-            const stmt = graph.statements[0];
+            const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
@@ -217,22 +217,22 @@ describe("DataToGraph", () => {
 
     describe("processObject", () => {
         it("handles undefined", () => {
-            const g = new rdflib.IndexedFormula();
+            const g = new RDFIndex();
             processObject(defaultNS.example("a"), defaultNS.example("property"), null, g);
-            expect(g.statements).toHaveLength(0);
+            expect(g.quads).toHaveLength(0);
         });
 
         it("handles null", () => {
-            const g = new rdflib.IndexedFormula();
+            const g = new RDFIndex();
             processObject(defaultNS.example("a"), defaultNS.example("property"), null, g);
-            expect(g.statements).toHaveLength(0);
+            expect(g.quads).toHaveLength(0);
         });
 
         it("handles rdf literals", () => {
-            const g = new rdflib.IndexedFormula();
+            const g = new RDFIndex();
             processObject(defaultNS.example("a"), defaultNS.example("property"), rdfFactory.literal(1), g);
-            expect(g.statements).toHaveLength(1);
-            expect(g.statements[0].object).toEqual(rdfFactory.literal(1));
+            expect(g.quads).toHaveLength(1);
+            expect(g.quads[0].object).toEqual(rdfFactory.literal(1));
         });
     });
 

@@ -6,13 +6,14 @@ import typescript from "rollup-plugin-typescript2";
 export default {
     // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
     external: [
+        "@ontologies/as",
+        "@ontologies/core",
+        "@ontologies/schema",
+        "@ontologies/shacl",
+        "@ontologies/xsd",
         "http-status-codes",
-        "jsonld",
-        "ml-disjoint-set",
         "n-quads-parser",
         "node-fetch",
-        "rdflib",
-        "solid-auth-client",
     ],
     input: "src/link-lib.ts",
     output: [

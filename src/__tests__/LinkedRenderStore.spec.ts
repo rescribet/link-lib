@@ -193,7 +193,7 @@ describe("LinkedRenderStore", () => {
                 rdfFactory.quad(idSecond, owl.sameAs, id),
             ];
 
-            store.store.addStatements(testData);
+            store.store.addQuads(testData);
             const entity = await store.lrs.tryEntity(id) as Quad[];
 
             expect(entity.map((s) => s.object.value)).toContainEqual("other");
@@ -278,10 +278,13 @@ describe("LinkedRenderStore", () => {
                 store.lrs.subscribe(reg);
                 expect(callback).not.toHaveBeenCalled();
 
-                store.store.addStatements([rdfFactory.quad(schemaT, schema.name, rdfFactory.literal("Thing"))]);
+                store.store.addQuads([rdfFactory.quad(schemaT, schema.name, rdfFactory.literal("Thing"))]);
                 await store.forceBroadcast();
                 expect(callback).toHaveBeenCalledTimes(1);
-                expect(callback.mock.calls[0][0]).toEqual([rdfFactory.id(schemaT)]);
+                expect(callback.mock.calls[0][0]).toEqual([
+                    rdfFactory.id(schemaT),
+                    rdfFactory.id(store.store.defaultGraph()),
+                ]);
                 expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
                 expect(callback.mock.calls[0][1]).toBeLessThan(Date.now());
             });
@@ -292,7 +295,7 @@ describe("LinkedRenderStore", () => {
         const store = getBasicStore();
         const start = ex("1");
         const bn = rdfFactory.blankNode();
-        store.store.addStatements([
+        store.store.addQuads([
             rdfFactory.quad(start, ex("oneToOne"), ex("1.1")),
 
             rdfFactory.quad(start, ex("oneToOneLiteral"), ex("1.2")),
@@ -381,7 +384,7 @@ describe("LinkedRenderStore", () => {
             rdfFactory.quad(entryPoint, schema.image, rdfFactory.namedNode("http://fontawesome.io/icon/plus")),
             rdfFactory.quad(entryPoint, schema.name, rdfFactory.literal("Add a picture")),
         ];
-        store.store.addStatements(actionStatements);
+        store.store.addQuads(actionStatements);
 
         it("sends the described request", async () => {
             const sub = jest.fn();
@@ -422,7 +425,7 @@ describe("LinkedRenderStore", () => {
             rdfFactory.quad(ex("4"), schema.numberOfPages, rdfFactory.literal(475)),
             rdfFactory.quad(ex("4"), schema.bookEdition, rdfFactory.literal("1st")),
         ];
-        store.store.addStatements(testData);
+        store.store.addQuads(testData);
 
         it("resolves an empty path to nothing", () => {
             const answer = store.lrs.findSubject(ex("1"), [], ex("2"));
@@ -666,7 +669,7 @@ describe("LinkedRenderStore", () => {
     describe("#removeResource", () => {
         it("resolves after removal", () => {
             const store = getBasicStore();
-            store.store.addStatements([
+            store.store.addQuads([
                 ...thingStatements,
                 ...creativeWorkStatements,
             ]);
@@ -678,7 +681,7 @@ describe("LinkedRenderStore", () => {
 
         it("removes the resource", () => {
             const store = getBasicStore();
-            store.store.addStatements([
+            store.store.addQuads([
                 ...thingStatements,
                 ...creativeWorkStatements,
             ]);
@@ -697,7 +700,7 @@ describe("LinkedRenderStore", () => {
                 onlySubjects: true,
                 subjectFilter: [schemaT],
             });
-            store.store.addStatements([
+            store.store.addQuads([
                 ...thingStatements,
                 ...creativeWorkStatements,
             ]);
@@ -730,7 +733,7 @@ describe("LinkedRenderStore", () => {
 
         it("returns the view when one is registered", () => {
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(nameComp, schema.Thing, property));
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdf.type, schema.Thing),
             ]);
 
@@ -749,7 +752,7 @@ describe("LinkedRenderStore", () => {
 
         it("returns the view when one is registered", () => {
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(thingComp, schema.Thing));
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdf.type, schema.Thing),
             ]);
 
@@ -769,7 +772,7 @@ describe("LinkedRenderStore", () => {
 
         it("should load invalidated resources", () => {
             const store = getBasicStore();
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
@@ -780,7 +783,7 @@ describe("LinkedRenderStore", () => {
 
         it("should not load existent resources", () => {
             const store = getBasicStore();
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
@@ -799,7 +802,7 @@ describe("LinkedRenderStore", () => {
         it("should not load invalidated queued resources", () => {
             const store = getBasicStore();
             store.store.flush();
-            store.store.addStatements([
+            store.store.addQuads([
                 rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
@@ -819,7 +822,7 @@ describe("LinkedRenderStore", () => {
                 rdfFactory.quad(resource, schema.name, rdfFactory.literal("Some org")),
                 rdfFactory.quad(resource, schema.employee, ex("2")),
             ];
-            store.store.addStatements(testData);
+            store.store.addQuads(testData);
             store.store.flush();
 
             const data = store.lrs.tryEntity(resource);

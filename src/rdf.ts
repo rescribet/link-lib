@@ -19,7 +19,9 @@ export type Node = BasicNode;
 
 export type OptionalNode = Node | undefined | null;
 
-export type OptionalTerm = Term | undefined | null;
+export type OptionalNamedNode = NamedNode | undefined | null;
+
+export type OptionalTerm = SomeTerm | undefined | null;
 
 export type Literal = BasicLiteral;
 

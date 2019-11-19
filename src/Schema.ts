@@ -1,15 +1,14 @@
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
+import RDFIndex from "./store/RDFIndex";
 
 import rdfFactory, { NamedNode, Quad, SomeTerm } from "./rdf";
-import { IndexedFormula } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";
 import { RDFS } from "./schema/rdfs";
 
 import {
-    Indexable,
     VocabularyProcessingContext,
     VocabularyProcessor,
 } from "./types";
@@ -21,20 +20,21 @@ import { DisjointSet } from "./utilities/DisjointSet";
  * Basically duplicates some functionality already present in {IndexedFormula} IIRC, but this API should be more
  * optimized so it can be used in real-time by low-power devices as well.
  */
-export class Schema<IndexType = number | string> extends IndexedFormula {
+export class Schema<IndexType = number | string> extends RDFIndex {
     private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
 
-    private equivalenceSet: DisjointSet<Indexable> = new DisjointSet();
-    private expansionCache: { [k: string]: Indexable[] };
+    private equivalenceSet: DisjointSet<IndexType> = new DisjointSet();
+    // Typescript can't handle generic index types, so it is set to string.
+    private expansionCache: { [k: string]: IndexType[] };
     private liveStore: RDFStore;
-    private superMap: Map<Indexable, Set<Indexable>> = new Map();
-    private processedTypes: Indexable[] = [];
+    private superMap: Map<IndexType, Set<IndexType>> = new Map();
+    private processedTypes: IndexType[] = [];
 
     public constructor(liveStore: RDFStore) {
-        super(undefined, { rdfFactory });
+        super();
         this.liveStore = liveStore;
+        this.liveStore.getInternalStore().addDataCallback(this.process.bind(this));
         this.expansionCache = {};
-        this.rdfFactory = rdfFactory;
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             this.addStatements(Schema.vocabularies[i].axioms);
@@ -43,30 +43,41 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
 
     /** Push statements onto the graph so it can be used by the render store for component determination. */
     public addStatements(statements: Quad[]): void {
-        const unique = statements.filter((s) => !this.holdsStatement(s));
+        const unique = statements.filter((s) => !this.holdsQuad(s));
         const eligible = unique.filter(this.process.bind(this));
         if (eligible.length === 0) {
             return;
         }
 
-        this.addAll(eligible);
-        return this.liveStore.addStatements(eligible);
+        for (const quad of eligible) {
+            this.addQuad(quad);
+        }
+
+        return this.liveStore.addQuads(eligible);
     }
 
-    public expand(types: Indexable[]): IndexType[] {
+    public allEquals(resource: IndexType, grade = 1.0): IndexType[] {
+        if (grade >= 0) {
+            return this.equivalenceSet.allValues(resource);
+        }
+
+        return [resource];
+    }
+
+    public expand(types: IndexType[]): IndexType[] {
         if (types.length === 1) {
             const existing = this.expansionCache[types[0] as unknown as string];
             this.expansionCache[types[0] as unknown as string] = existing
                 ? existing
-                : this.sort(this.mineForTypes(types) as unknown as Indexable[]) as unknown as Indexable[];
+                : this.sort(this.mineForTypes(types));
 
-            return this.expansionCache[types[0] as unknown as string] as unknown as IndexType[];
+            return this.expansionCache[types[0] as unknown as string];
         }
 
-        return this.sort(this.mineForTypes(types) as unknown as Indexable[]);
+        return this.sort(this.mineForTypes(types));
     }
 
-    public getProcessingCtx(): VocabularyProcessingContext {
+    public getProcessingCtx(): VocabularyProcessingContext<IndexType> {
         return {
             dataStore: this.liveStore,
             equivalenceSet: this.equivalenceSet,
@@ -75,15 +86,15 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
         };
     }
 
-    public isInstanceOf(resource: Indexable, superClass: Indexable): boolean {
-        return this.holdsStatement(rdfFactory.quad(
+    public isInstanceOf(resource: IndexType, superClass: IndexType): boolean {
+        return this.holdsQuad(rdfFactory.quad(
             rdfFactory.fromId(resource) as NamedNode,
             rdf.type,
             rdfFactory.fromId(superClass) as SomeTerm,
         ));
     }
 
-    public isSubclassOf(resource: Indexable, superClass: Indexable): boolean {
+    public isSubclassOf(resource: IndexType, superClass: IndexType): boolean {
         const resourceMap = this.superMap.get(resource);
 
         if (resourceMap) {
@@ -96,7 +107,7 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
      * Returns the hierarchical depth of the type, or -1 if unknown.
      * @param type the type to check
      */
-    public superTypeDepth(type: Indexable): number {
+    public superTypeDepth(type: IndexType): number {
         const superMap = this.superMap.get(type);
 
         return superMap ? superMap.size : -1;
@@ -107,18 +118,20 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
      * This is done in multiple iterations until no new types are found.
      * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
      */
-    public mineForTypes(lookupTypes: Indexable[]): IndexType[] {
+    public mineForTypes(lookupTypes: IndexType[]): IndexType[] {
         if (lookupTypes.length === 0) {
-            return [rdfFactory.id(rdfs.Resource) as unknown as IndexType];
+            return [rdfFactory.id(rdfs.Resource)];
         }
 
-        const canonicalTypes: Indexable[] = [];
-        for (let i = 0; i < lookupTypes.length; i++) {
+        const canonicalTypes: IndexType[] = [];
+        const lookupTypesExpanded = lookupTypes
+            .reduce<IndexType[]>((acc, t) => acc.concat(...this.allEquals(rdfFactory.id(t))), []);
+        for (let i = 0; i < lookupTypesExpanded.length; i++) {
             const canon = rdfFactory.id(
                 this.liveStore.canon(
                     rdfFactory.fromId(lookupTypes[i]) as NamedNode,
                 ),
-            ) as unknown as Indexable;
+            ) as unknown as IndexType;
 
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
@@ -157,7 +170,7 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
         return this.sort(allTypes);
     }
 
-    public sort(types: Indexable[]): IndexType[] {
+    public sort(types: IndexType[]): IndexType[] {
         return types.sort((a, b) => {
             if (this.isSubclassOf(a, b)) {
                 return -1;
@@ -174,7 +187,7 @@ export class Schema<IndexType = number | string> extends IndexedFormula {
             }
 
             return 0;
-        }) as unknown as IndexType[];
+        });
     }
 
     private process(item: Quad): Quad[] | null {

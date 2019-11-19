@@ -14,6 +14,7 @@ export {
     toGraph,
 } from "./processor/DataToGraph";
 export { transformers } from "./transformers/index";
+
 export * from "./types";
 export {
     allRDFPropertyStatements,

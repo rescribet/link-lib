@@ -1,11 +1,10 @@
-import { QuadPosition } from "@ontologies/core";
+import { LowLevelStore, QuadPosition } from "@ontologies/core";
 
 import rdfFactory, {
     NamedNode,
     Node,
     Quadruple,
 } from "../rdf";
-import { Store } from "../rdflib";
 import { StoreProcessor, StoreProcessorResult } from "../types";
 
 const matchSingle = (graphIRI: NamedNode | undefined): (graph: Node) => boolean => {
@@ -19,9 +18,9 @@ const matchSingle = (graphIRI: NamedNode | undefined): (graph: Node) => boolean 
 
 const isInGraph = (graphIRIS: Array<NamedNode | undefined>): (graph: Node) => boolean => {
     if (graphIRIS.length === 0) {
-        return matchSingle(graphIRIS[0]);
+        return matchSingle(rdfFactory.toNQ(graphIRIS[0]));
     }
-    const matchers = graphIRIS.map((iri) => matchSingle(iri));
+    const matchers = graphIRIS.map((iri) => matchSingle(rdfFactory.toNQ(iri)));
 
     return (graph: Node): boolean => matchers.some((matcher) => matcher(graph));
 };
@@ -32,14 +31,14 @@ export const deltaProcessor = (
     removeGraphIRIS: Array<NamedNode | undefined>,
     purgeGraphIRIS: Array<NamedNode | undefined>,
     sliceGraphIRIS: Array<NamedNode | undefined>,
-): (store: Store) => StoreProcessor => {
+): (store: LowLevelStore) => StoreProcessor => {
     const isAdd = isInGraph(addGraphIRIS);
     const isReplace = isInGraph(replaceGraphIRIS);
     const isRemove = isInGraph(removeGraphIRIS);
     const isPurge = isInGraph(purgeGraphIRIS);
     const isSlice = isInGraph(sliceGraphIRIS);
 
-    return (store: Store): StoreProcessor => (delta: Quadruple[]): StoreProcessorResult => {
+    return (store: LowLevelStore): StoreProcessor => (delta: Quadruple[]): StoreProcessorResult => {
         const addable = [];
         const replaceable = [];
         const removable = [];
