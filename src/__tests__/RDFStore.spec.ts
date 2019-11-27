@@ -13,14 +13,14 @@ import { RDFStore } from "../RDFStore";
 import RDFIndex from "../store/RDFIndex";
 import { getBasicStore } from "../testUtilities";
 
-const example = createNS("http://example.com");
+const example = createNS("http://example.com/");
 const ex = createNS("http://example.com/ns#");
 
 const schemaT = schema.Thing;
 const thingStatements = [
-    rdfFactory.quad(schemaT, rdf.type, rdfs.Class, example("why")),
-    rdfFactory.quad(schemaT, rdfs.comment, rdfFactory.literal("The most generic type of item."), example("why")),
-    rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing."), example("why")),
+    rdfFactory.quad(schemaT, rdf.type, rdfs.Class, rdfFactory.defaultGraph()),
+    rdfFactory.quad(schemaT, rdfs.comment, rdfFactory.literal("The most generic type"), rdfFactory.defaultGraph()),
+    rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing."), rdfFactory.defaultGraph()),
 ];
 
 describe("RDFStore", () => {

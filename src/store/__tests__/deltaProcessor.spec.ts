@@ -11,6 +11,8 @@ import { deltaProcessor } from "../deltaProcessor";
 import RDFIndex from "../RDFIndex";
 
 describe("deltaProcessor", () => {
+    const graph = rdfFactory.namedNode("http://example.com/graph");
+
     const alice = NS.ex("person/alice");
     const bob = NS.ex("person/bob");
     const erin = NS.ex("person/erin");
@@ -18,7 +20,7 @@ describe("deltaProcessor", () => {
     const defaultProcessor = deltaProcessor(
         [ld.add],
         [
-            undefined,
+            rdfFactory.defaultGraph(),
             ld.replace,
             rdfFactory.namedNode("chrome:theSession"),
         ],
@@ -38,9 +40,18 @@ describe("deltaProcessor", () => {
         store.add(alice, rdf.type, schema.Person);
         store.add(alice, schema.name, rdfFactory.literal("Alice"));
 
+        store.add(bob, rdf.type, schema.Person, graph);
+        store.add(bob, schema.name, rdfFactory.literal("bob"), graph);
+        store.add(bob, schema.children, alice, graph);
+        store.add(bob, schema.children, NS.ex("person/charlie"), graph);
+        store.add(bob, schema.children, NS.ex("person/dave"), graph);
+
+        store.add(alice, rdf.type, schema.Person, graph);
+        store.add(alice, schema.name, rdfFactory.literal("Alice"), graph);
+
         return store;
     };
-    const initialCount = 7;
+    const initialCount = 14;
 
     it("handles empty values", () => {
         const store = filledStore();
@@ -50,7 +61,7 @@ describe("deltaProcessor", () => {
         expect(addable).toEqual([]);
         expect(replaceable).toEqual([]);
         expect(removable).toEqual([]);
-        expect(store).toHaveLength(initialCount);
+        expect((store as any).quads).toHaveLength(initialCount);
     });
 
     describe("with an existing value", () => {
@@ -65,7 +76,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(1);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("replace", () => {
@@ -79,7 +90,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(1);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("remove", () => {
@@ -93,7 +104,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(3);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("purge", () => {
@@ -107,7 +118,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(5);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("slice", () => {
@@ -121,7 +132,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(1);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
     });
 
@@ -137,7 +148,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(1);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("replace", () => {
@@ -151,7 +162,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(1);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("remove", () => {
@@ -165,7 +176,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(3);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("purge", () => {
@@ -179,7 +190,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(5);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("slice", () => {
@@ -193,12 +204,11 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
     });
 
     describe("with graph", () => {
-        const graph = rdfFactory.namedNode("http://example.com/graph");
         const graphify = (iri: NamedNode): NamedNode =>
             rdfFactory.namedNode(iri.value + `?graph=${encodeURIComponent(graph)}`);
 
@@ -213,7 +223,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(1);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("replace", () => {
@@ -227,7 +237,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(1);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("remove", () => {
@@ -241,7 +251,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(3);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("purge", () => {
@@ -255,7 +265,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(5);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
 
         it("slice", () => {
@@ -269,7 +279,7 @@ describe("deltaProcessor", () => {
             expect(addable).toHaveLength(0);
             expect(replaceable).toHaveLength(0);
             expect(removable).toHaveLength(0);
-            expect(store).toHaveLength(initialCount);
+            expect((store as any).quads).toHaveLength(initialCount);
         });
     });
 });

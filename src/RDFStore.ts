@@ -21,7 +21,7 @@ import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 
 export interface RDFStoreOpts {
-    deltaProcessorOpts?: {[k: string]: Array<NamedNode | undefined>};
+    deltaProcessorOpts?: { [k: string]: NamedNode[] };
     innerStore?: RDFIndex;
 }
 
@@ -65,7 +65,6 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             purgeGraphIRIS: [ll.purge, ld.purge],
             removeGraphIRIS: [ll.remove, ld.remove],
             replaceGraphIRIS: [
-                undefined,
                 ll.replace,
                 ld.replace,
                 rdfFactory.defaultGraph(),
