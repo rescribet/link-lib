@@ -416,6 +416,12 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 this.acceptForHost(requestIRI),
             );
             const req = this.fetch(requestIRI.value, reqOpts)
+                .then((response) => {
+                    this.invalidate(iri);
+                    this.setStatus(iri, response.status);
+
+                    return response;
+                })
                 .then(this.feedResponse)
                 .catch((err) => {
                     const status = rdfFactory.literal(err instanceof Error ? 499 : err.status, xsd.integer);
