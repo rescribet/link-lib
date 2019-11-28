@@ -353,7 +353,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             this.store.removeQuads(preExistingData);
         }
         await this.api.getEntity(iri, apiOpts);
-        this.broadcast();
+        return this.broadcast();
     }
 
     /**
@@ -695,7 +695,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
         if (this.bulkFetch) {
             await this.api.getEntities(queue);
-            this.broadcast();
+            return this.broadcast();
         } else {
             for (let i = 0; i < queue.length; i++) {
                 try {
