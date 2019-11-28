@@ -359,7 +359,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             this.store.removeStatements(preExistingData);
         }
         await this.api.getEntity(iri, apiOpts);
-        this.broadcast();
+        return this.broadcast();
     }
 
     /**

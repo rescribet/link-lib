@@ -62,7 +62,7 @@ export class ProcessBroadcast {
             || this.subjectSubscriptions.length === 0 && this.bulkSubscriptions.length === 0;
     }
 
-    public run(): Promise <void> {
+    public run(): Promise<void> {
         if (this.timeout === 0) {
             this.queue();
             return Promise.resolve();
