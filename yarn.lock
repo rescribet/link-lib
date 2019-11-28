@@ -4113,10 +4113,10 @@ rdf-canonize@^1.0.2:
     node-forge "^0.8.1"
     semver "^5.6.0"
 
-rdflib@=1.0.7-0:
-  version "1.0.7-0"
-  resolved "https://registry.yarnpkg.com/rdflib/-/rdflib-1.0.7-0.tgz#42139c81c7f498c192e32b09b1218b9f54287438"
-  integrity sha512-0mVSFBvS1zvmMw13QgAC113IS0XHnQuESjxoObftuk1zttrrFFcPQxLH3BR74EjHKwPyQ8fPSl5Fna8qYdEcRA==
+rdflib@=1.0.7-1:
+  version "1.0.7-1"
+  resolved "https://registry.yarnpkg.com/rdflib/-/rdflib-1.0.7-1.tgz#391b13a98b79a86ed043e9db7b8d6561c156616c"
+  integrity sha512-TaD8GtqLTcLgSAZd0e6Ki+s4TT4UlGpnUyqiA3ozQRD7ity8b2MJyr9ZJDZTNdrGXW8TiUWh7FojqyYD00J0yw==
   dependencies:
     "@babel/runtime" "^7.5.5"
     async "^3.1.x"

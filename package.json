@@ -62,7 +62,7 @@
     "jest": "^24.9.0",
     "jest-fetch-mock": "^2.1.2",
     "n-quads-parser": "=2.0.3-ontologies",
-    "rdflib": "=1.0.7-0",
+    "rdflib": "=1.0.7-1",
     "rollup": "^1.26.5",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",

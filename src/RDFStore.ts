@@ -57,7 +57,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     constructor({ deltaProcessorOpts, innerStore }: RDFStoreOpts = {}) {
         this.processDelta = this.processDelta.bind(this);
 
-        const g = innerStore || graph();
+        const g = innerStore || graph(undefined, { rdfFactory, rdfArrayRemove: this.fastArrayRemove.bind(this) });
         this.store = patchRDFLibStoreWithOverrides(g, this);
         this.store.newPropertyAction(rdf.type, this.processTypeStatement.bind(this));
 
@@ -197,7 +197,9 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public removeStatements(statements: Quad[]): void {
-        this.store.remove(statements.slice());
+        for (const statement of statements.slice()) {
+            this.store.removeStatement(statement);
+        }
     }
 
     /**
@@ -333,5 +335,12 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             this.typeCache[subjId].push((obj as NamedNode));
         }
         return false;
+    }
+
+    private fastArrayRemove(arr: Quad[], q: Quad): void {
+        arr[arr.indexOf(q)] = arr[arr.length - 1];
+        arr.pop();
+        this.changeBuffer.push(q);
+        this.changeBufferCount++;
     }
 }
