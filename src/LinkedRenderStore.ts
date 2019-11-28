@@ -139,6 +139,13 @@ export class LinkedRenderStore<T> implements Dispatcher {
     }
 
     /**
+     * Add a custom delta processor in the stack.
+     */
+    public addDeltaProcessor(processor: DeltaProcessor): void {
+        this.deltaProcessors.unshift(processor);
+    }
+
+    /**
      * Push one or more ontological items onto the graph so it can be used by the render store for component
      * determination.
      *
