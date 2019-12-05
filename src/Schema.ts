@@ -9,6 +9,7 @@ import { RDFLIB } from "./schema/rdflib";
 import { RDFS } from "./schema/rdfs";
 
 import {
+    SomeNode,
     VocabularyProcessingContext,
     VocabularyProcessor,
 } from "./types";
@@ -20,19 +21,20 @@ import { DisjointSet } from "./utilities/DisjointSet";
  * Basically duplicates some functionality already present in {IndexedFormula} IIRC, but this API should be more
  * optimized so it can be used in real-time by low-power devices as well.
  */
-export class Schema<IndexType = number | string> extends RDFIndex {
+export class Schema<IndexType = number | string> {
     private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
 
     private equivalenceSet: DisjointSet<IndexType> = new DisjointSet();
     // Typescript can't handle generic index types, so it is set to string.
     private expansionCache: { [k: string]: IndexType[] };
+    private store: RDFIndex;
     private liveStore: RDFStore;
     private superMap: Map<IndexType, Set<IndexType>> = new Map();
     private processedTypes: IndexType[] = [];
 
     public constructor(liveStore: RDFStore) {
-        super();
         this.liveStore = liveStore;
+        this.store = new RDFIndex();
         this.liveStore.getInternalStore().addDataCallback(this.process.bind(this));
         this.expansionCache = {};
 
@@ -46,14 +48,14 @@ export class Schema<IndexType = number | string> extends RDFIndex {
      * @return The quads added to the store.
      */
     public addQuads(quads: Quad[]): Quad[] {
-        const unique = quads.filter((s) => !this.holdsQuad(s));
+        const unique = quads.filter((s) => !this.store.holdsQuad(s));
         const eligible = unique.filter(this.process.bind(this));
         if (eligible.length === 0) {
             return [];
         }
 
         for (const quad of eligible) {
-            this.addQuad(quad);
+            this.store.addQuad(quad);
         }
 
         return this.liveStore.addQuads(eligible);
@@ -95,7 +97,7 @@ export class Schema<IndexType = number | string> extends RDFIndex {
     }
 
     public isInstanceOf(resource: IndexType, superClass: IndexType): boolean {
-        return this.holdsQuad(rdfFactory.quad(
+        return this.store.holdsQuad(rdfFactory.quad(
             rdfFactory.fromId(resource) as NamedNode,
             rdf.type,
             rdfFactory.fromId(superClass) as SomeTerm,
@@ -121,6 +123,16 @@ export class Schema<IndexType = number | string> extends RDFIndex {
         return superMap ? superMap.size : -1;
     }
 
+    /** @ignore */
+    public match(subject: SomeNode | null,
+                 predicate: NamedNode | null,
+                 object: SomeTerm | null,
+                 graph: SomeNode | null,
+                 justOne: boolean = false,
+    ): Quad[] {
+        return this.store.match(subject, predicate, object, graph, justOne);
+    }
+
     /**
      * Expands the given lookupTypes to include all their equivalent and subclasses.
      * This is done in multiple iterations until no new types are found.
@@ -133,7 +145,7 @@ export class Schema<IndexType = number | string> extends RDFIndex {
 
         const canonicalTypes: IndexType[] = [];
         const lookupTypesExpanded = lookupTypes
-            .reduce<IndexType[]>((acc, t) => acc.concat(...this.allEquals(rdfFactory.id(t))), []);
+            .reduce<IndexType[]>((acc, t) => acc.concat(...this.allEquals(t)), []);
         for (let i = 0; i < lookupTypesExpanded.length; i++) {
             const canon = rdfFactory.id(
                 this.liveStore.canon(

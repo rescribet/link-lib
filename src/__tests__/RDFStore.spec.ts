@@ -96,13 +96,13 @@ describe("RDFStore", () => {
                 [schemaT, rdfs.label, rdfFactory.literal("Thing!"), ll.ns("replace")],
             ];
 
-            const before = store.match(schemaT, rdfs.label);
+            const before = store.match(schemaT, rdfs.label, null, null);
             expect(before).toHaveLength(1);
             expect(before[0].object).toEqual(rdfFactory.literal("Thing."));
 
             store.replaceMatches(quads);
 
-            const after = store.match(schemaT, rdfs.label);
+            const after = store.match(schemaT, rdfs.label, null, null);
             expect(after).toHaveLength(1);
             expect(after[0].object).toEqual(rdfFactory.literal("Thing!", undefined, xsd.string));
         });
@@ -128,7 +128,7 @@ describe("RDFStore", () => {
                 const store = new RDFStore();
                 store.addQuads(thingStatements);
 
-                expect(store.match(null)).toHaveLength(thingStatements.length);
+                expect(store.match(null, null, null, null)).toHaveLength(thingStatements.length);
 
                 const statements: Quadruple[] = [
                     [schemaT, rdfs.label, rdfFactory.literal("irrelevant"), ll.ns("remove")],
@@ -136,8 +136,8 @@ describe("RDFStore", () => {
 
                 store.processDelta(statements);
 
-                expect(store.match(null)).toHaveLength(thingStatements.length - 1);
-                expect(store.match(schemaT, rdfs.label)).toHaveLength(0);
+                expect(store.match(null, null, null, null)).toHaveLength(thingStatements.length - 1);
+                expect(store.match(schemaT, rdfs.label, null, null)).toHaveLength(0);
             });
 
             it("removes many", () => {
@@ -145,7 +145,7 @@ describe("RDFStore", () => {
                 store.addQuads(thingStatements);
                 store.addQuads([rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing gb", "en-gb"))]);
 
-                expect(store.match(null)).toHaveLength(thingStatements.length + 1);
+                expect(store.match(null, null, null, null)).toHaveLength(thingStatements.length + 1);
 
                 const quads: Quadruple[] = [
                     [schemaT, rdfs.label, rdfFactory.literal("irrelevant"), ll.ns("remove")],
@@ -153,8 +153,8 @@ describe("RDFStore", () => {
 
                 store.processDelta(quads);
 
-                expect(store.match(null)).toHaveLength(thingStatements.length - 1);
-                expect(store.match(schemaT, rdfs.label)).toHaveLength(0);
+                expect(store.match(null, null, null, null)).toHaveLength(thingStatements.length - 1);
+                expect(store.match(schemaT, rdfs.label, null, null)).toHaveLength(0);
             });
         });
     });
@@ -168,7 +168,7 @@ describe("RDFStore", () => {
             store.replaceQuads(old, next);
 
             expect(store.match(null, null, null, null)).toHaveLength(1);
-            expect(store.match(ex("a"))[0]).toEqual(next[0]);
+            expect(store.match(ex("a"), null, null, null)[0]).toEqual(next[0]);
         });
     });
 

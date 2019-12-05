@@ -146,7 +146,7 @@ export const RDFS = {
 
     processType(type: NamedNode, ctx: VocabularyProcessingContext): boolean {
         RDFS.processStatement(rdfFactory.quad(type, rdfs.subClassOf, rdfs.Resource), ctx);
-        ctx.store.addQuad(rdfFactory.quad(type, rdf.type, rdfs.Class));
+        ctx.store.addQuads([rdfFactory.quad(type, rdf.type, rdfs.Class)]);
         return false;
     },
 } as VocabularyProcessor;
