@@ -23,12 +23,6 @@ describe("Schema", () => {
         describe("initializes with the correct statements", () => {
             const schema = blankSchema();
 
-            it("processes the axioms", () => {
-                // TODO: verify
-                expect(schema.quads.length)
-                    .toEqual(49);
-            });
-
             // TODO: Implement core rdf logic
             // it("holds rdfs:Class to be an instance of rdfs:Class", () => {
             //     expect(schema.isInstanceOf(rdfs.Class, rdfs.Class))
@@ -57,7 +51,7 @@ describe("Schema", () => {
 
         describe("#addStatements", () => {
             it("adds an empty array", () => {
-                expect(blankSchema().addStatements([])).toBeUndefined();
+                expect(blankSchema().addQuads([])).toHaveLength(0);
             });
 
             it("adds ontology statements", () => {
@@ -66,7 +60,7 @@ describe("Schema", () => {
 
                 expect(schema.holdsQuad(personIsAClass)).toBeFalsy();
 
-                schema.addStatements([personIsAClass]);
+                schema.addQuads([personIsAClass]);
 
                 expect(schema.holdsQuad(personIsAClass)).toBeTruthy();
             });
@@ -75,7 +69,7 @@ describe("Schema", () => {
                 const schema = blankSchema();
                 const statement = resource1[1];
 
-                schema.addStatements([statement]);
+                schema.addQuads([statement]);
 
                 expect(schema.holdsQuad(statement)).toBeFalsy();
             });
@@ -108,7 +102,7 @@ describe("Schema", () => {
                     rdfFactory.id(rdfs.Resource),
                 ];
 
-                schema.addStatements([
+                schema.addQuads([
                     rdfFactory.quad(schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing),
                     rdfFactory.quad(schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork),
                 ]);
@@ -121,7 +115,7 @@ describe("Schema", () => {
 
     describe("when filled", () => {
         const schema = blankSchema();
-        schema.addStatements([
+        schema.addQuads([
             rdfFactory.quad(NS.ex("A"), rdfs.subClassOf, rdfs.Class),
 
             rdfFactory.quad(NS.ex("B"), rdfs.subClassOf, NS.ex("A")),

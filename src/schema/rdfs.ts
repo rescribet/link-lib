@@ -87,7 +87,7 @@ export const RDFS = {
                 ctx.dataStore.getInternalStore().newPropertyAction(
                     item.subject as NamedNode,
                     (quad: Quad) => {
-                        ctx.store.addStatements([rdfFactory.quad(quad.subject, rdf.type, item.object)]);
+                        ctx.store.addQuads([rdfFactory.quad(quad.subject, rdf.type, item.object)]);
                         return true;
                     },
                 );
@@ -105,7 +105,7 @@ export const RDFS = {
                 ctx.dataStore.getInternalStore().newPropertyAction(
                     item.subject as NamedNode,
                     (quad: Quad) => {
-                        ctx.store.addStatements([rdfFactory.quad(quad.object, rdf.type, item.object)]);
+                        ctx.store.addQuads([rdfFactory.quad(quad.object, rdf.type, item.object)]);
                         return true;
                     },
                 );

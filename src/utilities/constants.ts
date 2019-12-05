@@ -91,6 +91,7 @@ export const NON_DATA_OBJECTS_CTORS: Function[] = [
     Map,
     Number,
     Promise,
+    /* istanbul ignore next */
     (typeof Proxy !== "undefined" ? Proxy : undefined)!,
     RangeError,
     ReferenceError,

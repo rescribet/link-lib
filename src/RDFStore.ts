@@ -57,7 +57,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         this.processDelta = this.processDelta.bind(this);
 
         const g = innerStore || new RDFIndex();
-        g.addDataCallback(this.processTypeStatement.bind(this));
+        g.addDataCallback(this.processTypeQuad.bind(this));
         this.store = patchRDFLibStoreWithOverrides(g, this);
 
         const defaults =  {
@@ -85,14 +85,12 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * Add statements to the store.
      * @param data Data to parse and add to the store.
      */
-    public addQuads(data: Quad[]): void {
+    public addQuads(data: Quad[]): Quad[] {
         if (!Array.isArray(data)) {
-            throw new TypeError("An array of statements must be passed to addStatements");
+            throw new TypeError("An array of quads must be passed to addQuads");
         }
 
-        for (let i = 0, len = data.length; i < len; i++) {
-            this.store.add(data[i].subject, data[i].predicate, data[i].object, data[i].graph);
-        }
+        return data.map((q) => this.store.add(q.subject, q.predicate, q.object, q.graph));
     }
 
     public addQuadruples(data: Quadruple[]): Quad[] {
@@ -148,7 +146,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 this.changeTimestamps[rdfFactory.id(s.subject)] = changeStamp;
                 return rdfFactory.equals(s.predicate, rdf.type);
             })
-            .map((s) => this.processTypeStatement(s));
+            .map((s) => this.processTypeQuad(s));
 
         return processingBuffer;
     }
@@ -181,7 +179,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public removeResource(subject: SomeNode): void {
         this.touch(subject);
         this.typeCache[rdfFactory.id(subject)] = [];
-        this.removeQuads(this.statementsFor(subject));
+        this.removeQuads(this.quadsFor(subject));
     }
 
     public removeQuads(statements: Quad[]): void {
@@ -197,7 +195,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param original The statements to remove from the store.
      * @param replacement The statements to add to the store.
      */
-    public replaceQuads(original: Quad[], replacement: Quad[]): void {
+    public replaceQuads(original: Quad[], replacement: Quad[]): Quad[] {
         const uniqueStatements = new Array(replacement.length).filter(Boolean);
         for (let i = 0; i < replacement.length; i++) {
             const cond = original.some(
@@ -237,7 +235,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Quad[] {
-        const props = this.statementsFor(subject);
+        const props = this.quadsFor(subject);
         if (Array.isArray(property)) {
             for (let i = 0; i < property.length; i++) {
                 const values = allRDFPropertyStatements(props, property[i]);
@@ -285,10 +283,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     /**
-     * Searches the store for all the statements on {iri} (so not all statements relating to {iri}).
+     * Searches the store for all the quads on {iri} (so not all statements relating to {iri}).
      * @param subject The identifier of the resource.
      */
-    public statementsFor(subject: SomeNode): Quad[] {
+    public quadsFor(subject: SomeNode): Quad[] {
         // TODO: Use the schema to replace canon
         const id = rdfFactory.id(subject);
 
@@ -310,7 +308,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     /**
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
-    private processTypeStatement(quad: Quad): boolean {
+    private processTypeQuad(quad: Quad): boolean {
         if (!rdfFactory.equals(quad.predicate, rdf.type)) {
             return false;
         }
@@ -318,7 +316,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         if (!Array.isArray(this.typeCache[subjId])) {
             this.typeCache[subjId] = [];
         }
-        this.typeCache[subjId] = this.statementsFor((quad.subject as NamedNode))
+        this.typeCache[subjId] = this.quadsFor((quad.subject as NamedNode))
             .filter((s) => rdfFactory.equals(s.predicate, rdf.type))
             .map((s) => s.object as NamedNode);
         return false;

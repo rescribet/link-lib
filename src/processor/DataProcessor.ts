@@ -253,7 +253,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const [graph, blobs = []] = dataTuple;
 
-        await (this.store.statementsFor(subject).length > 0
+        await (this.store.quadsFor(subject).length > 0
             ? Promise.resolve([])
             : this.getEntity(subject));
 
@@ -406,8 +406,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         let preExistingData: Quad[] = [];
         if (opts && opts.clearPreviousData) {
-            preExistingData = this.store.statementsFor(iri);
-            preExistingData = preExistingData.concat(this.store.statementsFor(requestIRI));
+            preExistingData = this.store.quadsFor(iri);
+            preExistingData = preExistingData.concat(this.store.quadsFor(requestIRI));
         }
 
         try {
@@ -486,7 +486,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
         const requestIRI = requests.pop()!.subject as BlankNode;
         const requestObj = anyRDFValue(
-            this.store.statementsFor(requestIRI),
+            this.store.quadsFor(requestIRI),
             link.response,
         ) as BlankNode | undefined;
 
@@ -494,7 +494,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             return this.memoizeStatus(irl, emptyRequest);
         }
 
-        const requestObjData = this.store.statementsFor(requestObj);
+        const requestObjData = this.store.quadsFor(requestObj);
 
         // RDFLib has different behaviour across browsers and code-paths, so we must check for multiple properties.
         const requestStatus = anyRDFValue(requestObjData, defaultNS.http("status"))

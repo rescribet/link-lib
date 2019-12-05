@@ -148,7 +148,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * Statements added here will also be added to the data store so views can access the statements.
      */
     public addOntologySchematics(items: Quad[]): void {
-        this.schema.addStatements(items);
+        this.schema.addQuads(items);
     }
 
     /**
@@ -583,7 +583,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @returns The object if found, or undefined.
      */
     public tryEntity(iri: Node): Quad[] {
-        return this.store.statementsFor(iri);
+        return this.store.quadsFor(iri);
     }
 
     /**

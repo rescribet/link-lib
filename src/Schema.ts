@@ -37,16 +37,19 @@ export class Schema<IndexType = number | string> extends RDFIndex {
         this.expansionCache = {};
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
-            this.addStatements(Schema.vocabularies[i].axioms);
+            this.addQuads(Schema.vocabularies[i].axioms);
         }
     }
 
-    /** Push statements onto the graph so it can be used by the render store for component determination. */
-    public addStatements(statements: Quad[]): void {
-        const unique = statements.filter((s) => !this.holdsQuad(s));
+    /**
+     * Push quads onto the graph so it can be used by the render store for component determination.
+     * @return The quads added to the store.
+     */
+    public addQuads(quads: Quad[]): Quad[] {
+        const unique = quads.filter((s) => !this.holdsQuad(s));
         const eligible = unique.filter(this.process.bind(this));
         if (eligible.length === 0) {
-            return;
+            return [];
         }
 
         for (const quad of eligible) {
@@ -84,6 +87,11 @@ export class Schema<IndexType = number | string> extends RDFIndex {
             store: this,
             superMap: this.superMap,
         };
+    }
+
+    /** @ignore */
+    public holdsQuad(quad: Quad): boolean {
+        return this.store.holdsQuad(quad);
     }
 
     public isInstanceOf(resource: IndexType, superClass: IndexType): boolean {

@@ -506,13 +506,13 @@ describe("LinkedRenderStore", () => {
             [ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add],
         ] as Quadruple[];
 
-        it("queues an empty delta", () => {
+        it("queues an empty delta", async () => {
             const store = getBasicStore();
 
-            store.lrs.queueDelta([]);
+            await store.lrs.queueDelta([]);
         });
 
-        it("queues a quadruple delta", () => {
+        it("queues a quadruple delta", async () => {
             const processor = {
                 flush: jest.fn(),
                 processDelta: jest.fn(),
@@ -521,7 +521,7 @@ describe("LinkedRenderStore", () => {
             const store = getBasicStore();
             store.lrs.deltaProcessors.push(processor);
 
-            store.lrs.queueDelta(quadDelta);
+            await store.lrs.queueDelta(quadDelta);
 
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
             expect(processor.queueDelta).toHaveBeenCalledWith(
@@ -530,7 +530,7 @@ describe("LinkedRenderStore", () => {
             );
         });
 
-        it("queues a statement delta", () => {
+        it("queues a statement delta", async () => {
             const processor = {
                 flush: jest.fn(),
                 processDelta: jest.fn(),
@@ -544,7 +544,7 @@ describe("LinkedRenderStore", () => {
                 rdfFactory.quad(ex("1"), ex("t"), rdfFactory.literal("Test"), ld.add),
                 rdfFactory.quad(ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add),
             ];
-            store.lrs.queueDelta(delta);
+            await store.lrs.queueDelta(delta);
 
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
             expect(processor.queueDelta).toHaveBeenCalledWith(
@@ -667,26 +667,26 @@ describe("LinkedRenderStore", () => {
     });
 
     describe("#removeResource", () => {
-        it("resolves after removal", () => {
+        it("resolves after removal", async () => {
             const store = getBasicStore();
             store.store.addQuads([
                 ...thingStatements,
                 ...creativeWorkStatements,
             ]);
             store.store.flush();
-            const res = store.lrs.removeResource(schemaT);
+            const res = await store.lrs.removeResource(schemaT);
 
-            expect(res).resolves.toBeUndefined();
+            expect(res).toBeUndefined();
         });
 
-        it("removes the resource", () => {
+        it("removes the resource", async () => {
             const store = getBasicStore();
             store.store.addQuads([
                 ...thingStatements,
                 ...creativeWorkStatements,
             ]);
             store.store.flush();
-            store.lrs.removeResource(schemaT);
+            await store.lrs.removeResource(schemaT);
 
             expect(store.lrs.tryEntity(schemaT)).toHaveLength(0);
         });
@@ -716,9 +716,9 @@ describe("LinkedRenderStore", () => {
         store.lrs.reset();
         const openStore = store.lrs as any;
 
-        it("reinitialized the store", () => expect(openStore.store).not.toEqual(store.store));
-        it("reinitialized the schema", () => expect(openStore.schema).not.toEqual(store.schema));
-        it("reinitialized the mapping", () => expect(openStore.mapping).not.toEqual(store.mapping));
+        it("reinitialized the store", () => expect(openStore.store).not.toStrictEqual(store.store));
+        it("reinitialized the schema", () => expect(openStore.schema === store.schema).toBeFalsy());
+        it("reinitialized the mapping", () => expect(openStore.mapping === store.mapping).toBeFalsy());
     });
 
     describe("#resourcePropertyComponent", () => {

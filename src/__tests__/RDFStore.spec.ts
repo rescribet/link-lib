@@ -356,9 +356,9 @@ describe("RDFStore", () => {
                 rdfFactory.quad(example("other"), schema.author, ex("3")),
             ]);
 
-            expect(store.store.statementsFor(resource)).toHaveLength(3);
+            expect(store.store.quadsFor(resource)).toHaveLength(3);
             store.store.removeResource(resource);
-            expect(store.store.statementsFor(resource)).toHaveLength(0);
+            expect(store.store.quadsFor(resource)).toHaveLength(0);
         });
     });
 
