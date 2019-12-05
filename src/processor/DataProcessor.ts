@@ -463,6 +463,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             null,
             link.requestedURI,
             rdfFactory.literal(irl.value),
+            null,
         );
         const totalRequested = requests.length;
         if (requests.length === 0) {

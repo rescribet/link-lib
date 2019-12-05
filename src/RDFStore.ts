@@ -114,6 +114,17 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     /**
+     * Find the first quad matching the given arguments.
+     * Use null or undefined as a wild-card.
+     */
+    public find(subj: OptionalNode,
+                pred: OptionalNamedNode,
+                obj: OptionalTerm,
+                graph: OptionalNode): Quad | undefined {
+        return this.match(subj, pred, obj, graph, true)[0];
+    }
+
+    /**
      * Flushes the change buffer to the return value.
      * @return Statements held in memory since the last flush.
      */
@@ -148,15 +159,11 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public match(subj: OptionalNode,
-                 pred?: OptionalNamedNode,
-                 obj?: OptionalTerm,
-                 graph?: OptionalNode): Quad[] {
-        return this.store.match(
-            subj || null,
-            pred || null,
-            obj || null,
-            graph || null,
-        ) || [];
+                 pred: OptionalNamedNode,
+                 obj: OptionalTerm,
+                 graph: OptionalNode,
+                 justOne: boolean = false): Quad[] {
+        return this.store.match(subj, pred, obj, graph, justOne) || [];
     }
 
     public processDelta(delta: Quadruple[]): Quad[] {
@@ -221,8 +228,8 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             this.removeQuads(this.match(
                 statements[i][0],
                 statements[i][1],
-                undefined,
-                undefined,
+                null,
+                null,
             ));
         }
 

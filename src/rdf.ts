@@ -17,11 +17,11 @@ export type NamedNode = BasicNamedNode;
 
 export type Node = BasicNode;
 
-export type OptionalNode = Node | undefined | null;
+export type OptionalNode = Node | null;
 
-export type OptionalNamedNode = NamedNode | undefined | null;
+export type OptionalNamedNode = NamedNode | null;
 
-export type OptionalTerm = SomeTerm | undefined | null;
+export type OptionalTerm = SomeTerm | null;
 
 export type Literal = BasicLiteral;
 
