@@ -139,10 +139,13 @@ export default class BasicStore implements LowLevelStore {
 
     public rdfArrayRemove(arr: Quad[], quad: Quad): void {
         const factory = this.rdfFactory;
-        const index = this.rdfFactory.supports[Feature.identity]
-            ? arr.indexOf(quad)
-            : arr.findIndex((q: Quad) => factory.equals(quad, q));
-        arr.splice(index, 1);
+        if (this.rdfFactory.supports[Feature.identity]) {
+            arr[arr.indexOf(quad)] = arr[arr.length - 1];
+            arr.pop();
+        } else {
+            const index = arr.findIndex((q: Quad) => factory.equals(quad, q));
+            arr.splice(index, 1);
+        }
 
         return undefined;
     }
