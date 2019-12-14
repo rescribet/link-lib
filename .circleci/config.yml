@@ -1,9 +1,57 @@
 version: 2
+defaults: &defaults
+  docker:
+    - image: circleci/node:13
+  working_directory: ~/link-lib
+
 jobs:
+  build:
+    <<: *defaults
+    steps:
+      - run:
+          name:  Download cc-test-reporter
+          command: |
+            mkdir -p tmp/
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./tmp/cc-test-reporter
+            chmod +x ./tmp/cc-test-reporter
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - cc-test-reporter
+
+  build-node-13:
+    <<: *defaults
+    docker:
+      - image: circleci/node:13
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/link-lib/tmp
+      - restore_cache:
+          keys:
+            - v1-dependencies-13-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-13-
+
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-13-{{ checksum "package.json" }}
+      - run: yarn lint
+      - run: yarn test -w 1
+      - run: ./tmp/cc-test-reporter format-coverage -t lcov -o ~/link-lib/tmp/codeclimate.node-13.json coverage/lcov.info
+      - run: yarn build
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - codeclimate.node-13.json
+
   build-node-12:
+    <<: *defaults
     docker:
       - image: circleci/node:12
-    working_directory: ~/link-lib
     steps:
       - checkout
       - restore_cache:
@@ -19,35 +67,13 @@ jobs:
             - node_modules
           key: v1-dependencies-12-{{ checksum "package.json" }}
       - run: yarn lint
-      - run: yarn test
-      - run: yarn build
-
-  build-node-11:
-    docker:
-      - image: circleci/node:11
-    working_directory: ~/link-lib
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-11-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-11-
-
-      - run: yarn install
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-11-{{ checksum "package.json" }}
-      - run: yarn lint
-      - run: yarn test
+      - run: yarn test -w 1
       - run: yarn build
 
   build-node-10:
+    <<: *defaults
     docker:
       - image: circleci/node:10
-    working_directory: ~/link-lib
     steps:
       - checkout
       - restore_cache:
@@ -63,36 +89,32 @@ jobs:
             - node_modules
           key: v1-dependencies-10-{{ checksum "package.json" }}
       - run: yarn lint
-      - run: yarn test
+      - run: yarn test -w 1
       - run: yarn build
 
-  build-node-8:
-    docker:
-      - image: circleci/node:8
-    working_directory: ~/link-lib
+  upload-coverage:
+    <<: *defaults
+    environment:
+      - CC_TEST_REPORTER_ID: c5cb6a4fe5e0beaf6d812394bcedd0f15e70ddf035fc1f51ea0ea2a842fdcfad
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-8-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-8-
-
-      - run: yarn install
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-8-{{ checksum "package.json" }}
-      - run: yarn lint
-      - run: yarn test
-      - run: yarn build
+      - attach_workspace:
+          at: ~/link-lib/tmp
+      - run:
+          name: Upload coverage results to Code Climate
+          command: |
+            ./tmp/cc-test-reporter sum-coverage tmp/codeclimate.*.json -p 1 -o tmp/codeclimate.total.json
+            ./tmp/cc-test-reporter upload-coverage -i tmp/codeclimate.total.json
 
 workflows:
   version: 2
-  build:
+  commit:
     jobs:
+      - build
+      - build-node-13:
+          requires:
+            - build
       - build-node-12
-      - build-node-11
       - build-node-10
-      - build-node-8
+      - upload-coverage:
+          requires:
+            - build-node-13
