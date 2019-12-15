@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { LowLevelStore, NamedNode } from "@ontologies/core";
+import rdfFactory, { LowLevelStore, NamedNode, Quadruple } from "@ontologies/core";
 import ld from "@ontologies/ld";
 import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
@@ -28,6 +28,7 @@ describe("deltaProcessor", () => {
         [ld.purge],
         [ld.slice],
     );
+
     const filledStore = (): LowLevelStore => {
         const store = new RDFIndex();
 
@@ -53,6 +54,18 @@ describe("deltaProcessor", () => {
     };
     const initialCount = 14;
 
+    const testDelta = (delta: Quadruple[], [adds, replaces, removes]: [number, number, number]): void => {
+        const store = filledStore();
+        const processor = defaultProcessor(store);
+
+        const [ addable, replaceable, removable ] = processor(delta);
+
+        expect(addable).toHaveLength(adds);
+        expect(replaceable).toHaveLength(replaces);
+        expect(removable).toHaveLength(removes);
+        expect((store as any).quads).toHaveLength(initialCount);
+    };
+
     it("handles empty values", () => {
         const store = filledStore();
         const processor = defaultProcessor(store);
@@ -66,145 +79,45 @@ describe("deltaProcessor", () => {
 
     describe("with an existing value", () => {
         it("add", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, alice, ld.add],
-            ]);
-
-            expect(addable).toHaveLength(1);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, alice, ld.add] ], [1, 0, 0]);
         });
 
         it("replace", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, alice, ld.replace],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(1);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, alice, ld.replace] ], [0, 1, 0]);
         });
 
         it("remove", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, alice, ld.remove],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(3);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, alice, ld.remove] ], [0, 0, 3]);
         });
 
         it("purge", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, alice, ld.purge],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(5);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, alice, ld.purge] ], [0, 0, 5]);
         });
 
         it("slice", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, alice, ld.slice],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(1);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, alice, ld.slice] ], [0, 0, 1]);
         });
     });
 
     describe("with a new value", () => {
         it("add", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, ld.add],
-            ]);
-
-            expect(addable).toHaveLength(1);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, ld.add] ], [1, 0, 0]);
         });
 
         it("replace", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, ld.replace],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(1);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, ld.replace] ], [0, 1, 0]);
         });
 
         it("remove", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, ld.remove],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(3);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, ld.remove] ], [0, 0, 3]);
         });
 
         it("purge", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, ld.purge],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(5);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, ld.purge] ], [0, 0, 5]);
         });
 
         it("slice", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, ld.slice],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, ld.slice] ], [0, 0, 0]);
         });
     });
 
@@ -213,73 +126,23 @@ describe("deltaProcessor", () => {
             rdfFactory.namedNode(iri.value + `?graph=${encodeURIComponent(graph)}`);
 
         it("add", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, graphify(ld.add)],
-            ]);
-
-            expect(addable).toHaveLength(1);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, graphify(ld.add)] ], [1, 0, 0]);
         });
 
         it("replace", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, graphify(ld.replace)],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(1);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, graphify(ld.replace)] ], [0, 1, 0]);
         });
 
         it("remove", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, graphify(ld.remove)],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(3);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, graphify(ld.remove)] ], [0, 0, 3]);
         });
 
         it("purge", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, graphify(ld.purge)],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(5);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, graphify(ld.purge)] ], [0, 0, 5]);
         });
 
         it("slice", () => {
-            const store = filledStore();
-            const processor = defaultProcessor(store);
-
-            const [ addable, replaceable, removable ] = processor([
-                [bob, schema.children, erin, graphify(ld.slice)],
-            ]);
-
-            expect(addable).toHaveLength(0);
-            expect(replaceable).toHaveLength(0);
-            expect(removable).toHaveLength(0);
-            expect((store as any).quads).toHaveLength(initialCount);
+            testDelta([ [bob, schema.children, erin, graphify(ld.slice)] ], [0, 0, 0]);
         });
     });
 });

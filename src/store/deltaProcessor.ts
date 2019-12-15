@@ -22,6 +22,15 @@ const isInGraph = (graphIRIS: NamedNode[]): (graph: Node) => boolean => {
     return (graph: Node): boolean => matchers.some((matcher) => matcher(graph));
 };
 
+const pushQuadruple = (arr: Quadruple[], quadruple: Quadruple, graph: NamedNode): void => {
+    arr.push([
+        quadruple[QuadPosition.subject],
+        quadruple[QuadPosition.predicate],
+        quadruple[QuadPosition.object],
+        graph,
+    ]);
+};
+
 export const deltaProcessor = (
     addGraphIRIS: NamedNode[],
     replaceGraphIRIS: NamedNode[],
@@ -51,42 +60,31 @@ export const deltaProcessor = (
             }
 
             const g = new URL(quad[QuadPosition.graph].value).searchParams.get("graph");
+            const graph = g ? rdfFactory.termFromNQ(g) : defaultGraph;
             if (isAdd(quad[QuadPosition.graph])) {
-                addable.push([
-                    quad[QuadPosition.subject],
-                    quad[QuadPosition.predicate],
-                    quad[QuadPosition.object],
-                    g ? rdfFactory.termFromNQ(g) : defaultGraph,
-                ]);
+                pushQuadruple(addable, quad, graph);
             } else if (isReplace(quad[QuadPosition.graph])) {
-                replaceable.push([
-                    quad[QuadPosition.subject],
-                    quad[QuadPosition.predicate],
-                    quad[QuadPosition.object],
-                    g ? rdfFactory.termFromNQ(g) : defaultGraph,
-                ]);
+                pushQuadruple(replaceable, quad, graph);
             } else if (isRemove(quad[QuadPosition.graph])) {
-                const matches = store.match(
+                removable.push(...store.match(
                     quad[QuadPosition.subject],
                     quad[QuadPosition.predicate],
                     null,
-                    g ? rdfFactory.termFromNQ(g) : defaultGraph,
-                );
-                removable.push(...matches);
+                    graph,
+                ));
             } else if (isPurge(quad[QuadPosition.graph])) {
-                const matches = store.match(
+                removable.push(...store.match(
                     quad[QuadPosition.subject],
                     null,
                     null,
-                    g ? rdfFactory.termFromNQ(g) : defaultGraph,
-                );
-                removable.push(...matches);
+                    graph,
+                ));
             } else if (isSlice(quad[QuadPosition.graph])) {
                 removable.push(...store.match(
                     quad[QuadPosition.subject],
                     quad[QuadPosition.predicate],
                     quad[QuadPosition.object],
-                    g ? rdfFactory.termFromNQ(g) : rdfFactory.defaultGraph(),
+                    graph,
                 ));
             }
         }
