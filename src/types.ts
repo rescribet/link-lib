@@ -1,4 +1,5 @@
 import { LowLevelStore, Namespace } from "@ontologies/core";
+import { Node, SomeTerm } from "@ontologies/core/dist-types/types";
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
@@ -244,3 +245,5 @@ export interface DataProcessorOpts {
 }
 
 export type ResourceQueueItem = [NamedNode, FetchOpts|undefined];
+
+export type WildQuadruple = [Node | null, NamedNode | null, SomeTerm | null, Node | null];
