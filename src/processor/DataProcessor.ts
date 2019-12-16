@@ -1,6 +1,7 @@
 import rdfFactory, { isBlankNode, QuadPosition, TermType } from "@ontologies/core";
 import schema from "@ontologies/schema";
 import xsd from "@ontologies/xsd";
+import { site } from "@rdfdev/iri";
 import {
     BAD_REQUEST,
     INTERNAL_SERVER_ERROR,
@@ -48,7 +49,6 @@ import {
     MSG_URL_UNDEFINED,
     MSG_URL_UNRESOLVABLE,
 } from "../utilities/constants";
-import { site } from "../utilities/iri";
 import { getContentType, getHeader, getJSON, getURL } from "../utilities/responses";
 
 import { ProcessorError } from "./ProcessorError";
@@ -253,9 +253,9 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const [graph, blobs = []] = dataTuple;
 
-        await (this.store.quadsFor(subject).length > 0
-            ? Promise.resolve([])
-            : this.getEntity(subject));
+        if (this.store.quadsFor(subject).length === 0) {
+            await this.getEntity(subject);
+        }
 
         const object = this.store.getResourceProperty(subject, schema.object);
         if (!object || object.termType !== TermType.BlankNode && object.termType !== TermType.NamedNode) {

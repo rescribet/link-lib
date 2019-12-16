@@ -63,6 +63,7 @@
     "@pika/plugin-build-web": "^0.8.1",
     "@pika/plugin-bundle-web": "^0.8.1",
     "@pika/plugin-ts-standard-pkg": "^0.8.1",
+    "@rdfdev/iri": "^1.0.0-alpha.2",
     "@types/firefox-webext-browser": "^67.0.2",
     "@types/jest": "^24.0.19",
     "@types/murmurhash-js": "^1.0.3",

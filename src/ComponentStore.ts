@@ -1,5 +1,6 @@
 import rdfFactory from "@ontologies/core";
 import rdfs from "@ontologies/rdfs";
+
 import ll from "./ontology/ll";
 import { NamedNode } from "./rdf";
 import { Schema } from "./Schema";
@@ -19,6 +20,12 @@ function convertToCacheKey(types: Indexable[], props: Indexable[], topology: Ind
     return `${types.join()}[${props.join()}][${topology}]`;
 }
 
+const assert = (obj: any): void => {
+    if (obj === undefined) {
+        throw new TypeError(MSG_TYPE_ERR);
+    }
+};
+
 /**
  * Handles registration and querying for view components.
  */
@@ -37,11 +44,11 @@ export class ComponentStore<T> {
         const registrations: Array<ComponentRegistration<T>> = [];
 
         for (let t = 0; t < types.length; t++) {
-            if (types[t] === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+            assert(types[t]);
             for (let p = 0; p < properties.length; p++) {
-                if (properties[p] === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+                assert(properties[p]);
                 for (let top = 0; top < topologies.length; top++) {
-                    if (topologies[top] === undefined) { throw new TypeError(MSG_TYPE_ERR); }
+                    assert(topologies[top]);
 
                     registrations.push({
                         component,

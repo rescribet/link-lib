@@ -1148,6 +1148,11 @@
   resolved "https://registry.yarnpkg.com/@pika/types/-/types-0.8.1.tgz#ac24b9a73e6712d638cbc124b6b1d6a1ade51bb0"
   integrity sha512-xQNGUA9CAHmbI6tO9weu088pX3PbrRgYZs68FXAqkJXodNyEy7Ju8LU191MZOS6MZreA1PElPd2evsgQ6Wl/cA==
 
+"@rdfdev/iri@^1.0.0-alpha.2":
+  version "1.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@rdfdev/iri/-/iri-1.0.0-alpha.2.tgz#2124d64d169e8d45f5b92ecd3adb59ebae71f9d8"
+  integrity sha512-MrvpTVSnATIiy5J0YrM6PszbE18n06mr6i3QEW0skOCXdxgdujtNP14zjDtvbKczYIbU6Es2OZ3luCLv2Gd5HA==
+
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@samverschueren/stream-to-observable/-/stream-to-observable-0.3.0.tgz#ecdf48d532c58ea477acfcab80348424f8d0662f"

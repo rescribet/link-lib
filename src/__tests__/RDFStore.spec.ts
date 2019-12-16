@@ -82,8 +82,7 @@ describe("RDFStore", () => {
 
     describe("#getInternalStore", () => {
         it("returns the store", () => {
-            expect(new RDFStore().getInternalStore())
-                .toBeInstanceOf(RDFIndex);
+            expect(new RDFStore().getInternalStore()).toBeInstanceOf(RDFIndex);
         });
     });
 
@@ -215,20 +214,11 @@ describe("RDFStore", () => {
         });
     });
 
-    // describe("#getResourceProperties", () => {
-    //     it("works", () => {
-    //         const expected = undefined;
-    //         expect(new RDFStore().getResourceProperties())
-    //             .toEqual(expected);
-    //     });
-    // });
-
     describe("#getResourceProperty", () => {
         it("returns undefined for type statements on unloaded resources", () => {
             const store = new RDFStore();
 
-            expect(store.getResourceProperty(ex("1"), rdf.type))
-                .toBeUndefined();
+            expect(store.getResourceProperty(ex("1"), rdf.type)).toBeUndefined();
         });
 
         it("returns the type for type statements", () => {
@@ -244,8 +234,7 @@ describe("RDFStore", () => {
         it("returns undefined for other statements on unloaded resources", () => {
             const store = new RDFStore();
 
-            expect(store.getResourceProperty(ex("1"), ex("prop")))
-                .toBeUndefined();
+            expect(store.getResourceProperty(ex("1"), ex("prop"))).toBeUndefined();
         });
 
         it("returns the object for other statements", () => {
@@ -272,24 +261,14 @@ describe("RDFStore", () => {
         });
     });
 
-    // describe("#statementsFor", () => {
-    //     it("works", () => {
-    //         const expected = undefined;
-    //         expect(new RDFStore().statementsFor())
-    //             .toEqual(expected);
-    //     });
-    // });
-
     describe("#processTypeStatement", () => {
         it("initializes new resources", () => {
             const store = new RDFStore();
 
-            // @ts-ignore TS-2341
             expect(store.typeCache[rdfFactory.id(ex("1"))]).toBeUndefined();
             store.addQuads([
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
             ]);
-            // @ts-ignore TS-2341
             expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type")]);
         });
 
@@ -300,7 +279,6 @@ describe("RDFStore", () => {
                 rdfFactory.quad(ex("1"), rdf.type, ex("type2"), ex("_")),
             ]);
 
-            // @ts-ignore TS-2341
             expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type"), ex("type2")]);
         });
 
@@ -313,7 +291,6 @@ describe("RDFStore", () => {
             store.removeQuads([rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_"))]);
             store.flush();
 
-            // @ts-ignore TS-2341
             expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type2")]);
         });
     });

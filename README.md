@@ -1,10 +1,11 @@
 # Link Library
 *A Link to the Web*
 
-[![CircleCI](https://circleci.com/gh/fletcher91/link-lib.svg?style=svg)](https://circleci.com/gh/fletcher91/link-lib)
+[![CircleCI](https://img.shields.io/circleci/build/gh/fletcher91/link-lib)](https://circleci.com/gh/fletcher91/link-lib)
+![Code Climate coverage](https://img.shields.io/codeclimate/coverage/fletcher91/link-lib)
 
-This package aims to make building rich web applications quick and easy by providing a wrapper around 
-[rdflib.js](https://github.com/linkeddata/rdflib.js)'s store, adding high-level API's for view rendering, data querying
+This package aims to make building rich web applications quick and easy by providing all the tools
+needed to work with linked data, providing high-level API's for view rendering, data querying
 & manipulation, and API communication. See the [link-redux](https://github.com/fletcher91/link-redux) package on how to
 use this in a React project.
 

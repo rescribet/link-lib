@@ -39,7 +39,9 @@ import {
 } from "./types";
 import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
-import { expandProperty } from "./utilities/memoizedNamespace";
+
+const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
+    .map((t) => rdfFactory.id(t || defaultValue));
 
 /**
  * Main entrypoint into the functionality of link-lib.
@@ -55,12 +57,9 @@ export class LinkedRenderStore<T> implements Dispatcher {
         prop: LazyNNArgument = RENDER_CLASS_NAME,
         topology: LazyNNArgument | Array<NamedNode | undefined> = DEFAULT_TOPOLOGY): Array<ComponentRegistration<T>> {
 
-        const types = normalizeType(type)
-            .map((t) => rdfFactory.id(t));
-        const props = normalizeType(prop)
-            .map((p) => rdfFactory.id(p || RENDER_CLASS_NAME));
-        const topologies = normalizeType(topology)
-            .map((t) => rdfFactory.id(t || DEFAULT_TOPOLOGY));
+        const types = normalizedIds(type);
+        const props = normalizedIds(prop, RENDER_CLASS_NAME);
+        const topologies = normalizedIds(topology, DEFAULT_TOPOLOGY);
 
         return ComponentStore.registerRenderer(component, types, props, topologies);
     }
@@ -160,7 +159,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
     /**
      * Execute an Action by its IRI. This will result in an HTTP request being done and probably some state changes.
-     * @param {module:rdflib.NamedNode} subject The resource to execute. Generally a schema:Action derivative with a
+     * @param {NamedNode} subject The resource to execute. Generally a schema:Action derivative with a
      *   schema:EntryPoint to describe the request. Currently schema:url is used over schema:urlTemplate
      *   to acquire the request URL, since template processing isn't implemented (yet).
      * @param {DataObject} data An object to send in the body when a non-safe method is used.
@@ -189,14 +188,6 @@ export class LinkedRenderStore<T> implements Dispatcher {
      */
     public async exec(subject: NamedNode, args?: DataObject): Promise<any> {
         return this.dispatch(subject, args);
-    }
-
-    /**
-     * Convert a string value to a NamedNode if possible. Useful for looking op dynamic data like user input. Please
-     * refrain from using in static code, as this will impact performance.
-     */
-    public expandProperty(prop: NamedNode | string | undefined): NamedNode | undefined {
-        return expandProperty(prop, this.namespaces);
     }
 
     /**
@@ -459,13 +450,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 i.topology,
             );
         };
+
         for (let i = 0; i < components.length; i++) {
-            if (Array.isArray(components[i])) {
-                for (let j = 0; j < (components[i] as Array<ComponentRegistration<T>>).length; j++) {
-                    registerItem((components[i] as Array<ComponentRegistration<T>>)[j]);
-                }
-            } else {
-                registerItem(components[i] as ComponentRegistration<T>);
+            const innerRegs = normalizeType(components[i]);
+
+            for (let j = 0; j < innerRegs.length; j++) {
+                registerItem(innerRegs[j]);
             }
         }
     }
@@ -611,15 +601,10 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 if (this.broadcastHandle) {
                     window.clearTimeout(this.broadcastHandle);
                 }
-                if (this.lastPostponed === undefined) {
-                    this.lastPostponed = Date.now();
-                    this.broadcastHandle = window.setTimeout(() => {
-                        this.broadcastHandle = undefined;
-                        this.broadcast(buffer, maxTimeout);
-                    }, 200);
-
-                    return this.currentBroadcast || Promise.resolve();
-                } else if (Date.now() - this.lastPostponed <= maxTimeout) {
+                if ((this.lastPostponed === undefined) || Date.now() - this.lastPostponed <= maxTimeout) {
+                    if (this.lastPostponed === undefined) {
+                        this.lastPostponed = Date.now();
+                    }
                     this.broadcastHandle = window.setTimeout(() => {
                         this.broadcastHandle = undefined;
                         this.broadcast(buffer, maxTimeout);

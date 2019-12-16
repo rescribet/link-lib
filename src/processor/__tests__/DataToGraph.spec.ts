@@ -4,6 +4,7 @@ import "../../__tests__/useHashFactory";
 import rdfFactory, { TermType } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
+import xsd from "@ontologies/xsd";
 import "jest";
 
 import ll from "../../ontology/ll";
@@ -177,6 +178,17 @@ describe("DataToGraph", () => {
             expect(stmt.subject).toEqual(ll.targetResource);
             expect(stmt.predicate).toEqual(defaultNS.example("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(45));
+        });
+
+        it("handles bigints", () => {
+            const value = "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+            const data = { "example:property": BigInt(value) as unknown as number };
+            const [graph] = dataToGraphTuple(data);
+            const stmt = graph.quads[0];
+            expect(stmt).toBeTruthy();
+            expect(stmt.subject).toEqual(ll.targetResource);
+            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.object).toEqual(rdfFactory.literal(value, xsd.integer));
         });
 
         it("handles nested resources", () => {

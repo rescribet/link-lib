@@ -1,14 +1,20 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { Node } from "@ontologies/core";
 import "jest";
 
 import { RDFStore } from "../../RDFStore";
 import { Schema } from "../../Schema";
+import { VocabularyProcessingContext } from "../../types";
 import { defaultNS as NS } from "../../utilities/constants";
 import { RDFS } from "../rdfs";
 
 describe("RDFS", () => {
+    const expectSuperMap = (ctx: VocabularyProcessingContext, mapItem: Node, equalValues: Node[]): void => {
+        expect(ctx.superMap.get(rdfFactory.id(mapItem)))
+            .toEqual(new Set(equalValues.map((v) => rdfFactory.id(v))));
+    };
+
     describe("#processStatement", () => {
         it("infers type domain resource", () => {
             const schema = new Schema(new RDFStore());
@@ -45,30 +51,27 @@ describe("RDFS", () => {
                 rdfFactory.quad(NS.schema("BlogPost"), NS.rdfs("subClassOf"), NS.schema("CreativeWork")),
                 ctx,
             );
-            expect(ctx.superMap.get(rdfFactory.id(NS.schema("BlogPost"))))
-                .toEqual(new Set([
-                    rdfFactory.id(NS.schema("BlogPost")),
-                    rdfFactory.id(NS.schema("CreativeWork")),
-                    rdfFactory.id(NS.rdfs("Resource")),
-                ]));
+            expectSuperMap(ctx, NS.schema("BlogPost"), [
+                    NS.schema("BlogPost"),
+                    NS.schema("CreativeWork"),
+                    NS.rdfs("Resource"),
+                ]);
 
             RDFS.processStatement(
                 rdfFactory.quad(NS.schema("CreativeWork"), NS.rdfs("subClassOf"), NS.schema("Thing")),
                 ctx,
             );
-            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork"))))
-                .toEqual(new Set([
-                    rdfFactory.id(NS.schema("CreativeWork")),
-                    rdfFactory.id(NS.schema("Thing")),
-                    rdfFactory.id(NS.rdfs("Resource")),
-                ]));
-            expect(ctx.superMap.get(rdfFactory.id(NS.schema("BlogPost"))))
-                .toEqual(new Set([
-                    rdfFactory.id(NS.schema("BlogPost")),
-                    rdfFactory.id(NS.schema("CreativeWork")),
-                    rdfFactory.id(NS.schema("Thing")),
-                    rdfFactory.id(NS.rdfs("Resource")),
-                ]));
+            expectSuperMap(ctx, NS.schema("CreativeWork"), [
+                    NS.schema("CreativeWork"),
+                    NS.schema("Thing"),
+                    NS.rdfs("Resource"),
+                ]);
+            expectSuperMap(ctx, NS.schema("BlogPost"), [
+                    NS.schema("BlogPost"),
+                    NS.schema("CreativeWork"),
+                    NS.schema("Thing"),
+                    NS.rdfs("Resource"),
+                ]);
         });
     });
 
@@ -99,14 +102,12 @@ describe("RDFS", () => {
 
             const ctx = schema.getProcessingCtx();
             expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork")))).toBeUndefined();
-
             RDFS.processType(NS.schema("CreativeWork"), ctx);
 
-            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork"))))
-                .toEqual(new Set([
-                    rdfFactory.id(NS.schema("CreativeWork")),
-                    rdfFactory.id(NS.rdfs("Resource")),
-                ]));
+            expectSuperMap(ctx, NS.schema("CreativeWork"), [
+                    NS.schema("CreativeWork"),
+                    NS.rdfs("Resource"),
+                ]);
         });
     });
 });

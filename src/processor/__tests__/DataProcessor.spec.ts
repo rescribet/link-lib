@@ -15,7 +15,7 @@ import ll from "../../ontology/ll";
 import { Quad } from "../../rdf";
 import RDFIndex from "../../store/RDFIndex";
 
-import { getBasicStore } from "../../testUtilities";
+import { BasicComponent, ExplodedLRS, getBasicStore } from "../../testUtilities";
 import { FulfilledRequestStatus, ResponseAndFallbacks } from "../../types";
 
 import {
@@ -42,13 +42,18 @@ const getFulfilledRequest = (): FulfilledRequestStatus => {
 
 describe("DataProcessor", () => {
     describe("#execActionByIRI", () => {
+        const subject = defaultNS.example("actions/5");
+        const object1 = rdfFactory.quad(subject, schema.object, defaultNS.example("objects/1"));
+        const target5 = rdfFactory.quad(subject, schema.target, defaultNS.example("targets/5"));
+        const exec = (store: ExplodedLRS<BasicComponent>): Promise<any> =>
+            store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
+
         it("throws an error when the action doesn't exists", async () => {
             const store = getBasicStore();
 
-            const subject = defaultNS.example("actions/5");
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
+                await exec(store);
             } catch (e) {
                 error = e;
             }
@@ -60,15 +65,14 @@ describe("DataProcessor", () => {
         it("throws an error when the target isn't a node", async () => {
             const store = getBasicStore();
 
-            const subject = defaultNS.example("actions/5");
             store.store.addQuads([
-                rdfFactory.quad(subject, schema.object, defaultNS.example("objects/1")),
+                object1,
                 rdfFactory.quad(subject, schema.target, rdfFactory.literal("targets/5")),
             ]);
 
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
+                await exec(store);
             } catch (e) {
                 error = e;
             }
@@ -80,15 +84,14 @@ describe("DataProcessor", () => {
         it("throws an error when the url is undefined", async () => {
             const store = getBasicStore();
 
-            const subject = defaultNS.example("actions/5");
             store.store.addQuads([
-                rdfFactory.quad(subject, schema.object, defaultNS.example("objects/1")),
-                rdfFactory.quad(subject, schema.target, defaultNS.example("targets/5")),
+                object1,
+                target5,
             ]);
 
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
+                await exec(store);
             } catch (e) {
                 error = e;
             }
@@ -100,16 +103,15 @@ describe("DataProcessor", () => {
         it("throws an error when the url is a blank node", async () => {
             const store = getBasicStore();
 
-            const subject = defaultNS.example("actions/5");
             store.store.addQuads([
-                rdfFactory.quad(subject, schema.object, defaultNS.example("objects/1")),
-                rdfFactory.quad(subject, schema.target, defaultNS.example("targets/5")),
+                object1,
+                target5,
                 rdfFactory.quad(defaultNS.example("targets/5"), schema.url, rdfFactory.blankNode()),
             ]);
 
             let error;
             try {
-                await store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
+                await exec(store);
             } catch (e) {
                 error = e;
             }
@@ -120,10 +122,10 @@ describe("DataProcessor", () => {
 
         it("calls processExecAction", async () => {
             const store = getBasicStore();
-            const subject = defaultNS.example("actions/5");
+
             store.store.addQuads([
-                rdfFactory.quad(subject, schema.object, defaultNS.example("objects/1")),
-                rdfFactory.quad(subject, schema.target, defaultNS.example("targets/5")),
+                object1,
+                target5,
                 rdfFactory.quad(defaultNS.example("targets/5"), schema.url, defaultNS.example("test")),
             ]);
 
@@ -131,7 +133,7 @@ describe("DataProcessor", () => {
             // @ts-ignore
             store.processor.processExecAction = process;
 
-            await store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
+            await exec(store);
 
             expect(process).toHaveBeenCalledTimes(1);
         });

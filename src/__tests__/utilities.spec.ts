@@ -1,6 +1,8 @@
 import "./useHashFactory";
 
 import rdfFactory from "@ontologies/core";
+import rdfx from "@ontologies/rdf";
+import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 import "jest";
 
@@ -19,6 +21,10 @@ import { expandProperty } from "../utilities/memoizedNamespace";
 const ex = defaultNS.example;
 
 describe("utilities", () => {
+    const abc = rdfFactory.quad(ex("a"), ex("b"), ex("c"));
+    const dpe = rdfFactory.quad(ex("d"), ex("p"), ex("e"));
+    const dpn = rdfFactory.quad(ex("d"), ex("p"), ex("n"));
+
     describe("#allRDFPropertyStatements", () => {
         it("returns an empty array when undefined is passed", () => {
             expect(allRDFPropertyStatements(undefined, ex("p"))).toHaveLength(0);
@@ -30,15 +36,15 @@ describe("utilities", () => {
 
         it("returns an empty array when no matches were found", () => {
             const stmts = [
-                rdfFactory.quad(ex("a"), ex("b"), ex("c")),
-                rdfFactory.quad(ex("d"), ex("p"), ex("e")),
+                abc,
+                dpe,
                 rdfFactory.quad(ex("f"), ex("g"), ex("h")),
-                rdfFactory.quad(ex("d"), ex("p"), ex("n")),
+                dpn,
                 rdfFactory.quad(ex("f"), ex("g"), ex("x")),
             ];
             expect(allRDFPropertyStatements(stmts, ex("p"))).toEqual([
-                rdfFactory.quad(ex("d"), ex("p"), ex("e")),
-                rdfFactory.quad(ex("d"), ex("p"), ex("n")),
+                dpe,
+                dpn,
             ]);
         });
     });
@@ -57,15 +63,15 @@ describe("utilities", () => {
 
         it("returns all rdfs:member properties", () => {
             const stmts = [
-                rdfFactory.quad(ex("a"), ex("b"), ex("c")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_1"), ex("1")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_0"), ex("0")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_2"), ex("2")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_3"), ex("3")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_5"), ex("5")),
-                rdfFactory.quad(ex("c"), defaultNS.rdfs("member"), ex("6")),
+                abc,
+                rdfFactory.quad(ex("c"), rdfx.ns("_1"), ex("1")),
+                rdfFactory.quad(ex("c"), rdfx.ns("_0"), ex("0")),
+                rdfFactory.quad(ex("c"), rdfx.ns("_2"), ex("2")),
+                rdfFactory.quad(ex("c"), rdfx.ns("_3"), ex("3")),
+                rdfFactory.quad(ex("c"), rdfx.ns("_5"), ex("5")),
+                rdfFactory.quad(ex("c"), rdfs.member, ex("6")),
             ];
-            expect(allRDFValues(stmts, defaultNS.rdfs("member")))
+            expect(allRDFValues(stmts, rdfs.member))
                 .toEqual([
                     ex("1"),
                     ex("0"),
@@ -88,7 +94,7 @@ describe("utilities", () => {
 
         it("returns the value if found", () => {
             const stmts = [
-                rdfFactory.quad(ex("a"), ex("b"), ex("c")),
+                abc,
                 rdfFactory.quad(ex("c"), ex("b"), ex("d")),
                 rdfFactory.quad(ex("d"), ex("h"), ex("f")),
                 rdfFactory.quad(ex("d"), ex("b"), ex("g")),
@@ -98,12 +104,12 @@ describe("utilities", () => {
 
         it("returns all rdfs:member properties", () => {
             const stmts = [
-                rdfFactory.quad(ex("a"), ex("b"), ex("c")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_1"), ex("1")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_0"), ex("0")),
-                rdfFactory.quad(ex("c"), defaultNS.rdf("_2"), ex("2")),
+                abc,
+                rdfFactory.quad(ex("c"), rdfx.ns("_1"), ex("1")),
+                rdfFactory.quad(ex("c"), rdfx.ns("_0"), ex("0")),
+                rdfFactory.quad(ex("c"), rdfx.ns("_2"), ex("2")),
             ];
-            expect(anyRDFValue(stmts, defaultNS.rdfs("member"))).toEqual(ex("1"));
+            expect(anyRDFValue(stmts, rdfs.member)).toEqual(ex("1"));
         });
     });
 
@@ -137,42 +143,29 @@ describe("utilities", () => {
         const enString = rdfFactory.literal("value", "en");
         const nlString = rdfFactory.literal("waarde", "nl");
 
+        const abnl = rdfFactory.quad(ex("a"), ex("b"), nlString);
+        const aben = rdfFactory.quad(ex("a"), ex("b"), enString);
+        const abde = rdfFactory.quad(ex("a"), ex("b"), deString);
+        const abd = rdfFactory.quad(ex("a"), ex("b"), ex("d"));
+
         it("returns when a single statement is given", () => {
-            expect(getPropBestLang(rdfFactory.quad(ex("a"), ex("b"), nlString), langs)).toEqual(nlString);
+            expect(getPropBestLang(abnl, langs)).toEqual(nlString);
         });
 
         it("returns when a single statement arr is given", () => {
-            expect(getPropBestLang([rdfFactory.quad(ex("a"), ex("b"), nlString)], langs)).toEqual(nlString);
+            expect(getPropBestLang([abnl], langs)).toEqual(nlString);
         });
 
         it("returns the correct language when present", () => {
-            expect(
-                getPropBestLang([
-                    rdfFactory.quad(ex("a"), ex("b"), nlString),
-                    rdfFactory.quad(ex("a"), ex("b"), enString),
-                    rdfFactory.quad(ex("a"), ex("b"), deString),
-                ], langs),
-            ).toEqual(enString);
+            expect(getPropBestLang([abnl, aben, abde], langs)).toEqual(enString);
         });
 
         it("returns the next best value when main is not present", () => {
-            expect(
-                getPropBestLang([
-                    rdfFactory.quad(ex("a"), ex("b"), ex("c")),
-                    rdfFactory.quad(ex("a"), ex("b"), deString),
-                    rdfFactory.quad(ex("a"), ex("b"), nlString),
-                    rdfFactory.quad(ex("a"), ex("b"), ex("d")),
-                ], langs),
-            ).toEqual(nlString);
+            expect(getPropBestLang([abc, abde, abnl, abd], langs)).toEqual(nlString);
         });
 
         it("returns the first if no match could be fount", () => {
-            expect(
-                getPropBestLang([
-                    rdfFactory.quad(ex("a"), ex("b"), ex("c")),
-                    rdfFactory.quad(ex("a"), ex("b"), ex("d")),
-                ], langs),
-            ).toEqual(ex("c"));
+            expect(getPropBestLang([abc, abd], langs)).toEqual(ex("c"));
         });
     });
 
@@ -191,19 +184,13 @@ describe("utilities", () => {
         });
 
         it("returns the correct language when present", () => {
-            expect(
-                getPropBestLangRaw([
-                    nlStmt,
-                    enStmt,
-                    deStmt,
-                ], langs),
-            ).toEqual(enStmt);
+            expect(getPropBestLangRaw([nlStmt, enStmt, deStmt], langs)).toEqual(enStmt);
         });
 
         it("returns the next best value when main is not present", () => {
             expect(
                 getPropBestLangRaw([
-                    rdfFactory.quad(ex("a"), ex("b"), ex("c")),
+                    abc,
                     deStmt,
                     nlStmt,
                     rdfFactory.quad(ex("a"), ex("b"), ex("d")),
@@ -212,7 +199,7 @@ describe("utilities", () => {
         });
 
         it("returns the first if no match could be fount", () => {
-            const c = rdfFactory.quad(ex("a"), ex("b"), ex("c"));
+            const c = abc;
             const d = rdfFactory.quad(ex("a"), ex("b"), ex("d"));
             expect(getPropBestLangRaw([c, d], langs)).toEqual(c);
         });
