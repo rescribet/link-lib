@@ -5,7 +5,7 @@
   "repository": "https://github.com/fletcher91/link-lib.git",
   "scripts": {
     "build": "pika build",
-    "doc": "rm -rf dist/docs/* && typedoc --tsconfig tsconfig-types.json --exclude **/*.spec.ts --excludeExternals --excludePrivate --mode file --theme minimal --target ES6 --includeDeclarations --out dist/docs/ src/",
+    "doc": "rm -rf dist/docs/* && typedoc --exclude **/*.spec.ts --excludeExternals --excludePrivate --mode file --theme minimal --target ES6 --includeDeclarations --out dist/docs/ src/",
     "doc:deploy": "gh-pages -d ./dist/docs",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "prepublish": "npm run build && npm run doc",
@@ -34,17 +34,15 @@
       ]
     ]
   },
-  "dependencies": {
-    "murmurhash-js": "^1.0.0"
-  },
   "peerDependencies": {
     "@ontologies/as": ">=1.0.1",
-    "@ontologies/core": ">=2.0.0-1",
+    "@ontologies/core": ">=2.0.0-3",
     "@ontologies/ld": ">=1.0.0",
     "@ontologies/schema": ">=1.0.0",
     "@ontologies/shacl": ">=1.0.0",
     "@ontologies/xsd": ">=1.0.0",
-    "http-status-codes": ">= 1.x"
+    "http-status-codes": ">= 1.x",
+    "n-quads-parser": "^2.1.0-0"
   },
   "devDependencies": {
     "@ontola/memoized-hash-factory": "^1.2.1",
@@ -63,22 +61,21 @@
     "@pika/plugin-build-web": "^0.8.1",
     "@pika/plugin-bundle-web": "^0.8.1",
     "@pika/plugin-ts-standard-pkg": "^0.8.1",
-    "@rdfdev/iri": "^1.0.0-alpha.2",
-    "@types/firefox-webext-browser": "^67.0.2",
-    "@types/jest": "^24.0.19",
+    "@rdfdev/iri": "^1.0.0",
+    "@types/jest": "^24.0.25",
     "@types/murmurhash-js": "^1.0.3",
     "@types/node": "^12.11.2",
-    "core-js": "^3.4.4",
+    "core-js": "^3.6.3",
     "esdoc": "^1.1.0",
-    "gh-pages": "^2.1.1",
+    "gh-pages": "^2.2.0",
     "http-status-codes": ">= 1.x",
     "jest": "^24.9.0",
     "jest-fetch-mock": "^2.1.2",
     "n-quads-parser": "^2.1.0-0",
-    "ts-jest": "^24.1.0",
-    "tslint": "^5.20.0",
-    "typedoc": "^0.15.2",
-    "typescript": "^3.7.2"
+    "ts-jest": "^24.3.0",
+    "tslint": "^5.20.1",
+    "typedoc": "^0.16.2",
+    "typescript": "^3.7.4"
   },
   "jest": {
     "automock": false,
