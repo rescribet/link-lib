@@ -621,11 +621,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             || this.accept.default;
     }
 
-    private execExecHeader(actionsHeader: string | null | undefined): void {
+    private execExecHeader(actionsHeader: string | null | undefined, args?: any): void {
         if (actionsHeader) {
             const actions = actionsHeader.split(", ");
             for (let i = 0; i < actions.length; i++) {
-                this.dispatch(rdfFactory.namedNode(actions[i]), undefined);
+                this.dispatch(rdfFactory.namedNode(actions[i]), args);
             }
         }
     }
