@@ -561,6 +561,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         this.bulkSubscriptions.push(registration);
 
         return (): void => {
+            registration.markedForDelete = true;
             this.bulkSubscriptions.splice(this.bulkSubscriptions.indexOf(registration), 1);
         };
     }
