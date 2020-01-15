@@ -2,6 +2,7 @@ import "jest";
 import "./useHashFactory";
 
 import rdfFactory, { Quadruple } from "@ontologies/core";
+import owl from "@ontologies/owl";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
@@ -21,6 +22,12 @@ const thingStatements = [
     rdfFactory.quad(schemaT, rdf.type, rdfs.Class, rdfFactory.defaultGraph()),
     rdfFactory.quad(schemaT, rdfs.comment, rdfFactory.literal("The most generic type"), rdfFactory.defaultGraph()),
     rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing."), rdfFactory.defaultGraph()),
+];
+const aboutIsThing = [
+    rdfFactory.quad(schema.AboutPage, owl.sameAs, schemaT),
+];
+const thingIsAbout = [
+    rdfFactory.quad(schemaT, owl.sameAs, schema.AboutPage),
 ];
 
 describe("RDFStore", () => {
@@ -60,6 +67,44 @@ describe("RDFStore", () => {
             ]);
             store.store.flush();
             expect(store.store.changeTimestamps[rdfFactory.id(schemaT)]).toBeGreaterThan(before);
+        });
+
+        describe("owl:sameAs", () => {
+            describe("big small", () => {
+                it("equates existing data", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(aboutIsThing);
+                    store.store.addQuads(thingStatements);
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(1);
+                });
+
+                it("equates new data", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(aboutIsThing);
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(1);
+                });
+            });
+
+            describe("small big", () => {
+                it("equates existing data", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(thingIsAbout);
+                    store.store.addQuads(thingStatements);
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(1);
+                });
+
+                it("equates new data", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(thingIsAbout);
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(1);
+                });
+            });
         });
     });
 
@@ -336,6 +381,64 @@ describe("RDFStore", () => {
             expect(store.store.quadsFor(resource)).toHaveLength(3);
             store.store.removeResource(resource);
             expect(store.store.quadsFor(resource)).toHaveLength(0);
+        });
+
+        describe("owl:sameAs", () => {
+            describe("big small", () => {
+                it("equal before", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(aboutIsThing);
+                    store.store.addQuads(thingStatements);
+
+                    store.store.removeResource(schema.AboutPage);
+
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                    expect(store.store.match(schemaT, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                });
+
+                it("equal after", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(aboutIsThing);
+
+                    store.store.removeResource(schemaT);
+
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                    expect(store.store.match(schemaT, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                });
+            });
+
+            describe("small big", () => {
+                it("equal before", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(thingIsAbout);
+                    store.store.addQuads(thingStatements);
+
+                    store.store.removeResource(schema.AboutPage);
+
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                    expect(store.store.match(schemaT, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                });
+
+                it("equal after", () => {
+                    const store = getBasicStore();
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(thingIsAbout);
+
+                    store.store.removeResource(schemaT);
+
+                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                    expect(store.store.match(schemaT, rdfs.label, rdfFactory.literal("Thing."), null))
+                        .toHaveLength(0);
+                });
+            });
         });
     });
 

@@ -26,6 +26,10 @@ export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
 export type Indexable = number | string;
 
+export interface IdTerm {
+    id?: Indexable;
+}
+
 export interface ComponentMapping<T> { [type: string]: { [obj: string]: { [topology: string]: T } }; }
 
 export interface SubscriptionRegistrationBase<T> {

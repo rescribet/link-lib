@@ -4,7 +4,7 @@ import { LowLevelStore, QuadPosition } from "@ontologies/core";
 import { Node, Term } from "@ontologies/core/dist-types/types";
 
 import { NamedNode, Quad, SomeTerm } from "../rdf";
-import { SomeNode, WildQuadruple } from "../types";
+import { IdTerm, SomeNode, WildQuadruple } from "../types";
 import BasicStore from "./BasicStore";
 
 export type Constructable<T = object> = new (...args: any[]) => T;
@@ -12,6 +12,7 @@ export type Constructable<T = object> = new (...args: any[]) => T;
 export interface IndexedStore extends LowLevelStore {
     readonly quads: Quad[];
     readonly indices: Quad[][][];
+    canon<T = Term>(t: T): T;
     match(
         subj: Node | undefined | null,
         pred?: NamedNode | undefined | null,
@@ -28,7 +29,7 @@ export interface CallbackStore {
     addDataCallback(callback: (q: Quad) => void): void;
 }
 
-const quadParts: Array<keyof Quad> = [
+const quadParts: Array<keyof Omit<Quad, keyof IdTerm>> = [
     "subject",
     "predicate",
     "object",
@@ -48,10 +49,10 @@ function isCallbackStore(store: any): store is CallbackStore {
 function updateIndices(store: IndexedStore, q: Quad): void {
     const indices = store.indices.length;
     const hash = [
-        store.rdfFactory.id(q.subject) as number,
-        store.rdfFactory.id(q.predicate) as number,
-        store.rdfFactory.id(q.object) as number,
-        store.rdfFactory.id(q.graph) as number,
+        store.rdfFactory.id(store.canon(q.subject)) as number,
+        store.rdfFactory.id(store.canon(q.predicate)) as number,
+        store.rdfFactory.id(store.canon(q.object)) as number,
+        store.rdfFactory.id(store.canon(q.graph)) as number,
     ];
 
     for (let i = 0; i < indices; i++) {
@@ -159,7 +160,7 @@ function filterIndex(store: IndexedStore, search: SearchIndex, bestIndex: number
 
         for (let i = 0; i < check.length; i++) { // for each position to be checked
             const p = check[i];
-            if (!store.rdfFactory.equals(st[quadParts[p]], pattern[p])) {
+            if (!store.rdfFactory.equals(store.canon(st[quadParts[p]]), pattern[p])) {
                 st = null;
                 break;
             }
@@ -173,7 +174,7 @@ function filterIndex(store: IndexedStore, search: SearchIndex, bestIndex: number
     return results;
 }
 
-function match(store: IndexedStore, search: WildQuadruple, justOne: boolean): Quad[] {
+export function match(store: IndexedStore, search: WildQuadruple, justOne: boolean): Quad[] {
     const parsedSearch = computeSearchIndices(store, search);
 
     if (parsedSearch[SearchIndexPosition.Given].length === 0) {
@@ -230,6 +231,10 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
             return add(this, subject, predicate, object, graph);
         }
 
+        public canon<T = Term>(term: T): T {
+            return term;
+        }
+
         /**
          * Remove a particular quad object from the store
          *
@@ -240,7 +245,7 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
         public removeQuad(quad: Quad): this {
             const term = [ quad.subject, quad.predicate, quad.object, quad.graph ];
             for (let p = 0; p < 4; p++) {
-                const h = this.rdfFactory.id(term[p]) as number;
+                const h = this.rdfFactory.id(this.canon(term[p])) as number;
                 if (this.indices[p][h]) {
                     this.rdfArrayRemove(this.indices[p][h], quad);
                 }

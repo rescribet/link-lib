@@ -1,13 +1,13 @@
 import "../../__tests__/useHashFactory";
 
 import rdf, { DataFactory } from "@ontologies/core";
+import owl from "@ontologies/owl";
 import rdfx from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 import "jest";
 
 import BasicStore from "../BasicStore";
-
 describe("BasicStore", () => {
     describe("constructor", () => {
         describe("without arguments", () => {
@@ -33,6 +33,12 @@ describe("BasicStore", () => {
         store.add(schema.Person, rdfx.type, schema.Thing);
         store.add(schema.Person, rdfx.type, rdfs.Resource);
         store.add(schema.Person, rdfs.label, rdf.literal("Person class"));
+
+        store.add(schema.name, rdfx.type, rdfx.Property);
+        store.add(schema.name, rdfs.label, rdf.literal("Object name"));
+        const blank = rdf.blankNode();
+        store.add(blank, schema.description, rdf.literal("The name of an object"));
+        store.add(blank, owl.sameAs, schema.name);
 
         it("returns a all quads", () => {
             expect(store.match(schema.Person, rdfx.type, null, null))

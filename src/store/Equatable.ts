@@ -1,9 +1,10 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import rdfFactory, { TermType } from "@ontologies/core";
+import rdfFactory, { isNode, TermType } from "@ontologies/core";
 import owl from "@ontologies/owl";
 
-import { Node, Quad } from "../rdf";
+import { NamedNode, Node, Quad, SomeTerm, Term } from "../rdf";
+import { SomeNode } from "../types";
 import BasicStore from "./BasicStore";
 import { IndexedStore } from "./Indexable";
 
@@ -30,13 +31,12 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             });
         }
 
-        public canon(term: Node): Node {
-            const red = this.redirections[this.id(term)];
-            if (!red) {
+        public canon<T = Term>(term: T): T {
+            if (!isNode(term)) {
                 return term;
             }
 
-            return red;
+            return this.redirections[this.id(term)] as unknown as T || term;
         }
 
         public compareTerm(u1: Node, u2: Node): number {
@@ -79,6 +79,24 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             } else {
                 return this.replaceWith(u1, u2);
             }
+        }
+
+        public match(
+            subject: SomeNode | null,
+            predicate: NamedNode | null,
+            object: SomeTerm | null,
+            graph: SomeNode | null,
+            justOne: boolean = false,
+        ): Quad[] {
+            return super.match(
+                subject ? this.canon(subject) : null,
+                predicate ? this.canon(predicate) as NamedNode : null,
+                object
+                    ? (isNode(object) ? this.canon(object) : object)
+                    : null,
+                graph ? this.canon(graph) : null,
+                justOne,
+            );
         }
 
         /**

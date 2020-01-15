@@ -36,7 +36,7 @@
   },
   "peerDependencies": {
     "@ontologies/as": ">=1.0.1",
-    "@ontologies/core": ">=2.0.0-3",
+    "@ontologies/core": ">=2.0.0-5",
     "@ontologies/ld": ">=1.0.0",
     "@ontologies/schema": ">=1.0.0",
     "@ontologies/shacl": ">=1.0.0",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@ontola/memoized-hash-factory": "^1.2.1",
     "@ontologies/as": "^1.0.1",
-    "@ontologies/core": "^2.0.0-2",
+    "@ontologies/core": "^2.0.0-5",
     "@ontologies/dcterms": "^1.0.0",
     "@ontologies/ld": "^1.0.0",
     "@ontologies/owl": "^1.0.0",

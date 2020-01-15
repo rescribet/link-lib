@@ -623,7 +623,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
         const work = this.deltaProcessors.flatMap((dp) => dp.flush());
         const subjects = work
-            .flatMap((w) => [rdfFactory.id(w.subject), rdfFactory.id(w.graph)])
+            .flatMap((w) => [
+                rdfFactory.id(w.subject),
+                rdfFactory.id(w.graph),
+                rdfFactory.id(this.store.canon(w.subject)),
+                rdfFactory.id(this.store.canon(w.graph)),
+            ])
             .reduce<number[]>((acc, w) => acc.includes(w) ? acc : acc.concat(w), []);
         const subjectRegs = subjects
             .flatMap((id) => this.subjectSubscriptions[id])

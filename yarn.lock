@@ -1001,10 +1001,10 @@
   dependencies:
     "@ungap/global-this" "^0.3.1"
 
-"@ontologies/core@^2.0.0-2":
-  version "2.0.0-2"
-  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-2.0.0-2.tgz#e6210215bb5ce6852ce348e1f889ba479dc681d5"
-  integrity sha512-TC5MFtdyvQp0KpN/XvsKAcWFjGFplVfSGJq1OJPhul6BWANvKd6ksV0RXXgaWo5AXS64GQ2tImQJUkjEK2TZXw==
+"@ontologies/core@^2.0.0-5":
+  version "2.0.0-5"
+  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-2.0.0-5.tgz#15ae16c1cca5060a5f29579c23bd94b71986ceed"
+  integrity sha512-Ns8dhK/nKuhNnBbvrSxueYV/V/7URfIxPo1e4UotQen7hOlZEI5LQFWvD8QGcZZH3vJHUNWdQ3feDWY1MhFWWw==
   dependencies:
     "@ungap/global-this" "^0.3.1"
 

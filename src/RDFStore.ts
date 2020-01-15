@@ -103,8 +103,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public canon(term: SomeNode): SomeNode {
-        // TODO
-        return term;
+        return this.store.canon(term);
     }
 
     public defaultGraph(): SomeNode {
@@ -287,8 +286,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param subject The identifier of the resource.
      */
     public quadsFor(subject: SomeNode): Quad[] {
-        // TODO: Use the schema to replace canon
-        const id = rdfFactory.id(subject);
+        const id = rdfFactory.id(this.store.canon(subject));
 
         return typeof this.store.indices[QuadPosition.subject][id] !== "undefined"
             ? this.store.indices[QuadPosition.subject][id]
