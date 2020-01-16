@@ -314,7 +314,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const statements = await this.feedResponse(resp, true);
 
         const location = getHeader(resp, "Location");
-        const fqLocation = location && new URL(location || "", window.location.origin);
+        const fqLocation = location && new URL(location || "", window.location.origin).toString();
         const iri = fqLocation && rdfFactory.namedNode(fqLocation) || null;
 
         return {
