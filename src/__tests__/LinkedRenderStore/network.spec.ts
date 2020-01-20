@@ -112,6 +112,14 @@ describe("LinkedRenderStore", () => {
             expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
         });
 
+        it("should not queue resources being fetched", () => {
+            const store = getBasicStore();
+            store.store.flush();
+            store.lrs.api.getEntities([[resource, undefined]]);
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
+        });
+
         it("should not load invalidated queued resources", () => {
             const store = getBasicStore();
             store.store.flush();

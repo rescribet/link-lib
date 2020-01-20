@@ -15,6 +15,7 @@ import { LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
 import { dataToGraphTuple } from "./processor/DataToGraph";
+import { isPending } from "./processor/requestStatus";
 import { RDFFetchOpts } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
@@ -27,7 +28,6 @@ import {
     EmptyRequestStatus,
     ErrorReporter,
     FetchOpts,
-    FulfilledRequestStatus,
     Indexable,
     LazyNNArgument,
     LinkedActionResponse,
@@ -35,6 +35,7 @@ import {
     MiddlewareActionHandler,
     NamespaceMap,
     ResourceQueueItem,
+    SomeRequestStatus,
     SubscriptionRegistrationBase,
 } from "./types";
 import { normalizeType } from "./utilities";
@@ -400,7 +401,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      *
      * Status 202 indicates that the resource has been queued for fetching (subject to change).
      */
-    public getStatus(iri: Node): EmptyRequestStatus | FulfilledRequestStatus {
+    public getStatus(iri: Node): SomeRequestStatus {
         if (iri.termType === TermType.BlankNode) {
             return emptyRequest as EmptyRequestStatus;
         }
@@ -526,7 +527,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
      */
     public shouldLoadResource(subject: Node): boolean {
         return (this.store.changeTimestamps[rdfFactory.id(subject)] === undefined || this.api.isInvalid(subject))
-            && !this.resourceQueue.find(([i]) => rdfFactory.equals(i, subject));
+            && !this.resourceQueue.find(([i]) => rdfFactory.equals(i, subject))
+            && !isPending(this.api.getStatus(subject));
     }
 
     /**

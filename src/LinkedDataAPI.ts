@@ -5,6 +5,7 @@ import {
     DataProcessorOpts,
     DeltaProcessor,
     Dispatcher,
+    PendingRequestStatus,
     ResourceQueueItem,
     SaveOpts,
 } from "./types";
@@ -49,10 +50,9 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      * - Resources where fetching failed due to browser and OS errors are given status `499 - Client Closed Request`.
      * - Resources which haven't been requested and aren't scheduled to be requested currently have no status code.
      *
-     * @param {SomeNode} iri The resource to get the status on.
-     * @return {EmptyRequestStatus | FulfilledRequestStatus}
+     * @param iri The resource to get the status on.
      */
-    getStatus(iri: SomeNode): EmptyRequestStatus | FulfilledRequestStatus;
+    getStatus(iri: SomeNode): EmptyRequestStatus | PendingRequestStatus | FulfilledRequestStatus;
 
     /** @unstable */
     invalidate(iri: string | SomeNode, error?: Error): boolean;

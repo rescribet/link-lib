@@ -186,12 +186,22 @@ export interface EmptyRequestStatus extends RequestStatus {
     timesRequested: 0;
 }
 
+export interface PendingRequestStatus extends RequestStatus {
+    lastRequested: Date;
+    lastResponseHeaders: null;
+    requested: true;
+    status: null;
+    timesRequested: number;
+}
+
 export interface FulfilledRequestStatus extends RequestStatus {
     lastRequested: Date;
     lastResponseHeaders: BlankNode | null;
     requested: true;
     status: number;
 }
+
+export type SomeRequestStatus = EmptyRequestStatus | PendingRequestStatus | FulfilledRequestStatus;
 
 export type ResponseAndFallbacks = Response
     | XMLHttpRequest
