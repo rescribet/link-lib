@@ -994,17 +994,10 @@
   resolved "https://registry.yarnpkg.com/@ontologies/as/-/as-1.0.1.tgz#f60489dcb1e3603d33d8bf7df73b325d8868b45e"
   integrity sha512-EqgREbZegZD2qH7byPLkpEk9cK/PV9ctpTt0qrqK4bMk7rumAdKI0Er4te5tZpejWBrTg+uWR193r+5zWl44dw==
 
-"@ontologies/core@>=2.0.0-1":
-  version "2.0.0-1"
-  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-2.0.0-1.tgz#38a0491eef4a66771214ed075a449c9e74f4ce63"
-  integrity sha512-RwfzYD3jFlLGVmrPnIoRGAybwWV/g4zyNK82s/C+giAmye5LmZWRP+4R8O57ku4dTPn6aq7R1LXZloveWN3Qtw==
-  dependencies:
-    "@ungap/global-this" "^0.3.1"
-
-"@ontologies/core@^2.0.0-5":
-  version "2.0.0-5"
-  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-2.0.0-5.tgz#15ae16c1cca5060a5f29579c23bd94b71986ceed"
-  integrity sha512-Ns8dhK/nKuhNnBbvrSxueYV/V/7URfIxPo1e4UotQen7hOlZEI5LQFWvD8QGcZZH3vJHUNWdQ3feDWY1MhFWWw==
+"@ontologies/core@>=2.0.0-6", "@ontologies/core@^2.0.0-6":
+  version "2.0.0-6"
+  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-2.0.0-6.tgz#31e90922eea315578c270bf5122932ea9798b40f"
+  integrity sha512-F9vP76XMM030RqDceIZWCI6DTZ8scfqHKQDiXkw2VZ4jsbKfE74g0goCTOwt74oh/FT09mJMUFvU/eJgsq94XQ==
   dependencies:
     "@ungap/global-this" "^0.3.1"
 
@@ -4815,12 +4808,12 @@ mute-stream@0.0.8:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-n-quads-parser@^2.1.0-0:
-  version "2.1.0-0"
-  resolved "https://registry.yarnpkg.com/n-quads-parser/-/n-quads-parser-2.1.0-0.tgz#5ec5daf50b079f2ff4a03efe236f49dcdb8e32dd"
-  integrity sha512-RqkqJvcpIImhwfGhCGlecQdoU07qBb0mh6sUSE/wEQ5aW4jS5q6NFrIA+9X++EBu/Vva3EvLsiUyV4zQKa7GRg==
+n-quads-parser@^2.1.0-2:
+  version "2.1.0-2"
+  resolved "https://registry.yarnpkg.com/n-quads-parser/-/n-quads-parser-2.1.0-2.tgz#d9d8b9cd9e05151798efdc11dfc42130f0f5de30"
+  integrity sha512-aU6RNywZ+tRF2c2OOIYkfRRgq72QRyFurEKARC3xCtJhkSdEkPA/iK0NSieDOC62KrYqWzjaDhZHNIt7l0sriw==
   dependencies:
-    "@ontologies/core" ">=2.0.0-1"
+    "@ontologies/core" ">=2.0.0-6"
 
 nan@^2.12.1:
   version "2.13.2"

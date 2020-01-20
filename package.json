@@ -36,18 +36,18 @@
   },
   "peerDependencies": {
     "@ontologies/as": ">=1.0.1",
-    "@ontologies/core": ">=2.0.0-5",
+    "@ontologies/core": ">=2.0.0-6",
     "@ontologies/ld": ">=1.0.0",
     "@ontologies/schema": ">=1.0.0",
     "@ontologies/shacl": ">=1.0.0",
     "@ontologies/xsd": ">=1.0.0",
     "http-status-codes": ">= 1.x",
-    "n-quads-parser": "^2.1.0-0"
+    "n-quads-parser": "^2.1.0-2"
   },
   "devDependencies": {
     "@ontola/memoized-hash-factory": "^1.2.1",
     "@ontologies/as": "^1.0.1",
-    "@ontologies/core": "^2.0.0-5",
+    "@ontologies/core": "^2.0.0-6",
     "@ontologies/dcterms": "^1.0.0",
     "@ontologies/ld": "^1.0.0",
     "@ontologies/owl": "^1.0.0",
@@ -71,7 +71,7 @@
     "http-status-codes": ">= 1.x",
     "jest": "^24.9.0",
     "jest-fetch-mock": "^2.1.2",
-    "n-quads-parser": "^2.1.0-0",
+    "n-quads-parser": "^2.1.0-2",
     "ts-jest": "^24.3.0",
     "tslint": "^5.20.1",
     "typedoc": "^0.16.2",
