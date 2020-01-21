@@ -91,10 +91,12 @@ export class ComponentStore<T> {
             return cached;
         }
 
-        for (let i = 0; i < oTypes.length; i++) {
-            const exact = this.lookup(predicates[0], oTypes[i], topology);
-            if (exact !== undefined) {
-                return this.addComponentToCache(exact, key);
+        for (let p = 0; p < predicates.length; p++) {
+            for (let t = 0; t < oTypes.length; t++) {
+                const exact = this.lookup(predicates[p], oTypes[t], topology);
+                if (exact !== undefined) {
+                    return this.addComponentToCache(exact, key);
+                }
             }
         }
 

@@ -2,10 +2,14 @@ import "jest";
 import "./useHashFactory";
 
 import rdfFactory from "@ontologies/core";
+import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 
 import { ComponentStore } from "../ComponentStore";
+import { RDFStore } from "../RDFStore";
+import { Schema } from "../Schema";
 import { getBasicStore } from "../testUtilities";
+import { Indexable } from "../types";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
 const DT = rdfFactory.id(DEFAULT_TOPOLOGY);
@@ -83,6 +87,26 @@ describe("ComponentStore", () => {
                 undefined,
                 undefined,
             )).toBeUndefined();
+        });
+    });
+
+    describe("getRenderComponent", () => {
+        it("resolved with unregistered views", () => {
+            const store = new ComponentStore(new Schema<Indexable>(new RDFStore()));
+            const unregistered = rdfFactory.id(schema.url);
+            const registered = rdfFactory.id(schema.name);
+
+            const comp = (): string => "test";
+            store.registerRenderer(comp, rdfFactory.id(schema.BlogPosting), registered);
+
+            const lookup = store.getRenderComponent(
+                [rdfFactory.id(schema.BlogPosting)],
+                [unregistered, registered],
+                rdfFactory.id(DEFAULT_TOPOLOGY),
+                rdfFactory.id(rdfs.Resource),
+            );
+
+            expect(lookup).toEqual(comp);
         });
     });
 });
