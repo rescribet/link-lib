@@ -7,8 +7,12 @@ import {
     INTERNAL_SERVER_ERROR,
     NOT_FOUND,
 } from "http-status-codes";
+import { equals, id } from "../factoryHelpers";
 
 import { LinkedDataAPI } from "../LinkedDataAPI";
+import http from "../ontology/http";
+import http07 from "../ontology/http07";
+import httph from "../ontology/httph";
 import link from "../ontology/link";
 import ll from "../ontology/ll";
 import {
@@ -40,7 +44,6 @@ import {
 } from "../types";
 import { anyRDFValue } from "../utilities";
 import {
-    defaultNS,
     F_NTRIPLES,
     MSG_BAD_REQUEST,
     MSG_INCORRECT_TARGET,
@@ -300,7 +303,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     public fetchableURLFromIRI(iri: NamedNode): NamedNode {
-        return rdfFactory.namedNode(iri.value.split("#").shift()!);
+        if (iri.value.includes("#")) {
+            return rdfFactory.namedNode(iri.value.split("#").shift()!);
+        }
+
+        return iri;
     }
 
     public flush(): Quad[] {
@@ -324,10 +331,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const toBeFetched = new Set<NamedNode>();
 
         for (const resource of resources) {
-            const id = rdfFactory.id(resource[0]) as number;
+            const rId = id(resource[0]);
             if (resource[1] && resource[1].reload) {
                 reload.push(resource[0]);
-            } else if (this.requestMap.has(id)) {
+            } else if (this.requestMap.has(rId)) {
                 continue;
             }
             toBeFetched.add(resource[0]);
@@ -348,14 +355,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             .catch((err) => {
                 const status = rdfFactory.literal(err instanceof Error ? 499 : err.status, xsd.integer);
                 const delta = resources
-                    .map(([s]) => [s, defaultNS.http("statusCode"), status, ll.meta] as Quadruple);
+                    .map(([s]) => [s, http.statusCode, status, ll.meta] as Quadruple);
 
                 return this.processDelta(delta);
             }).finally(() => {
-                toBeFetched.forEach((resource) => this.requestMap.delete(rdfFactory.id(resource)));
+                toBeFetched.forEach((resource) => this.requestMap.delete(id(resource)));
             });
         toBeFetched.forEach((resource) => {
-            this.requestMap.set(rdfFactory.id(resource), chain);
+            this.requestMap.set(id(resource), chain);
             this.setStatus(resource, null);
         });
 
@@ -400,11 +407,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 .catch((err) => {
                     const status = rdfFactory.literal(err instanceof Error ? 499 : err.status, xsd.integer);
                     const delta: Quadruple[] = [
-                        [requestIRI, defaultNS.http("statusCode"), status, ll.meta],
+                        [requestIRI, http.statusCode, status, ll.meta],
                     ];
                     return this.processDelta(delta);
                 });
-            this.requestMap.set(rdfFactory.id(requestIRI), req);
+            this.requestMap.set(id(requestIRI), req);
             return await req;
         } catch (e) {
             if (typeof e.res === "undefined") {
@@ -416,7 +423,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
             return responseQuads;
         } finally {
-            this.requestMap.delete(rdfFactory.id(requestIRI));
+            this.requestMap.delete(id(requestIRI));
         }
     }
 
@@ -425,7 +432,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      */
     public getStatus(iri: NamedNode): SomeRequestStatus {
         const irl = this.fetchableURLFromIRI(iri);
-        const existing = this.statusMap[rdfFactory.id(irl)];
+        const existing = this.statusMap[id(irl)];
 
         if (existing) {
             return existing;
@@ -477,10 +484,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const requestObjData = this.store.quadsFor(requestObj);
 
         // RDFLib has different behaviour across browsers and code-paths, so we must check for multiple properties.
-        const requestStatus = anyRDFValue(requestObjData, defaultNS.http("status"))
-            || anyRDFValue(requestObjData, defaultNS.http07("status"))
-            || anyRDFValue(requestObjData, defaultNS.httph("status"));
-        const requestDate = anyRDFValue(requestObjData, defaultNS.httph("date"));
+        const requestStatus = anyRDFValue(requestObjData, http.status)
+            || anyRDFValue(requestObjData, http07.status)
+            || anyRDFValue(requestObjData, httph.status);
+        const requestDate = anyRDFValue(requestObjData, httph.date);
 
         if (!requestStatus) {
             if (fetcherStatus === "done") {
@@ -502,16 +509,16 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     public invalidate(iri: string | SomeNode, _err?: Error): boolean {
-        const id = rdfFactory.id(typeof iri === "string" ? rdfFactory.namedNode(iri) : iri);
-        this.invalidationMap.set(id);
+        const iriId = id(typeof iri === "string" ? rdfFactory.namedNode(iri) : iri);
+        this.invalidationMap.set(iriId);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
-        this.statusMap[id] = undefined;
+        this.statusMap[iriId] = undefined;
 
         return true;
     }
 
     public isInvalid(iri: SomeNode): boolean {
-        return this.invalidationMap.has(rdfFactory.id(iri));
+        return this.invalidationMap.has(id(iri));
     }
 
     public processExternalResponse(response: Response): Promise<Quad[] | undefined> {
@@ -525,19 +532,19 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             s = delta[i];
             const subj = s ? s[0] : undefined;
 
-            const currentStatus = subj && this.statusMap[rdfFactory.id(subj)];
+            const currentStatus = subj && this.statusMap[id(subj)];
             if (subj && currentStatus && currentStatus.status === 203) {
-                this.statusMap[rdfFactory.id(subj)] = undefined;
+                this.statusMap[id(subj)] = undefined;
             }
 
-            if (!s || !rdfFactory.equals(s[QuadPosition.graph], ll.meta)) {
+            if (!s || !equals(s[QuadPosition.graph], ll.meta)) {
                 continue;
             }
 
-            if (rdfFactory.equals(s[1], defaultNS.http("statusCode"))) {
+            if (equals(s[1], http.statusCode)) {
                 this.removeInvalidation(subj as NamedNode);
                 this.setStatus(subj as NamedNode, Number.parseInt(s[2].value, 10));
-            } else if (rdfFactory.equals(s[1], defaultNS.httph("Exec-Action"))) {
+            } else if (equals(s[1], httph["Exec-Action"])) {
                 this.execExecHeader(s[2].value);
             }
         }
@@ -622,7 +629,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private memoizeStatus(iri: NamedNode, s: SomeRequestStatus): SomeRequestStatus {
-        this.statusMap[rdfFactory.id(iri)] = s;
+        this.statusMap[id(iri)] = s;
 
         return s;
     }
@@ -635,7 +642,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private removeInvalidation(subject: NamedNode): void {
-        this.invalidationMap.delete(rdfFactory.id(subject));
+        this.invalidationMap.delete(id(subject));
     }
 
     private serialize(data: Quad[]): string {
@@ -644,7 +651,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     private setStatus(iri: NamedNode, status: number | null): void {
         const url = this.fetchableURLFromIRI(iri);
-        const prevStatus = this.statusMap[rdfFactory.id(url)];
+        const prevStatus = this.statusMap[id(url)];
         this.store.touch(url);
         this.store.touch(iri);
 

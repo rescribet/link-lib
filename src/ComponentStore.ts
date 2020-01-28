@@ -1,6 +1,6 @@
-import rdfFactory from "@ontologies/core";
 import rdfs from "@ontologies/rdfs";
 
+import { id } from "./factoryHelpers";
 import ll from "./ontology/ll";
 import { NamedNode } from "./rdf";
 import { Schema } from "./Schema";
@@ -73,7 +73,7 @@ export class ComponentStore<T> {
 
     public constructor(schema: Schema) {
         this.schema = schema;
-        this.mapping[rdfFactory.id(RENDER_CLASS_NAME)] = {};
+        this.mapping[id(RENDER_CLASS_NAME)] = {};
     }
 
     /**
@@ -102,13 +102,13 @@ export class ComponentStore<T> {
 
         const possibleComponents = this.possibleComponents(predicates, topology);
         if (possibleComponents.length === 0) {
-            if (topology === rdfFactory.id(DEFAULT_TOPOLOGY)) {
+            if (topology === id(DEFAULT_TOPOLOGY)) {
                 return undefined;
             }
             const foundComponent = this.getRenderComponent(
                 oTypes,
                 predicates,
-                rdfFactory.id(DEFAULT_TOPOLOGY),
+                id(DEFAULT_TOPOLOGY),
                 defaultType,
             );
             if (!foundComponent) {
@@ -147,8 +147,8 @@ export class ComponentStore<T> {
      */
     public registerRenderer(component: T,
                             type: Indexable,
-                            property: Indexable = rdfFactory.id(RENDER_CLASS_NAME),
-                            topology: Indexable = rdfFactory.id(DEFAULT_TOPOLOGY)): void {
+                            property: Indexable = id(RENDER_CLASS_NAME),
+                            topology: Indexable = id(DEFAULT_TOPOLOGY)): void {
         if (!property || !type) {
             return;
         }
@@ -233,7 +233,7 @@ export class ComponentStore<T> {
     }
 
     private possibleComponents(predicates: Indexable[], topology: Indexable): Indexable[] {
-        const classes = [rdfFactory.id(rdfs.Resource)];
+        const classes = [id(rdfs.Resource)];
         for (let i = 0; i < predicates.length; i++) {
             const predicate = predicates[i];
             if (typeof this.mapping[predicate] !== "undefined") {

@@ -3,6 +3,7 @@ import rdfFactory, {
     NamedNode,
     Node,
     Quad,
+    QuadPosition,
     Quadruple,
     Term,
     TermType,
@@ -11,6 +12,7 @@ import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
 
 import { ComponentStore } from "./ComponentStore";
+import { id } from "./factoryHelpers";
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
@@ -42,7 +44,7 @@ import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
 
 const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
-    .map((t) => rdfFactory.id(t || defaultValue));
+    .map((t) => id(t || defaultValue));
 
 /**
  * Main entrypoint into the functionality of link-lib.
@@ -268,14 +270,14 @@ export class LinkedRenderStore<T> implements Dispatcher {
         if (type === undefined || (Array.isArray(type) && type.length === 0)) {
             return undefined;
         }
-        const types = normalizeType(type).map((t) => rdfFactory.id(t));
-        const predicates = normalizeType(predicate).map((p) => rdfFactory.id(p));
+        const types = normalizeType(type).map(id);
+        const predicates = normalizeType(predicate).map(id);
 
         return this.mapping.getRenderComponent(
             types,
             predicates,
-            rdfFactory.id(topology),
-            rdfFactory.id(this.defaultType),
+            id(topology),
+            id(this.defaultType),
         );
     }
 
@@ -318,11 +320,17 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const quadArr = isQuad(delta[0])
             ? (delta as Quad[]).map((s: Quad) => rdfFactory.qdrFromQuad(s))
             : delta as Quadruple[];
-        const subjects = quadArr
-            .reduce(
-                (acc, [s]) => acc.includes(rdfFactory.id(s)) ? acc : acc.concat(rdfFactory.id(s)),
-                [] as number[],
-            );
+        const subjects: number[] = [];
+        let sId;
+        for (let i = 0; i < quadArr.length; i++) {
+            if (!quadArr[i]) {
+                continue;
+            }
+            sId = id(quadArr[i][QuadPosition.subject]);
+            if (!subjects.includes(sId)) {
+                subjects.push(sId);
+            }
+        }
 
         for (const dp of this.deltaProcessors) {
             dp.queueDelta(quadArr, subjects);
@@ -431,8 +439,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const quadArr = Object.prototype.hasOwnProperty.call(delta[0], "subject")
             ? (delta as Quad[]).map((s: Quad) => rdfFactory.qdrFromQuad(s))
             : delta as Quadruple[];
-        const statements = this.deltaProcessors
-            .reduce((acc: Quad[], dp: DeltaProcessor) => acc.concat(dp.processDelta(quadArr)), []);
+        const processors = this.deltaProcessors;
+        const statements: Quad[] = [];
+        for (let i = 0; i < processors.length; i++) {
+            statements.push(...processors[i].processDelta(quadArr));
+        }
 
         return this.broadcastWithExpedite(expedite)
             .then(() => statements);
@@ -526,7 +537,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @unstable
      */
     public shouldLoadResource(subject: Node): boolean {
-        return (this.store.changeTimestamps[rdfFactory.id(subject)] === undefined || this.api.isInvalid(subject))
+        return (this.store.changeTimestamps[id(subject)] === undefined || this.api.isInvalid(subject))
             && !this.resourceQueue.find(([i]) => rdfFactory.equals(i, subject))
             && !isPending(this.api.getStatus(subject));
     }
@@ -547,11 +558,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
         if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {
             for (let i = 0, len = subjectFilter.length; i < len; i++) {
-                const id = rdfFactory.id(subjectFilter[i]);
-                if (!this.subjectSubscriptions[id]) {
-                    this.subjectSubscriptions[id] = [];
+                const sId = id(subjectFilter[i]);
+                if (!this.subjectSubscriptions[sId]) {
+                    this.subjectSubscriptions[sId] = [];
                 }
-                this.subjectSubscriptions[id].push(registration);
+                this.subjectSubscriptions[sId].push(registration);
             }
 
             return (): void => {
@@ -626,18 +637,18 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const work = this.deltaProcessors.flatMap((dp) => dp.flush());
         const subjects = work
             .flatMap((w) => [
-                rdfFactory.id(w.subject),
-                rdfFactory.id(w.graph),
-                rdfFactory.id(this.store.canon(w.subject)),
-                rdfFactory.id(this.store.canon(w.graph)),
+                id(w.subject),
+                id(w.graph),
+                id(this.store.canon(w.subject)),
+                id(this.store.canon(w.graph)),
             ])
             .reduce<number[]>((acc, w) => acc.includes(w) ? acc : acc.concat(w), []);
         const subjectRegs = subjects
-            .flatMap((id) => this.subjectSubscriptions[id])
+            .flatMap((sId) => this.subjectSubscriptions[sId])
             .filter((reg) => reg
                 && !reg.markedForDelete
                 && (reg.subjectFilter
-                    ? reg.subjectFilter.some((s) => subjects.includes(rdfFactory.id(s)))
+                    ? reg.subjectFilter.some((s) => subjects.includes(id(s)))
                     : true));
 
         if (this.bulkSubscriptions.length === 0 && subjectRegs.length === 0) {
