@@ -1,6 +1,7 @@
 /* Taken, stripped and modified from rdflib.js */
 
 import { DataFactory, LowLevelStore } from "@ontologies/core";
+import { id } from "../factoryHelpers";
 
 import { NamedNode, Quad, SomeTerm } from "../rdf";
 import { SomeNode } from "../types";
@@ -89,7 +90,7 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
     }
 
     public newPropertyAction(predicate: NamedNode, action: PropertyActionCallback): void {
-        const hash = this.rdfFactory.id(predicate) as number;
+        const hash = id(predicate) as number;
         if (!this.propertyActions[hash]) {
             this.propertyActions[hash] = [];
         }

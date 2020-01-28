@@ -23,6 +23,9 @@ export default class BasicStore implements LowLevelStore {
         this.dataCallbacks = [];
         this.quads = opts.quads || [];
         this.rdfFactory = opts.rdfFactory || rdfFactory;
+        this.rdfArrayRemove = this.rdfFactory.supports?.[Feature.identity]
+            ? this.identityRemove
+            : this.searchRemove;
     }
 
     /** Add a quad to the store. */
@@ -137,17 +140,17 @@ export default class BasicStore implements LowLevelStore {
         return this.quads.filter(filter);
     }
 
-    public rdfArrayRemove(arr: Quad[], quad: Quad): void {
-        const factory = this.rdfFactory;
-        if (this.rdfFactory.supports[Feature.identity]) {
-            arr[arr.indexOf(quad)] = arr[arr.length - 1];
-            arr.pop();
-        } else {
-            const index = arr.findIndex((q: Quad) => factory.equals(quad, q));
-            arr.splice(index, 1);
-        }
+    // tslint:disable-next-line:no-empty
+    public rdfArrayRemove(_arr: Quad[], _quad: Quad): void {}
 
-        return undefined;
+    public identityRemove(arr: Quad[], quad: Quad): void {
+        arr[arr.indexOf(quad)] = arr[arr.length - 1];
+        arr.pop();
     }
 
+    public searchRemove(arr: Quad[], quad: Quad): void {
+        const factory = this.rdfFactory;
+        const index = arr.findIndex((q: Quad) => factory.equals(quad, q));
+        arr.splice(index, 1);
+    }
 }

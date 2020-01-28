@@ -1,5 +1,6 @@
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
+import { id } from "./factoryHelpers";
 import RDFIndex from "./store/RDFIndex";
 
 import rdfFactory, { NamedNode, Quad, SomeTerm } from "./rdf";
@@ -140,14 +141,16 @@ export class Schema<IndexType = number | string> {
      */
     public mineForTypes(lookupTypes: IndexType[]): IndexType[] {
         if (lookupTypes.length === 0) {
-            return [rdfFactory.id(rdfs.Resource)];
+            return [id(rdfs.Resource) as unknown as IndexType];
         }
 
         const canonicalTypes: IndexType[] = [];
-        const lookupTypesExpanded = lookupTypes
-            .reduce<IndexType[]>((acc, t) => acc.concat(...this.allEquals(t)), []);
+        const lookupTypesExpanded = [];
+        for (let i = 0; i < lookupTypes.length; i++) {
+            lookupTypesExpanded.push(...this.allEquals(lookupTypes[i]));
+        }
         for (let i = 0; i < lookupTypesExpanded.length; i++) {
-            const canon = rdfFactory.id(
+            const canon = id(
                 this.liveStore.canon(
                     rdfFactory.fromId(lookupTypes[i]) as NamedNode,
                 ),

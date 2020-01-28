@@ -1,10 +1,12 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import rdfFactory, { isNode, TermType } from "@ontologies/core";
+import { isNode, TermType } from "@ontologies/core";
 import owl from "@ontologies/owl";
 
+import { equals, id } from "../factoryHelpers";
 import { NamedNode, Node, Quad, SomeTerm, Term } from "../rdf";
 import { SomeNode } from "../types";
+
 import BasicStore from "./BasicStore";
 import { IndexedStore } from "./Indexable";
 
@@ -25,7 +27,7 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             super(...args);
 
             this.addDataCallback((quad: Quad) => {
-                if (rdfFactory.equals(quad.predicate, owl.sameAs)) {
+                if (equals(quad.predicate, owl.sameAs)) {
                     this.equate(quad.subject, quad.object as Node);
                 }
             });
@@ -36,7 +38,7 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
                 return term;
             }
 
-            return this.redirections[this.id(term)] as unknown as T || term;
+            return this.redirections[id(term)] as unknown as T || term;
         }
 
         public compareTerm(u1: Node, u2: Node): number {
@@ -104,8 +106,8 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
          */
         public replaceWith(big: Node, small: Node): void {
             // log.debug("Replacing "+big+" with "+small) // this.id(@@
-            const oldhash = this.id(big);
-            const newhash = this.id(small);
+            const oldhash = id(big);
+            const newhash = id(small);
             const moveIndex = (ix: Quad[][]): void => {
                 const oldlist = ix[oldhash];
                 if (!oldlist) {
@@ -132,7 +134,7 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
                 this.aliases[newhash].push(big); // Back link
                 if (this.aliases[oldhash]) {
                     for (let i = 0; i < this.aliases[oldhash].length; i++) {
-                        this.redirections[this.id(this.aliases[oldhash][i])] = small;
+                        this.redirections[id(this.aliases[oldhash][i])] = small;
                         this.aliases[newhash].push(this.aliases[oldhash][i]);
                     }
                 }

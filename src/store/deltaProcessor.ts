@@ -1,5 +1,6 @@
 import { LowLevelStore, QuadPosition } from "@ontologies/core";
 
+import { equals } from "../factoryHelpers";
 import rdfFactory, {
     NamedNode,
     Node,
@@ -10,7 +11,7 @@ import { StoreProcessor, StoreProcessorResult } from "../types";
 
 const matchSingle = (graphIRI: NamedNode): (graph: Node) => boolean => {
     const value = graphIRI.value;
-    return (graph: Node): boolean => rdfFactory.equals(graph, graphIRI) || graph.value.startsWith(value);
+    return (graph: Node): boolean => equals(graph, graphIRI) || graph.value.startsWith(value);
 };
 
 const isInGraph = (graphIRIS: NamedNode[]): (graph: Node) => boolean => {
