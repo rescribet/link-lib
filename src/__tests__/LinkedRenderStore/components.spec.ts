@@ -26,13 +26,13 @@ describe("LinkedRenderStore", () => {
                                       p: NamedNode,
                                       top: SomeNode): void {
             expect(r.component).toEqual(c);
-            expect(r.type).toEqual(rdfFactory.id(t));
-            expect(r.property).toEqual(rdfFactory.id(p));
-            expect(r.topology).toEqual(rdfFactory.id(top));
+            expect(r.type).toEqual(t);
+            expect(r.property).toEqual(p);
+            expect(r.topology).toEqual(top);
         }
 
         it("does not register without component", () => {
-            const defaultMsg = `Undefined component was given for (${rdfFactory.id(type)}, ${RCN}, ${DT}).`;
+            const defaultMsg = `Undefined component was given for (${type}, ${RCN}, ${DT}).`;
             try {
                 LinkedRenderStore.registerRenderer(undefined, type);
                 expect(true).toBeFalsy();
@@ -90,15 +90,15 @@ describe("LinkedRenderStore", () => {
     describe("#registerAll", () => {
         const reg1 = {
             component: (): string => "1",
-            property: rdfFactory.id(schema.text),
+            property: schema.text,
             topology: DT,
-            type: rdfFactory.id(schema.Thing),
+            type: schema.Thing,
         } as ComponentRegistration<() => string>;
         const reg2 = {
             component: (): string => "2",
-            property: rdfFactory.id(schema.name),
-            topology: rdfFactory.id(NS.argu("collection")),
-            type: rdfFactory.id(schema.Person),
+            property: schema.name,
+            topology: NS.argu("collection"),
+            type: schema.Person,
         } as ComponentRegistration<() => string>;
 
         it("stores multiple ComponentRegistration objects", () => {
@@ -135,7 +135,7 @@ describe("LinkedRenderStore", () => {
 
         it("returns the view when one is registered", () => {
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(nameComp, schema.Thing, property));
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdf.type, schema.Thing),
             ]);
 
@@ -154,7 +154,7 @@ describe("LinkedRenderStore", () => {
 
         it("returns the view when one is registered", () => {
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(thingComp, schema.Thing));
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdf.type, schema.Thing),
             ]);
 

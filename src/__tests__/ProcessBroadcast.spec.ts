@@ -1,10 +1,9 @@
 import "./useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { HexPos, Hextuple } from "@ontologies/core";
 import "jest";
 
 import { ProcessBroadcast, ProcessBroadcastOpts } from "../ProcessBroadcast";
-import { Quad } from "../rdf";
 import { SubscriptionRegistrationBase } from "../types";
 import { defaultNS as NS} from "../utilities/constants";
 
@@ -35,14 +34,14 @@ const mixedWork = [
 ];
 
 const getOpts = (
-    work: Quad[] = [],
+    work: Hextuple[] = [],
     bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [],
     subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [],
 ): ProcessBroadcastOpts => ({
     bulkSubscriptions,
     changedSubjects: work.reduce(
-        (acc, cur) => acc.includes(rdfFactory.id(cur.subject)) ? acc : acc.concat(rdfFactory.id(cur.subject)),
-        [] as number[],
+        (acc, cur) => acc.includes(cur[HexPos.subject]) ? acc : acc.concat(cur[HexPos.subject]),
+        [] as string[],
     ),
     subjectSubscriptions,
     timeout: 10,

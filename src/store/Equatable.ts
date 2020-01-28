@@ -1,10 +1,16 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import rdfFactory, { isNode, TermType } from "@ontologies/core";
+import rdfFactory, {
+    HexPos,
+    Hextuple,
+    isNode,
+    Resource,
+} from "@ontologies/core";
 import owl from "@ontologies/owl";
 
-import { NamedNode, Node, Quad, SomeTerm, Term } from "../rdf";
+import { NamedNode, Quad, SomeTerm, Term } from "../rdf";
 import { SomeNode } from "../types";
+import { termTypeOrder } from "../utilities/hex";
 import BasicStore from "./BasicStore";
 import { IndexedStore } from "./Indexable";
 
@@ -13,57 +19,52 @@ export type Constructable<T = object> = new (...args: any[]) => T;
 // tslint:disable-next-line:typedef
 export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(base: BC) {
     return class extends base {
-        public aliases: Node[][] = [];
-        public redirections: Node[] = [];
-        public classOrder: Record<TermType, number> = {
-            BlankNode: 6,
-            Literal: 1,
-            NamedNode: 5,
-        };
+        public aliases: Map<string, Resource[]> = new Map<string, Resource[]>();
+        public redirections: Map<string, Resource> = new Map<string, Resource>();
 
         public constructor(...args: any[]) {
             super(...args);
 
-            this.addDataCallback((quad: Quad) => {
-                if (rdfFactory.equals(quad.predicate, owl.sameAs)) {
-                    this.equate(quad.subject, quad.object as Node);
+            this.addDataCallback((quad: Hextuple) => {
+                if (rdfFactory.equals(quad[HexPos.predicate], owl.sameAs)) {
+                    this.equate(quad[HexPos.subject], quad[HexPos.object] as Resource);
                 }
             });
         }
 
         public canon<T = Term>(term: T): T {
-            if (!isNode(term)) {
+            if (typeof term !== "string") {
                 return term;
             }
 
-            return this.redirections[this.id(term)] as unknown as T || term;
+            return this.redirections.get(term) as unknown as T || term;
         }
 
-        public compareTerm(u1: Node, u2: Node): number {
-            if (this.classOrder[u1.termType] < this.classOrder[u2.termType]) {
+        public compareTerm(u1: Resource, u2: Resource): number {
+            if (termTypeOrder(u1) < termTypeOrder(u2)) {
                 return -1;
             }
-            if (this.classOrder[u1.termType] > this.classOrder[u2.termType]) {
+            if (termTypeOrder(u1) > termTypeOrder(u2)) {
                 return 1;
             }
-            if (u1.value < u2.value) {
+            if (u1 < u2) {
                 return -1;
             }
-            if (u1.value > u2.value) {
+            if (u1 > u2) {
                 return 1;
             }
             return 0;
         }
 
-        public id(x: Node): number {
-            return this.rdfFactory.id(x) as number;
+        public id(x: Resource): string {
+            return x as string;
         }
 
         /**
          * simplify graph in store when we realize two identifiers are equivalent
          * We replace the bigger with the smaller.
          */
-        public equate(u1: Node, u2: Node): void {
+        public equate(u1: Resource, u2: Resource): void {
             // log.warn("Equating "+u1+" and "+u2); // @@
             // @@JAMBO Must canonicalize the uris to prevent errors from a=b=c
             // 03-21-2010
@@ -102,11 +103,11 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
         /**
          * Replace big with small, obsoleted with obsoleting.
          */
-        public replaceWith(big: Node, small: Node): void {
+        public replaceWith(big: Resource, small: Resource): void {
             // log.debug("Replacing "+big+" with "+small) // this.id(@@
-            const oldhash = this.id(big);
-            const newhash = this.id(small);
-            const moveIndex = (ix: Quad[][]): void => {
+            const oldhash = big;
+            const newhash = small;
+            const moveIndex = (ix: {[k: string]: Hextuple[]}): void => {
                 const oldlist = ix[oldhash];
                 if (!oldlist) {
                     return; // none to move
@@ -123,17 +124,18 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             for (let i = 0; i < 4; i++) {
                 moveIndex(this.indices[i]);
             }
-            this.redirections[oldhash] = small;
-            if (big.value) {
+            this.redirections.set(oldhash, small);
+            if (big) {
                 // @@JAMBO: must update redirections,aliases from sub-items, too.
-                if (!this.aliases[newhash]) {
-                    this.aliases[newhash] = [];
+                if (!this.aliases.get(newhash)) {
+                    this.aliases.set(newhash, []);
                 }
-                this.aliases[newhash].push(big); // Back link
-                if (this.aliases[oldhash]) {
-                    for (let i = 0; i < this.aliases[oldhash].length; i++) {
-                        this.redirections[this.id(this.aliases[oldhash][i])] = small;
-                        this.aliases[newhash].push(this.aliases[oldhash][i]);
+                this.aliases.get(newhash)!.push(big); // Back link
+                const oldAlias = this.aliases.get(oldhash);
+                if (oldAlias) {
+                    for (let i = 0; i < oldAlias.length; i++) {
+                        this.redirections.set(oldAlias[i], small);
+                        this.aliases.get(newhash)!.push(oldAlias[i]);
                     }
                 }
                 this.add(small, this.rdfFactory.namedNode("http://www.w3.org/2007/ont/link#uri"), big);

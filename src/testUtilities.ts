@@ -1,3 +1,4 @@
+import { Resource } from "@ontologies/core";
 import { ComponentStore } from "./ComponentStore";
 import { createStore } from "./createStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
@@ -7,7 +8,6 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import {
     DataProcessorOpts,
-    Indexable,
     LinkedRenderStoreOptions,
     MiddlewareActionHandler,
 } from "./types";
@@ -15,9 +15,9 @@ import {
 export type BasicComponent = () => string | undefined;
 
 export class ComponentStoreTestProxy<T> extends ComponentStore<T> {
-    public publicLookup(predicate: Indexable,
-                        obj: Indexable,
-                        topology: Indexable): T | undefined {
+    public publicLookup(predicate: Resource,
+                        obj: Resource,
+                        topology: Resource): T | undefined {
         return this.lookup(predicate, obj, topology);
     }
 }

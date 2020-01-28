@@ -7,6 +7,7 @@ import schema from "@ontologies/schema";
 import "jest";
 
 import { defaultNS as NS } from "../../utilities/constants";
+import { quadrupleToHex } from "../../utilities/hex";
 import { deltaProcessor } from "../deltaProcessor";
 import RDFIndex from "../RDFIndex";
 
@@ -58,7 +59,7 @@ describe("deltaProcessor", () => {
         const store = filledStore();
         const processor = defaultProcessor(store);
 
-        const [ addable, replaceable, removable ] = processor(delta);
+        const [ addable, replaceable, removable ] = processor(delta.map(quadrupleToHex));
 
         expect(addable).toHaveLength(adds);
         expect(replaceable).toHaveLength(replaces);
@@ -123,7 +124,7 @@ describe("deltaProcessor", () => {
 
     describe("with graph", () => {
         const graphify = (iri: NamedNode): NamedNode =>
-            rdfFactory.namedNode(iri.value + `?graph=${encodeURIComponent(graph)}`);
+            rdfFactory.namedNode(iri + `?graph=${encodeURIComponent(graph)}`);
 
         it("add", () => {
             testDelta([ [bob, schema.children, erin, graphify(ld.add)] ], [1, 0, 0]);

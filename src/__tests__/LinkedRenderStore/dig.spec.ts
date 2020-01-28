@@ -12,7 +12,7 @@ describe("LinkedRenderStore", () => {
         const store = getBasicStore();
         const start = ex("1");
         const bn = rdfFactory.blankNode();
-        store.store.addQuads([
+        store.store.addHextuples([
             rdfFactory.quad(start, ex("oneToOne"), ex("1.1")),
 
             rdfFactory.quad(start, ex("oneToOneLiteral"), ex("1.2")),

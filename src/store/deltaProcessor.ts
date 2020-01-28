@@ -1,42 +1,38 @@
-import { LowLevelStore, QuadPosition } from "@ontologies/core";
+import { HexPos, Hextuple, JSNamedNode, JSResource, LowLevelStore } from "@ontologies/core";
 
-import rdfFactory, {
-    NamedNode,
-    Node,
-    Quad,
-    Quadruple,
-} from "../rdf";
+import rdfFactory from "../rdf";
 import { StoreProcessor, StoreProcessorResult } from "../types";
 
-const matchSingle = (graphIRI: NamedNode): (graph: Node) => boolean => {
-    const value = graphIRI.value;
-    return (graph: Node): boolean => rdfFactory.equals(graph, graphIRI) || graph.value.startsWith(value);
+const matchSingle = (graphIRI: JSNamedNode): (graph: JSResource) => boolean => {
+    return (graph: JSResource): boolean => graph === graphIRI || graph.startsWith(graphIRI);
 };
 
-const isInGraph = (graphIRIS: NamedNode[]): (graph: Node) => boolean => {
+const isInGraph = (graphIRIS: JSNamedNode[]): (graph: JSResource) => boolean => {
     if (graphIRIS.length === 0) {
         throw new Error("Pass a default graph explicitly");
     }
     const matchers = graphIRIS.map((iri) => matchSingle(iri));
 
-    return (graph: Node): boolean => matchers.some((matcher) => matcher(graph));
+    return (graph: JSResource): boolean => matchers.some((matcher) => matcher(graph));
 };
 
-const pushQuadruple = (arr: Quadruple[], quadruple: Quadruple, graph: NamedNode): void => {
+const pushHextuple = (arr: Hextuple[], quadruple: Hextuple, graph: JSResource): void => {
     arr.push([
-        quadruple[QuadPosition.subject],
-        quadruple[QuadPosition.predicate],
-        quadruple[QuadPosition.object],
+        quadruple[HexPos.subject],
+        quadruple[HexPos.predicate],
+        quadruple[HexPos.object],
+        quadruple[HexPos.objectDT],
+        quadruple[HexPos.objectLang],
         graph,
     ]);
 };
 
 export const deltaProcessor = (
-    addGraphIRIS: NamedNode[],
-    replaceGraphIRIS: NamedNode[],
-    removeGraphIRIS: NamedNode[],
-    purgeGraphIRIS: NamedNode[],
-    sliceGraphIRIS: NamedNode[],
+    addGraphIRIS: JSNamedNode[],
+    replaceGraphIRIS: JSNamedNode[],
+    removeGraphIRIS: JSNamedNode[],
+    purgeGraphIRIS: JSNamedNode[],
+    sliceGraphIRIS: JSNamedNode[],
 ): (store: LowLevelStore) => StoreProcessor => {
     const defaultGraph = rdfFactory.defaultGraph();
 
@@ -46,12 +42,12 @@ export const deltaProcessor = (
     const isPurge = isInGraph(purgeGraphIRIS);
     const isSlice = isInGraph(sliceGraphIRIS);
 
-    return (store: LowLevelStore): StoreProcessor => (delta: Quadruple[]): StoreProcessorResult => {
-        const addable: Quadruple[] = [];
-        const replaceable: Quadruple[] = [];
-        const removable: Quad[] = [];
+    return (store: LowLevelStore): StoreProcessor => (delta: Hextuple[]): StoreProcessorResult => {
+        const addable: Hextuple[] = [];
+        const replaceable: Hextuple[] = [];
+        const removable: Hextuple[] = [];
 
-        let quad: Quadruple;
+        let quad: Hextuple;
         for (let i = 0, len = delta.length; i < len; i++) {
             quad = delta[i];
 
@@ -59,31 +55,37 @@ export const deltaProcessor = (
                 continue;
             }
 
-            const g = new URL(quad[QuadPosition.graph].value).searchParams.get("graph");
+            const g = new URL(quad[HexPos.graph]).searchParams.get("graph");
             const graph = g ? rdfFactory.termFromNQ(g) : defaultGraph;
-            if (isAdd(quad[QuadPosition.graph])) {
-                pushQuadruple(addable, quad, graph);
-            } else if (isReplace(quad[QuadPosition.graph])) {
-                pushQuadruple(replaceable, quad, graph);
-            } else if (isRemove(quad[QuadPosition.graph])) {
-                removable.push(...store.match(
-                    quad[QuadPosition.subject],
-                    quad[QuadPosition.predicate],
+            if (isAdd(quad[HexPos.graph])) {
+                pushHextuple(addable, quad, graph);
+            } else if (isReplace(quad[HexPos.graph])) {
+                pushHextuple(replaceable, quad, graph);
+            } else if (isRemove(quad[HexPos.graph])) {
+                removable.push(...store.matchHex(
+                    quad[HexPos.subject],
+                    quad[HexPos.predicate],
                     null,
-                    graph,
-                ));
-            } else if (isPurge(quad[QuadPosition.graph])) {
-                removable.push(...store.match(
-                    quad[QuadPosition.subject],
                     null,
                     null,
                     graph,
                 ));
-            } else if (isSlice(quad[QuadPosition.graph])) {
-                removable.push(...store.match(
-                    quad[QuadPosition.subject],
-                    quad[QuadPosition.predicate],
-                    quad[QuadPosition.object],
+            } else if (isPurge(quad[HexPos.graph])) {
+                removable.push(...store.matchHex(
+                    quad[HexPos.subject],
+                    null,
+                    null,
+                    null,
+                    null,
+                    graph,
+                ));
+            } else if (isSlice(quad[HexPos.graph])) {
+                removable.push(...store.matchHex(
+                    quad[HexPos.subject],
+                    quad[HexPos.predicate],
+                    quad[HexPos.object],
+                    quad[HexPos.objectDT],
+                    quad[HexPos.objectLang],
                     graph,
                 ));
             }

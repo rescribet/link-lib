@@ -28,7 +28,7 @@ describe("LinkedRenderStore", () => {
             rdfFactory.quad(entryPoint, schema.image, rdfFactory.namedNode("http://fontawesome.io/icon/plus")),
             rdfFactory.quad(entryPoint, schema.name, rdfFactory.literal("Add a picture")),
         ];
-        store.store.addQuads(actionStatements);
+        store.store.addHextuples(actionStatements);
 
         it("sends the described request", async () => {
             const sub = jest.fn();
@@ -66,7 +66,7 @@ describe("LinkedRenderStore", () => {
             const store = getBasicStore();
             const resource = example("test");
             const exStatus = { status: 259 };
-            (store.processor as any).statusMap[rdfFactory.id(resource)] = exStatus;
+            (store.processor as any).statusMap[resource] = exStatus;
             const status = store.lrs.getStatus(resource);
 
             expect(status).toHaveProperty("status", 259);
@@ -85,7 +85,7 @@ describe("LinkedRenderStore", () => {
 
         it("should load invalidated resources", () => {
             const store = getBasicStore();
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
@@ -96,7 +96,7 @@ describe("LinkedRenderStore", () => {
 
         it("should not load existent resources", () => {
             const store = getBasicStore();
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
@@ -123,7 +123,7 @@ describe("LinkedRenderStore", () => {
         it("should not load invalidated queued resources", () => {
             const store = getBasicStore();
             store.store.flush();
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
             ]);
             store.store.flush();
@@ -143,7 +143,7 @@ describe("LinkedRenderStore", () => {
                 rdfFactory.quad(resource, schema.name, rdfFactory.literal("Some org")),
                 rdfFactory.quad(resource, schema.employee, ex("2")),
             ];
-            store.store.addQuads(testData);
+            store.store.addHextuples(testData);
             store.store.flush();
 
             const data = store.lrs.tryEntity(resource);

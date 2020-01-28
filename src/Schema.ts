@@ -1,3 +1,4 @@
+import { Hextuple, JSLitDatatype, JSLitLang, JSLitValue, Resource } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import RDFIndex from "./store/RDFIndex";
@@ -21,16 +22,16 @@ import { DisjointSet } from "./utilities/DisjointSet";
  * Basically duplicates some functionality already present in {IndexedFormula} IIRC, but this API should be more
  * optimized so it can be used in real-time by low-power devices as well.
  */
-export class Schema<IndexType = number | string> {
+export class Schema {
     private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
 
-    private equivalenceSet: DisjointSet<IndexType> = new DisjointSet();
+    private equivalenceSet: DisjointSet<Resource> = new DisjointSet();
     // Typescript can't handle generic index types, so it is set to string.
-    private expansionCache: { [k: string]: IndexType[] };
+    private expansionCache: { [k: string]: Resource[] };
     private store: RDFIndex;
     private liveStore: RDFStore;
-    private superMap: Map<IndexType, Set<IndexType>> = new Map();
-    private processedTypes: IndexType[] = [];
+    private superMap: Map<Resource, Set<Resource>> = new Map();
+    private processedTypes: Resource[] = [];
 
     public constructor(liveStore: RDFStore) {
         this.liveStore = liveStore;
@@ -39,7 +40,7 @@ export class Schema<IndexType = number | string> {
         this.expansionCache = {};
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
-            this.addQuads(Schema.vocabularies[i].axioms);
+            this.addHextuples(Schema.vocabularies[i].axioms);
         }
     }
 
@@ -47,21 +48,21 @@ export class Schema<IndexType = number | string> {
      * Push quads onto the graph so it can be used by the render store for component determination.
      * @return The quads added to the store.
      */
-    public addQuads(quads: Quad[]): Quad[] {
-        const unique = quads.filter((s) => !this.store.holdsQuad(s));
+    public addHextuples(quads: Hextuple[]): Hextuple[] {
+        const unique = quads.filter((s) => !this.store.holdsHex(s));
         const eligible = unique.filter(this.process.bind(this));
         if (eligible.length === 0) {
             return [];
         }
 
         for (const quad of eligible) {
-            this.store.addQuad(quad);
+            this.store.addHex(quad);
         }
 
-        return this.liveStore.addQuads(eligible);
+        return this.liveStore.addHextuples(eligible);
     }
 
-    public allEquals(resource: IndexType, grade = 1.0): IndexType[] {
+    public allEquals(resource: Resource, grade = 1.0): Resource[] {
         if (grade >= 0) {
             return this.equivalenceSet.allValues(resource);
         }
@@ -69,7 +70,7 @@ export class Schema<IndexType = number | string> {
         return [resource];
     }
 
-    public expand(types: IndexType[]): IndexType[] {
+    public expand(types: Resource[]): Resource[] {
         if (types.length === 1) {
             const existing = this.expansionCache[types[0] as unknown as string];
             this.expansionCache[types[0] as unknown as string] = existing
@@ -82,7 +83,7 @@ export class Schema<IndexType = number | string> {
         return this.sort(this.mineForTypes(types));
     }
 
-    public getProcessingCtx(): VocabularyProcessingContext<IndexType> {
+    public getProcessingCtx(): VocabularyProcessingContext {
         return {
             dataStore: this.liveStore,
             equivalenceSet: this.equivalenceSet,
@@ -96,15 +97,15 @@ export class Schema<IndexType = number | string> {
         return this.store.holdsQuad(quad);
     }
 
-    public isInstanceOf(resource: IndexType, superClass: IndexType): boolean {
+    public isInstanceOf(resource: Resource, superClass: Resource): boolean {
         return this.store.holdsQuad(rdfFactory.quad(
-            rdfFactory.fromId(resource) as NamedNode,
+            resource,
             rdf.type,
-            rdfFactory.fromId(superClass) as SomeTerm,
+            rdfFactory.literal(superClass),
         ));
     }
 
-    public isSubclassOf(resource: IndexType, superClass: IndexType): boolean {
+    public isSubclassOf(resource: Resource, superClass: Resource): boolean {
         const resourceMap = this.superMap.get(resource);
 
         if (resourceMap) {
@@ -117,7 +118,7 @@ export class Schema<IndexType = number | string> {
      * Returns the hierarchical depth of the type, or -1 if unknown.
      * @param type the type to check
      */
-    public superTypeDepth(type: IndexType): number {
+    public superTypeDepth(type: Resource): number {
         const superMap = this.superMap.get(type);
 
         return superMap ? superMap.size : -1;
@@ -133,30 +134,39 @@ export class Schema<IndexType = number | string> {
         return this.store.match(subject, predicate, object, graph, justOne);
     }
 
+    /** @ignore */
+    public matchHex(
+        subject: Resource | null,
+        predicate: NamedNode | null,
+        object: JSLitValue | null,
+        objectDt: JSLitDatatype | null,
+        objectL: JSLitLang | null,
+        graph: SomeNode | null,
+        justOne: boolean = false,
+    ): Hextuple[] {
+        return this.store.matchHex(subject, predicate, object, objectDt, objectL, graph, justOne);
+    }
+
     /**
      * Expands the given lookupTypes to include all their equivalent and subclasses.
      * This is done in multiple iterations until no new types are found.
      * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
      */
-    public mineForTypes(lookupTypes: IndexType[]): IndexType[] {
+    public mineForTypes(lookupTypes: Resource[]): Resource[] {
         if (lookupTypes.length === 0) {
-            return [rdfFactory.id(rdfs.Resource)];
+            return [rdfs.Resource];
         }
 
-        const canonicalTypes: IndexType[] = [];
+        const canonicalTypes: Resource[] = [];
         const lookupTypesExpanded = lookupTypes
-            .reduce<IndexType[]>((acc, t) => acc.concat(...this.allEquals(t)), []);
+            .reduce<Resource[]>((acc, t) => acc.concat(...this.allEquals(t)), []);
         for (let i = 0; i < lookupTypesExpanded.length; i++) {
-            const canon = rdfFactory.id(
-                this.liveStore.canon(
-                    rdfFactory.fromId(lookupTypes[i]) as NamedNode,
-                ),
-            ) as unknown as IndexType;
+            const canon = this.liveStore.canon(lookupTypes[i]);
 
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
                     Schema.vocabularies[j].processType(
-                        rdfFactory.fromId(canon) as NamedNode,
+                        canon,
                         this.getProcessingCtx(),
                     );
                 }
@@ -190,7 +200,7 @@ export class Schema<IndexType = number | string> {
         return this.sort(allTypes);
     }
 
-    public sort(types: IndexType[]): IndexType[] {
+    public sort(types: Resource[]): Resource[] {
         return types.sort((a, b) => {
             if (this.isSubclassOf(a, b)) {
                 return -1;
@@ -210,7 +220,7 @@ export class Schema<IndexType = number | string> {
         });
     }
 
-    private process(item: Quad): Quad[] | null {
+    private process(item: Hextuple): Hextuple[] | null {
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             const res = Schema.vocabularies[i].processStatement(item, this.getProcessingCtx());
             if (res !== null) {

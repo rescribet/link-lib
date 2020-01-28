@@ -1,7 +1,7 @@
 import "jest";
 import "./useHashFactory";
 
-import rdfFactory, { Quad } from "@ontologies/core";
+import rdfFactory, { HexPos } from "@ontologies/core";
 import owl from "@ontologies/owl";
 import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
@@ -28,10 +28,10 @@ describe("LinkedRenderStore", () => {
                 rdfFactory.quad(idSecond, owl.sameAs, id),
             ];
 
-            store.store.addQuads(testData);
-            const entity = await store.lrs.tryEntity(id) as Quad[];
+            store.store.addHextuples(testData);
+            const entity = await store.lrs.tryEntity(id);
 
-            expect(entity.map((s) => s.object.value)).toContainEqual("other");
+            expect(entity.map((s) => s[HexPos.object])).toContainEqual("other");
         });
     });
 

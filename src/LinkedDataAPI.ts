@@ -1,4 +1,4 @@
-import { NamedNode, Quad } from "@ontologies/core";
+import { Hextuple, NamedNode } from "@ontologies/core";
 
 import { RDFFetchOpts } from "./rdflib";
 import {
@@ -23,7 +23,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
     execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
     /** @private */
-    getEntities(resources: ResourceQueueItem[]): Promise<Quad[]>;
+    getEntities(resources: ResourceQueueItem[]): Promise<Hextuple[]>;
 
     /**
      * Gets an entity by its SomeNode.
@@ -34,7 +34,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    getEntity(iri: NamedNode, opts?: RDFFetchOpts): Promise<Quad[]>;
+    getEntity(iri: NamedNode, opts?: RDFFetchOpts): Promise<Hextuple[]>;
 
     /**
      * Retrieve the (network) status for a resource.
@@ -72,7 +72,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      *
      * @param graph
      * @param opts
-     * @param {Quad[]} opts.data - Override default data collection for this data.
+     * @param {Hextuple[]} opts.data - Override default data collection for this data.
      * @param {string} opts.url - Overrides the target to save the resource to.
      * @param {boolean} opts.useDefaultGraph - Changes data collection to search for {graph} in the default graph rather
      *  than the named graph {graph}.

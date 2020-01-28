@@ -8,8 +8,8 @@ import { RENDER_CLASS_NAME } from "../../ComponentStore";
 import { createNS } from "../../rdf";
 import { DEFAULT_TOPOLOGY } from "../../utilities/constants";
 
-export const DT = rdfFactory.id(DEFAULT_TOPOLOGY);
-export const RCN = rdfFactory.id(RENDER_CLASS_NAME);
+export const DT = DEFAULT_TOPOLOGY;
+export const RCN = RENDER_CLASS_NAME;
 
 export const schemaT = schema.Thing;
 export const thingStatements = [

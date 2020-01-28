@@ -1,27 +1,34 @@
-import { DataFactory, QuadPosition } from "@ontologies/core";
+import {
+    DataFactory,
+    HexPos,
+    Hextuple,
+    JSNamedNode,
+    Literal,
+    QuadPosition,
+    Resource,
+} from "@ontologies/core";
 import ld from "@ontologies/ld";
 import rdf from "@ontologies/rdf";
 
 import ll from "./ontology/ll";
 import rdfFactory, {
-    NamedNode,
     OptionalNamedNode,
     OptionalNode,
     OptionalTerm,
     Quad,
-    Quadruple,
-    Term,
 } from "./rdf";
+import { InternalHextuple } from "./store/BasicStore";
 import { deltaProcessor } from "./store/deltaProcessor";
 import RDFIndex from "./store/RDFIndex";
-import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
+import { ChangeBuffer, DeltaProcessor, StoreProcessor } from "./types";
 import { allRDFPropertyStatements, getPropBestLang } from "./utilities";
+import { hexToQuad, literalFromHex, literalFromResource, quadToHex } from "./utilities/hex";
 import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 
-const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
+const EMPTY_ST_ARR: ReadonlyArray<Hextuple> = Object.freeze([]);
 
 export interface RDFStoreOpts {
-    deltaProcessorOpts?: { [k: string]: NamedNode[] };
+    deltaProcessorOpts?: { [k: string]: JSNamedNode[] };
     innerStore?: RDFIndex;
 }
 
@@ -29,17 +36,17 @@ export interface RDFStoreOpts {
  * Provides a clean consistent interface to stored (RDF) data.
  */
 export class RDFStore implements ChangeBuffer, DeltaProcessor {
-    public changeBuffer: Quad[] = new Array(100);
+    public changeBuffer: Hextuple[] = new Array(100);
     public changeBufferCount: number = 0;
     /**
      * Record of the last time a resource was flushed.
      *
      * @note Not to be confused with the last change in the store, which might be later than the flush time.
      */
-    public changeTimestamps: number[] = [];
-    public typeCache: NamedNode[][] = [];
+    public changeTimestamps: { [k: string]: number } = {};
+    public typeCache: { [k: string]: JSNamedNode[] } = {};
 
-    private deltas: Quadruple[][] = [];
+    private deltas: Hextuple[][] = [];
     private deltaProcessor: StoreProcessor;
     private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
@@ -61,15 +68,15 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         this.store = patchRDFLibStoreWithOverrides(g, this);
 
         const defaults =  {
-            addGraphIRIS: [ll.add, ld.add],
-            purgeGraphIRIS: [ll.purge, ld.purge],
-            removeGraphIRIS: [ll.remove, ld.remove],
+            addGraphIRIS: [ld.add, ll.add],
+            purgeGraphIRIS: [ld.purge, ll.purge],
+            removeGraphIRIS: [ld.remove, ll.remove],
             replaceGraphIRIS: [
-                ll.replace,
                 ld.replace,
+                ll.replace,
                 rdfFactory.defaultGraph(),
             ],
-            sliceGraphIRIS: [ll.slice, ld.slice],
+            sliceGraphIRIS: [ld.slice, ll.slice],
         };
 
         this.deltaProcessor = deltaProcessor(
@@ -90,23 +97,23 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             throw new TypeError("An array of quads must be passed to addQuads");
         }
 
-        return data.map((q) => this.store.add(q.subject, q.predicate, q.object, q.graph));
+        return this.store.addHexes(data.map(quadToHex)).map(hexToQuad);
     }
 
-    public addQuadruples(data: Quadruple[]): Quad[] {
+    public addHextuples(data: Hextuple[]): Hextuple[] {
         const statements = new Array(data.length);
         for (let i = 0, len = data.length; i < len; i++) {
-            statements[i] = this.store.add(data[i][0], data[i][1], data[i][2], data[i][3]);
+            statements[i] = this.store.addHex(data[i]);
         }
 
         return statements;
     }
 
-    public canon(term: SomeNode): SomeNode {
+    public canon(term: Resource): Resource {
         return this.store.canon(term);
     }
 
-    public defaultGraph(): SomeNode {
+    public defaultGraph(): Resource {
         return rdfFactory.defaultGraph();
     }
 
@@ -125,7 +132,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * Flushes the change buffer to the return value.
      * @return Statements held in memory since the last flush.
      */
-    public flush(): Quad[] {
+    public flush(): Hextuple[] {
         const deltas = this.deltas;
         this.deltas = [];
 
@@ -134,16 +141,16 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         }
 
         if (this.changeBufferCount === 0) {
-            return EMPTY_ST_ARR as Quad[];
+            return EMPTY_ST_ARR as Hextuple[];
         }
         const processingBuffer = this.changeBuffer;
         this.changeBuffer = new Array(100);
         this.changeBufferCount = 0;
         const changeStamp = Date.now();
         processingBuffer
-            .filter((s) => {
-                this.changeTimestamps[rdfFactory.id(s.subject)] = changeStamp;
-                return rdfFactory.equals(s.predicate, rdf.type);
+            .filter((hex) => {
+                this.changeTimestamps[hex[HexPos.subject]] = changeStamp;
+                return hex[HexPos.predicate] === rdf.type;
             })
             .map((s) => this.processTypeQuad(s));
 
@@ -163,26 +170,38 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return this.store.match(subj, pred, obj, graph, justOne) || [];
     }
 
-    public processDelta(delta: Quadruple[]): Quad[] {
+    public matchHex(
+        subject: string | null,
+        predicate: string | null,
+        object: string | null,
+        datatype: string | null,
+        lang: string | null,
+        graph: string | null,
+        justOne: boolean = false,
+    ): Hextuple[] {
+        return this.store.matchHex(subject, predicate, object, datatype, lang, graph, justOne) || [];
+    }
+
+    public processDelta(delta: Hextuple[]): Hextuple[] {
         const [
             addables,
             replacables,
             removables,
         ] = this.deltaProcessor(delta);
 
-        this.removeQuads(removables);
+        this.removeHexes(removables);
 
-        return this.replaceMatches(replacables).concat(this.addQuadruples(addables));
+        return [...this.replaceMatches(replacables), ...this.addHextuples(addables)];
     }
 
-    public removeResource(subject: SomeNode): void {
+    public removeResource(subject: Resource): void {
         this.touch(subject);
-        this.typeCache[rdfFactory.id(subject)] = [];
-        this.removeQuads(this.quadsFor(subject));
+        this.typeCache[subject] = [];
+        this.removeHexes(this.quadsFor(subject));
     }
 
-    public removeQuads(statements: Quad[]): void {
-        this.store.removeQuads(statements);
+    public removeHexes(statements: Hextuple[]): void {
+        this.store.removeHexes(statements);
     }
 
     /**
@@ -194,19 +213,19 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param original The statements to remove from the store.
      * @param replacement The statements to add to the store.
      */
-    public replaceQuads(original: Quad[], replacement: Quad[]): Quad[] {
+    public replaceQuads(original: Hextuple[], replacement: Hextuple[]): Hextuple[] {
         const uniqueStatements = new Array(replacement.length).filter(Boolean);
         for (let i = 0; i < replacement.length; i++) {
             const cond = original.some(
-                ({ subject, predicate }) => rdfFactory.equals(subject, replacement[i].subject)
-                    && rdfFactory.equals(predicate, replacement[i].predicate),
+                ([ subject, predicate ]) => rdfFactory.equals(subject, replacement[i][HexPos.subject])
+                    && rdfFactory.equals(predicate, replacement[i][HexPos.predicate]),
             );
             if (!cond) {
                 uniqueStatements.push(replacement[i]);
             }
         }
 
-        this.removeQuads(original);
+        this.removeHexes(original);
         // Remove statements not in the old object. Useful for replacing data loosely related to the main resource.
         for (let i = 0; i < uniqueStatements.length; i++) {
             this.store.removeMatches(
@@ -217,23 +236,25 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             );
         }
 
-        return this.addQuads(replacement);
+        return this.addHextuples(replacement);
     }
 
-    public replaceMatches(statements: Quadruple[]): Quad[] {
+    public replaceMatches(statements: Hextuple[]): Hextuple[] {
         for (let i = 0; i < statements.length; i++) {
-            this.removeQuads(this.match(
+            this.removeHexes(this.matchHex(
                 statements[i][0],
                 statements[i][1],
+                null,
+                null,
                 null,
                 null,
             ));
         }
 
-        return this.addQuadruples(statements);
+        return this.addHextuples(statements);
     }
 
-    public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Quad[] {
+    public getResourcePropertyRaw(subject: Resource, property: Resource | Resource[]): Hextuple[] {
         const props = this.quadsFor(subject);
         if (Array.isArray(property)) {
             for (let i = 0; i < property.length; i++) {
@@ -243,31 +264,34 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 }
             }
 
-            return EMPTY_ST_ARR as Quad[];
+            return EMPTY_ST_ARR as Hextuple[];
         }
 
         return allRDFPropertyStatements(props, property);
     }
 
-    public getResourceProperties<TT extends Term = Term>(subject: SomeNode, property: SomeNode | SomeNode[]): TT[] {
+    public getResourceProperties<TT extends Literal = Literal>(
+        subject: Resource,
+        property: Resource | Resource[],
+    ): TT[] {
         if (property === rdf.type) {
-            return (this.typeCache[rdfFactory.id(subject)] || []) as TT[];
+            return (this.typeCache[subject]?.map(literalFromResource) || []) as unknown as TT[];
         }
 
         return this
             .getResourcePropertyRaw(subject, property)
-            .map((s) => s.object as TT);
+            .map((s) => literalFromHex(s) as unknown as TT);
     }
 
-    public getResourceProperty<T extends Term = Term>(
-        subject: SomeNode,
-        property: SomeNode | SomeNode[],
+    public getResourceProperty<T extends Literal = Literal>(
+        subject: Resource,
+        property: Resource | Resource[],
     ): T | undefined {
 
-        if (!Array.isArray(property) && rdfFactory.equals(property, rdf.type)) {
-            const entry = this.typeCache[rdfFactory.id(subject)];
+        if (!Array.isArray(property) && property === rdf.type) {
+            const entry = this.typeCache[subject];
 
-            return entry ? entry[0] as T : undefined;
+            return entry ? entry[0] as unknown as T : undefined;
         }
         const rawProp = this.getResourcePropertyRaw(subject, property);
         if (rawProp.length === 0) {
@@ -277,7 +301,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return getPropBestLang<T>(rawProp, this.langPrefs);
     }
 
-    public queueDelta(delta: Quadruple[]): void {
+    public queueDelta(delta: Hextuple[]): void {
         this.deltas.push(delta);
     }
 
@@ -285,16 +309,26 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * Searches the store for all the quads on {iri} (so not all statements relating to {iri}).
      * @param subject The identifier of the resource.
      */
-    public quadsFor(subject: SomeNode): Quad[] {
-        const id = rdfFactory.id(this.store.canon(subject));
+    public quadsFor(subject: Resource): Hextuple[] {
+        const id = this.store.canon(subject);
+        const index = this.store.indices[QuadPosition.subject][id];
 
-        return typeof this.store.indices[QuadPosition.subject][id] !== "undefined"
-            ? this.store.indices[QuadPosition.subject][id]
-            : EMPTY_ST_ARR as Quad[];
+        if (typeof index === "undefined") {
+            return EMPTY_ST_ARR as Hextuple[];
+        }
+
+        const res = [];
+        for (let i = 0; i < index.length; i++) {
+            if (!(index[i] as unknown as InternalHextuple)[6]) {
+                res.push(index[i]);
+            }
+        }
+
+        return res;
     }
 
-    public touch(iri: SomeNode): void {
-        this.changeTimestamps[rdfFactory.id(iri)] = Date.now();
+    public touch(iri: Resource): void {
+        this.changeTimestamps[iri] = Date.now();
         this.changeBuffer.push(rdfFactory.quad(iri, ll.nop, ll.nop));
         this.changeBufferCount++;
     }
@@ -306,17 +340,22 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     /**
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
-    private processTypeQuad(quad: Quad): boolean {
-        if (!rdfFactory.equals(quad.predicate, rdf.type)) {
+    private processTypeQuad([subject, predicate]: Hextuple): boolean {
+        if (predicate !== rdf.type) {
             return false;
         }
-        const subjId = rdfFactory.id(quad.subject);
-        if (!Array.isArray(this.typeCache[subjId])) {
-            this.typeCache[subjId] = [];
+        if (!Array.isArray(this.typeCache[subject])) {
+            this.typeCache[subject] = [];
         }
-        this.typeCache[subjId] = this.quadsFor((quad.subject as NamedNode))
-            .filter((s) => rdfFactory.equals(s.predicate, rdf.type))
-            .map((s) => s.object as NamedNode);
+        const next = [];
+        const q = this.quadsFor(subject);
+        for (let i = 0; i < q.length; i++) {
+            if (q[i][HexPos.predicate] === rdf.type) {
+                next.push(q[i][HexPos.object] as JSNamedNode);
+            }
+        }
+        this.typeCache[subject] = next;
+
         return false;
     }
 }

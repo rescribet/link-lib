@@ -1,6 +1,6 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import { DataFactory, LowLevelStore } from "@ontologies/core";
+import { DataFactory, HexPos, Hextuple, LowLevelStore } from "@ontologies/core";
 
 import { NamedNode, Quad, SomeTerm } from "../rdf";
 import { SomeNode } from "../types";
@@ -10,16 +10,16 @@ import { Equatable } from "./Equatable";
 import { Indexable } from "./Indexable";
 
 export interface IndexedFormulaOpts {
-    quads: Quad[];
-    dataCallback: (quad: Quad) => void;
+    quads: Hextuple[];
+    dataCallback: (quad: Hextuple) => void;
     rdfFactory: DataFactory;
 }
 
-export type PropertyActionCallback = (quad: Quad) => void;
+export type PropertyActionCallback = (quad: Hextuple) => void;
 
 /** Query and modify an array of quads. */
 export default class RDFIndex extends Equatable(Indexable(BasicStore)) implements LowLevelStore {
-    private readonly propertyActions: PropertyActionCallback[][] = [];
+    private readonly propertyActions: { [k: string]: PropertyActionCallback[] } = {};
 
     /**
      * @constructor
@@ -87,14 +87,24 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
     public holdsQuad(quad: Quad): boolean {
         return this.holds(quad.subject, quad.predicate, quad.object, quad.graph);
     }
+    public holdsHex(quad: Hextuple): boolean {
+        return this.matchHex(
+            quad[HexPos.subject],
+            quad[HexPos.predicate],
+            quad[HexPos.object],
+            quad[HexPos.objectDT],
+            quad[HexPos.objectLang],
+            quad[HexPos.graph],
+            true,
+        )?.[0] !== undefined;
+    }
 
     public newPropertyAction(predicate: NamedNode, action: PropertyActionCallback): void {
-        const hash = this.rdfFactory.id(predicate) as number;
-        if (!this.propertyActions[hash]) {
-            this.propertyActions[hash] = [];
+        if (!this.propertyActions[predicate]) {
+            this.propertyActions[predicate] = [];
         }
-        this.propertyActions[hash].push(action);
-        const toBeFixed = this.match(null, predicate, null, null);
+        this.propertyActions[predicate].push(action);
+        const toBeFixed = this.matchHex(null, predicate, null, null, null, null);
         for (let i = 0; i < toBeFixed.length; i++) {
             action(toBeFixed[i]);
         }

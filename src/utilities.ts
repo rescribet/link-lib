@@ -1,12 +1,20 @@
 /* global chrome */
-import rdfFactory, { TermType } from "@ontologies/core";
+import rdfFactory, {
+    HexPos,
+    Hextuple,
+    isBlankNode,
+    isHextuple,
+    JSResource,
+    Literal,
+} from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
-import { Literal, Quad, Term } from "./rdf";
+import { Term } from "./rdf";
 
 import { SomeNode } from "./types";
+import { literalFromHex } from "./utilities/hex";
 
-const memberPrefix = rdf.ns("_").value;
+const memberPrefix = rdf.ns("_");
 
 /**
  * Filters {obj} to only include statements where the subject equals {predicate}.
@@ -15,82 +23,81 @@ const memberPrefix = rdf.ns("_").value;
  * @return A possibly empty filtered array of statements.
  */
 export function allRDFPropertyStatements(
-    obj: Quad[] | undefined,
-    predicate: SomeNode): Quad[] {
+    obj: Hextuple[] | undefined,
+    predicate: JSResource,
+): Hextuple[] {
 
     if (typeof obj === "undefined") {
         return [];
     }
 
     if (rdfFactory.equals(predicate, rdfs.member)) {
-        return obj.filter((s) =>
-            rdfFactory.equals(s.predicate, rdfs.member)
-            || s.predicate.value.startsWith(memberPrefix));
+        return obj.filter(([, p]) => p === rdfs.member || p.startsWith(memberPrefix));
     }
 
-    return obj.filter((s) => rdfFactory.equals(s.predicate, predicate));
+    return obj.filter(([_, p]) => p === predicate);
 }
 
 /**
  * Filters {obj} on subject {predicate} returning the resulting statements' objects.
  * @see allRDFPropertyStatements
  */
-export function allRDFValues(obj: Quad[], predicate: SomeNode): Term[] {
+export function allRDFValues(obj: Hextuple[], predicate: JSResource): Literal[] {
     const props = allRDFPropertyStatements(obj, predicate);
     if (props.length === 0) {
         return [];
     }
 
-    return props.map((s) => s.object);
+    return props.map(([, , v, dt, l]) => [v, dt, l]);
 }
 
 /**
  * Resolve {predicate} to any value, if any. If present, additional values are ignored.
  */
-export function anyRDFValue(obj: Quad[] | undefined, predicate: SomeNode): Term | undefined {
+export function anyRDFValue(obj: Hextuple[] | undefined, predicate: JSResource): Literal | undefined {
     if (!Array.isArray(obj)) {
         return undefined;
     }
 
     const match = rdfFactory.equals(predicate, rdfs.member)
-        ? obj.find((s) => s.predicate.value.startsWith(memberPrefix))
-        :  obj.find((s) => rdfFactory.equals(s.predicate, predicate));
+        ? obj.find(([, p]) => p.startsWith(memberPrefix))
+        :  obj.find(([, p]) => rdfFactory.equals(p, predicate));
 
     if (typeof match === "undefined") {
         return undefined;
     }
 
-    return match.object;
+    return literalFromHex(match);
 }
 
-export function getPropBestLang<T extends Term = Term>(rawProp: Quad | Quad[], langPrefs: string[]): T {
-    if (!Array.isArray(rawProp)) {
-        return rawProp.object as T;
+export function getPropBestLang<T extends Term = Term>(rawProp: Hextuple | Hextuple[], langPrefs: string[]): T {
+    if (isHextuple(rawProp)) {
+        return literalFromHex(rawProp) as unknown as T;
     }
     if (rawProp.length === 1) {
-        return rawProp[0].object as T;
+        return literalFromHex(rawProp[0]) as unknown as T;
     }
     for (let i = 0; i < langPrefs.length; i++) {
-        const pIndex = rawProp.findIndex((p) => "language" in p.object
-            && (p.object as Literal).language === langPrefs[i]);
+        const pIndex = rawProp.findIndex((p) =>
+            p[HexPos.objectLang] === langPrefs[i]);
         if (pIndex >= 0) {
-            return rawProp[pIndex].object as T;
+            return literalFromHex(rawProp[pIndex]) as unknown as T;
         }
     }
 
-    return rawProp[0].object as T;
+    return literalFromHex(rawProp[0]) as unknown as T;
 }
 
-export function getPropBestLangRaw(statements: Quad | Quad[], langPrefs: string[]): Quad {
-    if (!Array.isArray(statements)) {
+export function getPropBestLangRaw(statements: Hextuple | Hextuple[], langPrefs: string[]): Hextuple {
+    if (isHextuple(statements)) {
         return statements;
     }
     if (statements.length === 1) {
         return statements[0];
     }
     for (let i = 0; i < langPrefs.length; i++) {
-        const pIndex = statements.findIndex((s) => "language" in s.object
-            && (s.object as Literal).language === langPrefs[i]);
+        const pIndex = statements.findIndex((s) =>
+            s[HexPos.objectLang] === langPrefs[i]);
         if (pIndex >= 0) {
             return statements[pIndex];
         }
@@ -107,7 +114,7 @@ export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Te
         return rawTerm[0];
     }
     for (let i = 0; i < langPrefs.length; i++) {
-        const pIndex = rawTerm.findIndex((p) => "language" in p && (p as Literal).language === langPrefs[i]);
+        const pIndex = rawTerm.findIndex((p) => Array.isArray(p) && p[2] === langPrefs[i]);
         if (pIndex >= 0) {
             return rawTerm[pIndex];
         }
@@ -121,14 +128,23 @@ export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Te
  * @returns `true` if matches, `false` otherwise.
  */
 export function isDifferentOrigin(href: SomeNode | string): boolean {
-    if (typeof href !== "string" && href.termType === TermType.BlankNode) {
+    if (isBlankNode(href)) {
         return false;
     }
-    const origin = typeof href !== "string" ? href.value : href;
 
-    return !origin.startsWith(self.location.origin + "/");
+    return !(href as string).startsWith(self.location.origin + "/");
 }
 
 export function normalizeType<T1>(type: T1 | T1[]): T1[] {
     return Array.isArray(type) ? type : [type];
+}
+
+export function equals(a: Term, b: Term): boolean {
+    if (typeof a !== typeof b || typeof a === "string") {
+        return a === b;
+    }
+
+    return a[0] === b[0]
+        && a[1] === b[1]
+        && a[2] === b[2];
 }

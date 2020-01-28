@@ -1,7 +1,7 @@
-import rdfFactory, { NamedNode, Quad } from "@ontologies/core";
+import { HexPos, Hextuple, NamedNode } from "@ontologies/core";
 import owl from "@ontologies/owl";
 
-import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
+import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 /*
  * TODO: Basically all of them...
@@ -87,10 +87,10 @@ const nsOWLsameAs = owl.sameAs;
 export const OWL = {
     axioms: [],
 
-    processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
-        if (rdfFactory.equals(item.predicate, nsOWLsameAs)) {
-            const a = ctx.equivalenceSet.add((item.object as SomeNode).id as number);
-            const b = ctx.equivalenceSet.add(item.subject.id as number);
+    processStatement(item: Hextuple, ctx: VocabularyProcessingContext): Hextuple[] | null {
+        if (item[HexPos.predicate] === nsOWLsameAs) {
+            const a = ctx.equivalenceSet.add(item[HexPos.object]);
+            const b = ctx.equivalenceSet.add(item[HexPos.subject]);
             ctx.equivalenceSet.union(a, b);
 
             return [item];

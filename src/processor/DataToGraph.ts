@@ -1,4 +1,11 @@
-import rdfFactory, { Literal, LowLevelStore, NamedNode, Node, TermType } from "@ontologies/core";
+import rdfFactory, {
+    isBlankNode,
+    isLiteral,
+    isNamedNode,
+    LowLevelStore,
+    NamedNode,
+    Node,
+} from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 
 import ll from "../ontology/ll";
@@ -12,8 +19,10 @@ import {
     SerializableDataTypes,
     SomeNode,
 } from "../types";
-import { defaultNS, MAIN_NODE_DEFAULT_IRI, NON_DATA_OBJECTS_CTORS } from "../utilities/constants";
-import { expandProperty } from "../utilities/memoizedNamespace";
+import {
+    MAIN_NODE_DEFAULT_IRI,
+    NON_DATA_OBJECTS_CTORS,
+} from "../utilities/constants";
 
 const BASE = 36;
 const DEC_CUTOFF = 2;
@@ -91,15 +100,15 @@ export function processObject(subject: Node,
         const id = datum["@id"] as SomeNode | undefined || rdfFactory.blankNode();
         blobs = blobs.concat(processDataObject(id, datum, store));
         store.add(subject, predicate, id);
-    } else if (datum && datum.termType === TermType.NamedNode) {
-        store.add(subject, predicate, rdfFactory.namedNode(datum.value));
-    } else if (datum && datum.termType === TermType.Literal) {
+    } else if (isNamedNode(datum)) {
+        store.add(subject, predicate, datum);
+    } else if (isLiteral(datum)) {
         store.add(
             subject,
             predicate,
             rdfFactory.literal(
-                datum.value,
-                (datum as Literal).language || rdfFactory.namedNode((datum as Literal).datatype.value),
+                datum[0],
+                datum[2] || datum[1],
             ),
         );
     } else if (datum !== null && datum !== undefined) {
@@ -114,7 +123,7 @@ function processDataObject(subject: Node, data: DataObject, store: LowLevelStore
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
         if (keys[i] === "@id") { continue; }
-        const predicate = expandProperty(keys[i], defaultNS);
+        const predicate = keys[i];
         const datum = data[keys[i]];
 
         if (predicate === undefined) {
@@ -146,7 +155,7 @@ export function toGraph(
     store?: LowLevelStore,
 ): ParsedObject {
 
-    const passedIRI = iriOrData.termType === TermType.BlankNode || iriOrData.termType === TermType.NamedNode;
+    const passedIRI = isNamedNode(iriOrData) || isBlankNode(iriOrData);
     if (passedIRI && !data) {
         throw new TypeError("Only an IRI was passed to `toObject`, a valid data object has to be the second argument");
     }

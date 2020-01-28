@@ -1,4 +1,4 @@
-import { LowLevelStore, Quad } from "@ontologies/core";
+import { Hextuple, LowLevelStore } from "@ontologies/core";
 import RDFIndex from "../store/RDFIndex";
 import { RDFLibFetcherResponse, ResponseAndFallbacks } from "../types";
 
@@ -17,8 +17,8 @@ export type RDFLibParse = (str: string,
  * Processes a range of media types with parsers from the
  * [rdflib.js package](https://www.npmjs.com/package/rdflib).
  */
-export const createProcessRDF = (rdfParse: RDFLibParse): (response: ResponseAndFallbacks) => Promise<Quad[]> => {
-    return async function processRDF(response: ResponseAndFallbacks): Promise<Quad[]> {
+export const createProcessRDF = (rdfParse: RDFLibParse): (response: ResponseAndFallbacks) => Promise<Hextuple[]> => {
+    return async function processRDF(response: ResponseAndFallbacks): Promise<Hextuple[]> {
         let data: string;
         if (isRdfLibResponse(response)) {
             data = response.responseText;

@@ -1,4 +1,3 @@
-import rdfFactory from "@ontologies/core";
 import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 
@@ -14,10 +13,10 @@ describe("LinkedRenderStore", () => {
             const comp = (): string => "a";
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(comp, schema.Thing));
             const thingComp = store.mapping.getRenderComponent(
-                [rdfFactory.id(schema.Thing)],
+                [schema.Thing],
                 [RCN],
                 DT,
-                rdfFactory.id(rdfs.Resource),
+                rdfs.Resource,
             );
             expect(thingComp).toEqual(comp);
         });
@@ -30,17 +29,17 @@ describe("LinkedRenderStore", () => {
                 [schema.Thing, schema.CreativeWork],
             ));
             const thingComp = store.mapping.getRenderComponent(
-                [rdfFactory.id(schema.Thing)],
+                [schema.Thing],
                 [RCN],
                 DT,
-                rdfFactory.id(rdfs.Resource),
+                rdfs.Resource,
             );
             expect(thingComp).toEqual(comp);
             const cwComp = store.mapping.getRenderComponent(
-                [rdfFactory.id(schema.CreativeWork)],
+                [schema.CreativeWork],
                 [RCN],
                 DT,
-                rdfFactory.id(rdfs.Resource),
+                rdfs.Resource,
             );
             expect(cwComp).toEqual(comp);
         });
@@ -52,10 +51,10 @@ describe("LinkedRenderStore", () => {
             const ident = (): string => "a";
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(ident, schema.Thing, schema.name));
             const nameComp = store.mapping.getRenderComponent(
-                [rdfFactory.id(schema.Thing)],
-                [rdfFactory.id(schema.name)],
+                [schema.Thing],
+                [schema.name],
                 DT,
-                rdfFactory.id(rdfs.Resource),
+                rdfs.Resource,
             );
             expect(nameComp).toEqual(ident);
         });
@@ -70,10 +69,10 @@ describe("LinkedRenderStore", () => {
             ));
             [schema.name, rdfs.label].forEach((prop) => {
                 const nameComp = store.mapping.getRenderComponent(
-                    [rdfFactory.id(schema.Thing)],
-                    [rdfFactory.id(prop)],
+                    [schema.Thing],
+                    [prop],
                     DT,
-                    rdfFactory.id(rdfs.Resource),
+                    rdfs.Resource,
                 );
                 expect(nameComp).toEqual(ident);
                 expect(nameComp).not.toEqual((): string => "b");

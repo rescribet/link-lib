@@ -1,4 +1,4 @@
-import { LowLevelStore, Namespace } from "@ontologies/core";
+import { Hextuple, LowLevelStore, Namespace, Resource } from "@ontologies/core";
 import { Node, SomeTerm } from "@ontologies/core/dist-types/types";
 
 import { ComponentStore } from "./ComponentStore";
@@ -9,8 +9,6 @@ import {
     BlankNode,
     Literal,
     NamedNode,
-    Quad,
-    Quadruple,
 } from "./rdf";
 import { Fetcher } from "./rdflib";
 import { RDFStore } from "./RDFStore";
@@ -24,12 +22,6 @@ export interface ActionMap {
 
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
-export type Indexable = number | string;
-
-export interface IdTerm {
-    id?: Indexable;
-}
-
 export interface ComponentMapping<T> { [type: string]: { [obj: string]: { [topology: string]: T } }; }
 
 export interface SubscriptionRegistrationBase<T> {
@@ -42,7 +34,7 @@ export interface SubscriptionRegistrationBase<T> {
     subscribedAt?: number;
 }
 
-export interface StatementSubscriptionRegistration extends SubscriptionRegistrationBase<ReadonlyArray<Quad>> {
+export interface StatementSubscriptionRegistration extends SubscriptionRegistrationBase<ReadonlyArray<Hextuple>> {
     onlySubjects: false;
 }
 
@@ -54,12 +46,12 @@ export type SubscriptionRegistration = StatementSubscriptionRegistration | NodeS
 
 export interface ComponentRegistration<T> {
     component: T;
-    property: Indexable;
-    topology: Indexable;
-    type: Indexable;
+    property: Resource;
+    topology: Resource;
+    type: Resource;
 }
 
-export type ResponseTransformer = (response: ResponseAndFallbacks) => Promise<Quad[]>;
+export type ResponseTransformer = (response: ResponseAndFallbacks) => Promise<Hextuple[]>;
 
 export interface ErrorResponse {
     errors?: Array<{ message: string }>;
@@ -92,17 +84,17 @@ export interface LinkedRenderStoreOptions<T> {
 }
 
 export interface DeltaProcessor {
-    queueDelta: (delta: Quadruple[], subjects: number[]) => void;
+    queueDelta: (delta: Hextuple[], subjects: string[]) => void;
     /**
      * Process all queued deltas
      * @note: Be sure to assign a new buffer array before starting processing to prevent infinite loops.
      */
-    flush: () => Quad[];
-    processDelta: (delta: Quadruple[]) => Quad[];
+    flush: () => Hextuple[];
+    processDelta: (delta: Hextuple[]) => Hextuple[];
 }
 
-export type StoreProcessorResult = [Quadruple[], Quadruple[], Quad[]];
-export type StoreProcessor = (delta: Quadruple[]) => StoreProcessorResult;
+export type StoreProcessorResult = [Hextuple[], Hextuple[], Hextuple[]];
+export type StoreProcessor = (delta: Hextuple[]) => StoreProcessorResult;
 
 export interface Dispatcher {
     dispatch: MiddlewareActionHandler;
@@ -137,18 +129,18 @@ export type DataTuple = [RDFIndex, NamedBlobTuple[]];
 export type ParsedObject = [SomeNode, LowLevelStore, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
-    changeBuffer: Quad[];
+    changeBuffer: Hextuple[];
     changeBufferCount: number;
 }
 
 export interface LinkedActionResponse {
     /** The IRI of the created resource, based from the Location header. */
     iri: NamedNode | null;
-    data: Quad[];
+    data: Hextuple[];
 }
 
 export interface SaveOpts extends RequestInit {
-    data?: Quad[];
+    data?: Hextuple[];
     url?: NamedNode;
     useDefaultGraph?: boolean;
 }
@@ -221,23 +213,23 @@ export interface GetEntityMessage {
     };
 }
 
-export interface VocabularyProcessingContext<IndexType = Indexable> {
+export interface VocabularyProcessingContext {
     dataStore: RDFStore;
-    equivalenceSet: DisjointSet<IndexType>;
-    superMap: Map<IndexType, Set<IndexType>>;
-    store: Schema<any>;
+    equivalenceSet: DisjointSet<Resource>;
+    superMap: Map<Resource, Set<Resource>>;
+    store: Schema;
 }
 
 export interface VocabularyProcessor {
-    axioms: Quad[];
+    axioms: Hextuple[];
 
-    processStatement: (item: Quad, ctx: VocabularyProcessingContext<any>) => Quad[] | null;
+    processStatement: (item: Hextuple, ctx: VocabularyProcessingContext) => Hextuple[] | null;
 
     /**
      * Processes class instances (object to rdf:type). If an IRI is given, processors must assume the resource to be an
      * instance of rdfs:Class.
      */
-    processType: (type: NamedNode, ctx: VocabularyProcessingContext<any>) => boolean;
+    processType: (type: NamedNode, ctx: VocabularyProcessingContext) => boolean;
 }
 
 export interface TransformerRegistrationRequest {
@@ -261,3 +253,12 @@ export interface DataProcessorOpts {
 export type ResourceQueueItem = [NamedNode, FetchOpts|undefined];
 
 export type WildQuadruple = [Node | null, NamedNode | null, SomeTerm | null, Node | null];
+
+export type WildHextuple = [
+    string | null,
+    string | null,
+    string | null,
+    string | null,
+    string | null,
+    string | null,
+];

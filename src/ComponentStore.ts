@@ -1,4 +1,4 @@
-import rdfFactory from "@ontologies/core";
+import { Resource } from "@ontologies/core";
 import rdfs from "@ontologies/rdfs";
 
 import ll from "./ontology/ll";
@@ -7,7 +7,6 @@ import { Schema } from "./Schema";
 import {
     ComponentMapping,
     ComponentRegistration,
-    Indexable,
 } from "./types";
 import { DEFAULT_TOPOLOGY } from "./utilities/constants";
 
@@ -16,9 +15,9 @@ const MSG_TYPE_ERR = "Non-optimized NamedNode instance given. Please memoize you
 /** Constant used to determine that a component is used to render a type rather than a property. */
 export const RENDER_CLASS_NAME: NamedNode = ll.typeRenderClass;
 
-function convertToCacheKey(types: Indexable[], props: Indexable[], topology: Indexable): string {
-    return `${types.join()}[${props.join()}][${topology}]`;
-}
+// function convertToCacheKey(types: Resource[], props: Resource[], topology: Resource): string {
+//     return `${types.join()}[${props.join()}][${topology}]`;
+// }
 
 const assert = (obj: any): void => {
     if (obj === undefined) {
@@ -35,9 +34,9 @@ export class ComponentStore<T> {
      * @see LinkedRenderStore#registerAll
      */
     public static registerRenderer<T>(component: T,
-                                      types: Indexable[],
-                                      properties: Indexable[],
-                                      topologies: Indexable[]): Array<ComponentRegistration<T>> {
+                                      types: Resource[],
+                                      properties: Resource[],
+                                      topologies: Resource[]): Array<ComponentRegistration<T>> {
         if (typeof component === "undefined") {
             throw new Error(`Undefined component was given for (${types}, ${properties}, ${topologies}).`);
         }
@@ -63,7 +62,7 @@ export class ComponentStore<T> {
         return registrations;
     }
 
-    private lookupCache: { [s: string]: T } = {};
+    // private lookupCache: { [s: string]: T } = {};
     /**
      * Lookup map ordered with the following hierarchy;
      * [propertyType][resourceType][topology]
@@ -73,49 +72,49 @@ export class ComponentStore<T> {
 
     public constructor(schema: Schema) {
         this.schema = schema;
-        this.mapping[rdfFactory.id(RENDER_CLASS_NAME)] = {};
+        this.mapping[RENDER_CLASS_NAME] = {};
     }
 
     /**
      * TODO: remove defaultType - Basically a bug. We default the type if no matches were found, rather than using
      *   inheritance to associate unknown types the RDF way (using rdfs:Resource).
      */
-    public getRenderComponent(types: Indexable[],
-                              predicates: Indexable[],
-                              topology: Indexable,
-                              defaultType: Indexable): T | undefined {
+    public getRenderComponent(types: Resource[],
+                              predicates: Resource[],
+                              topology: Resource,
+                              defaultType: Resource): T | undefined {
         const oTypes = this.schema.expand(types);
-        const key = convertToCacheKey(oTypes, predicates, topology);
-        const cached = this.getComponentFromCache(key);
-        if (cached !== undefined) {
-            return cached;
-        }
+        // const key = convertToCacheKey(oTypes, predicates, topology);
+        // const cached = this.getComponentFromCache(key);
+        // if (cached !== undefined) {
+        //     return cached;
+        // }
 
         for (let p = 0; p < predicates.length; p++) {
             for (let t = 0; t < oTypes.length; t++) {
                 const exact = this.lookup(predicates[p], oTypes[t], topology);
                 if (exact !== undefined) {
-                    return this.addComponentToCache(exact, key);
+                    return exact; // this.addComponentToCache(exact, key);
                 }
             }
         }
 
         const possibleComponents = this.possibleComponents(predicates, topology);
         if (possibleComponents.length === 0) {
-            if (topology === rdfFactory.id(DEFAULT_TOPOLOGY)) {
+            if (topology === DEFAULT_TOPOLOGY) {
                 return undefined;
             }
             const foundComponent = this.getRenderComponent(
                 oTypes,
                 predicates,
-                rdfFactory.id(DEFAULT_TOPOLOGY),
+                DEFAULT_TOPOLOGY,
                 defaultType,
             );
             if (!foundComponent) {
                 return undefined;
             }
 
-            return this.addComponentToCache(foundComponent, key);
+            return foundComponent; // this.addComponentToCache(foundComponent, key);
         }
         for (let i = 0; i < predicates.length; i++) {
             const bestComponent = this.bestComponent(possibleComponents, oTypes);
@@ -125,13 +124,13 @@ export class ComponentStore<T> {
                 topology,
             );
             if (component) {
-                return this.addComponentToCache(component, key);
+                return component; // this.addComponentToCache(component, key);
             }
         }
         for (let i = 0; i < predicates.length; i++) {
             const component = this.lookup(predicates[i], defaultType, topology);
             if (component) {
-                return this.addComponentToCache(component, key);
+                return component; // this.addComponentToCache(component, key);
             }
         }
 
@@ -146,15 +145,15 @@ export class ComponentStore<T> {
      * @param [topology] An alternate topology this {component} should render.
      */
     public registerRenderer(component: T,
-                            type: Indexable,
-                            property: Indexable = rdfFactory.id(RENDER_CLASS_NAME),
-                            topology: Indexable = rdfFactory.id(DEFAULT_TOPOLOGY)): void {
+                            type: Resource,
+                            property: Resource = RENDER_CLASS_NAME,
+                            topology: Resource = DEFAULT_TOPOLOGY): void {
         if (!property || !type) {
             return;
         }
 
         this.store(component, property, type, topology);
-        this.lookupCache = {};
+        // this.lookupCache = {};
     }
 
     /**
@@ -165,9 +164,9 @@ export class ComponentStore<T> {
      * @param cache The cache to look into (defaults to the mapping)
      * @returns The appropriate component if any
      */
-    protected lookup(predicate: Indexable,
-                     obj: Indexable,
-                     topology: Indexable,
+    protected lookup(predicate: Resource,
+                     obj: Resource,
+                     topology: Resource,
                      cache: ComponentMapping<T> = this.mapping): T | undefined {
         const predMap = cache[predicate];
         if (!predMap || !predMap[obj]) {
@@ -179,9 +178,9 @@ export class ComponentStore<T> {
 
     /** Store a component to a cache. */
     protected store(component: T,
-                    predicate: Indexable,
-                    obj: Indexable,
-                    topology: Indexable,
+                    predicate: Resource,
+                    obj: Resource,
+                    topology: Resource,
                     cache: ComponentMapping<T> = this.mapping): void {
         if (typeof cache[predicate] === "undefined") {
             cache[predicate] = {};
@@ -192,17 +191,17 @@ export class ComponentStore<T> {
         cache[predicate][obj][topology] = component;
     }
 
-    /**
-     * Adds a renderer to {this.lookupCache}
-     * @param component The render component.
-     * @param key The memoization key.
-     * @returns The renderer passed with {component}
-     */
-    private addComponentToCache(component: T, key: string): T {
-        this.lookupCache[key] = component;
-
-        return this.lookupCache[key];
-    }
+    // /**
+    //  * Adds a renderer to {this.lookupCache}
+    //  * @param component The render component.
+    //  * @param key The memoization key.
+    //  * @returns The renderer passed with {component}
+    //  */
+    // private addComponentToCache(component: T, key: string): T {
+    //     this.lookupCache[key] = component;
+    //
+    //     return this.lookupCache[key];
+    // }
 
     /**
      * Expands the given types and returns the best component to render it with.
@@ -210,7 +209,7 @@ export class ComponentStore<T> {
      * @param [types] The types to expand on.
      * @returns The best match for the given components and types.
      */
-    private bestComponent(components: Indexable[], types: Indexable[]): Indexable | undefined {
+    private bestComponent(components: Resource[], types: Resource[]): Resource | undefined {
         if (types.length > 0) {
             const direct = this.schema.sort(types).find((c) => components.indexOf(c) >= 0);
             if (direct) {
@@ -223,25 +222,26 @@ export class ComponentStore<T> {
         return components.find((c) => chain.indexOf(c) > 0);
     }
 
-    /**
-     * Resolves a renderer from the {lookupCache}.
-     * @param key The key to look up.
-     * @returns If saved the render component, otherwise undefined.
-     */
-    private getComponentFromCache(key: string): T | undefined {
-        return this.lookupCache[key];
-    }
+    // /**
+    //  * Resolves a renderer from the {lookupCache}.
+    //  * @param key The key to look up.
+    //  * @returns If saved the render component, otherwise undefined.
+    //  */
+    // private getComponentFromCache(key: string): T | undefined {
+    //     return this.lookupCache[key];
+    // }
 
-    private possibleComponents(predicates: Indexable[], topology: Indexable): Indexable[] {
-        const classes = [rdfFactory.id(rdfs.Resource)];
+    private possibleComponents(predicates: Resource[], topology: Resource): Resource[] {
+        const classes = [rdfs.Resource];
         for (let i = 0; i < predicates.length; i++) {
             const predicate = predicates[i];
             if (typeof this.mapping[predicate] !== "undefined") {
-                const types = Object.values(this.mapping[predicate]);
+                const types = Object.keys(this.mapping[predicate]);
                 for (let j = 0; j < types.length; j++) {
-                    const compType = this.lookup(predicate, j, topology);
+                    // TODO: verify
+                    const compType = this.lookup(predicate, types[j], topology);
                     if (compType !== undefined) {
-                        classes.push(j);
+                        classes.push(types[j]);
                     }
                 }
             }

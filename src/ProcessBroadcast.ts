@@ -1,4 +1,4 @@
-import { Quad } from "./rdf";
+import { Hextuple, Resource } from "@ontologies/core";
 
 import { SubscriptionRegistrationBase } from "./types";
 
@@ -17,7 +17,7 @@ declare global {
 export interface ProcessBroadcastOpts {
     bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
     /** Ids of the subjects which have been changed in this batch */
-    changedSubjects: number[];
+    changedSubjects: string[];
     /**
      * Subject registrations to call
      * It is assumed to only contain subscriptions relevant to the {work}.
@@ -25,7 +25,7 @@ export interface ProcessBroadcastOpts {
     subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
     timeout: number;
     /** Statements which have changed in the store */
-    work: Quad[] | ReadonlyArray<Quad>;
+    work: Hextuple[] | ReadonlyArray<Hextuple>;
 }
 
 /**
@@ -33,12 +33,12 @@ export interface ProcessBroadcastOpts {
  */
 export class ProcessBroadcast {
     private readonly bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
-    private readonly changedSubjects: number[];
+    private readonly changedSubjects: Resource[];
     private readonly hasIdleCallback: boolean;
     private readonly hasRequestAnimationFrame: boolean;
     private readonly regUpdateTime: number;
     private subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
-    private readonly work: ReadonlyArray<Quad>;
+    private readonly work: ReadonlyArray<Hextuple>;
     private resolve: () => void;
     private readonly timeout: number;
 

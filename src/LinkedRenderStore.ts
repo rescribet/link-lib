@@ -1,11 +1,15 @@
 import rdfFactory, {
+    HexPos,
+    Hextuple,
+    isBlankNode,
+    isLiteral,
+    isNode,
     isQuad,
+    Literal,
     NamedNode,
     Node,
     Quad,
-    Quadruple,
-    Term,
-    TermType,
+    Resource,
 } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
@@ -28,7 +32,6 @@ import {
     EmptyRequestStatus,
     ErrorReporter,
     FetchOpts,
-    Indexable,
     LazyNNArgument,
     LinkedActionResponse,
     LinkedRenderStoreOptions,
@@ -38,11 +41,12 @@ import {
     SomeRequestStatus,
     SubscriptionRegistrationBase,
 } from "./types";
-import { normalizeType } from "./utilities";
+import { equals, normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
+import { quadToHex } from "./utilities/hex";
 
-const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
-    .map((t) => rdfFactory.id(t || defaultValue));
+const normalizedIds = (item: Node | Node[], defaultValue: Node): string[] => normalizeType(item)
+    .map((t) => t || defaultValue);
 
 /**
  * Main entrypoint into the functionality of link-lib.
@@ -56,9 +60,9 @@ export class LinkedRenderStore<T> implements Dispatcher {
         component: T,
         type: LazyNNArgument,
         prop: LazyNNArgument = RENDER_CLASS_NAME,
-        topology: LazyNNArgument | Array<NamedNode | undefined> = DEFAULT_TOPOLOGY): Array<ComponentRegistration<T>> {
+        topology: LazyNNArgument = DEFAULT_TOPOLOGY): Array<ComponentRegistration<T>> {
 
-        const types = normalizedIds(type);
+        const types = normalizeType(type);
         const props = normalizedIds(prop, RENDER_CLASS_NAME);
         const topologies = normalizedIds(topology, DEFAULT_TOPOLOGY);
 
@@ -84,7 +88,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
     public api: LinkedDataAPI;
     public mapping: ComponentStore<T>;
-    public schema: Schema<Indexable>;
+    public schema: Schema;
     public store: RDFStore = new RDFStore();
 
     private _dispatch?: MiddlewareActionHandler;
@@ -154,8 +158,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
      *
      * Statements added here will also be added to the data store so views can access the statements.
      */
-    public addOntologySchematics(items: Quad[]): void {
-        this.schema.addQuads(items);
+    public addOntologySchematics(items: Hextuple[]): void {
+        this.schema.addHextuples(items);
     }
 
     /**
@@ -196,7 +200,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param subject The resource to start descending on
      * @param path A list of linked predicates to descend on.
      */
-    public dig(subject: Node, path: NamedNode[]): Term[] {
+    public dig(subject: Node, path: NamedNode[]): Literal[] {
         if (path.length === 0) {
             return [];
         }
@@ -211,8 +215,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const props = this.getResourceProperties(subject, pred!);
         if (props) {
             return props
-                .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
-                    && this.dig(term as Node, remaining))
+                .map((term) => isNode(term) && this.dig(term as Node, remaining))
                 .flat(1)
                 .filter(Boolean);
         }
@@ -227,7 +230,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param path A list of linked predicates to descend on.
      * @param match The value which the predicate at the end of {path} has to match for its subject to return.
      */
-    public findSubject(subject: Node, path: NamedNode[], match: Term | Term[]): Node[] {
+    public findSubject(subject: Resource, path: Resource[], match: Literal | Literal[]): Resource[] {
         if (path.length === 0) {
             return [];
         }
@@ -237,15 +240,15 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const props = this.getResourceProperties(subject, pred!);
 
         if (props && remaining.length === 0) {
-            const finder = Array.isArray(match)
-                ? (p: Term): boolean => match.some((m) => rdfFactory.equals(m, p))
-                : (p: Term): boolean => rdfFactory.equals(match, p);
+            const finder = Array.isArray(match) && !isLiteral(match)
+                ? (p: Literal): boolean => match.some((m) => equals(m, p))
+                : (p: Literal): boolean => equals(match, p);
 
             return props.find(finder) ? [subject] : [];
         } else if (props) {
             return props
-                .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
-                    && this.findSubject(term as Node, remaining, match))
+                .map(([v, dt]) => (dt === rdf.ns("namedNode") || dt === rdf.ns("blankNode"))
+                    && this.findSubject(v, remaining, match))
                 .flat(1)
                 .filter(Boolean);
         }
@@ -268,14 +271,14 @@ export class LinkedRenderStore<T> implements Dispatcher {
         if (type === undefined || (Array.isArray(type) && type.length === 0)) {
             return undefined;
         }
-        const types = normalizeType(type).map((t) => rdfFactory.id(t));
-        const predicates = normalizeType(predicate).map((p) => rdfFactory.id(p));
+        const types = normalizeType(type);
+        const predicates = normalizeType(predicate);
 
         return this.mapping.getRenderComponent(
             types,
             predicates,
-            rdfFactory.id(topology),
-            rdfFactory.id(this.defaultType),
+            topology,
+            this.defaultType,
         );
     }
 
@@ -314,15 +317,18 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * Note: This should only be used by render-libraries (e.g. link-redux), not by application code.
      * @renderlibrary This should only be used by render-libraries, not by application code.
      */
-    public queueDelta(delta: Array<Quadruple|void> | Quad[], expedite = false): Promise<void> {
+    public queueDelta(delta: Array<Hextuple|void> | Quad[], expedite = false): Promise<void> {
         const quadArr = isQuad(delta[0])
             ? (delta as Quad[]).map((s: Quad) => rdfFactory.qdrFromQuad(s))
-            : delta as Quadruple[];
-        const subjects = quadArr
-            .reduce(
-                (acc, [s]) => acc.includes(rdfFactory.id(s)) ? acc : acc.concat(rdfFactory.id(s)),
-                [] as number[],
-            );
+            : delta as Hextuple[];
+        const subjects: Resource[] = [];
+        let sub;
+        for (let i = 0; i < quadArr.length; i++) {
+            sub = quadArr[i][HexPos.subject];
+            if (!subjects.includes(sub)) {
+                subjects.push(sub);
+            }
+        }
 
         for (const dp of this.deltaProcessors) {
             dp.queueDelta(quadArr, subjects);
@@ -349,7 +355,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             preExistingData = this.tryEntity(iri);
         }
         if (preExistingData !== undefined) {
-            this.store.removeQuads(preExistingData);
+            this.store.removeHexes(preExistingData);
         }
         await this.api.getEntity(iri, apiOpts);
         return this.broadcast();
@@ -363,7 +369,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Statement[]} All the statements of {property} on {subject}, or an empty array when none are present.
      */
-    public getResourcePropertyRaw(subject: Node, property: Node | Node[]): Quad[] {
+    public getResourcePropertyRaw(subject: Node, property: Node | Node[]): Hextuple[] {
         return this.store.getResourcePropertyRaw(subject, property);
     }
 
@@ -376,7 +382,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Term[]} The resolved values of {property}, or an empty array when none are present.
      */
-    public getResourceProperties<TT extends Term = Term>(subject: Node, property: Node | Node[]): TT[] {
+    public getResourceProperties<TT extends Literal = Literal>(subject: Node, property: Node | Node[]): TT[] {
         return this.store.getResourceProperties<TT>(subject, property);
     }
 
@@ -392,7 +398,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Term | undefined} The resolved value of {property}, or undefined when none are present.
      */
-    public getResourceProperty<TT extends Term = Term>(subject: Node, property: Node | Node[]): TT | undefined {
+    public getResourceProperty<TT extends Literal = Literal>(subject: Node, property: Node | Node[]): TT | undefined {
         return this.store.getResourceProperty<TT>(subject, property);
     }
 
@@ -402,7 +408,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * Status 202 indicates that the resource has been queued for fetching (subject to change).
      */
     public getStatus(iri: Node): SomeRequestStatus {
-        if (iri.termType === TermType.BlankNode) {
+        if (isBlankNode(iri)) {
             return emptyRequest as EmptyRequestStatus;
         }
 
@@ -427,12 +433,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param expedite Will immediately process the delta rather than waiting for an idle moment, useful in conjunction
      *  with event handlers within the UI needing immediate feedback. Might cause jumpy interfaces.
      */
-    public processDelta(delta: Array<Quadruple|void> | Quad[], expedite = false): Promise<Quad[]> {
+    public processDelta(delta: Array<Hextuple|void> | Quad[], expedite = false): Promise<Hextuple[]> {
         const quadArr = Object.prototype.hasOwnProperty.call(delta[0], "subject")
-            ? (delta as Quad[]).map((s: Quad) => rdfFactory.qdrFromQuad(s))
-            : delta as Quadruple[];
+            ? (delta as Quad[]).map(quadToHex)
+            : delta as Hextuple[];
         const statements = this.deltaProcessors
-            .reduce((acc: Quad[], dp: DeltaProcessor) => acc.concat(dp.processDelta(quadArr)), []);
+            .reduce((acc: Hextuple[], dp: DeltaProcessor) => acc.concat(dp.processDelta(quadArr)), []);
 
         return this.broadcastWithExpedite(expedite)
             .then(() => statements);
@@ -497,7 +503,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
                                      predicate: NamedNode | NamedNode[],
                                      topology?: NamedNode): T | undefined {
         return this.getComponentForProperty(
-            this.store.getResourceProperties(subject, rdf.type) as NamedNode[],
+            this.store.getResourceProperties(subject, rdf.type).map((s) => s[0]),
             predicate,
             topology || DEFAULT_TOPOLOGY,
         );
@@ -513,7 +519,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      */
     public resourceComponent(subject: Node, topology?: NamedNode): T | undefined {
         return this.getComponentForProperty(
-            this.store.getResourceProperties(subject, rdf.type) as NamedNode[],
+            this.store.getResourceProperties(subject, rdf.type).map((s) => s[0]),
             RENDER_CLASS_NAME,
             topology || DEFAULT_TOPOLOGY,
         );
@@ -526,7 +532,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @unstable
      */
     public shouldLoadResource(subject: Node): boolean {
-        return (this.store.changeTimestamps[rdfFactory.id(subject)] === undefined || this.api.isInvalid(subject))
+        return (this.store.changeTimestamps[subject] === undefined || this.api.isInvalid(subject))
             && !this.resourceQueue.find(([i]) => rdfFactory.equals(i, subject))
             && !isPending(this.api.getStatus(subject));
     }
@@ -547,7 +553,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
         if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {
             for (let i = 0, len = subjectFilter.length; i < len; i++) {
-                const id = rdfFactory.id(subjectFilter[i]);
+                const id = subjectFilter[i];
                 if (!this.subjectSubscriptions[id]) {
                     this.subjectSubscriptions[id] = [];
                 }
@@ -582,7 +588,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param iri The Node of the resource.
      * @returns The object if found, or undefined.
      */
-    public tryEntity(iri: Node): Quad[] {
+    public tryEntity(iri: Node): Hextuple[] {
         return this.store.quadsFor(iri);
     }
 
@@ -624,20 +630,19 @@ export class LinkedRenderStore<T> implements Dispatcher {
         }
 
         const work = this.deltaProcessors.flatMap((dp) => dp.flush());
-        const subjects = work
+        const subjects = Array.from(new Set(work
             .flatMap((w) => [
-                rdfFactory.id(w.subject),
-                rdfFactory.id(w.graph),
-                rdfFactory.id(this.store.canon(w.subject)),
-                rdfFactory.id(this.store.canon(w.graph)),
-            ])
-            .reduce<number[]>((acc, w) => acc.includes(w) ? acc : acc.concat(w), []);
+                w[HexPos.subject],
+                w[HexPos.graph],
+                this.store.canon(w[HexPos.subject]),
+                this.store.canon(w[HexPos.graph]),
+            ])));
         const subjectRegs = subjects
             .flatMap((id) => this.subjectSubscriptions[id])
             .filter((reg) => reg
                 && !reg.markedForDelete
                 && (reg.subjectFilter
-                    ? reg.subjectFilter.some((s) => subjects.includes(rdfFactory.id(s)))
+                    ? reg.subjectFilter.some((s) => subjects.includes(s))
                     : true));
 
         if (this.bulkSubscriptions.length === 0 && subjectRegs.length === 0) {

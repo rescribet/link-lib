@@ -14,7 +14,7 @@ export const linkMiddleware = <T>(catchActions = true): MiddlewareFn<T> =>
         (next: MiddlewareActionHandler): MiddlewareActionHandler =>
             (action: NamedNode, args: any): Promise<any> => {
 
-    if (action.value.startsWith(ll.ns("data/rdflib/").value)) {
+    if (action.startsWith(ll.ns("data/rdflib/"))) {
         return Promise.resolve(lrs.touch(args[0], args[1]));
     }
 

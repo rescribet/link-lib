@@ -51,7 +51,7 @@ describe("Schema", () => {
 
         describe("#addStatements", () => {
             it("adds an empty array", () => {
-                expect(blankSchema().addQuads([])).toHaveLength(0);
+                expect(blankSchema().addHextuples([])).toHaveLength(0);
             });
 
             it("adds ontology statements", () => {
@@ -60,7 +60,7 @@ describe("Schema", () => {
 
                 expect(schema.holdsQuad(personIsAClass)).toBeFalsy();
 
-                schema.addQuads([personIsAClass]);
+                schema.addHextuples([personIsAClass]);
 
                 expect(schema.holdsQuad(personIsAClass)).toBeTruthy();
             });
@@ -69,7 +69,7 @@ describe("Schema", () => {
                 const schema = blankSchema();
                 const statement = resource1[1];
 
-                schema.addQuads([statement]);
+                schema.addHextuples([statement]);
 
                 expect(schema.holdsQuad(statement)).toBeFalsy();
             });
@@ -79,35 +79,35 @@ describe("Schema", () => {
             it("returns the default ", () => {
                 const s = blankSchema();
                 expect(s.mineForTypes([]))
-                    .toEqual([rdfFactory.id(rdfs.Resource)]);
+                    .toEqual([rdfs.Resource]);
             });
 
             it("ensures all have rdfs:Resource as base class", () => {
                 const schema = blankSchema();
                 const result = [
-                    rdfFactory.id(schemaNS.CreativeWork),
-                    rdfFactory.id(rdfs.Resource),
+                    schemaNS.CreativeWork,
+                    rdfs.Resource,
                 ];
 
-                expect(schema.mineForTypes([rdfFactory.id(schemaNS.CreativeWork)]))
+                expect(schema.mineForTypes([schemaNS.CreativeWork]))
                     .toEqual(result);
             });
 
             it("adds superclasses", () => {
                 const schema = blankSchema();
                 const result = [
-                    rdfFactory.id(schemaNS.BlogPosting),
-                    rdfFactory.id(schemaNS.CreativeWork),
-                    rdfFactory.id(schemaNS.Thing),
-                    rdfFactory.id(rdfs.Resource),
+                    schemaNS.BlogPosting,
+                    schemaNS.CreativeWork,
+                    schemaNS.Thing,
+                    rdfs.Resource,
                 ];
 
-                schema.addQuads([
+                schema.addHextuples([
                     rdfFactory.quad(schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing),
                     rdfFactory.quad(schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork),
                 ]);
 
-                expect(schema.mineForTypes([rdfFactory.id(schemaNS.BlogPosting)]))
+                expect(schema.mineForTypes([schemaNS.BlogPosting]))
                     .toEqual(result);
             });
         });
@@ -115,7 +115,7 @@ describe("Schema", () => {
 
     describe("when filled", () => {
         const schema = blankSchema();
-        schema.addQuads([
+        schema.addHextuples([
             rdfFactory.quad(NS.ex("A"), rdfs.subClassOf, rdfs.Class),
 
             rdfFactory.quad(NS.ex("B"), rdfs.subClassOf, NS.ex("A")),
@@ -134,29 +134,29 @@ describe("Schema", () => {
         describe("#sort", () => {
             it("accounts for class inheritance", () => {
                 expect(schema.sort([
-                    rdfFactory.id(NS.ex("D")),
-                    rdfFactory.id(NS.ex("A")),
-                    rdfFactory.id(NS.ex("C")),
+                    NS.ex("D"),
+                    NS.ex("A"),
+                    NS.ex("C"),
                 ])).toEqual([
-                    rdfFactory.id(NS.ex("D")), // 3
-                    rdfFactory.id(NS.ex("C")), // 2
-                    rdfFactory.id(NS.ex("A")), // 1
+                    NS.ex("D"), // 3
+                    NS.ex("C"), // 2
+                    NS.ex("A"), // 1
                 ]);
             });
 
             it("accounts for supertype depth", () => {
                 expect(schema.sort([
-                    rdfFactory.id(NS.ex("G")),
-                    rdfFactory.id(NS.ex("C")),
-                    rdfFactory.id(NS.ex("B")),
-                    rdfFactory.id(NS.ex("A")),
-                    rdfFactory.id(NS.ex("D")),
+                    NS.ex("G"),
+                    NS.ex("C"),
+                    NS.ex("B"),
+                    NS.ex("A"),
+                    NS.ex("D"),
                 ])).toEqual([
-                    rdfFactory.id(NS.ex("D")), // 3
-                    rdfFactory.id(NS.ex("C")), // 2
-                    rdfFactory.id(NS.ex("B")), // 2
-                    rdfFactory.id(NS.ex("G")), // 2
-                    rdfFactory.id(NS.ex("A")), // 1
+                    NS.ex("D"), // 3
+                    NS.ex("C"), // 2
+                    NS.ex("B"), // 2
+                    NS.ex("G"), // 2
+                    NS.ex("A"), // 1
                 ]);
             });
         });

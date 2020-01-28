@@ -1,4 +1,4 @@
-import rdfFactory, { Quadruple } from "@ontologies/core";
+import rdfFactory, { Hextuple } from "@ontologies/core";
 
 import { getBasicStore } from "../../testUtilities";
 
@@ -7,10 +7,10 @@ import { ex, ld } from "./fixtures";
 describe("LinkedRenderStore", () => {
     describe("#queueDelta", () => {
         const quadDelta = [
-            [ex("1"), ex("p"), ex("2"), ld.add],
-            [ex("1"), ex("t"), rdfFactory.literal("Test"), ld.add],
-            [ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add],
-        ] as Quadruple[];
+            rdfFactory.quad(ex("1"), ex("p"), ex("2"), ld.add),
+            rdfFactory.quad(ex("1"), ex("t"), rdfFactory.literal("Test"), ld.add),
+            rdfFactory.quad(ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add),
+        ] as Hextuple[];
 
         it("queues an empty delta", async () => {
             const store = getBasicStore();
@@ -32,7 +32,7 @@ describe("LinkedRenderStore", () => {
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
             expect(processor.queueDelta).toHaveBeenCalledWith(
                 quadDelta,
-                [rdfFactory.id(ex("1")), rdfFactory.id(ex("2"))],
+                [ex("1"), ex("2")],
             );
         });
 
@@ -55,7 +55,7 @@ describe("LinkedRenderStore", () => {
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
             expect(processor.queueDelta).toHaveBeenCalledWith(
                 quadDelta,
-                [rdfFactory.id(ex("1")), rdfFactory.id(ex("2"))],
+                [ex("1"), ex("2")],
             );
         });
     });

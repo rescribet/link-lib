@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { Hextuple } from "@ontologies/core";
 import rdfx from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
@@ -12,7 +12,6 @@ import {
 import "jest";
 
 import ll from "../../ontology/ll";
-import { Quad } from "../../rdf";
 import RDFIndex from "../../store/RDFIndex";
 
 import { BasicComponent, ExplodedLRS, getBasicStore } from "../../testUtilities";
@@ -65,7 +64,7 @@ describe("DataProcessor", () => {
         it("throws an error when the target isn't a node", async () => {
             const store = getBasicStore();
 
-            store.store.addQuads([
+            store.store.addHextuples([
                 object1,
                 rdfFactory.quad(subject, schema.target, rdfFactory.literal("targets/5")),
             ]);
@@ -84,7 +83,7 @@ describe("DataProcessor", () => {
         it("throws an error when the url is undefined", async () => {
             const store = getBasicStore();
 
-            store.store.addQuads([
+            store.store.addHextuples([
                 object1,
                 target5,
             ]);
@@ -103,7 +102,7 @@ describe("DataProcessor", () => {
         it("throws an error when the url is a blank node", async () => {
             const store = getBasicStore();
 
-            store.store.addQuads([
+            store.store.addHextuples([
                 object1,
                 target5,
                 rdfFactory.quad(defaultNS.example("targets/5"), schema.url, rdfFactory.blankNode()),
@@ -123,7 +122,7 @@ describe("DataProcessor", () => {
         it("calls processExecAction", async () => {
             const store = getBasicStore();
 
-            store.store.addQuads([
+            store.store.addHextuples([
                 object1,
                 target5,
                 rdfFactory.quad(defaultNS.example("targets/5"), schema.url, defaultNS.example("test")),
@@ -212,8 +211,8 @@ describe("DataProcessor", () => {
             const body = new URLSearchParams(fetchMock.mock.calls[0][1].body);
             const resources = body.getAll("resource[]");
             expect(resources).toHaveLength(2);
-            expect(resources).toContain(encodeURIComponent(defaultNS.ex("a").value));
-            expect(resources).toContain(encodeURIComponent(defaultNS.ex("b").value));
+            expect(resources).toContain(encodeURIComponent(defaultNS.ex("a")));
+            expect(resources).toContain(encodeURIComponent(defaultNS.ex("b")));
         });
     });
 
@@ -268,7 +267,7 @@ describe("DataProcessor", () => {
             const subject = defaultNS.example("resource/5");
 
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = "";
+            (store.processor as any).fetcher.requested[subject] = "";
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", false);
@@ -280,7 +279,7 @@ describe("DataProcessor", () => {
             const subject = defaultNS.example("resource/5");
 
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = undefined;
+            (store.processor as any).fetcher.requested[subject] = undefined;
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", true);
@@ -291,15 +290,15 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("resource/6");
 
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(
                     rdfFactory.blankNode(),
                     defaultNS.link("requestedURI"),
-                    rdfFactory.literal(subject.value),
+                    rdfFactory.literal(subject),
                 ),
             ]);
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = true;
+            (store.processor as any).fetcher.requested[subject] = true;
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", true);
@@ -311,11 +310,11 @@ describe("DataProcessor", () => {
             const subject = defaultNS.example("resource/6");
 
             const requestInfo = rdfFactory.blankNode();
-            store.store.addQuads([
-                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+            store.store.addHextuples([
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject)),
             ]);
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = "other";
+            (store.processor as any).fetcher.requested[subject] = "other";
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", false);
@@ -326,15 +325,15 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             const subject = defaultNS.example("resource/6");
 
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(
                     rdfFactory.blankNode(),
                     defaultNS.link("requestedURI"),
-                    rdfFactory.literal(subject.value),
+                    rdfFactory.literal(subject),
                 ),
             ]);
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = "timeout";
+            (store.processor as any).fetcher.requested[subject] = "timeout";
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", true);
@@ -348,13 +347,13 @@ describe("DataProcessor", () => {
             const response = rdfFactory.blankNode();
             const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
-            store.store.addQuads([
-                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+            store.store.addHextuples([
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject)),
                 rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
                 rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = "done";
+            (store.processor as any).fetcher.requested[subject] = "done";
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", true);
@@ -368,13 +367,13 @@ describe("DataProcessor", () => {
             const response = rdfFactory.blankNode();
             const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
-            store.store.addQuads([
-                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+            store.store.addHextuples([
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject)),
                 rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
                 rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = "other";
+            (store.processor as any).fetcher.requested[subject] = "other";
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", false);
@@ -388,14 +387,14 @@ describe("DataProcessor", () => {
             const response = rdfFactory.blankNode();
             const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
-            store.store.addQuads([
-                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+            store.store.addHextuples([
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject)),
                 rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
                 rdfFactory.quad(response, defaultNS.httph("status"), rdfFactory.literal(259)),
                 rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = "done";
+            (store.processor as any).fetcher.requested[subject] = "done";
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", true);
@@ -410,14 +409,14 @@ describe("DataProcessor", () => {
             const response = rdfFactory.blankNode();
             const requestInfo = rdfFactory.blankNode();
             const requestDate = new Date();
-            store.store.addQuads([
-                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject.value)),
+            store.store.addHextuples([
+                rdfFactory.quad(requestInfo, defaultNS.link("requestedURI"), rdfFactory.literal(subject)),
                 rdfFactory.quad(requestInfo, defaultNS.link("response"), response),
                 rdfFactory.quad(response, defaultNS.httph("status"), rdfFactory.literal(259)),
                 rdfFactory.quad(response, defaultNS.httph("date"), rdfFactory.literal(requestDate.toISOString())),
             ]);
             (store.processor as any).fetcher = { requested: {} };
-            (store.processor as any).fetcher.requested[subject.value] = "done";
+            (store.processor as any).fetcher.requested[subject] = "done";
             const status = store.processor.getStatus(subject);
 
             expect(status).toHaveProperty("requested", true);
@@ -436,7 +435,7 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             // @ts-ignore
             const map = store.processor.statusMap;
-            map[rdfFactory.id(defaultNS.example("test"))] = emptyRequest;
+            map[defaultNS.example("test")] = emptyRequest;
 
             expect(Object.values(map).filter(Boolean).length).toEqual(1);
             // @ts-ignore
@@ -488,7 +487,7 @@ describe("DataProcessor", () => {
             store.processor.dispatch = dispatch;
 
             const headers = new Headers();
-            headers.append("Exec-Action", defaultNS.example("action/something?text=Hello%20world").value);
+            headers.append("Exec-Action", defaultNS.example("action/something?text=Hello%20world"));
             const res = new Response(null, { headers });
 
             // @ts-ignore TS-2341
@@ -508,7 +507,7 @@ describe("DataProcessor", () => {
             const action0 = defaultNS.example("action/something?text=Hello%20world");
             const action1 = defaultNS.example("action/other");
             const action2 = defaultNS.example("action");
-            headers.append("Exec-Action", [action0.value, action1.value, action2.value].join(", "));
+            headers.append("Exec-Action", [action0, action1, action2].join(", "));
             const res = new Response(null, { headers });
 
             // @ts-ignore TS-2341
@@ -563,7 +562,7 @@ describe("DataProcessor", () => {
         it("ignores other deltas", () => {
             const store = getBasicStore();
             store.processor.processDelta([
-                [resource, defaultNS.rdf("type"), schema.Thing, rdfFactory.blankNode("chrome:theSession")],
+                rdfFactory.quad([resource, defaultNS.rdf("type"), schema.Thing, rdfFactory.blankNode("chrome:theSession")]),
             ]);
         });
 
@@ -571,7 +570,7 @@ describe("DataProcessor", () => {
             it("sets the status codes", () => {
                 const store = getBasicStore();
                 store.processor.processDelta([
-                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), ll.meta],
+                    rdfFactory.quad([resource, defaultNS.http("statusCode"), rdfFactory.literal(200), ll.meta]),
                 ]);
 
                 expect(store.processor.getStatus(resource).status).toEqual(200);
@@ -581,7 +580,7 @@ describe("DataProcessor", () => {
                 const store = getBasicStore();
                 store.processor.invalidate(resource);
                 store.processor.processDelta([
-                    [resource, defaultNS.http("statusCode"), rdfFactory.literal(200), ll.meta],
+                    rdfFactory.quad(resource, defaultNS.http("statusCode"), rdfFactory.literal(200), ll.meta),
                 ]);
 
                 expect(store.processor.isInvalid(resource)).toBeFalsy();
@@ -602,7 +601,7 @@ describe("DataProcessor", () => {
                 rdfFactory.quad(schema.Person, rdfx.type, schema.Thing),
                 rdfFactory.quad(schema.Person, rdfs.label, rdfFactory.literal("Person class")),
             ];
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(schema.Person, rdfx.type, schema.RejectAction, schema.Person),
                 ...data,
             ]);
@@ -624,7 +623,7 @@ describe("DataProcessor", () => {
                 rdfFactory.quad(schema.Person, rdfs.label, rdfFactory.literal("Person class"), schema.Person),
                 rdfFactory.quad(blankNode, rdfs.label, rdfFactory.literal("included"), schema.Person),
             ];
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(schema.Person, rdfx.type, schema.RejectAction, rdfFactory.defaultGraph()),
                 ...data,
             ]);
@@ -657,7 +656,7 @@ describe("DataProcessor", () => {
 
         it("sets the status", () => {
             const store = getBasicStore();
-            store.processor.queueDelta([], [rdfFactory.id(resource)]);
+            store.processor.queueDelta([], [resource]);
 
             expect(store.processor.getStatus(resource)).toHaveProperty("status", 203);
             expect(store.processor.getStatus(resource)).toHaveProperty("timesRequested", 1);
@@ -670,7 +669,7 @@ describe("DataProcessor", () => {
             // @ts-ignore
             const mapping = store.processor.mapping;
 
-            const transformer = (_res: ResponseAndFallbacks): Promise<Quad[]> => Promise.resolve([]);
+            const transformer = (_res: ResponseAndFallbacks): Promise<Hextuple[]> => Promise.resolve([]);
 
             store.processor.registerTransformer(transformer, "text/n3", 0.9);
 

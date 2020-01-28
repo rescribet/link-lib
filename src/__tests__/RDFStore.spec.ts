@@ -1,18 +1,19 @@
 import "jest";
 import "./useHashFactory";
 
-import rdfFactory, { Quadruple } from "@ontologies/core";
+import rdfFactory, { HexPos, Hextuple } from "@ontologies/core";
+import ld from "@ontologies/ld";
 import owl from "@ontologies/owl";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 import xsd from "@ontologies/xsd";
 
-import ll from "../ontology/ll";
 import { createNS } from "../rdf";
 import { RDFStore } from "../RDFStore";
 import RDFIndex from "../store/RDFIndex";
 import { getBasicStore } from "../testUtilities";
+import { objectToHexObj } from "../utilities/hex";
 
 const example = createNS("http://example.com/");
 const ex = createNS("http://example.com/ns#");
@@ -36,13 +37,13 @@ describe("RDFStore", () => {
             const store = new RDFStore();
 
             expect(() => {
-                store.addQuads("test" as any);
+                store.addHextuples("test" as any);
             }).toThrowError(TypeError);
         });
 
         it("works", () => {
             const store = new RDFStore();
-            store.addQuads(thingStatements);
+            store.addHextuples(thingStatements);
 
             const libStatements = store.getInternalStore().quads;
             expect(libStatements).toHaveLength(3);
@@ -53,36 +54,36 @@ describe("RDFStore", () => {
 
         it("bumps the changeTimestamp", async () => {
             const store = getBasicStore();
-            store.store.addQuads([
+            store.store.addHextuples([
                 thingStatements[0],
             ]);
-            store.store.flush();
-            const before = store.store.changeTimestamps[rdfFactory.id(schemaT)];
+            await store.store.flush();
+            const before = store.store.changeTimestamps[schemaT];
 
             await new Promise((resolve): void => { window.setTimeout(resolve, 100); });
 
-            store.store.addQuads([
+            store.store.addHextuples([
                 thingStatements[1],
                 thingStatements[2],
             ]);
-            store.store.flush();
-            expect(store.store.changeTimestamps[rdfFactory.id(schemaT)]).toBeGreaterThan(before);
+            await store.store.flush();
+            expect(store.store.changeTimestamps[schemaT]).toBeGreaterThan(before);
         });
 
         describe("owl:sameAs", () => {
             describe("big small", () => {
                 it("equates existing data", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(aboutIsThing);
-                    store.store.addQuads(thingStatements);
+                    store.store.addHextuples(aboutIsThing);
+                    store.store.addHextuples(thingStatements);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
                         .toHaveLength(1);
                 });
 
                 it("equates new data", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(thingStatements);
-                    store.store.addQuads(aboutIsThing);
+                    store.store.addHextuples(thingStatements);
+                    store.store.addHextuples(aboutIsThing);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
                         .toHaveLength(1);
                 });
@@ -91,16 +92,16 @@ describe("RDFStore", () => {
             describe("small big", () => {
                 it("equates existing data", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(thingIsAbout);
-                    store.store.addQuads(thingStatements);
+                    store.store.addHextuples(thingIsAbout);
+                    store.store.addHextuples(thingStatements);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
                         .toHaveLength(1);
                 });
 
                 it("equates new data", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(thingStatements);
-                    store.store.addQuads(thingIsAbout);
+                    store.store.addHextuples(thingStatements);
+                    store.store.addHextuples(thingIsAbout);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing."), null))
                         .toHaveLength(1);
                 });
@@ -111,7 +112,7 @@ describe("RDFStore", () => {
     describe("#flush", () => {
         it("is returns the work available", () => {
             const store = new RDFStore();
-            store.addQuads(thingStatements);
+            store.addHextuples(thingStatements);
             const res = store.flush();
             expect(res[0]).toEqual(thingStatements[0]);
             expect(res[1]).toEqual(thingStatements[1]);
@@ -134,21 +135,28 @@ describe("RDFStore", () => {
     describe("#replaceMatches", () => {
         it("replaces a statement", () => {
             const store = new RDFStore();
-            store.addQuads(thingStatements);
+            store.addHextuples(thingStatements);
 
-            const quads: Quadruple[] = [
-                [schemaT, rdfs.label, rdfFactory.literal("Thing!"), ll.ns("replace")],
+            const [v, dt, l] = objectToHexObj(rdfFactory.literal("Thing!"));
+            const quads: Hextuple[] = [
+                [schemaT, rdfs.label, v, dt, l, ld.replace],
             ];
 
-            const before = store.match(schemaT, rdfs.label, null, null);
+            const before = store.matchHex(schemaT, rdfs.label, null, null, null, null);
             expect(before).toHaveLength(1);
-            expect(before[0].object).toEqual(rdfFactory.literal("Thing."));
+            const [v2, dt2, l2] = rdfFactory.literal("Thing.");
+            expect(before[0][HexPos.object]).toEqual(v2);
+            expect(before[0][HexPos.objectDT]).toEqual(dt2);
+            expect(before[0][HexPos.objectLang]).toEqual(l2);
 
             store.replaceMatches(quads);
 
-            const after = store.match(schemaT, rdfs.label, null, null);
+            const after = store.matchHex(schemaT, rdfs.label, null, null, null, null);
             expect(after).toHaveLength(1);
-            expect(after[0].object).toEqual(rdfFactory.literal("Thing!", undefined, xsd.string));
+            const [v3, dt3, l3] = rdfFactory.literal("Thing!", undefined, xsd.string);
+            expect(after[0][HexPos.object]).toEqual(v3);
+            expect(after[0][HexPos.objectDT]).toEqual(dt3);
+            expect(after[0][HexPos.objectLang]).toEqual(l3);
         });
     });
 
@@ -159,7 +167,7 @@ describe("RDFStore", () => {
             expect(store.processDelta(new Array(1))).toEqual([]);
         });
 
-        describe("ll:replace", () => {
+        describe("ld:replace", () => {
             it("replaces existing", () => {
                 const store = new RDFStore();
 
@@ -167,15 +175,16 @@ describe("RDFStore", () => {
             });
         });
 
-        describe("ll:remove", () => {
+        describe("ld:remove", () => {
             it("removes one", () => {
                 const store = new RDFStore();
-                store.addQuads(thingStatements);
+                store.addHextuples(thingStatements);
 
                 expect(store.match(null, null, null, null)).toHaveLength(thingStatements.length);
 
-                const statements: Quadruple[] = [
-                    [schemaT, rdfs.label, rdfFactory.literal("irrelevant"), ll.ns("remove")],
+                const [v, dt, l] = rdfFactory.literal("irrelevant");
+                const statements: Hextuple[] = [
+                    [schemaT, rdfs.label, v, dt, l, ld.remove],
                 ];
 
                 store.processDelta(statements);
@@ -186,13 +195,14 @@ describe("RDFStore", () => {
 
             it("removes many", () => {
                 const store = new RDFStore();
-                store.addQuads(thingStatements);
-                store.addQuads([rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing gb", "en-gb"))]);
+                store.addHextuples(thingStatements);
+                store.addHextuples([rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing gb", "en-gb"))]);
 
                 expect(store.match(null, null, null, null)).toHaveLength(thingStatements.length + 1);
 
-                const quads: Quadruple[] = [
-                    [schemaT, rdfs.label, rdfFactory.literal("irrelevant"), ll.ns("remove")],
+                const [v, dt, l] = rdfFactory.literal("irrelevant");
+                const quads: Hextuple[] = [
+                    [schemaT, rdfs.label, v, dt, l, ld.remove],
                 ];
 
                 store.processDelta(quads);
@@ -208,7 +218,7 @@ describe("RDFStore", () => {
             const old = [rdfFactory.quad(ex("a"), ex("p"), ex("x"), ex("g"))];
             const next = [rdfFactory.quad(ex("a"), ex("q"), ex("x"), ex("g"))];
             const store = new RDFStore();
-            store.addQuads(old);
+            store.addHextuples(old);
             store.replaceQuads(old, next);
 
             expect(store.match(null, null, null, null)).toHaveLength(1);
@@ -218,7 +228,7 @@ describe("RDFStore", () => {
 
     describe("#getResourcePropertyRaw", () => {
         const store = new RDFStore();
-        store.addQuads([
+        store.addHextuples([
             rdfFactory.quad(ex("a"), ex("p"), ex("x")),
             rdfFactory.quad(ex("a"), ex("r"), ex("y")),
 
@@ -268,7 +278,7 @@ describe("RDFStore", () => {
 
         it("returns the type for type statements", () => {
             const store = new RDFStore();
-            store.addQuads([
+            store.addHextuples([
                 rdfFactory.quad(ex("2"), rdf.type, ex("SomeClass")),
             ]);
 
@@ -284,7 +294,7 @@ describe("RDFStore", () => {
 
         it("returns the object for other statements", () => {
             const store = new RDFStore();
-            store.addQuads([
+            store.addHextuples([
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop")),
             ]);
 
@@ -294,7 +304,7 @@ describe("RDFStore", () => {
 
         it("picks the preferred language", () => {
             const store = new RDFStore();
-            store.addQuads([
+            store.addHextuples([
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop", "de")),
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop", "nl")),
                 rdfFactory.quad(ex("2"), ex("prop"), rdfFactory.literal("some prop", "en")),
@@ -310,33 +320,33 @@ describe("RDFStore", () => {
         it("initializes new resources", () => {
             const store = new RDFStore();
 
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toBeUndefined();
-            store.addQuads([
+            expect(store.typeCache[ex("1")]).toBeUndefined();
+            store.addHextuples([
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
             ]);
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type")]);
+            expect(store.typeCache[ex("1")]).toEqual([ex("type")]);
         });
 
         it("adds new types for cached resources", () => {
             const store = new RDFStore();
-            store.addQuads([
+            store.addHextuples([
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
                 rdfFactory.quad(ex("1"), rdf.type, ex("type2"), ex("_")),
             ]);
 
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type"), ex("type2")]);
+            expect(store.typeCache[ex("1")]).toEqual([ex("type"), ex("type2")]);
         });
 
         it("removes type statements after they are removed from the store", () => {
             const store = new RDFStore();
-            store.addQuads([
+            store.addHextuples([
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
                 rdfFactory.quad(ex("1"), rdf.type, ex("type2"), ex("_")),
             ]);
-            store.removeQuads([rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_"))]);
+            store.removeHexes([rdfFactory.quad(ex("1"), rdf.type, ...objectToHexObj(ex("type")), ex("_"))]);
             store.flush();
 
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type2")]);
+            expect(store.typeCache[ex("1")]).toEqual([ex("type2")]);
         });
     });
 
@@ -344,34 +354,34 @@ describe("RDFStore", () => {
         it("bumps the changeTimestamp", async () => {
             const store = getBasicStore();
             const resource = example("test");
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdf.type, schema.Person),
             ]);
             store.store.flush();
-            const before = store.store.changeTimestamps[rdfFactory.id(resource)];
+            const before = store.store.changeTimestamps[resource];
 
             await new Promise((resolve): void => { window.setTimeout(resolve, 100); });
 
             store.store.removeResource(resource);
-            expect(store.store.changeTimestamps[rdfFactory.id(resource)]).toBeGreaterThan(before);
+            expect(store.store.changeTimestamps[resource]).toBeGreaterThan(before);
         });
 
         it("clears the type cache", () => {
             const store = getBasicStore();
             const resource = example("test");
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdf.type, schema.Person),
             ]);
 
-            expect(store.store.typeCache[rdfFactory.id(resource)]).toHaveLength(1);
+            expect(store.store.typeCache[resource]).toHaveLength(1);
             store.store.removeResource(resource);
-            expect(store.store.typeCache[rdfFactory.id(resource)]).toHaveLength(0);
+            expect(store.store.typeCache[resource]).toHaveLength(0);
         });
 
         it("removes the resource data", () => {
             const store = getBasicStore();
             const resource = example("test");
-            store.store.addQuads([
+            store.store.addHextuples([
                 rdfFactory.quad(resource, rdf.type, schema.Person),
                 rdfFactory.quad(resource, schema.name, rdfFactory.literal("Name")),
                 rdfFactory.quad(resource, schema.author, ex("3")),
@@ -387,8 +397,8 @@ describe("RDFStore", () => {
             describe("big small", () => {
                 it("equal before", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(aboutIsThing);
-                    store.store.addQuads(thingStatements);
+                    store.store.addHextuples(aboutIsThing);
+                    store.store.addHextuples(thingStatements);
 
                     store.store.removeResource(schema.AboutPage);
 
@@ -400,8 +410,8 @@ describe("RDFStore", () => {
 
                 it("equal after", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(thingStatements);
-                    store.store.addQuads(aboutIsThing);
+                    store.store.addHextuples(thingStatements);
+                    store.store.addHextuples(aboutIsThing);
 
                     store.store.removeResource(schemaT);
 
@@ -415,8 +425,8 @@ describe("RDFStore", () => {
             describe("small big", () => {
                 it("equal before", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(thingIsAbout);
-                    store.store.addQuads(thingStatements);
+                    store.store.addHextuples(thingIsAbout);
+                    store.store.addHextuples(thingStatements);
 
                     store.store.removeResource(schema.AboutPage);
 
@@ -428,8 +438,8 @@ describe("RDFStore", () => {
 
                 it("equal after", () => {
                     const store = getBasicStore();
-                    store.store.addQuads(thingStatements);
-                    store.store.addQuads(thingIsAbout);
+                    store.store.addHextuples(thingStatements);
+                    store.store.addHextuples(thingIsAbout);
 
                     store.store.removeResource(schemaT);
 
@@ -450,13 +460,13 @@ describe("RDFStore", () => {
         it("is more than zero work", () => {
             const store = new RDFStore();
             expect(store.workAvailable()).toEqual(0);
-            store.addQuads(thingStatements);
+            store.addHextuples(thingStatements);
             expect(store.workAvailable()).toEqual(3);
         });
 
         it("is reset after #flush()", () => {
             const store = new RDFStore();
-            store.addQuads(thingStatements);
+            store.addHextuples(thingStatements);
             expect(store.workAvailable()).toEqual(3);
             store.flush();
             expect(store.workAvailable()).toEqual(0);

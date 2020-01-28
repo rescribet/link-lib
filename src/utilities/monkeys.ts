@@ -1,4 +1,4 @@
-import { Quad } from "@ontologies/core";
+import { Hextuple } from "@ontologies/core";
 import { ChangeBuffer } from "../types";
 
 /**
@@ -10,7 +10,7 @@ export function patchRDFLibStoreWithOverrides<T extends any = any>(
     changeBufferTarget: ChangeBuffer,
 ): T {
     if (typeof graph.indices !== "undefined") {
-        graph.addDataCallback((quad: Quad): void => {
+        graph.addDataCallback((quad: Hextuple): void => {
             changeBufferTarget.changeBuffer[changeBufferTarget.changeBufferCount] = quad;
             changeBufferTarget.changeBufferCount++;
         });
@@ -28,12 +28,12 @@ export function patchRDFLibStoreWithOverrides<T extends any = any>(
     }
 
     if (typeof graph.indices !== "undefined") {
-        graph.removeCallback = (quad: Quad): void => {
+        graph.removeCallback = (quad: Hextuple): void => {
             changeBufferTarget.changeBuffer.push(quad);
             changeBufferTarget.changeBufferCount++;
         };
     } else {
-        graph.statements.splice = (index: any, len: any): Quad[] => {
+        graph.statements.splice = (index: any, len: any): Hextuple[] => {
             const rem = Array.prototype.splice.call(graph.statements, index, len);
             changeBufferTarget.changeBuffer.push(...rem);
             changeBufferTarget.changeBufferCount += len;

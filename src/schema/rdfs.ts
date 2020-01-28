@@ -1,4 +1,4 @@
-import rdfFactory, { NamedNode, Quad, TermType } from "@ontologies/core";
+import rdfFactory, { HexPos, Hextuple, isBlankNode, isNamedNode, NamedNode, Resource } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 
@@ -57,67 +57,95 @@ export const RDFS = {
         rdfFactory.quad(rdfs.Class, rdf.type, rdfs.Class),
     ],
 
-    processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
+    processStatement(item: Hextuple, ctx: VocabularyProcessingContext): Hextuple[] | null {
         const result = [item];
 
-        const domainStatements = ctx.store.match(item.predicate, rdfs.domain, null, null);
+        const domainStatements = ctx.store.matchHex(item[HexPos.predicate], rdfs.domain, null, null, null, null);
         if (domainStatements.length > 0) {
             for (let i = 0; i < domainStatements.length; i++) {
-                result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, domainStatements[i].object));
+                result.push(rdfFactory.hextuple(
+                    item[HexPos.subject] as NamedNode,
+                    rdf.type,
+                    domainStatements[i][HexPos.object],
+                    domainStatements[i][HexPos.objectDT],
+                    domainStatements[i][HexPos.objectLang],
+                ));
             }
         }
 
-        const rangeStatements = ctx.store.match(item.predicate, rdfs.range, null, null);
+        const rangeStatements = ctx.store.matchHex(item[HexPos.predicate], rdfs.range, null, null, null, null);
         if (rangeStatements.length > 0) {                                                     // P rdfs:range C..Cn
             for (let i = 0; i < rangeStatements.length; i++) {
-                result.push(rdfFactory.quad(item.object as NamedNode, rdf.type, rangeStatements[i].object));
+                result.push(rdfFactory.quad(
+                    item[HexPos.object] as NamedNode,
+                    rdf.type,
+                    rangeStatements[i][HexPos.object],
+                    rangeStatements[i][HexPos.objectDT],
+                    rangeStatements[i][HexPos.objectLang],
+                ));
             }
         }
 
-        if (rdfFactory.equals(rdfs.domain, item.predicate)) {
-            result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
-            result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
+        if (rdfs.domain === item[HexPos.predicate]) {
+            result.push(rdfFactory.quad(item[HexPos.subject], rdf.type, rdf.Property));     // P rdf:type rdf:Property
+            result.push(rdfFactory.quad(item[HexPos.object], rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.match(item.subject, null, null, null);
+            const dereferences = ctx.store.matchHex(item[HexPos.subject], null, null, null, null, null);
             for (let i = 0; i < dereferences.length; i++) {
-                result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, dereferences[i].object));
+                result.push(rdfFactory.hextuple(
+                    item[HexPos.subject] as NamedNode,
+                    rdf.type,
+                    dereferences[i][HexPos.object],
+                    dereferences[i][HexPos.objectDT],
+                    dereferences[i][HexPos.objectLang],
+                ));
             }
 
-            if (!rdfFactory.equals(item.subject, rdf.type)) {
+            if (item[HexPos.subject] !== rdf.type) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
-                    item.subject as NamedNode,
-                    (quad: Quad) => {
-                        ctx.store.addQuads([rdfFactory.quad(quad.subject, rdf.type, item.object)]);
+                    item[HexPos.subject] as NamedNode,
+                    (quad: Hextuple) => {
+                        ctx.store.addHextuples([rdfFactory.quad(
+                            quad[HexPos.subject],
+                            rdf.type,
+                            item[HexPos.object],
+                            item[HexPos.objectDT],
+                            item[HexPos.objectLang],
+                        )]);
                         return true;
                     },
                 );
             }
-        } else if (rdfFactory.equals(rdfs.range, item.predicate)) {
-            result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
-            result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
+        } else if (rdfs.range === item[HexPos.predicate]) {
+            result.push(rdfFactory.quad(item[HexPos.subject], rdf.type, rdf.Property));     // P rdf:type rdf:Property
+            result.push(rdfFactory.quad(item[HexPos.object], rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.match(null, null, item.subject, null);
+            const dereferences = ctx.store.matchHex(null, null, item[HexPos.subject], null, null, null);
             for (let i = 0; i < dereferences.length; i++) {
-                result.push(rdfFactory.quad(dereferences[i].subject, rdf.type, item.object));
+                result.push(rdfFactory.quad(dereferences[i][HexPos.subject], rdf.type, item[HexPos.object]));
             }
 
-            if (!rdfFactory.equals(item.subject, rdf.type)) {
+            if (item[HexPos.subject] !== rdf.type) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
-                    item.subject as NamedNode,
-                    (quad: Quad) => {
-                        ctx.store.addQuads([rdfFactory.quad(quad.object, rdf.type, item.object)]);
+                    item[HexPos.subject] as NamedNode,
+                    (quad: Hextuple) => {
+                        ctx.store.addHextuples([rdfFactory.quad(
+                            quad[HexPos.object],
+                            rdf.type,
+                            item[HexPos.object],
+                        )]);
                         return true;
                     },
                 );
             }
-        } else if (rdfFactory.equals(rdfs.subClassOf, item.predicate)) {            // C1 rdfs:subClassOf C2
-            if (!(item.object.termType === TermType.NamedNode || item.object.termType === TermType.BlankNode)) {
+        } else if (rdfs.subClassOf === item[HexPos.predicate]) {            // C1 rdfs:subClassOf C2
+            if (!(isNamedNode(item[HexPos.object]) || isBlankNode(item[HexPos.object]))) {
                 throw new Error("Object of subClassOf statement must be a NamedNode");
             }
-            const iSubject = rdfFactory.id(item.subject) as number;
-            const iObject = rdfFactory.id(item.object) as number;
+            const iSubject = item[HexPos.subject];
+            const iObject = item[HexPos.object];
             if (!ctx.superMap.has(iObject)) {
-                ctx.superMap.set(iObject, new Set([rdfFactory.id(rdfs.Resource) as number]));
+                ctx.superMap.set(iObject, new Set([rdfs.Resource]));
             }
 
             let parents = ctx.superMap.get(iObject);
@@ -126,7 +154,7 @@ export const RDFS = {
                 ctx.superMap.set(iObject, parents);
             }
             parents.add(iObject);
-            const itemVal = ctx.superMap.get(iSubject) || new Set<number>([iSubject]);
+            const itemVal = ctx.superMap.get(iSubject) || new Set<Resource>([iSubject]);
 
             parents.forEach((i) => itemVal.add(i));
 
@@ -136,7 +164,7 @@ export const RDFS = {
                     itemVal.forEach(v.add, v);
                 }
             });
-        } else if (rdfFactory.equals(rdfs.subPropertyOf, item.predicate)) {
+        } else if (rdfs.subPropertyOf === item[HexPos.predicate]) {
             // TODO: Implement
             return result;
         }
@@ -146,7 +174,7 @@ export const RDFS = {
 
     processType(type: NamedNode, ctx: VocabularyProcessingContext): boolean {
         RDFS.processStatement(rdfFactory.quad(type, rdfs.subClassOf, rdfs.Resource), ctx);
-        ctx.store.addQuads([rdfFactory.quad(type, rdf.type, rdfs.Class)]);
+        ctx.store.addHextuples([rdfFactory.quad(type, rdf.type, rdfs.Class)]);
         return false;
     },
 } as VocabularyProcessor;

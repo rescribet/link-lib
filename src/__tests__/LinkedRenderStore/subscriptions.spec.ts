@@ -85,12 +85,12 @@ describe("LinkedRenderStore", () => {
                 store.lrs.subscribe(reg);
                 expect(callback).not.toHaveBeenCalled();
 
-                store.store.addQuads([rdfFactory.quad(schemaT, schema.name, rdfFactory.literal("Thing"))]);
+                store.store.addHextuples([rdfFactory.quad(schemaT, schema.name, rdfFactory.literal("Thing"))]);
                 await store.forceBroadcast();
                 expect(callback).toHaveBeenCalledTimes(1);
                 expect(callback.mock.calls[0][0]).toEqual([
-                    rdfFactory.id(schemaT),
-                    rdfFactory.id(store.store.defaultGraph()),
+                    schemaT,
+                    store.store.defaultGraph(),
                 ]);
                 expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
                 expect(callback.mock.calls[0][1]).toBeLessThan(Date.now());

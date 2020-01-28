@@ -3,7 +3,6 @@ import "./useHashFactory";
 import rdfFactory from "@ontologies/core";
 import rdfx from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
-import schema from "@ontologies/schema";
 import "jest";
 
 import {
@@ -16,7 +15,6 @@ import {
     isDifferentOrigin,
 } from "../utilities";
 import { defaultNS } from "../utilities/constants";
-import { expandProperty } from "../utilities/memoizedNamespace";
 
 const ex = defaultNS.example;
 
@@ -110,30 +108,6 @@ describe("utilities", () => {
                 rdfFactory.quad(ex("c"), rdfx.ns("_2"), ex("2")),
             ];
             expect(anyRDFValue(stmts, rdfs.member)).toEqual(ex("1"));
-        });
-    });
-
-    describe("defaultNS", () => {
-        it("contains memoized namespaces", () => {
-            expect(defaultNS.argu("test")).toHaveProperty("id");
-        });
-    });
-
-    describe("#expandProperty", () => {
-        it("expands short to long notation", () => {
-            const nameShort = expandProperty("schema:name");
-            if (nameShort === undefined) {
-                throw new TypeError();
-            }
-            expect(rdfFactory.equals(schema.name, nameShort)).toBeTruthy();
-        });
-
-        it("preserves long notation", () => {
-            const nameLong = expandProperty("http://schema.org/name");
-            if (nameLong === undefined) {
-                throw new TypeError();
-            }
-            expect(rdfFactory.equals(schema.name, nameLong)).toBeTruthy();
         });
     });
 
@@ -233,37 +207,11 @@ describe("utilities", () => {
             expect(isDifferentOrigin(rdfFactory.blankNode())).toBeFalsy();
         });
         it("is false on the same origin", () => {
-            expect(isDifferentOrigin(rdfFactory.namedNode("http://example.org/test"))).toBeFalsy();
+            expect(isDifferentOrigin("http://example.org/test")).toBeFalsy();
         });
 
         it("is true on a different origin", () => {
-            expect(isDifferentOrigin(rdfFactory.namedNode("http://example.com/test"))).toBeTruthy();
-        });
-    });
-
-    describe("#namedNodeByIRI", () => {
-        it("returns known iris from the map", () => {
-            const name = defaultNS.schema("name");
-            expect(rdfFactory.namedNode(name.value)).toEqual(name);
-        });
-
-        it("adds new IRI's to the map", () => {
-            const added = rdfFactory.namedNode("http://new.example.org/test", "test");
-            expect(added).toHaveProperty("termType", "NamedNode");
-            // expect(added).toHaveProperty("term", "test");
-            expect(added).toHaveProperty("id");
-            expect(rdfFactory.memoizationMap[rdfFactory.id(added)]).toEqual(added);
-        });
-    });
-
-    describe("#namedNodeByStoreIndex", () => {
-        it("returns known iris from the map", () => {
-            const name = defaultNS.schema("name");
-            expect(rdfFactory.fromId(rdfFactory.id(name))).toEqual(name);
-        });
-
-        it("returns undefined for unknown values", () => {
-            expect(rdfFactory.fromId(999999)).toBeUndefined();
+            expect(isDifferentOrigin("http://example.com/test")).toBeTruthy();
         });
     });
 });

@@ -1,4 +1,5 @@
-import rdfFactory, { isBlankNode, QuadPosition, TermType } from "@ontologies/core";
+import rdfFactory, { Hextuple, isBlankNode, isLiteral, isNamedNode, QuadPosition, Resource } from "@ontologies/core";
+import rdfx from "@ontologies/rdf";
 import schema from "@ontologies/schema";
 import xsd from "@ontologies/xsd";
 import { site } from "@rdfdev/iri";
@@ -14,8 +15,6 @@ import ll from "../ontology/ll";
 import {
     BlankNode,
     NamedNode,
-    Quad,
-    Quadruple,
 } from "../rdf";
 import {
     Fetcher,
@@ -105,7 +104,7 @@ function pushToMap<T>(map: { [key: string]: T[] }, k: string, v: T): void {
  * @param res The (fetch) response object from the request.
  * @returns A graph with metadata about the response.
  */
-function processResponse(iri: string | NamedNode, res: Response): Quad[] {
+function processResponse(iri: string | NamedNode, res: Response): Hextuple[] {
     const rawURL = getURL(res);
     const origin = typeof iri === "string"
         ? rdfFactory.namedNode(new URL(rawURL).origin)
@@ -113,12 +112,14 @@ function processResponse(iri: string | NamedNode, res: Response): Quad[] {
 
     if (rawURL && iri !== rawURL) {
         return [
-            rdfFactory.quad(
-                typeof iri === "string" ? rdfFactory.namedNode(iri) : iri,
-                rdfFactory.namedNode("http://www.w3.org/2002/07/owl#sameAs"),
+            [
+                iri,
+                "http://www.w3.org/2002/07/owl#sameAs",
                 rdfFactory.namedNode(rawURL),
+                rdfx.ns("namedNode"),
+                "",
                 origin,
-            ),
+            ],
         ];
     }
 
@@ -144,12 +145,12 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private _dispatch?: MiddlewareActionHandler;
     private readonly bulkEndpoint: string;
     private report: ErrorReporter;
-    private deltas: Quadruple[][] = [];
+    private deltas: Hextuple[][] = [];
     private fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-    private readonly invalidationMap: Map<number, void>;
+    private readonly invalidationMap: Map<Resource, void>;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
     private readonly requestInitGenerator: RequestInitGenerator;
-    private readonly requestMap: Map<number, Promise<Quad[]>>;
+    private readonly requestMap: Map<Resource, Promise<Hextuple[]>>;
     private readonly statusMap: { [k: string]: SomeRequestStatus | undefined };
     private readonly store: RDFStore;
 
@@ -234,12 +235,12 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
 
         const object = this.store.getResourceProperty(subject, schema.object);
-        if (!object || object.termType !== TermType.BlankNode && object.termType !== TermType.NamedNode) {
+        if (!object || !isBlankNode(object) && !isNamedNode(object)) {
             throw new ProcessorError(MSG_OBJECT_NOT_IRI);
         }
         const target = this.store.getResourceProperty(subject, schema.target);
 
-        if (!target || target.termType === "Collection" || target.termType === TermType.Literal) {
+        if (!target || isLiteral(target)) {
             throw new ProcessorError(MSG_INCORRECT_TARGET);
         }
 
@@ -248,17 +249,17 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         if (!url) {
             throw new ProcessorError(MSG_URL_UNDEFINED);
         }
-        if (url.termType !== TermType.NamedNode) {
+        if (!isNamedNode(url)) {
             throw new ProcessorError(MSG_URL_UNRESOLVABLE);
         }
         const targetMethod = this.store.getResourceProperty(target as SomeNode, schema.httpMethod);
-        const method = typeof targetMethod !== "undefined" ? targetMethod.value : "GET";
+        const method = typeof targetMethod !== "undefined" ? targetMethod[0] : "GET";
         const opts = this.requestInitGenerator.generate(method, this.acceptForHost(url));
 
         if (opts.headers instanceof Headers) {
-            opts.headers.set("Request-Referrer", subject.value);
+            opts.headers.set("Request-Referrer", subject);
         } else if (opts.headers && !Array.isArray(opts.headers)) {
-            opts.headers["Request-Referrer"] = subject.value;
+            opts.headers["Request-Referrer"] = subject;
         }
 
         if (!SAFE_METHODS.includes(method) && graph && graph !== null && graph.length > 0) {
@@ -280,7 +281,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             opts.body = data;
         }
 
-        const resp = await this.fetch(url.value, opts).then(this.processExecAction);
+        const resp = await this.fetch(url, opts).then(this.processExecAction);
 
         if (resp.status > BAD_REQUEST) {
             // TODO: process responses with a correct content-type.
@@ -300,10 +301,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     public fetchableURLFromIRI(iri: NamedNode): NamedNode {
-        return rdfFactory.namedNode(iri.value.split("#").shift()!);
+        if (iri.includes("#")) {
+            return rdfFactory.namedNode(iri.split("#").shift()!);
+        }
+
+        return iri;
     }
 
-    public flush(): Quad[] {
+    public flush(): Hextuple[] {
         const deltas = this.deltas;
         this.deltas = [];
 
@@ -318,19 +323,19 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return [];
     }
 
-    public getEntities(resources: ResourceQueueItem[]): Promise<Quad[]> {
+    public getEntities(resources: ResourceQueueItem[]): Promise<Hextuple[]> {
         const reload: NamedNode[] = [];
 
         const toBeFetched = new Set<NamedNode>();
 
         for (const resource of resources) {
-            const id = rdfFactory.id(resource[0]) as number;
+            const id = resource[0];
             if (resource[1] && resource[1].reload) {
-                reload.push(resource[0]);
+                reload.push(id);
             } else if (this.requestMap.has(id)) {
                 continue;
             }
-            toBeFetched.add(resource[0]);
+            toBeFetched.add(id);
         }
 
         if (toBeFetched.size === 0) {
@@ -339,7 +344,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const body = new URLSearchParams();
         for (const entry of toBeFetched) {
-            body.append("resource[]", encodeURIComponent(entry.value));
+            body.append("resource[]", encodeURIComponent(entry));
         }
 
         const opts = this.requestInitGenerator.generate("POST", this.acceptForHost(this.bulkEndpoint), body);
@@ -348,14 +353,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             .catch((err) => {
                 const status = rdfFactory.literal(err instanceof Error ? 499 : err.status, xsd.integer);
                 const delta = resources
-                    .map(([s]) => [s, defaultNS.http("statusCode"), status, ll.meta] as Quadruple);
+                    .map(([s]) => [s, defaultNS.http("statusCode"), ...status, ll.meta] as Hextuple);
 
                 return this.processDelta(delta);
             }).finally(() => {
-                toBeFetched.forEach((resource) => this.requestMap.delete(rdfFactory.id(resource)));
+                toBeFetched.forEach((resource) => this.requestMap.delete(resource));
             });
         toBeFetched.forEach((resource) => {
-            this.requestMap.set(rdfFactory.id(resource), chain);
+            this.requestMap.set(resource, chain);
             this.setStatus(resource, null);
         });
 
@@ -369,8 +374,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public async getEntity(iri: NamedNode, opts?: RDFFetchOpts): Promise<Quad[]> {
-        const url = new URL(iri.value);
+    public async getEntity(iri: NamedNode, opts?: RDFFetchOpts): Promise<Hextuple[]> {
+        const url = new URL(iri);
         url.hash = "";
         const requestIRI = rdfFactory.namedNode(url.toString());
         const existing = this.requestMap.get(requestIRI.id);
@@ -378,7 +383,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             return existing;
         }
 
-        let preExistingData: Quad[] = [];
+        let preExistingData: Hextuple[] = [];
         if (opts && opts.clearPreviousData) {
             preExistingData = this.store.quadsFor(iri);
             preExistingData = preExistingData.concat(this.store.quadsFor(requestIRI));
@@ -399,24 +404,24 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 .then(this.feedResponse)
                 .catch((err) => {
                     const status = rdfFactory.literal(err instanceof Error ? 499 : err.status, xsd.integer);
-                    const delta: Quadruple[] = [
-                        [requestIRI, defaultNS.http("statusCode"), status, ll.meta],
+                    const delta: Hextuple[] = [
+                        [requestIRI, defaultNS.http("statusCode"), ...status, ll.meta] as Hextuple,
                     ];
                     return this.processDelta(delta);
                 });
-            this.requestMap.set(rdfFactory.id(requestIRI), req);
+            this.requestMap.set(requestIRI, req);
             return await req;
         } catch (e) {
             if (typeof e.res === "undefined") {
                 throw e;
             }
-            this.store.removeQuads(preExistingData);
+            this.store.removeHexes(preExistingData);
             const responseQuads = processResponse(iri, e.res);
-            this.store.addQuads(responseQuads);
+            this.store.addHextuples(responseQuads);
 
             return responseQuads;
         } finally {
-            this.requestMap.delete(rdfFactory.id(requestIRI));
+            this.requestMap.delete(requestIRI);
         }
     }
 
@@ -425,15 +430,15 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      */
     public getStatus(iri: NamedNode): SomeRequestStatus {
         const irl = this.fetchableURLFromIRI(iri);
-        const existing = this.statusMap[rdfFactory.id(irl)];
+        const existing = this.statusMap[irl];
 
         if (existing) {
             return existing;
         }
-        const fetcherStatus = this.fetcher?.requested[irl.value];
+        const fetcherStatus = this.fetcher?.requested[irl];
 
         if (fetcherStatus === undefined) {
-            if (this.fetcher && irl.value in this.fetcher.requested) {
+            if (this.fetcher && irl in this.fetcher.requested) {
                 return this.memoizeStatus(irl, failedRequest());
             }
             return this.memoizeStatus(irl, emptyRequest);
@@ -442,7 +447,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const requests = this.store.match(
             null,
             link.requestedURI,
-            rdfFactory.literal(irl.value),
+            rdfFactory.literal(irl),
             null,
         );
         const totalRequested = requests.length;
@@ -480,7 +485,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const requestStatus = anyRDFValue(requestObjData, defaultNS.http("status"))
             || anyRDFValue(requestObjData, defaultNS.http07("status"))
             || anyRDFValue(requestObjData, defaultNS.httph("status"));
-        const requestDate = anyRDFValue(requestObjData, defaultNS.httph("date"));
+        const requestDate = anyRDFValue(requestObjData, defaultNS.httph("date"))?.[0];
 
         if (!requestStatus) {
             if (fetcherStatus === "done") {
@@ -492,53 +497,52 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return this.memoizeStatus(
             irl,
             {
-                lastRequested: requestDate ? new Date(requestDate.value) : new Date(0),
+                lastRequested: requestDate ? new Date(requestDate) : new Date(0),
                 lastResponseHeaders: requestObj,
                 requested: true,
-                status: Number.parseInt(requestStatus.value, 10),
+                status: Number.parseInt(requestStatus[0], 10),
                 timesRequested: totalRequested,
             },
         );
     }
 
     public invalidate(iri: string | SomeNode, _err?: Error): boolean {
-        const id = rdfFactory.id(typeof iri === "string" ? rdfFactory.namedNode(iri) : iri);
-        this.invalidationMap.set(id);
+        this.invalidationMap.set(iri);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
-        this.statusMap[id] = undefined;
+        this.statusMap[iri] = undefined;
 
         return true;
     }
 
     public isInvalid(iri: SomeNode): boolean {
-        return this.invalidationMap.has(rdfFactory.id(iri));
+        return this.invalidationMap.has(iri);
     }
 
-    public processExternalResponse(response: Response): Promise<Quad[] | undefined> {
+    public processExternalResponse(response: Response): Promise<Hextuple[] | undefined> {
         return handleStatus(response)
             .then(this.feedResponse);
     }
 
-    public processDelta(delta: Array<Quadruple|void>): Quad[] {
-        let s: Quadruple|void;
+    public processDelta(delta: Array<Hextuple|void>): Hextuple[] {
+        let s: Hextuple|void;
         for (let i = 0, len = delta.length; i < len; i++) {
             s = delta[i];
             const subj = s ? s[0] : undefined;
 
-            const currentStatus = subj && this.statusMap[rdfFactory.id(subj)];
+            const currentStatus = subj && this.statusMap[subj];
             if (subj && currentStatus && currentStatus.status === 203) {
-                this.statusMap[rdfFactory.id(subj)] = undefined;
+                this.statusMap[subj] = undefined;
             }
 
-            if (!s || !rdfFactory.equals(s[QuadPosition.graph], ll.meta)) {
+            if (!s || s[QuadPosition.graph] !== ll.meta) {
                 continue;
             }
 
-            if (rdfFactory.equals(s[1], defaultNS.http("statusCode"))) {
+            if (s[1] === defaultNS.http("statusCode")) {
                 this.removeInvalidation(subj as NamedNode);
-                this.setStatus(subj as NamedNode, Number.parseInt(s[2].value, 10));
-            } else if (rdfFactory.equals(s[1], defaultNS.httph("Exec-Action"))) {
-                this.execExecHeader(s[2].value);
+                this.setStatus(subj as NamedNode, Number.parseInt(s[2], 10));
+            } else if (s[1] === defaultNS.httph("Exec-Action")) {
+                this.execExecHeader(s[2]);
             }
         }
 
@@ -563,8 +567,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const target = isBlankNode(iri) ? opts.url! : (opts?.url || iri);
         const targetData = opts.data || !opts?.useDefaultGraph
-            ? this.store.match(null, null, null, iri)
-            : this.store.match(iri, null, null, this.store.rdfFactory.defaultGraph());
+            ? this.store.matchHex(null, null, null, null, null, iri)
+            : this.store.matchHex(iri, null, null, null, null, this.store.rdfFactory.defaultGraph());
 
         const options = this.requestInitGenerator.generate(
             opts.method || "PUT",
@@ -572,11 +576,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             this.serialize(targetData),
         );
 
-        return this.fetch(target.value, options)
+        return this.fetch(target, options)
             .then(() => Promise.resolve());
     }
 
-    public queueDelta(delta: Quadruple[], subjects: number[]): void {
+    public queueDelta(delta: Hextuple[], subjects: string[]): void {
         this.deltas.push(delta);
         const status = queuedDeltaStatus(1);
         for (const s of subjects) {
@@ -591,7 +595,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private acceptForHost(iri: NamedNode | string): string {
-        return this.accept[new URL(typeof iri === "string" ? iri : iri.value).origin]
+        return this.accept[new URL(iri).origin]
             || this.accept.default;
     }
 
@@ -604,7 +608,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
     }
 
-    private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Quad[]> {
+    private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Hextuple[]> {
         if (res.status >= INTERNAL_SERVER_ERROR) {
             return Promise.reject(res);
         }
@@ -622,7 +626,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private memoizeStatus(iri: NamedNode, s: SomeRequestStatus): SomeRequestStatus {
-        this.statusMap[rdfFactory.id(iri)] = s;
+        this.statusMap[iri] = s;
 
         return s;
     }
@@ -635,16 +639,16 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private removeInvalidation(subject: NamedNode): void {
-        this.invalidationMap.delete(rdfFactory.id(subject));
+        this.invalidationMap.delete(subject);
     }
 
-    private serialize(data: Quad[]): string {
+    private serialize(data: Hextuple[]): string {
         return data.reduce((acc, quad) => acc.concat(rdfFactory.toNQ(quad)), "");
     }
 
     private setStatus(iri: NamedNode, status: number | null): void {
         const url = this.fetchableURLFromIRI(iri);
-        const prevStatus = this.statusMap[rdfFactory.id(url)];
+        const prevStatus = this.statusMap[url];
         this.store.touch(url);
         this.store.touch(iri);
 

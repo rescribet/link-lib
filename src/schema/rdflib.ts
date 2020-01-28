@@ -1,4 +1,4 @@
-import rdfFactory, { createNS, NamedNode, Quad } from "@ontologies/core";
+import rdfFactory, { createNS, Hextuple, NamedNode } from "@ontologies/core";
 import { Resource, subClassOf } from "@ontologies/rdfs";
 import link from "../ontology/link";
 
@@ -41,7 +41,7 @@ export const RDFLIB = {
         rdfFactory.quad(ianaTTLResource, subClassOf, Resource),
     ],
 
-    processStatement(_: Quad, __: VocabularyProcessingContext): Quad[] | null {
+    processStatement(_: Hextuple, __: VocabularyProcessingContext): Hextuple[] | null {
         return null;
     },
 

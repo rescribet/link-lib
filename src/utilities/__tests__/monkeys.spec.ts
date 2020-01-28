@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { LowLevelStore } from "@ontologies/core";
+import rdfFactory, { HexPos, LowLevelStore } from "@ontologies/core";
 import RDFIndex from "../../store/RDFIndex";
 
 import { ChangeBuffer } from "../../types";
@@ -40,7 +40,7 @@ describe("monkeys", () => {
         it("normalizes terms", () => {
             const [ g, changeBuffer ] = getStorePair();
             patchRDFLibStoreWithOverrides(g, changeBuffer);
-            g.addQuads([
+            g.addHexes([
                 rdfFactory.quad(
                     rdfFactory.namedNode("http://example.com/1"),
                     rdfFactory.namedNode("http://example.com/p"),
@@ -53,7 +53,7 @@ describe("monkeys", () => {
                 ),
             ]);
 
-            expect((g as any).quads[0].subject).toHaveProperty("id");
+            expect((g as any).quads[0][HexPos.subject]).toHaveProperty("id");
         });
     });
 });
