@@ -55,8 +55,10 @@ export const deltaProcessor = (
                 continue;
             }
 
-            const g = new URL(quad[HexPos.graph]).searchParams.get("graph");
-            const graph = g || defaultGraph;
+            const searchIndex = quad[HexPos.graph].indexOf("?");
+            const graph = searchIndex === -1
+                ? defaultGraph
+                : (new URLSearchParams(quad[HexPos.graph].substring(searchIndex)).get("graph") || defaultGraph);
             if (isAdd(quad[HexPos.graph])) {
                 pushHextuple(addable, quad, graph);
             } else if (isReplace(quad[HexPos.graph])) {

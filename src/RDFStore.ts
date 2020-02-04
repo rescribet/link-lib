@@ -16,7 +16,6 @@ import rdfFactory, {
     OptionalTerm,
     Quad,
 } from "./rdf";
-import { InternalHextuple } from "./store/BasicStore";
 import { deltaProcessor } from "./store/deltaProcessor";
 import RDFIndex from "./store/RDFIndex";
 import { ChangeBuffer, DeltaProcessor, StoreProcessor } from "./types";
@@ -220,8 +219,8 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public replaceQuads(original: Hextuple[], replacement: Hextuple[]): Hextuple[] {
         const uniqueStatements: Hextuple[] = new Array(replacement.length).filter(Boolean);
         for (let i = 0; i < replacement.length; i++) {
-            const cond = original.some(([ subject, predicate ]) =>
-                subject === replacement[i][HexPos.subject] && predicate === replacement[i][HexPos.predicate]);
+            const cond = original.some((h) =>
+                h[0] === replacement[i][HexPos.subject] && h[1] === replacement[i][HexPos.predicate]);
             if (!cond) {
                 uniqueStatements.push(replacement[i]);
             }
@@ -242,8 +241,9 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public replaceMatches(statements: Hextuple[]): Hextuple[] {
+        const toRemove = [];
         for (let i = 0; i < statements.length; i++) {
-            this.removeHexes(this.matchHex(
+            toRemove.push(...this.matchHex(
                 statements[i][0],
                 statements[i][1],
                 null,
@@ -252,6 +252,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 null,
             ));
         }
+        this.removeHexes(toRemove);
 
         return this.addHextuples(statements);
     }
@@ -321,9 +322,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
 
         const res = [];
         for (let i = 0; i < index.length; i++) {
-            if (!(index[i] as unknown as InternalHextuple)[6]) {
-                res.push(index[i]);
+            if ((index[i] as any).statementDeleted === true) {
+                continue;
             }
+            res.push(index[i]);
         }
 
         return res;
@@ -342,10 +344,11 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     /**
      * Builds a cache of types per resource. Can be omitted when compiled against a well known service.
      */
-    private processTypeQuad([subject, predicate]: Hextuple): boolean {
-        if (predicate !== rdf.type) {
+    private processTypeQuad(hex: Hextuple): boolean {
+        if (hex[HexPos.predicate] !== rdf.type) {
             return false;
         }
+        const subject = hex[HexPos.subject];
         if (!Array.isArray(this.typeCache[subject])) {
             this.typeCache[subject] = [];
         }

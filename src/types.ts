@@ -262,3 +262,10 @@ export type WildHextuple = [
     string | null,
     string | null,
 ];
+
+export type WildSearch = [
+    string | null,
+    string | null,
+    null | [string, string, string],
+    string | null,
+];

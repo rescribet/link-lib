@@ -2,10 +2,14 @@ import rdfFactory, {
     BlankNode,
     HexPos,
     Hextuple,
-    isBlankNode, isLiteral, isNamedNode,
+    isBlankNode,
+    isLiteral,
+    isNamedNode,
     Literal,
     NamedNode,
-    Quad, Quadruple, Resource,
+    Quad,
+    Quadruple,
+    Resource,
 } from "@ontologies/core";
 import rdfx from "@ontologies/rdf";
 
@@ -68,25 +72,33 @@ export function hexToQuad(q: Hextuple): Quad {
 }
 
 export function quadToHex(q: Quad): Hextuple {
-    return [
-        q.subject,
-        q.predicate,
-        ...objectToHexObj(q.object),
-        q.graph,
-    ] as Hextuple;
+    const [v, dt, l] = objectToHexObj(q.object);
+    return {
+        0: q.subject,
+        1: q.predicate,
+        2: v,
+        3: dt,
+        4: l,
+        5: q.graph,
+        statementDeleted: false,
+    } as unknown as Hextuple;
 }
 
 export function quadrupleToHex(q: Quadruple): Hextuple {
-    return [
-        q[0],
-        q[1],
-        ...objectToHexObj(q[2]),
-        q[3],
-    ] as Hextuple;
+    const [v, dt, l] = objectToHexObj(q[2]);
+    return {
+        0: q[0],
+        1: q[1],
+        2: v,
+        3: dt,
+        4: l,
+        5: q[3],
+        statementDeleted: false,
+    } as unknown as Hextuple;
 }
 
 export function literalFromHex(hex: Hextuple): Literal {
-    return hex.slice(HexPos.object, HexPos.graph) as Literal;
+    return [hex[HexPos.object], hex[HexPos.objectDT], hex[HexPos.objectLang]];
 }
 
 export function literalFromResource(resource: Resource): Literal {

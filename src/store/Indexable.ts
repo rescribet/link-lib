@@ -1,8 +1,9 @@
 /* Taken, stripped and modified from rdflib.js */
 
 import {
+    datatypes,
     HexPos,
-    Hextuple, Indexable,
+    Hextuple,
     JSLitDatatype,
     JSLitLang,
     JSLitValue,
@@ -10,6 +11,7 @@ import {
     JSResource,
     LowLevelStore,
     Node,
+    Resource,
     Term,
 } from "@ontologies/core";
 
@@ -23,7 +25,7 @@ export type Constructable<T = object> = new (...args: any[]) => T;
 export interface IndexedStore extends LowLevelStore {
     readonly quads: Hextuple[];
     readonly indices: Array<{[k: string]: Hextuple[]}>;
-    canon<T = Term>(t: T): T;
+    canon<T extends Resource = Resource>(t: T): T;
     match(
         subj: Node | undefined | null,
         pred?: NamedNode | undefined | null,
@@ -50,11 +52,11 @@ export interface CallbackStore {
 }
 
 enum SearchIndexPosition {
-    Pattern = 0,
-    Hash = 1,
-    Given = 2,
+    // Pattern = 0,
+    Hash = 0,
+    Given = 1,
 }
-type SearchIndex = [Array<SomeTerm | null>, string[], number[]];
+type SearchIndex = [Array<string|undefined>, number[]];
 
 function isCallbackStore(store: any): store is CallbackStore {
     return typeof store === "object" && store !== null && "dataCallbacks" in store;
@@ -95,7 +97,15 @@ function add(
         return existing;
     }
 
-    const h: Hextuple = [subject, predicate, objectV, objectDt, objectL, graph];
+    const h: Hextuple = {
+        0: subject,
+        1: predicate,
+        2: objectV,
+        3: objectDt,
+        4: objectL,
+        5: graph,
+        statementDeleted: false,
+    } as unknown as Hextuple;
     updateIndices(store, h);
     store.quads.push(h);
 
@@ -108,34 +118,38 @@ function add(
     return h;
 }
 
-function computeSearchIndices(store: IndexedStore, search: WildHextuple): SearchIndex {
-    const pat = [
-        search[HexPos.subject],
-        search[HexPos.predicate],
-        search[HexPos.object],
-        search[HexPos.objectDT],
-        search[HexPos.objectLang],
-        search[HexPos.graph],
-    ];
-    const pattern = [];
-    const given = []; // Not wild
-    const hash = [];
-
-    const len = pat.length;
-    for (let p = 0; p < len; p++) {
-        pattern[p] = pat[p];
-        if (pattern[p] !== null) {
-            given.push(p);
-            hash[p] = store.canon(pattern[p]!);
+function computeSearchIndices(store: IndexedStore, pat: WildHextuple): SearchIndex {
+    // Not wild
+    const given = [];
+    for (let i = 0; i < pat.length; i++) {
+        if (pat[i] !== null) {
+            given.push(i);
         }
     }
 
-    return [pattern, hash, given];
+    let objHash = pat[HexPos.object] === null
+        ? undefined
+        : pat[HexPos.object]!;
+    if (objHash !== undefined
+        && (pat[HexPos.objectDT] === datatypes.namedNode
+            || pat[HexPos.objectDT] === datatypes.blankNode)) {
+        objHash = store.canon(objHash);
+    }
+    const hash = [
+        pat[HexPos.subject] === null ? undefined : store.canon(pat[HexPos.subject]!),
+        pat[HexPos.predicate] === null ? undefined : store.canon(pat[HexPos.predicate]!),
+        objHash,
+        pat[HexPos.objectDT] === null ? undefined : store.canon(pat[HexPos.objectDT]!),
+        pat[HexPos.objectLang] === null ? undefined : store.canon(pat[HexPos.objectLang]!),
+        pat[HexPos.graph] === null ? undefined : store.canon(pat[HexPos.graph]!),
+    ];
+
+    return [hash, given];
 }
 
 function hexByIndex(store: IndexedStore, search: SearchIndex, _: boolean): Hextuple[] {
     const p = search[SearchIndexPosition.Given][0];
-    const indexEntry = (store.indices[p][search[SearchIndexPosition.Hash][p]] as unknown as InternalHextuple[]);
+    const indexEntry = (store.indices[p][search[SearchIndexPosition.Hash][p]!] as unknown as InternalHextuple[]);
 
     if (!indexEntry) {
         return [];
@@ -143,9 +157,10 @@ function hexByIndex(store: IndexedStore, search: SearchIndex, _: boolean): Hextu
 
     const res: Hextuple[] = [];
     for (let i = 0; i < indexEntry.length; i++) {
-        if (!indexEntry[i][HexPos.graph + 1]) {
-            res.push(indexEntry[i] as unknown as Hextuple);
+        if ((indexEntry[i] as any).statementDeleted === true) {
+            continue;
         }
+        res.push(indexEntry[i] as unknown as Hextuple);
     }
 
     return res;
@@ -159,7 +174,7 @@ function findShortestIndex(store: IndexedStore, search: SearchIndex): number|nul
 
     for (let i = 0; i < given.length; i++) {
         const p = given[i];
-        list = store.indices[p][search[SearchIndexPosition.Hash][p]];
+        list = store.indices[p][search[SearchIndexPosition.Hash][p]!];
 
         if (!list) {
             return null;
@@ -180,24 +195,37 @@ function filterIndex(
     bestIndex: number,
     justOne: boolean,
 ): Hextuple[] {
-    const [pattern, hash, given] = search;
+    const [hash, given] = search;
 
     // Ok, we have picked the shortest index but now we have to filter it
     const pBest = given[bestIndex];
-    const possibles = store.indices[pBest][hash[pBest]] as unknown as InternalHextuple[];
-    const check = [...given.slice(0, bestIndex), ...given.slice(bestIndex + 1)]; // remove iBest
+    const possibles = store.indices[pBest][hash[pBest]!] as unknown as InternalHextuple[];
+
+    // remove iBest
+    const check = [];
+    for (let i = 0; i < given.length; i++) {
+        if (i !== bestIndex) {
+            check.push(given[i]);
+        }
+    }
+
     const results = [];
     for (let j = 0; j < possibles.length; j++) {
         let st: InternalHextuple | null = possibles[j];
+        if ((st as any).statementDeleted === true) {
+            continue;
+        }
 
         for (let i = 0; i < check.length; i++) { // for each position to be checked
             const p = check[i];
-            if ((store.canon(st[p]) || st[p]) !== pattern[p]) {
+            const h = hash[p];
+            const s = st[p];
+            if (store.canon(s as string) !== h && s !== h) {
                 st = null;
                 break;
             }
         }
-        if (st !== null && !st[6]) {
+        if (st !== null) {
             results.push(st);
             if (justOne) { break; }
         }
@@ -280,7 +308,7 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
             return add(this, subject, predicate, object, dt, lang, graph);
         }
 
-        public canon<T = Term>(term: T): T {
+        public canon<T extends Resource = Resource>(term: T): T {
             return term;
         }
 
@@ -320,7 +348,8 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
                 this.cleanTimeout = window.requestIdleCallback(this.cleanIndices, { timeout: 10000 });
             }
 
-            (hex as unknown as InternalHextuple)[HexPos.graph + 1] = true;
+            (hex as any).statementDeleted = true;
+            // (hex as unknown as InternalHextuple)[HexPos.graph + 1] = true;
             if (this.removeCallback) {
                 this.removeCallback(hex);
             }
@@ -374,10 +403,11 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
             const langIndex: { [k: string]: Hextuple[] } = {};
             const graphIndex: { [k: string]: Hextuple[] } = {};
             let q;
+            const quads = this.quads;
             const length = this.quads.length;
             for (let i = 0; i < length; i++) {
-                q = this.quads[i];
-                if (!q[HexPos.graph + 1]) {
+                q = quads[i];
+                if ((q as any).statementDeleted !== true) {
                     next.push(q);
 
                     const sCanon = this.canon(q[HexPos.subject]);

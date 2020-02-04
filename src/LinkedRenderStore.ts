@@ -412,7 +412,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             return emptyRequest as EmptyRequestStatus;
         }
 
-        if (this.resourceQueue.find(([resource]) => rdfFactory.equals(resource, iri))) {
+        if (this.resourceQueue.find(([resource]) => resource === iri)) {
             return {
                 lastRequested: new Date(),
                 lastResponseHeaders: null,
@@ -533,7 +533,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      */
     public shouldLoadResource(subject: Node): boolean {
         return (this.store.changeTimestamps[subject] === undefined || this.api.isInvalid(subject))
-            && !this.resourceQueue.find(([i]) => rdfFactory.equals(i, subject))
+            && !this.resourceQueue.find(([i]) => i === subject)
             && !isPending(this.api.getStatus(subject));
     }
 
@@ -630,13 +630,16 @@ export class LinkedRenderStore<T> implements Dispatcher {
         }
 
         const work = this.deltaProcessors.flatMap((dp) => dp.flush());
-        const subjects = Array.from(new Set(work
-            .flatMap((w) => [
-                w[HexPos.subject],
-                w[HexPos.graph],
-                this.store.canon(w[HexPos.subject]),
-                this.store.canon(w[HexPos.graph]),
-            ])));
+        const t: Resource[] = [];
+        for (let i = 0; i < work.length; i++) {
+            t.push(work[i][HexPos.subject]);
+            t.push(work[i][HexPos.graph]);
+        }
+        const tLen = t.length;
+        for (let i = 0; i < tLen; i++) {
+            t.push(this.store.canon(t[i]));
+        }
+        const subjects = Array.from(new Set<Resource>(t));
         const subjectRegs = subjects
             .flatMap((id) => this.subjectSubscriptions[id])
             .filter((reg) => reg

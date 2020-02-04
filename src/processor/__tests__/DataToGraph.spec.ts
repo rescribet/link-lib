@@ -266,7 +266,7 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt[HexPos.subject]).toEqual(ll.targetResource);
             expect(stmt[HexPos.predicate]).toEqual(defaultNS.example("property"));
-            const [v, dt, l] = rdfFactory.literal("Some string")
+            const [v, dt, l] = rdfFactory.literal("Some string");
             expect(stmt[HexPos.object]).toEqual(v);
             expect(stmt[HexPos.objectDT]).toEqual(dt);
             expect(stmt[HexPos.objectLang]).toEqual(l);

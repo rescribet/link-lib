@@ -982,19 +982,19 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@ontola/memoized-hash-factory@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@ontola/memoized-hash-factory/-/memoized-hash-factory-1.2.1.tgz#d8b5340b5c2d4b5700c1745f4c4cb51cf19dd164"
-  integrity sha512-w+IF5MegiooFslUZhJ4qk69e4YALGwSCPDIG4GHFMUaG76FB9rJLkaJhAoOGxZ/IOKs02VLF4Yk4kHPvIlhRVw==
-  dependencies:
-    murmurhash-js "^1.0.0"
-
 "@ontologies/as@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@ontologies/as/-/as-1.0.1.tgz#f60489dcb1e3603d33d8bf7df73b325d8868b45e"
   integrity sha512-EqgREbZegZD2qH7byPLkpEk9cK/PV9ctpTt0qrqK4bMk7rumAdKI0Er4te5tZpejWBrTg+uWR193r+5zWl44dw==
 
-"@ontologies/core@>=2.0.0-6", "@ontologies/core@^2.0.0-6":
+"@ontologies/core@2.0.0-plain.1":
+  version "2.0.0-plain.1"
+  resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-2.0.0-plain.1.tgz#156b9f518b73e9dd2101d208b6705e7518280a73"
+  integrity sha512-+s1pQIbMVNyr5wPOdQzUykpXerwqfqWMf9ndp77H8blmQLkGFNY77kD6EU9Z4QJafvO9vBphbd1ALRmbIsJ6mg==
+  dependencies:
+    "@ungap/global-this" "^0.3.1"
+
+"@ontologies/core@>=2.0.0-6":
   version "2.0.0-6"
   resolved "https://registry.yarnpkg.com/@ontologies/core/-/core-2.0.0-6.tgz#31e90922eea315578c270bf5122932ea9798b40f"
   integrity sha512-F9vP76XMM030RqDceIZWCI6DTZ8scfqHKQDiXkw2VZ4jsbKfE74g0goCTOwt74oh/FT09mJMUFvU/eJgsq94XQ==
@@ -4792,11 +4792,6 @@ ms@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
-
-murmurhash-js@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/murmurhash-js/-/murmurhash-js-1.0.0.tgz#b06278e21fc6c37fa5313732b0412bcb6ae15f51"
-  integrity sha1-sGJ44h/Gw3+lMTcysEEry2rhX1E=
 
 mute-stream@0.0.7:
   version "0.0.7"

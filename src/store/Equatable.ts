@@ -8,7 +8,7 @@ import {
 } from "@ontologies/core";
 import owl from "@ontologies/owl";
 
-import { NamedNode, SomeTerm, Term } from "../rdf";
+import { NamedNode, SomeTerm } from "../rdf";
 import { SomeNode } from "../types";
 import { termTypeOrder } from "../utilities/hex";
 import BasicStore from "./BasicStore";
@@ -21,6 +21,7 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
     return class extends base {
         public aliases: Map<string, Resource[]> = new Map<string, Resource[]>();
         public redirections: Map<string, Resource> = new Map<string, Resource>();
+        public hasRedirections: boolean = false;
 
         public constructor(...args: any[]) {
             super(...args);
@@ -32,12 +33,12 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             });
         }
 
-        public canon<T = Term>(term: T): T {
-            if (typeof term !== "string") {
+        public canon<T extends Resource = Resource>(term: T): T {
+            if (!this.hasRedirections || term === undefined || term === null) {
                 return term;
             }
 
-            return this.redirections.get(term) as unknown as T || term;
+            return this.redirections.get(term) as T || term;
         }
 
         public compareTerm(u1: Resource, u2: Resource): number {
@@ -126,6 +127,7 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
                 moveIndex(this.indices[i]);
             }
             this.redirections.set(oldhash, small);
+            this.hasRedirections = true;
             if (big) {
                 // @@JAMBO: must update redirections,aliases from sub-items, too.
                 if (!this.aliases.get(newhash)) {

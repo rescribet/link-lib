@@ -1,5 +1,5 @@
 /* global chrome */
-import rdfFactory, {
+import {
     HexPos,
     Hextuple,
     isBlankNode,
@@ -31,11 +31,11 @@ export function allRDFPropertyStatements(
         return [];
     }
 
-    if (rdfFactory.equals(predicate, rdfs.member)) {
-        return obj.filter(([, p]) => p === rdfs.member || p.startsWith(memberPrefix));
+    if (predicate === rdfs.member) {
+        return obj.filter((h) => h[1] === rdfs.member || h[1].startsWith(memberPrefix));
     }
 
-    return obj.filter(([_, p]) => p === predicate);
+    return obj.filter((h) => h[1] === predicate);
 }
 
 /**
@@ -48,7 +48,7 @@ export function allRDFValues(obj: Hextuple[], predicate: JSResource): Literal[] 
         return [];
     }
 
-    return props.map(([, , v, dt, l]) => [v, dt, l]);
+    return props.map((h) => [h[2], h[3], h[4]]);
 }
 
 /**
@@ -59,9 +59,9 @@ export function anyRDFValue(obj: Hextuple[] | undefined, predicate: JSResource):
         return undefined;
     }
 
-    const match = rdfFactory.equals(predicate, rdfs.member)
-        ? obj.find(([, p]) => p.startsWith(memberPrefix))
-        :  obj.find(([, p]) => rdfFactory.equals(p, predicate));
+    const match = predicate === rdfs.member
+        ? obj.find((h) => h[1].startsWith(memberPrefix))
+        :  obj.find((h) => h[1] === predicate);
 
     if (typeof match === "undefined") {
         return undefined;

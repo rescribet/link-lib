@@ -15,9 +15,9 @@ const MSG_TYPE_ERR = "Non-optimized NamedNode instance given. Please memoize you
 /** Constant used to determine that a component is used to render a type rather than a property. */
 export const RENDER_CLASS_NAME: NamedNode = ll.typeRenderClass;
 
-// function convertToCacheKey(types: Resource[], props: Resource[], topology: Resource): string {
-//     return `${types.join()}[${props.join()}][${topology}]`;
-// }
+function convertToCacheKey(types: Resource[], props: Resource[], topology: Resource): string {
+    return `${types.join()}[${props.join()}][${topology}]`;
+}
 
 const assert = (obj: any): void => {
     if (obj === undefined) {
@@ -62,7 +62,7 @@ export class ComponentStore<T> {
         return registrations;
     }
 
-    // private lookupCache: { [s: string]: T } = {};
+    private lookupCache: { [s: string]: T } = {};
     /**
      * Lookup map ordered with the following hierarchy;
      * [propertyType][resourceType][topology]
@@ -84,17 +84,17 @@ export class ComponentStore<T> {
                               topology: Resource,
                               defaultType: Resource): T | undefined {
         const oTypes = this.schema.expand(types);
-        // const key = convertToCacheKey(oTypes, predicates, topology);
-        // const cached = this.getComponentFromCache(key);
-        // if (cached !== undefined) {
-        //     return cached;
-        // }
+        const key = convertToCacheKey(oTypes, predicates, topology);
+        const cached = this.getComponentFromCache(key);
+        if (cached !== undefined) {
+            return cached;
+        }
 
         for (let p = 0; p < predicates.length; p++) {
             for (let t = 0; t < oTypes.length; t++) {
                 const exact = this.lookup(predicates[p], oTypes[t], topology);
                 if (exact !== undefined) {
-                    return exact; // this.addComponentToCache(exact, key);
+                    return this.addComponentToCache(exact, key);
                 }
             }
         }
@@ -191,17 +191,17 @@ export class ComponentStore<T> {
         cache[predicate][obj][topology] = component;
     }
 
-    // /**
-    //  * Adds a renderer to {this.lookupCache}
-    //  * @param component The render component.
-    //  * @param key The memoization key.
-    //  * @returns The renderer passed with {component}
-    //  */
-    // private addComponentToCache(component: T, key: string): T {
-    //     this.lookupCache[key] = component;
-    //
-    //     return this.lookupCache[key];
-    // }
+    /**
+     * Adds a renderer to {this.lookupCache}
+     * @param component The render component.
+     * @param key The memoization key.
+     * @returns The renderer passed with {component}
+     */
+    private addComponentToCache(component: T, key: string): T {
+        this.lookupCache[key] = component;
+
+        return this.lookupCache[key];
+    }
 
     /**
      * Expands the given types and returns the best component to render it with.
@@ -222,14 +222,14 @@ export class ComponentStore<T> {
         return components.find((c) => chain.indexOf(c) > 0);
     }
 
-    // /**
-    //  * Resolves a renderer from the {lookupCache}.
-    //  * @param key The key to look up.
-    //  * @returns If saved the render component, otherwise undefined.
-    //  */
-    // private getComponentFromCache(key: string): T | undefined {
-    //     return this.lookupCache[key];
-    // }
+    /**
+     * Resolves a renderer from the {lookupCache}.
+     * @param key The key to look up.
+     * @returns If saved the render component, otherwise undefined.
+     */
+    private getComponentFromCache(key: string): T | undefined {
+        return this.lookupCache[key];
+    }
 
     private possibleComponents(predicates: Resource[], topology: Resource): Resource[] {
         const classes = [rdfs.Resource];
