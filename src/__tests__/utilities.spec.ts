@@ -71,12 +71,12 @@ describe("utilities", () => {
             ];
             expect(allRDFValues(stmts, rdfs.member))
                 .toEqual([
-                    ex("1"),
-                    ex("0"),
-                    ex("2"),
-                    ex("3"),
-                    ex("5"),
-                    ex("6"),
+                    rdfFactory.literal(ex("1")),
+                    rdfFactory.literal(ex("0")),
+                    rdfFactory.literal(ex("2")),
+                    rdfFactory.literal(ex("3")),
+                    rdfFactory.literal(ex("5")),
+                    rdfFactory.literal(ex("6")),
                 ]);
         });
     });
@@ -97,7 +97,7 @@ describe("utilities", () => {
                 rdfFactory.quad(ex("d"), ex("h"), ex("f")),
                 rdfFactory.quad(ex("d"), ex("b"), ex("g")),
             ];
-            expect(anyRDFValue(stmts, ex("b"))).toEqual(ex("c"));
+            expect(anyRDFValue(stmts, ex("b"))).toEqual(rdfFactory.literal(ex("c")));
         });
 
         it("returns all rdfs:member properties", () => {
@@ -107,7 +107,7 @@ describe("utilities", () => {
                 rdfFactory.quad(ex("c"), rdfx.ns("_0"), ex("0")),
                 rdfFactory.quad(ex("c"), rdfx.ns("_2"), ex("2")),
             ];
-            expect(anyRDFValue(stmts, rdfs.member)).toEqual(ex("1"));
+            expect(anyRDFValue(stmts, rdfs.member)).toEqual(rdfFactory.literal(ex("1")));
         });
     });
 
@@ -139,7 +139,7 @@ describe("utilities", () => {
         });
 
         it("returns the first if no match could be fount", () => {
-            expect(getPropBestLang([abc, abd], langs)).toEqual(ex("c"));
+            expect(getPropBestLang([abc, abd], langs)).toEqual(rdfFactory.literal(ex("c")));
         });
     });
 

@@ -51,14 +51,15 @@ describe("LinkedRenderStore", () => {
 
         it("is empty without path", () => expect(store.lrs.dig(start, [])).toEqual([]));
 
-        it("resolves oneToOne", () => expect(store.lrs.dig(start, [ex("oneToOne")])).toEqual([ex("1.1")]));
+        it("resolves oneToOne", () => expect(store.lrs.dig(start, [ex("oneToOne")]))
+            .toEqual([rdfFactory.literal(ex("1.1"))]));
 
         it("resolves literals through oneToOne", () => {
             expect(store.lrs.dig(start, [ex("oneToOneLiteral"), ex("p")]))
                 .toEqual([
                     rdfFactory.literal("value", "en"),
                     rdfFactory.literal("value", "nl"),
-                    ex("2.3"),
+                    rdfFactory.literal(ex("2.3")),
                 ]);
         });
 
@@ -69,22 +70,25 @@ describe("LinkedRenderStore", () => {
 
         it("resolves oneToMany", () => {
             expect(store.lrs.dig(start, [ex("oneToMany")]))
-                .toEqual([ex("1.4"), ex("1.5")]);
+                .toEqual([rdfFactory.literal(ex("1.4")), rdfFactory.literal(ex("1.5"))]);
         });
 
         it("resolves values through oneToMany", () => {
             expect(store.lrs.dig(start, [ex("oneToMany"), ex("p")]))
-                .toEqual([ex("2.4"), ex("2.5")]);
+                .toEqual([rdfFactory.literal(ex("2.4")), rdfFactory.literal(ex("2.5"))]);
         });
 
         it("resolves values through holey oneToMany", () => {
             expect(store.lrs.dig(start, [ex("oneToManyHoley"), ex("p"), ex("q")]))
-                .toEqual([ex("3.6"), ex("3.8")]);
+                .toEqual([rdfFactory.literal(ex("3.6")), rdfFactory.literal(ex("3.8"))]);
         });
 
         it("resolves empty through holey oneToMany without end value", () => {
-            expect(store.lrs.dig(start, [ex("oneToManyHoley"), ex("p"), ex("nonexistent")]))
-                .toEqual([]);
+            expect(store.lrs.dig(start, [
+                ex("oneToManyHoley"),
+                rdfFactory.literal(ex("p")),
+                rdfFactory.literal(ex("nonexistent")),
+            ])).toEqual([]);
         });
     });
 });

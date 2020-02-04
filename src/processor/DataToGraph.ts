@@ -76,7 +76,18 @@ export function processObject(subject: Node,
                               store: LowLevelStore): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
 
-    if (isIterable(datum)) {
+    if (isNamedNode(datum)) {
+        store.add(subject, predicate, datum);
+    } else if (isLiteral(datum)) {
+        store.add(
+            subject,
+            predicate,
+            rdfFactory.literal(
+                datum[0],
+                datum[2] || datum[1],
+            ),
+        );
+    } else if (isIterable(datum)) {
         for (const subResource of datum) {
             if (isPlainObject(subResource)) {
                 const id = (subResource as DataObject)["@id"] as SomeNode | undefined || rdfFactory.blankNode();
@@ -95,22 +106,11 @@ export function processObject(subject: Node,
         const f = uploadIRI();
         const file = rdfFactory.quad(subject, predicate, f);
         blobs.push([f, datum as File]);
-        store.addQuad(file);
+        store.addHex(file);
     } else if (isPlainObject(datum)) {
         const id = datum["@id"] as SomeNode | undefined || rdfFactory.blankNode();
         blobs = blobs.concat(processDataObject(id, datum, store));
         store.add(subject, predicate, id);
-    } else if (isNamedNode(datum)) {
-        store.add(subject, predicate, datum);
-    } else if (isLiteral(datum)) {
-        store.add(
-            subject,
-            predicate,
-            rdfFactory.literal(
-                datum[0],
-                datum[2] || datum[1],
-            ),
-        );
     } else if (datum !== null && datum !== undefined) {
         store.add(subject, predicate, rdfFactory.literal(datum));
     }

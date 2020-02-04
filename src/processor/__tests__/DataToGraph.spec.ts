@@ -131,19 +131,19 @@ describe("DataToGraph", () => {
                 null,
             );
             expect(nestedProp).toHaveLength(1);
-            expect(nestedProp[0][HexPos.objectDT]).toEqual(rdf.ns("biteral"));
+            expect(nestedProp[0][HexPos.objectDT]).toEqual(xsd.string);
             expect(nestedProp[0][HexPos.object]).toEqual("1");
 
             const nn = stmts[2]!;
             expect(nn[HexPos.subject]).toEqual(ll.targetResource);
             expect(nn[HexPos.predicate]).toEqual(defaultNS.example("property"));
-            expect(nn[HexPos.objectDT]).toEqual(rdf.ns("bamedNode"));
+            expect(nn[HexPos.objectDT]).toEqual(rdf.ns("namedNode"));
             expect(nn[HexPos.object]).toEqual("http://schema.org/name");
 
             const lit = stmts[1]!;
             expect(lit[HexPos.subject]).toEqual(ll.targetResource);
             expect(lit[HexPos.predicate]).toEqual(defaultNS.example("property"));
-            expect(lit[HexPos.objectDT]).toEqual(rdf.ns("biteral"));
+            expect(lit[HexPos.objectDT]).toEqual(xsd.integer);
             expect(lit[HexPos.object]).toEqual("2");
         });
 
@@ -246,13 +246,13 @@ describe("DataToGraph", () => {
                 null,
                 true,
             )?.[0];
-            expect(stmt[0]).toBeTruthy();
-            expect(stmt[0][HexPos.subject]).toEqual(ll.targetResource);
-            expect(stmt[0][HexPos.predicate]).toEqual(defaultNS.example("property"));
-            expect(stmt[0][HexPos.objectDT]).toEqual(rdf.ns("blankNode"));
+            expect(stmt).toBeTruthy();
+            expect(stmt[HexPos.subject]).toEqual(ll.targetResource);
+            expect(stmt[HexPos.predicate]).toEqual(defaultNS.example("property"));
+            expect(stmt[HexPos.objectDT]).toEqual(rdf.ns("blankNode"));
 
             const match = rdfFactory.quad(
-                (stmt[0][HexPos.object] as Node),
+                (stmt[HexPos.object] as Node),
                 schema.name,
                 rdfFactory.literal("Some string"),
             );
@@ -266,7 +266,10 @@ describe("DataToGraph", () => {
             expect(stmt).toBeTruthy();
             expect(stmt[HexPos.subject]).toEqual(ll.targetResource);
             expect(stmt[HexPos.predicate]).toEqual(defaultNS.example("property"));
-            expect(stmt[HexPos.object]).toEqual(rdfFactory.literal("Some string"));
+            const [v, dt, l] = rdfFactory.literal("Some string")
+            expect(stmt[HexPos.object]).toEqual(v);
+            expect(stmt[HexPos.objectDT]).toEqual(dt);
+            expect(stmt[HexPos.objectLang]).toEqual(l);
         });
     });
 

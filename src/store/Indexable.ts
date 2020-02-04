@@ -2,7 +2,7 @@
 
 import {
     HexPos,
-    Hextuple,
+    Hextuple, Indexable,
     JSLitDatatype,
     JSLitLang,
     JSLitValue,
@@ -30,7 +30,7 @@ export interface IndexedStore extends LowLevelStore {
         obj?: Term | undefined | null,
         why?: Node | undefined | null,
         justOne?: boolean,
-    ): Quad[];
+    ): Hextuple[];
     matchHex(
         subject: JSResource,
         predicate: JSNamedNode,
@@ -66,6 +66,8 @@ function updateIndices(store: IndexedStore, q: Hextuple): void {
         store.canon(q[HexPos.subject]),
         store.canon(q[HexPos.predicate]),
         store.canon(q[HexPos.object]),
+        store.canon(q[HexPos.objectDT]),
+        store.canon(q[HexPos.objectLang]),
         store.canon(q[HexPos.graph]),
     ];
 
@@ -106,7 +108,7 @@ function add(
     return h;
 }
 
-function computeSearchIndices(search: WildHextuple): SearchIndex {
+function computeSearchIndices(store: IndexedStore, search: WildHextuple): SearchIndex {
     const pat = [
         search[HexPos.subject],
         search[HexPos.predicate],
@@ -119,11 +121,12 @@ function computeSearchIndices(search: WildHextuple): SearchIndex {
     const given = []; // Not wild
     const hash = [];
 
-    for (let p = 0; p < 4; p++) {
+    const len = pat.length;
+    for (let p = 0; p < len; p++) {
         pattern[p] = pat[p];
         if (pattern[p] !== null) {
             given.push(p);
-            hash[p] = pattern[p]!;
+            hash[p] = store.canon(pattern[p]!);
         }
     }
 
@@ -138,14 +141,14 @@ function hexByIndex(store: IndexedStore, search: SearchIndex, _: boolean): Hextu
         return [];
     }
 
-    const res = [];
+    const res: Hextuple[] = [];
     for (let i = 0; i < indexEntry.length; i++) {
         if (!indexEntry[i][HexPos.graph + 1]) {
-            res.push(indexEntry[i]);
+            res.push(indexEntry[i] as unknown as Hextuple);
         }
     }
 
-    return indexEntry as unknown as Hextuple[];
+    return res;
 }
 
 function findShortestIndex(store: IndexedStore, search: SearchIndex): number|null {
@@ -184,13 +187,12 @@ function filterIndex(
     const possibles = store.indices[pBest][hash[pBest]] as unknown as InternalHextuple[];
     const check = [...given.slice(0, bestIndex), ...given.slice(bestIndex + 1)]; // remove iBest
     const results = [];
-    const canons = (store as any).redirections;
     for (let j = 0; j < possibles.length; j++) {
         let st: InternalHextuple | null = possibles[j];
 
         for (let i = 0; i < check.length; i++) { // for each position to be checked
             const p = check[i];
-            if ((canons.get(st[p] as string) || st[p]) !== pattern[p]) {
+            if ((store.canon(st[p]) || st[p]) !== pattern[p]) {
                 st = null;
                 break;
             }
@@ -205,7 +207,7 @@ function filterIndex(
 }
 
 export function match(store: IndexedStore, search: WildHextuple, justOne: boolean): Hextuple[] {
-    const parsedSearch = computeSearchIndices(search);
+    const parsedSearch = computeSearchIndices(store, search);
 
     if (parsedSearch[SearchIndexPosition.Given].length === 0) {
         return (store.quads as unknown as InternalHextuple[])
@@ -231,6 +233,8 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
         public subjectIndex: { [k: string]: Hextuple[] } = {};
         public predicateIndex: { [k: string]: Hextuple[] } = {};
         public objectIndex: { [k: string]: Hextuple[] } = {};
+        public datatypeIndex: { [k: string]: Hextuple[] } = {};
+        public langIndex: { [k: string]: Hextuple[] } = {};
         public graphIndex: { [k: string]: Hextuple[] } = {};
 
         constructor(...args: any[]) {
@@ -240,6 +244,8 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
                 this.subjectIndex,
                 this.predicateIndex,
                 this.objectIndex,
+                this.datatypeIndex,
+                this.langIndex,
                 this.graphIndex,
             ];
         }
@@ -286,9 +292,15 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
          *    Otherwise, you should use remove() above.
          */
         public removeQuad(quad: Quad): this {
-            const term = [ quad.subject, quad.predicate, objectToHexObj(quad.object)[0], quad.graph ];
+            const term = [
+                quad.subject,
+                quad.predicate,
+                ...objectToHexObj(quad.object),
+                quad.graph,
+            ];
             const hex = quadToHex(quad);
-            for (let p = 0; p < 4; p++) {
+            const len = this.indices.length;
+            for (let p = 0; p < len; p++) {
                 const h = this.canon(term[p]);
                 if (this.indices[p][h]) {
                     this.rdfArrayRemove(this.indices[p][h], hex);
@@ -301,23 +313,10 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
             return this;
         }
 
-        // public removeHex(hex: Hextuple): this {
-        //     const term = [ hex[HexPos.subject], hex[HexPos.predicate], hex[HexPos.object], hex[HexPos.graph] ];
-        //     for (let p = 0; p < 4; p++) {
-        //         const h = this.canon(term[p]);
-        //         if (this.indices[p][h]) {
-        //             this.rdfArrayRemove(this.indices[p][h], hex);
-        //         }
-        //     }
-        //     if (this.removeCallback) {
-        //         this.removeCallback(hex);
-        //     }
-        //     this.rdfArrayRemove(this.quads, hex);
-        //     return this;
-        // }
-
         public removeHex(hex: Hextuple): this {
-            if (!this.cleanTimeout && typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
+            if (!this.cleanTimeout
+                && typeof window !== "undefined"
+                && typeof window.requestIdleCallback === "function") {
                 this.cleanTimeout = window.requestIdleCallback(this.cleanIndices, { timeout: 10000 });
             }
 
@@ -345,12 +344,12 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
             object: SomeTerm | null,
             graph: SomeNode | null,
             justOne: boolean = false,
-        ): Quad[] {
+        ): Hextuple[] {
             return match(
                 this,
                 [subject, predicate, ...objectToHexObj(object!), graph] as WildHextuple,
                 justOne,
-            ).map(hexToQuad);
+            );
         }
 
         public matchHex(
@@ -371,6 +370,8 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
             const subjectIndex: { [k: string]: Hextuple[] } = {};
             const predicateIndex: { [k: string]: Hextuple[] } = {};
             const objectIndex: { [k: string]: Hextuple[] } = {};
+            const datatypeIndex: { [k: string]: Hextuple[] } = {};
+            const langIndex: { [k: string]: Hextuple[] } = {};
             const graphIndex: { [k: string]: Hextuple[] } = {};
             let q;
             const length = this.quads.length;
@@ -400,6 +401,20 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
                         objectIndex[oCanon] = [q];
                     }
 
+                    const dtCanon = this.canon(q[HexPos.objectDT]);
+                    if (datatypeIndex[dtCanon]) {
+                        datatypeIndex[dtCanon].push(q);
+                    } else {
+                        datatypeIndex[dtCanon] = [q];
+                    }
+
+                    const lCanon = this.canon(q[HexPos.objectLang]);
+                    if (langIndex[lCanon]) {
+                        langIndex[lCanon].push(q);
+                    } else {
+                        langIndex[lCanon] = [q];
+                    }
+
                     const gCanon = this.canon(q[HexPos.graph]);
                     if (graphIndex[gCanon]) {
                         graphIndex[gCanon].push(q);
@@ -412,11 +427,15 @@ export function Indexable<BC extends Constructable<BasicStore>>(base: BC) {
             this.subjectIndex = subjectIndex;
             this.predicateIndex = predicateIndex;
             this.objectIndex = objectIndex;
+            this.datatypeIndex = datatypeIndex;
+            this.langIndex = langIndex;
             this.graphIndex = graphIndex;
             this.indices = [
                 this.subjectIndex,
                 this.predicateIndex,
                 this.objectIndex,
+                this.datatypeIndex,
+                this.langIndex,
                 this.graphIndex,
             ];
 

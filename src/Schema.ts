@@ -3,7 +3,7 @@ import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import RDFIndex from "./store/RDFIndex";
 
-import rdfFactory, { NamedNode, Quad, SomeTerm } from "./rdf";
+import rdfFactory, { NamedNode, SomeTerm } from "./rdf";
 import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";
@@ -93,8 +93,8 @@ export class Schema {
     }
 
     /** @ignore */
-    public holdsQuad(quad: Quad): boolean {
-        return this.store.holdsQuad(quad);
+    public holdsHex(quad: Hextuple): boolean {
+        return this.store.holdsHex(quad);
     }
 
     public isInstanceOf(resource: Resource, superClass: Resource): boolean {
@@ -130,7 +130,7 @@ export class Schema {
                  object: SomeTerm | null,
                  graph: SomeNode | null,
                  justOne: boolean = false,
-    ): Quad[] {
+    ): Hextuple[] {
         return this.store.match(subject, predicate, object, graph, justOne);
     }
 

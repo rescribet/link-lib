@@ -1,14 +1,14 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import rdfFactory, {
+import {
     HexPos,
     Hextuple,
-    isNode,
+    isResource,
     Resource,
 } from "@ontologies/core";
 import owl from "@ontologies/owl";
 
-import { NamedNode, Quad, SomeTerm, Term } from "../rdf";
+import { NamedNode, SomeTerm, Term } from "../rdf";
 import { SomeNode } from "../types";
 import { termTypeOrder } from "../utilities/hex";
 import BasicStore from "./BasicStore";
@@ -26,8 +26,8 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             super(...args);
 
             this.addDataCallback((quad: Hextuple) => {
-                if (rdfFactory.equals(quad[HexPos.predicate], owl.sameAs)) {
-                    this.equate(quad[HexPos.subject], quad[HexPos.object] as Resource);
+                if (quad[HexPos.predicate] === owl.sameAs) {
+                    this.equate(quad[HexPos.subject], quad[HexPos.object]);
                 }
             });
         }
@@ -88,12 +88,12 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             object: SomeTerm | null,
             graph: SomeNode | null,
             justOne: boolean = false,
-        ): Quad[] {
+        ): Hextuple[] {
             return super.match(
                 subject ? this.canon(subject) : null,
-                predicate ? this.canon(predicate) as NamedNode : null,
+                predicate ? this.canon(predicate) : null,
                 object
-                    ? (isNode(object) ? this.canon(object) : object)
+                    ? (isResource(object) ? this.canon(object) : object)
                     : null,
                 graph ? this.canon(graph) : null,
                 justOne,
@@ -121,7 +121,8 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
                 delete ix[oldhash];
             };
             // the canonical one carries all the indexes
-            for (let i = 0; i < 4; i++) {
+            const len = this.indices.length;
+            for (let i = 0; i < len; i++) {
                 moveIndex(this.indices[i]);
             }
             this.redirections.set(oldhash, small);
@@ -135,7 +136,10 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
                 if (oldAlias) {
                     for (let i = 0; i < oldAlias.length; i++) {
                         this.redirections.set(oldAlias[i], small);
-                        this.aliases.get(newhash)!.push(oldAlias[i]);
+                        this.aliases.set(
+                            newhash,
+                            [...this.aliases.get(newhash)!, oldAlias[i]],
+                        );
                     }
                 }
                 this.add(small, this.rdfFactory.namedNode("http://www.w3.org/2007/ont/link#uri"), big);

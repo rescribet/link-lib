@@ -20,7 +20,7 @@ describe("BasicStore", () => {
 
         describe("with arguments", () => {
             const rdfFactory = {} as DataFactory;
-            const quads = [rdf.quad()];
+            const quads = [rdf.quad(schema.Thing, schema.name, rdf.literal("Thing"))];
             const store = new BasicStore({ quads, rdfFactory });
 
             it("sets quads", () => expect(store.quads).toEqual(quads));

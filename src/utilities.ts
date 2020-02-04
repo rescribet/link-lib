@@ -3,14 +3,14 @@ import rdfFactory, {
     HexPos,
     Hextuple,
     isBlankNode,
-    isHextuple,
+    isHextuple, isLiteral,
     JSResource,
     Literal,
 } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
-import { Term } from "./rdf";
 
+import { Term } from "./rdf";
 import { SomeNode } from "./types";
 import { literalFromHex } from "./utilities/hex";
 
@@ -70,7 +70,7 @@ export function anyRDFValue(obj: Hextuple[] | undefined, predicate: JSResource):
     return literalFromHex(match);
 }
 
-export function getPropBestLang<T extends Term = Term>(rawProp: Hextuple | Hextuple[], langPrefs: string[]): T {
+export function getPropBestLang<T extends Literal = Literal>(rawProp: Hextuple | Hextuple[], langPrefs: string[]): T {
     if (isHextuple(rawProp)) {
         return literalFromHex(rawProp) as unknown as T;
     }
@@ -78,8 +78,7 @@ export function getPropBestLang<T extends Term = Term>(rawProp: Hextuple | Hextu
         return literalFromHex(rawProp[0]) as unknown as T;
     }
     for (let i = 0; i < langPrefs.length; i++) {
-        const pIndex = rawProp.findIndex((p) =>
-            p[HexPos.objectLang] === langPrefs[i]);
+        const pIndex = rawProp.findIndex((p) => p[HexPos.objectLang] === langPrefs[i]);
         if (pIndex >= 0) {
             return literalFromHex(rawProp[pIndex]) as unknown as T;
         }
@@ -106,8 +105,8 @@ export function getPropBestLangRaw(statements: Hextuple | Hextuple[], langPrefs:
     return statements[0];
 }
 
-export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Term {
-    if (!Array.isArray(rawTerm)) {
+export function getTermBestLang(rawTerm: Literal | Literal[], langPrefs: string[]): Literal {
+    if (isLiteral(rawTerm)) {
         return rawTerm;
     }
     if (rawTerm.length === 1) {

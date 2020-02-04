@@ -4,7 +4,6 @@ import {
     Hextuple,
     JSNamedNode,
     Literal,
-    QuadPosition,
     Resource,
 } from "@ontologies/core";
 import ld from "@ontologies/ld";
@@ -101,6 +100,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public addHextuples(data: Hextuple[]): Hextuple[] {
+        if (!Array.isArray(data)) {
+            throw new TypeError("An array of hextuples must be passed to addQuads");
+        }
+
         const statements = new Array(data.length);
         for (let i = 0, len = data.length; i < len; i++) {
             statements[i] = this.store.addHex(data[i]);
@@ -124,7 +127,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public find(subj: OptionalNode,
                 pred: OptionalNamedNode,
                 obj: OptionalTerm,
-                graph: OptionalNode): Quad | undefined {
+                graph: OptionalNode): Hextuple | undefined {
         return this.match(subj, pred, obj, graph, true)[0];
     }
 
@@ -166,7 +169,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                  pred: OptionalNamedNode,
                  obj: OptionalTerm,
                  graph: OptionalNode,
-                 justOne: boolean = false): Quad[] {
+                 justOne: boolean = false): Hextuple[] {
         return this.store.match(subj, pred, obj, graph, justOne) || [];
     }
 
@@ -195,9 +198,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public removeResource(subject: Resource): void {
-        this.touch(subject);
-        this.typeCache[subject] = [];
-        this.removeHexes(this.quadsFor(subject));
+        const canon = this.canon(subject);
+        this.touch(canon);
+        this.typeCache[canon] = [];
+        this.removeHexes(this.quadsFor(canon));
     }
 
     public removeHexes(statements: Hextuple[]): void {
@@ -214,12 +218,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param replacement The statements to add to the store.
      */
     public replaceQuads(original: Hextuple[], replacement: Hextuple[]): Hextuple[] {
-        const uniqueStatements = new Array(replacement.length).filter(Boolean);
+        const uniqueStatements: Hextuple[] = new Array(replacement.length).filter(Boolean);
         for (let i = 0; i < replacement.length; i++) {
-            const cond = original.some(
-                ([ subject, predicate ]) => rdfFactory.equals(subject, replacement[i][HexPos.subject])
-                    && rdfFactory.equals(predicate, replacement[i][HexPos.predicate]),
-            );
+            const cond = original.some(([ subject, predicate ]) =>
+                subject === replacement[i][HexPos.subject] && predicate === replacement[i][HexPos.predicate]);
             if (!cond) {
                 uniqueStatements.push(replacement[i]);
             }
@@ -229,8 +231,8 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         // Remove statements not in the old object. Useful for replacing data loosely related to the main resource.
         for (let i = 0; i < uniqueStatements.length; i++) {
             this.store.removeMatches(
-                uniqueStatements[i].subject,
-                uniqueStatements[i].predicate,
+                uniqueStatements[i][HexPos.subject],
+                uniqueStatements[i][HexPos.predicate],
                 null,
                 null,
             );
@@ -311,7 +313,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      */
     public quadsFor(subject: Resource): Hextuple[] {
         const id = this.store.canon(subject);
-        const index = this.store.indices[QuadPosition.subject][id];
+        const index = this.store.indices[HexPos.subject][id];
 
         if (typeof index === "undefined") {
             return EMPTY_ST_ARR as Hextuple[];

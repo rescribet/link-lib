@@ -343,7 +343,7 @@ describe("RDFStore", () => {
                 rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_")),
                 rdfFactory.quad(ex("1"), rdf.type, ex("type2"), ex("_")),
             ]);
-            store.removeHexes([rdfFactory.quad(ex("1"), rdf.type, ...objectToHexObj(ex("type")), ex("_"))]);
+            store.removeHexes([rdfFactory.quad(ex("1"), rdf.type, ex("type"), ex("_"))]);
             store.flush();
 
             expect(store.typeCache[ex("1")]).toEqual([ex("type2")]);

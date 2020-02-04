@@ -41,13 +41,17 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
         if (st === undefined) {
             return undefined;
         } else if (subject === null) {
-            return st.subject;
+            return st[HexPos.subject];
         } else if (predicate === null) {
-            return st.predicate;
+            return st[HexPos.predicate];
         } else if (object === null) {
-            return st.object;
+            return [
+                st[HexPos.object],
+                st[HexPos.objectDT],
+                st[HexPos.objectLang],
+            ];
         } else if (graph === null) {
-            return st.graph;
+            return st[HexPos.graph];
         }
 
         return undefined;
@@ -58,7 +62,7 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
         predicate: NamedNode | null,
         object: SomeTerm | null,
         graph: SomeNode | null,
-    ): Quad | undefined {
+    ): Hextuple | undefined {
         return this.match(subject, predicate, object, graph, true)?.[0];
     }
 
@@ -116,7 +120,7 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
         object: SomeTerm | null,
         graph: SomeNode | null,
     ): this {
-        this.removeQuads(this.match(
+        this.removeHexes(this.match(
             subject,
             predicate,
             object,

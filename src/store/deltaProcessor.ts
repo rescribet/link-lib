@@ -56,7 +56,7 @@ export const deltaProcessor = (
             }
 
             const g = new URL(quad[HexPos.graph]).searchParams.get("graph");
-            const graph = g ? rdfFactory.termFromNQ(g) : defaultGraph;
+            const graph = g || defaultGraph;
             if (isAdd(quad[HexPos.graph])) {
                 pushHextuple(addable, quad, graph);
             } else if (isReplace(quad[HexPos.graph])) {

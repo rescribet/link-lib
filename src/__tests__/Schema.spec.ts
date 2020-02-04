@@ -44,7 +44,7 @@ describe("Schema", () => {
                     rdfs.Resource,
                 );
 
-                expect(schema.holdsQuad(expected))
+                expect(schema.holdsHex(expected))
                     .toBeTruthy();
             });
         });
@@ -58,11 +58,11 @@ describe("Schema", () => {
                 const schema = blankSchema();
                 const personIsAClass = rdfFactory.quad(schemaNS.Person, rdf.type, rdfs.Class);
 
-                expect(schema.holdsQuad(personIsAClass)).toBeFalsy();
+                expect(schema.holdsHex(personIsAClass)).toBeFalsy();
 
                 schema.addHextuples([personIsAClass]);
 
-                expect(schema.holdsQuad(personIsAClass)).toBeTruthy();
+                expect(schema.holdsHex(personIsAClass)).toBeTruthy();
             });
 
             it("doesn't add generic statements", () => {
@@ -71,7 +71,7 @@ describe("Schema", () => {
 
                 schema.addHextuples([statement]);
 
-                expect(schema.holdsQuad(statement)).toBeFalsy();
+                expect(schema.holdsHex(statement)).toBeFalsy();
             });
         });
 

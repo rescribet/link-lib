@@ -148,9 +148,9 @@ describe("LinkedRenderStore", () => {
 
             const data = store.lrs.tryEntity(resource);
             expect(data).toHaveLength(3);
-            expect(data).toContain(testData[0]);
-            expect(data).toContain(testData[1]);
-            expect(data).toContain(testData[2]);
+            expect(data).toContainEqual(testData[0]);
+            expect(data).toContainEqual(testData[1]);
+            expect(data).toContainEqual(testData[2]);
         });
     });
 });

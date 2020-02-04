@@ -1,4 +1,10 @@
-import rdfFactory, { HexPos, Hextuple, isBlankNode, isNamedNode, NamedNode, Resource } from "@ontologies/core";
+import rdfFactory, {
+    HexPos,
+    Hextuple,
+    isResource,
+    NamedNode,
+    Resource,
+} from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 
@@ -64,7 +70,7 @@ export const RDFS = {
         if (domainStatements.length > 0) {
             for (let i = 0; i < domainStatements.length; i++) {
                 result.push(rdfFactory.hextuple(
-                    item[HexPos.subject] as NamedNode,
+                    item[HexPos.subject],
                     rdf.type,
                     domainStatements[i][HexPos.object],
                     domainStatements[i][HexPos.objectDT],
@@ -76,8 +82,8 @@ export const RDFS = {
         const rangeStatements = ctx.store.matchHex(item[HexPos.predicate], rdfs.range, null, null, null, null);
         if (rangeStatements.length > 0) {                                                     // P rdfs:range C..Cn
             for (let i = 0; i < rangeStatements.length; i++) {
-                result.push(rdfFactory.quad(
-                    item[HexPos.object] as NamedNode,
+                result.push(rdfFactory.hextuple(
+                    item[HexPos.object],
                     rdf.type,
                     rangeStatements[i][HexPos.object],
                     rangeStatements[i][HexPos.objectDT],
@@ -93,7 +99,7 @@ export const RDFS = {
             const dereferences = ctx.store.matchHex(item[HexPos.subject], null, null, null, null, null);
             for (let i = 0; i < dereferences.length; i++) {
                 result.push(rdfFactory.hextuple(
-                    item[HexPos.subject] as NamedNode,
+                    item[HexPos.subject],
                     rdf.type,
                     dereferences[i][HexPos.object],
                     dereferences[i][HexPos.objectDT],
@@ -103,7 +109,7 @@ export const RDFS = {
 
             if (item[HexPos.subject] !== rdf.type) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
-                    item[HexPos.subject] as NamedNode,
+                    item[HexPos.subject],
                     (quad: Hextuple) => {
                         ctx.store.addHextuples([rdfFactory.quad(
                             quad[HexPos.subject],
@@ -127,7 +133,7 @@ export const RDFS = {
 
             if (item[HexPos.subject] !== rdf.type) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
-                    item[HexPos.subject] as NamedNode,
+                    item[HexPos.subject],
                     (quad: Hextuple) => {
                         ctx.store.addHextuples([rdfFactory.quad(
                             quad[HexPos.object],
@@ -139,9 +145,10 @@ export const RDFS = {
                 );
             }
         } else if (rdfs.subClassOf === item[HexPos.predicate]) {            // C1 rdfs:subClassOf C2
-            if (!(isNamedNode(item[HexPos.object]) || isBlankNode(item[HexPos.object]))) {
+            if (!isResource(item[HexPos.object])) {
                 throw new Error("Object of subClassOf statement must be a NamedNode");
             }
+
             const iSubject = item[HexPos.subject];
             const iObject = item[HexPos.object];
             if (!ctx.superMap.has(iObject)) {

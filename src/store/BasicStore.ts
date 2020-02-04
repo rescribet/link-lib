@@ -2,7 +2,6 @@
 
 import rdfFactory, {
     DataFactory,
-    Feature,
     HexPos,
     Hextuple,
     JSLitDatatype,
@@ -43,10 +42,10 @@ function hexEquals(a: Hextuple, b: Hextuple): boolean {
         && a[5] === b[5];
 }
 
-function indexRemove(arr: Hextuple[], quad: Hextuple): void {
-    arr[arr.indexOf(quad)] = arr[arr.length - 1];
-    arr.pop();
-}
+// function indexRemove(arr: Hextuple[], quad: Hextuple): void {
+//     arr[arr.indexOf(quad)] = arr[arr.length - 1];
+//     arr.pop();
+// }
 
 function findRemove(arr: Hextuple[], quad: Hextuple): void {
     const index = arr.findIndex((q: Hextuple) => hexEquals(quad, q));
@@ -77,9 +76,10 @@ export default class BasicStore implements LowLevelStore {
         this.dataCallbacks = [];
         this.quads = opts.quads || [];
         this.rdfFactory = opts.rdfFactory || rdfFactory;
-        this.rdfArrayRemove = this.rdfFactory.supports[Feature.identity]
-            ? indexRemove
-            : findRemove;
+        // this.rdfArrayRemove = this.rdfFactory?.supports[Feature.identity]
+        //     ? indexRemove
+        //     : findRemove;
+        this.rdfArrayRemove = findRemove;
         this.cleanIndices = this.cleanIndices.bind(this);
     }
 
@@ -93,8 +93,8 @@ export default class BasicStore implements LowLevelStore {
         graph: SomeNode = this.rdfFactory.defaultGraph(),
     ): Quad {
         const [oV, oDt, oL] = objectToHexObj(object);
-        this.addH(subject, predicate, oV, oDt, oL, graph);
-        throw new Error();
+
+        return hexToQuad(this.addH(subject, predicate, oV, oDt, oL, graph));
     }
 
     /** Add a quad to the store. */
@@ -202,8 +202,8 @@ export default class BasicStore implements LowLevelStore {
     }
 
     public removeHexes(quads: Hextuple[]): this {
-        // Ensure we don't loop over the array we're modifying.
-        const toRemove = quads.slice();
+        // TODO: move to RDFIndex?
+        const toRemove = quads.map((h) => this.matchHex(...h)[0]).filter(Boolean);
         for (let i = 0; i < toRemove.length; i++) {
             this.removeHex(toRemove[i]);
         }
@@ -217,7 +217,7 @@ export default class BasicStore implements LowLevelStore {
         object: SomeTerm | null,
         graph: SomeNode | null,
         justOne: boolean = false,
-    ): Quad[] {
+    ): Hextuple[] {
         const hex = [
             subject || null,
             predicate || null,
@@ -225,9 +225,7 @@ export default class BasicStore implements LowLevelStore {
             graph || null,
         ] as HexSearch;
 
-        return this
-            .matchHex(hex[0], hex[1], hex[2], hex[3], hex[4], hex[5], justOne)
-            .map(hexToQuad);
+        return this.matchHex(hex[0], hex[1], hex[2], hex[3], hex[4], hex[5], justOne);
     }
 
     public addHex(hex: Hextuple): Hextuple {
@@ -251,8 +249,8 @@ export default class BasicStore implements LowLevelStore {
             (subject === null || h[HexPos.subject] === subject)
             && (predicate === null || h[HexPos.predicate] === predicate)
             && (object === null || h[HexPos.object] === object)
-            && (datatype === null || h[HexPos.objectDT] === object)
-            && (lang === null || h[HexPos.objectLang] === object)
+            && (datatype === null || h[HexPos.objectDT] === datatype)
+            && (lang === null || h[HexPos.objectLang] === lang)
             && (graph === null || h[HexPos.graph] === graph);
 
         if (justOne) {
@@ -267,7 +265,7 @@ export default class BasicStore implements LowLevelStore {
     public cleanIndices(): void {
         const next = [];
         for (let i = 0; i < this.quads.length; i++) {
-            if (!this.quads[i][QuadPosition.graph + 1]) {
+            if (!this.quads[i][HexPos.graph + 1]) {
                 next.push(this.quads[i]);
             }
         }

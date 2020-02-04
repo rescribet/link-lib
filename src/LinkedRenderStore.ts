@@ -215,7 +215,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
         const props = this.getResourceProperties(subject, pred!);
         if (props) {
             return props
-                .map((term) => isNode(term) && this.dig(term as Node, remaining))
+                .map((term) => isNode(term) && this.dig(term[0], remaining))
                 .flat(1)
                 .filter(Boolean);
         }

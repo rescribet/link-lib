@@ -31,7 +31,7 @@ describe("RDFIndex", () => {
         });
 
         it("resolves object", () => {
-            expect(store.any(schema.Person, rdfx.type, null, rdf.defaultGraph())).toEqual(schema.Thing);
+            expect(store.any(schema.Person, rdfx.type, null, rdf.defaultGraph())).toEqual(rdf.literal(schema.Thing));
         });
 
         it("resolves graph", () => {

@@ -25,7 +25,7 @@ describe("RDFS", () => {
             const data = rdfFactory.quad(NS.example("1"), rdfx.type, schemaOrg.Person);
             const inference = rdfFactory.quad(NS.example("1"), rdfx.type, rdfs.Resource);
 
-            expect(schema.holdsQuad(inference)).toBeFalsy();
+            expect(schema.holdsHex(inference)).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
             expect(inferred).not.toBeNull();
             expect(inferred).toContainEqual(inference);
@@ -37,7 +37,7 @@ describe("RDFS", () => {
             const data = rdfFactory.quad(NS.example("1"), rdfx.type, schemaOrg.Person);
             const inference = rdfFactory.quad(schemaOrg.Person, rdfx.type, rdfs.Class);
 
-            expect(schema.holdsQuad(inference)).toBeFalsy();
+            expect(schema.holdsHex(inference)).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
             expect(inferred).not.toBeNull();
             expect(inferred).toContainEqual(inference);
@@ -89,11 +89,11 @@ describe("RDFS", () => {
             const ctx = schema.getProcessingCtx();
             const inference = rdfFactory.quad(schemaOrg.CreativeWork, rdfx.type, rdfs.Class);
 
-            expect(schema.holdsQuad(inference)).toBeFalsy();
+            expect(schema.holdsHex(inference)).toBeFalsy();
 
             RDFS.processType(schemaOrg.CreativeWork, ctx);
 
-            expect(schema.holdsQuad(inference)).toBeTruthy();
+            expect(schema.holdsHex(inference)).toBeTruthy();
         });
 
         /**
