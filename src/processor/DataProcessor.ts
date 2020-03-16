@@ -185,7 +185,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this.accept = opts.accept || {
             default: "",
         };
-        this.bulkEndpoint = `${typeof window !== "undefined" ? window.location.origin : ""}/link-lib/bulk`;
+        this.bulkEndpoint = opts.bulkEndpoint || `${typeof window !== "undefined" ? window.location.origin : ""}/link-lib/bulk`;
         this._dispatch = opts.dispatch;
         this.invalidationMap = new Map();
         this.requestInitGenerator = opts.requestInitGenerator || new RequestInitGenerator();
