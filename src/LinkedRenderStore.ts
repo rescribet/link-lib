@@ -692,7 +692,9 @@ export class LinkedRenderStore<T> implements Dispatcher {
             return;
         }
 
-        if (typeof window.requestIdleCallback !== "undefined") {
+        if (typeof window === "undefined") {
+            setTimeout(this.processResourceQueue, 100);
+        } else if (typeof window.requestIdleCallback !== "undefined") {
             this.resourceQueueHandle = window.requestIdleCallback(this.processResourceQueue, { timeout: 100 });
         } else {
             this.resourceQueueHandle = window.setTimeout(this.processResourceQueue, 100);
