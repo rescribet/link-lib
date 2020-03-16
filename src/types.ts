@@ -248,6 +248,7 @@ export interface TransformerRegistrationRequest {
 
 export interface DataProcessorOpts {
     accept?: { [k: string]: string };
+    bulkEndpoint?: string;
     dispatch?: MiddlewareActionHandler;
     requestInitGenerator?: RequestInitGenerator;
     fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
