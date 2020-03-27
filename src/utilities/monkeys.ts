@@ -14,6 +14,11 @@ export function patchRDFLibStoreWithOverrides<T extends any = any>(
             changeBufferTarget.changeBuffer[changeBufferTarget.changeBufferCount] = quad;
             changeBufferTarget.changeBufferCount++;
         });
+
+        graph.removeCallback = (quad: Quad): void => {
+            changeBufferTarget.changeBuffer.push(quad);
+            changeBufferTarget.changeBufferCount++;
+        };
     } else {
         // Don't try this at home, kids!
         graph.statements.push = (...elems: any): number => {
@@ -25,14 +30,7 @@ export function patchRDFLibStoreWithOverrides<T extends any = any>(
             }
             return Array.prototype.push.call(graph.statements, ...elems);
         };
-    }
 
-    if (typeof graph.indices !== "undefined") {
-        graph.removeCallback = (quad: Quad): void => {
-            changeBufferTarget.changeBuffer.push(quad);
-            changeBufferTarget.changeBufferCount++;
-        };
-    } else {
         graph.statements.splice = (index: any, len: any): Quad[] => {
             const rem = Array.prototype.splice.call(graph.statements, index, len);
             changeBufferTarget.changeBuffer.push(...rem);

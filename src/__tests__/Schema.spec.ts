@@ -6,14 +6,15 @@ import rdfs from "@ontologies/rdfs";
 import schemaNS from "@ontologies/schema";
 import "jest";
 
+import ex from "../ontology/ex";
+import example from "../ontology/example";
 import { RDFStore } from "../RDFStore";
 import { Schema } from "../Schema";
-import { defaultNS as NS } from "../utilities/constants";
 
 const resource1 = [
-    rdfFactory.quad(NS.example("5"), rdf.type, schemaNS.CreativeWork),
-    rdfFactory.quad(NS.example("5"), schemaNS.name, rdfFactory.literal("The name")),
-    rdfFactory.quad(NS.example("5"), schemaNS.text, rdfFactory.literal("Body text")),
+    rdfFactory.quad(example.ns("5"), rdf.type, schemaNS.CreativeWork),
+    rdfFactory.quad(example.ns("5"), schemaNS.name, rdfFactory.literal("The name")),
+    rdfFactory.quad(example.ns("5"), schemaNS.text, rdfFactory.literal("Body text")),
 ];
 
 const blankSchema = (): Schema => new Schema(new RDFStore());
@@ -116,47 +117,47 @@ describe("Schema", () => {
     describe("when filled", () => {
         const schema = blankSchema();
         schema.addQuads([
-            rdfFactory.quad(NS.ex("A"), rdfs.subClassOf, rdfs.Class),
+            rdfFactory.quad(ex.ns("A"), rdfs.subClassOf, rdfs.Class),
 
-            rdfFactory.quad(NS.ex("B"), rdfs.subClassOf, NS.ex("A")),
+            rdfFactory.quad(ex.ns("B"), rdfs.subClassOf, ex.ns("A")),
 
-            rdfFactory.quad(NS.ex("C"), rdfs.subClassOf, NS.ex("A")),
+            rdfFactory.quad(ex.ns("C"), rdfs.subClassOf, ex.ns("A")),
 
-            rdfFactory.quad(NS.ex("D"), rdfs.subClassOf, NS.ex("C")),
+            rdfFactory.quad(ex.ns("D"), rdfs.subClassOf, ex.ns("C")),
 
-            rdfFactory.quad(NS.ex("E"), rdfs.subClassOf, rdfs.Class),
+            rdfFactory.quad(ex.ns("E"), rdfs.subClassOf, rdfs.Class),
 
-            rdfFactory.quad(NS.ex("F"), rdfs.subClassOf, rdfs.Class),
+            rdfFactory.quad(ex.ns("F"), rdfs.subClassOf, rdfs.Class),
 
-            rdfFactory.quad(NS.ex("G"), rdfs.subClassOf, NS.example("E")), // TODO: check if typo
+            rdfFactory.quad(ex.ns("G"), rdfs.subClassOf, example.ns("E")), // TODO: check if typo
         ]);
 
         describe("#sort", () => {
             it("accounts for class inheritance", () => {
                 expect(schema.sort([
-                    rdfFactory.id(NS.ex("D")),
-                    rdfFactory.id(NS.ex("A")),
-                    rdfFactory.id(NS.ex("C")),
+                    rdfFactory.id(ex.ns("D")),
+                    rdfFactory.id(ex.ns("A")),
+                    rdfFactory.id(ex.ns("C")),
                 ])).toEqual([
-                    rdfFactory.id(NS.ex("D")), // 3
-                    rdfFactory.id(NS.ex("C")), // 2
-                    rdfFactory.id(NS.ex("A")), // 1
+                    rdfFactory.id(ex.ns("D")), // 3
+                    rdfFactory.id(ex.ns("C")), // 2
+                    rdfFactory.id(ex.ns("A")), // 1
                 ]);
             });
 
             it("accounts for supertype depth", () => {
                 expect(schema.sort([
-                    rdfFactory.id(NS.ex("G")),
-                    rdfFactory.id(NS.ex("C")),
-                    rdfFactory.id(NS.ex("B")),
-                    rdfFactory.id(NS.ex("A")),
-                    rdfFactory.id(NS.ex("D")),
+                    rdfFactory.id(ex.ns("G")),
+                    rdfFactory.id(ex.ns("C")),
+                    rdfFactory.id(ex.ns("B")),
+                    rdfFactory.id(ex.ns("A")),
+                    rdfFactory.id(ex.ns("D")),
                 ])).toEqual([
-                    rdfFactory.id(NS.ex("D")), // 3
-                    rdfFactory.id(NS.ex("C")), // 2
-                    rdfFactory.id(NS.ex("B")), // 2
-                    rdfFactory.id(NS.ex("G")), // 2
-                    rdfFactory.id(NS.ex("A")), // 1
+                    rdfFactory.id(ex.ns("D")), // 3
+                    rdfFactory.id(ex.ns("C")), // 2
+                    rdfFactory.id(ex.ns("B")), // 2
+                    rdfFactory.id(ex.ns("G")), // 2
+                    rdfFactory.id(ex.ns("A")), // 1
                 ]);
             });
         });

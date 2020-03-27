@@ -1,11 +1,11 @@
 import "../../__tests__/useHashFactory";
 
 import rdfFactory, { LowLevelStore } from "@ontologies/core";
-import RDFIndex from "../../store/RDFIndex";
 
+import ex from "../../ontology/ex";
+import RDFIndex from "../../store/RDFIndex";
 import { ChangeBuffer } from "../../types";
 
-import { defaultNS as NS } from "../constants";
 import { patchRDFLibStoreWithOverrides } from "../monkeys";
 
 function getStorePair(): [LowLevelStore, ChangeBuffer] {
@@ -31,7 +31,7 @@ describe("monkeys", () => {
         it("increments the changebuffer", () => {
             const [ g, changeBuffer ] = getStorePair();
             patchRDFLibStoreWithOverrides(g, changeBuffer);
-            g.addQuad(rdfFactory.quad(NS.ex("1"), NS.ex("p"), NS.ex("2")));
+            g.addQuad(rdfFactory.quad(ex.ns("1"), ex.ns("p"), ex.ns("2")));
 
             expect(changeBuffer.changeBufferCount).toEqual(1);
         });

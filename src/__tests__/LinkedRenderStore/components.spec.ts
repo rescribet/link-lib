@@ -4,9 +4,10 @@ import schema from "@ontologies/schema";
 
 import { RENDER_CLASS_NAME } from "../../ComponentStore";
 import { LinkedRenderStore } from "../../LinkedRenderStore";
+import argu from "../../ontology/argu";
 import { getBasicStore } from "../../testUtilities";
 import { ComponentRegistration, SomeNode } from "../../types";
-import { DEFAULT_TOPOLOGY, defaultNS as NS } from "../../utilities/constants";
+import { DEFAULT_TOPOLOGY } from "../../utilities/constants";
 
 import { DT, example, RCN } from "./fixtures";
 
@@ -17,8 +18,8 @@ describe("LinkedRenderStore", () => {
         const types = [schema.Thing, schema.Person];
         const prop = schema.name;
         const props = [schema.name, schema.text, schema.dateCreated];
-        const topology = NS.argu("collection");
-        const topologies = [NS.argu("collection"), NS.argu("collection")];
+        const topology = argu.ns("collection");
+        const topologies = [argu.ns("collection"), argu.ns("collection")];
 
         function checkRegistration<T>(r: ComponentRegistration<T>,
                                       c: T,
@@ -97,7 +98,7 @@ describe("LinkedRenderStore", () => {
         const reg2 = {
             component: (): string => "2",
             property: rdfFactory.id(schema.name),
-            topology: rdfFactory.id(NS.argu("collection")),
+            topology: rdfFactory.id(argu.ns("collection")),
             type: rdfFactory.id(schema.Person),
         } as ComponentRegistration<() => string>;
 

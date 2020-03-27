@@ -1,4 +1,4 @@
-import { LowLevelStore, Namespace } from "@ontologies/core";
+import { CustomPredicateCreator, LowLevelStore } from "@ontologies/core";
 import { Node, SomeTerm } from "@ontologies/core/dist-types/types";
 
 import { ComponentStore } from "./ComponentStore";
@@ -115,7 +115,7 @@ export type MiddlewareWithBoundLRS = (next: MiddlewareActionHandler) => Middlewa
 export type MiddlewareActionHandler = (action: NamedNode, args: any) => Promise<any>;
 
 export interface NamespaceMap {
-    [s: string]: Namespace;
+    [k: string]: CustomPredicateCreator;
 }
 
 export type LazyNNArgument = NamedNode | NamedNode[];

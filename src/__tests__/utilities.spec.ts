@@ -6,6 +6,7 @@ import rdfs from "@ontologies/rdfs";
 import schema from "@ontologies/schema";
 import "jest";
 
+import example from "../ontology/example";
 import {
     allRDFPropertyStatements,
     allRDFValues,
@@ -15,10 +16,8 @@ import {
     getTermBestLang,
     isDifferentOrigin,
 } from "../utilities";
-import { defaultNS } from "../utilities/constants";
-import { expandProperty } from "../utilities/memoizedNamespace";
 
-const ex = defaultNS.example;
+const ex = example.ns;
 
 describe("utilities", () => {
     const abc = rdfFactory.quad(ex("a"), ex("b"), ex("c"));
@@ -110,30 +109,6 @@ describe("utilities", () => {
                 rdfFactory.quad(ex("c"), rdfx.ns("_2"), ex("2")),
             ];
             expect(anyRDFValue(stmts, rdfs.member)).toEqual(ex("1"));
-        });
-    });
-
-    describe("defaultNS", () => {
-        it("contains memoized namespaces", () => {
-            expect(defaultNS.argu("test")).toHaveProperty("id");
-        });
-    });
-
-    describe("#expandProperty", () => {
-        it("expands short to long notation", () => {
-            const nameShort = expandProperty("schema:name");
-            if (nameShort === undefined) {
-                throw new TypeError();
-            }
-            expect(rdfFactory.equals(schema.name, nameShort)).toBeTruthy();
-        });
-
-        it("preserves long notation", () => {
-            const nameLong = expandProperty("http://schema.org/name");
-            if (nameLong === undefined) {
-                throw new TypeError();
-            }
-            expect(rdfFactory.equals(schema.name, nameLong)).toBeTruthy();
         });
     });
 
@@ -243,7 +218,7 @@ describe("utilities", () => {
 
     describe("#namedNodeByIRI", () => {
         it("returns known iris from the map", () => {
-            const name = defaultNS.schema("name");
+            const name = schema.name;
             expect(rdfFactory.namedNode(name.value)).toEqual(name);
         });
 
@@ -258,7 +233,7 @@ describe("utilities", () => {
 
     describe("#namedNodeByStoreIndex", () => {
         it("returns known iris from the map", () => {
-            const name = defaultNS.schema("name");
+            const name = schema.name;
             expect(rdfFactory.fromId(rdfFactory.id(name))).toEqual(name);
         });
 

@@ -1,9 +1,4 @@
-import as from "@ontologies/as";
-import { createNS, NamedNode } from "@ontologies/core";
-import rdf from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
-import schema from "@ontologies/schema";
-import shacl from "@ontologies/shacl";
+import { NamedNode } from "@ontologies/core";
 
 import ll from "../ontology/ll";
 
@@ -20,50 +15,6 @@ export const F_NTRIPLES_DEP = "text/ntriples";
 export const F_TURTLE_DEP = "application/x-turtle";
 
 export const NON_CONTENT_EXTS = ["php", "asp", "aspx", "cgi", "jsp"];
-
-/** @deprecated Use the @ontologies/<ns> packages directly, these provide better typing and documentation */
-export const defaultNS = Object.freeze({
-    argu: createNS("https://argu.co/ns/core#"),
-    as: as.ns,
-    bibo: createNS("http://purl.org/ontology/bibo/"),
-    cc: createNS("http://creativecommons.org/ns#"),
-    dbo: createNS("http://dbpedia.org/ontology/"),
-    dbp: createNS("http://dbpedia.org/property/"),
-    dbpedia: createNS("http://dbpedia.org/resource/"),
-    dcat: createNS("http://www.w3.org/ns/dcat#"),
-    dctype: createNS("http://purl.org/dc/dcmitype/"),
-    ex: createNS("http://example.com/ns#"),
-    example: createNS("http://www.example.com/"),
-    fhir: createNS("http://hl7.org/fhir/"),
-    fhir3: createNS("http://hl7.org/fhir/STU3"),
-    foaf: createNS("http://xmlns.com/foaf/0.1/"),
-    geo: createNS("http://www.w3.org/2003/01/geo/wgs84_pos#"),
-    http: createNS("http://www.w3.org/2011/http#"),
-    http07: createNS("http://www.w3.org/2007/ont/http#"),
-    httph: createNS("http://www.w3.org/2007/ont/httph#"),
-    hydra: createNS("http://www.w3.org/ns/hydra/core#"),
-    ianalr: createNS("http://www.iana.org/assignments/link-relations/"),
-    ld: createNS("http://purl.org/linked-delta/"),
-    link: createNS("http://www.w3.org/2007/ont/link#"),
-    ll: createNS("http://purl.org/link-lib/"),
-    owl: createNS("http://www.w3.org/2002/07/owl#"),
-    p: createNS("http://www.wikidata.org/prop/"),
-    prov: createNS("http://www.w3.org/ns/prov#"),
-    qb: createNS("http://purl.org/linked-data/cube#"),
-    rdf: rdf.ns,
-    rdfs: rdfs.ns,
-    schema: schema.ns,
-    sh: shacl.ns,
-    shacl: shacl.ns,
-    skos: createNS("http://www.w3.org/2004/02/skos/core#"),
-    wd: createNS("http://www.wikidata.org/entity/"),
-    wdata: createNS("https://www.wikidata.org/wiki/Special:EntityData/"),
-    wdref: createNS("http://www.wikidata.org/reference/"),
-    wds: createNS("http://www.wikidata.org/entity/statement/"),
-    wdt: createNS("http://www.wikidata.org/prop/direct/"),
-    wdv: createNS("http://www.wikidata.org/value/"),
-    xmlns: createNS("http://www.w3.org/2000/xmlns/"),
-});
 
 export const DEFAULT_TOPOLOGY: NamedNode = ll.defaultTopology;
 

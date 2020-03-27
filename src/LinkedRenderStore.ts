@@ -41,7 +41,7 @@ import {
     SubscriptionRegistrationBase,
 } from "./types";
 import { normalizeType } from "./utilities";
-import { DEFAULT_TOPOLOGY, defaultNS, RENDER_CLASS_NAME } from "./utilities/constants";
+import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "./utilities/constants";
 
 const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
     .map((t) => id(t || defaultValue));
@@ -81,8 +81,12 @@ export class LinkedRenderStore<T> implements Dispatcher {
     public defaultType: NamedNode = schema.Thing;
     public deltaProcessors: DeltaProcessor[];
     public report: ErrorReporter;
-    /** @deprecated */
-    public namespaces: NamespaceMap = {...defaultNS};
+    /**
+     * Can aid in parsing an creating prefix mapping strings.
+     * Please use @ontologies/<namespace> packages in your programs, canonicalizing certain prefixes will lead to
+     * brittle and hard to refactor code!
+     */
+    public namespaces: NamespaceMap = {};
 
     public api: LinkedDataAPI;
     public mapping: ComponentStore<T>;
@@ -118,7 +122,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             this.dispatch = opts.dispatch;
         }
         this.defaultType = opts.defaultType || schema.Thing;
-        this.namespaces = opts.namespaces || {...defaultNS};
+        this.namespaces = opts.namespaces || {};
         this.schema = opts.schema || new Schema(this.store);
         this.mapping = opts.mapping || new ComponentStore(this.schema);
         this.resourceQueue = [];
@@ -169,7 +173,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @return {Promise<LinkedActionResponse>}
      */
     public execActionByIRI(subject: NamedNode, data?: DataObject): Promise<LinkedActionResponse> {
-        const preparedData = dataToGraphTuple(data || {});
+        const preparedData = dataToGraphTuple(data || {}, this.namespaces);
         return this
             .api
             .execActionByIRI(subject, preparedData)

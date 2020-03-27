@@ -7,15 +7,17 @@ import schema from "@ontologies/schema";
 import xsd from "@ontologies/xsd";
 import "jest";
 
+import ex from "../../ontology/ex";
+import example from "../../ontology/example";
 import ll from "../../ontology/ll";
 import { Node } from "../../rdf";
 import RDFIndex from "../../store/RDFIndex";
 
-import { defaultNS } from "../../utilities/constants";
-
 import { dataToGraphTuple, list, processObject, seq, toGraph } from "../DataToGraph";
 
 describe("DataToGraph", () => {
+    const exampleMap = { example };
+
     it("returns empty objects without data", () => {
         const [graph, blobs] = dataToGraphTuple({});
         expect(graph.quads).toHaveLength(0);
@@ -25,7 +27,7 @@ describe("DataToGraph", () => {
     describe("IRIs", () => {
         it("raises when only an IRI was given", () => {
             expect(() => {
-                toGraph(defaultNS.example("r"));
+                toGraph(example.ns("r"));
             }).toThrowError(TypeError);
         });
 
@@ -71,7 +73,7 @@ describe("DataToGraph", () => {
         });
 
         it("handles shortened strings", () => {
-            const [graph, blobs] = dataToGraphTuple({ "schema:name": "Some name" });
+            const [graph, blobs] = dataToGraphTuple({ "schema:name": "Some name" }, { schema });
             expect(graph.quads).toHaveLength(1);
             expect(blobs).toHaveLength(0);
 
@@ -93,101 +95,101 @@ describe("DataToGraph", () => {
         it("handles arrays", () => {
             const data = { "example:property": [
                 {
-                    "@id": defaultNS.example("nested"),
+                    "@id": example.ns("nested"),
                     "example:nestedProp": "1",
                 },
                 2,
                 schema.name,
             ]};
-            const [graph] = dataToGraphTuple(data);
+            const [graph] = dataToGraphTuple(data, exampleMap);
 
-            const stmts = graph.match(ll.targetResource, defaultNS.example("property"), null, null);
+            const stmts = graph.match(ll.targetResource, example.ns("property"), null, null);
             expect(stmts).toHaveLength(3);
 
             const bn = stmts[0]!;
             expect(bn.subject).toEqual(ll.targetResource);
-            expect(bn.predicate).toEqual(defaultNS.example("property"));
-            expect(bn.object).toEqual(defaultNS.example("nested"));
+            expect(bn.predicate).toEqual(example.ns("property"));
+            expect(bn.object).toEqual(example.ns("nested"));
 
-            const nestedProp = graph.match(bn.object as Node, defaultNS.example("nestedProp"), null, null);
+            const nestedProp = graph.match(bn.object as Node, example.ns("nestedProp"), null, null);
             expect(nestedProp).toHaveLength(1);
             expect(nestedProp[0].object.termType).toEqual("Literal");
             expect(nestedProp[0].object.value).toEqual("1");
 
             const nn = stmts[2]!;
             expect(nn.subject).toEqual(ll.targetResource);
-            expect(nn.predicate).toEqual(defaultNS.example("property"));
+            expect(nn.predicate).toEqual(example.ns("property"));
             expect(nn.object.termType).toEqual("NamedNode");
             expect(nn.object.value).toEqual("http://schema.org/name");
 
             const lit = stmts[1]!;
             expect(lit.subject).toEqual(ll.targetResource);
-            expect(lit.predicate).toEqual(defaultNS.example("property"));
+            expect(lit.predicate).toEqual(example.ns("property"));
             expect(lit.object.termType).toEqual("Literal");
             expect(lit.object.value).toEqual("2");
         });
 
         it("handles booleans", () => {
             const data = { "example:property": true };
-            const [graph] = dataToGraphTuple(data);
+            const [graph] = dataToGraphTuple(data, exampleMap);
             const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
-            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.predicate).toEqual(example.ns("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(true));
         });
 
         it("handles dates", () => {
             const data = { "example:property": new Date() };
-            const [graph] = dataToGraphTuple(data);
+            const [graph] = dataToGraphTuple(data, exampleMap);
             const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
-            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.predicate).toEqual(example.ns("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(data["example:property"]));
         });
 
         it("handles decimals", () => {
             const data = { "example:property": 2.5 };
-            const [graph] = dataToGraphTuple(data);
+            const [graph] = dataToGraphTuple(data, exampleMap);
             const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
-            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.predicate).toEqual(example.ns("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(2.5));
         });
 
         it("handles files", () => {
             const data = { "example:property": new File([""], "test.txt") };
-            const [graph, blobs] = dataToGraphTuple(data);
+            const [graph, blobs] = dataToGraphTuple(data, exampleMap);
             expect(blobs).toHaveLength(1);
             const fileNode = blobs[0][0];
 
             const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
-            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.predicate).toEqual(example.ns("property"));
             expect(stmt.object).toEqual(fileNode);
         });
 
         it("handles integers", () => {
             const data = { "example:property": 45 };
-            const [graph] = dataToGraphTuple(data);
+            const [graph] = dataToGraphTuple(data, exampleMap);
             const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
-            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.predicate).toEqual(example.ns("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(45));
         });
 
         it("handles bigints", () => {
             const value = "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
             const data = { "example:property": BigInt(value) as unknown as number };
-            const [graph] = dataToGraphTuple(data);
+            const [graph] = dataToGraphTuple(data, exampleMap);
             const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
-            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.predicate).toEqual(example.ns("property"));
             expect(stmt.object).toEqual(rdfFactory.literal(value, xsd.integer));
         });
 
@@ -198,14 +200,14 @@ describe("DataToGraph", () => {
                     "schema:name": "Some string",
                 },
             };
-            const [graph, blobs] = dataToGraphTuple(data);
+            const [graph, blobs] = dataToGraphTuple(data, { example, schema });
             expect(blobs).toHaveLength(1);
             expect(graph.quads).toHaveLength(3);
 
-            const stmt = graph.match(ll.targetResource, defaultNS.example("property"), null, null, true)?.[0];
+            const stmt = graph.match(ll.targetResource, example.ns("property"), null, null, true)?.[0];
             expect(stmt).toBeTruthy();
             expect(stmt!.subject).toEqual(ll.targetResource);
-            expect(stmt!.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt!.predicate).toEqual(example.ns("property"));
             expect(stmt!.object.termType).toEqual("BlankNode");
 
             const match = rdfFactory.quad(
@@ -218,11 +220,11 @@ describe("DataToGraph", () => {
 
         it("handles strings", () => {
             const data = { "example:property": "Some string" };
-            const [graph] = dataToGraphTuple(data);
+            const [graph] = dataToGraphTuple(data, exampleMap);
             const stmt = graph.quads[0];
             expect(stmt).toBeTruthy();
             expect(stmt.subject).toEqual(ll.targetResource);
-            expect(stmt.predicate).toEqual(defaultNS.example("property"));
+            expect(stmt.predicate).toEqual(example.ns("property"));
             expect(stmt.object).toEqual(rdfFactory.literal("Some string"));
         });
     });
@@ -230,19 +232,19 @@ describe("DataToGraph", () => {
     describe("processObject", () => {
         it("handles undefined", () => {
             const g = new RDFIndex();
-            processObject(defaultNS.example("a"), defaultNS.example("property"), null, g);
+            processObject(example.ns("a"), example.ns("property"), null, g);
             expect(g.quads).toHaveLength(0);
         });
 
         it("handles null", () => {
             const g = new RDFIndex();
-            processObject(defaultNS.example("a"), defaultNS.example("property"), null, g);
+            processObject(example.ns("a"), example.ns("property"), null, g);
             expect(g.quads).toHaveLength(0);
         });
 
         it("handles rdf literals", () => {
             const g = new RDFIndex();
-            processObject(defaultNS.example("a"), defaultNS.example("property"), rdfFactory.literal(1), g);
+            processObject(example.ns("a"), example.ns("property"), rdfFactory.literal(1), g);
             expect(g.quads).toHaveLength(1);
             expect(g.quads[0].object).toEqual(rdfFactory.literal(1));
         });
@@ -268,13 +270,13 @@ describe("DataToGraph", () => {
                 rdfFactory.literal(1),
                 rdfFactory.literal("2"),
                 rdfFactory.literal(d),
-                defaultNS.ex("t"),
+                ex.ns("t"),
             ])).toEqual({
                 [rdf.type.toString()]: rdf.Seq,
                 [rdf.ns("_0").toString()]: rdfFactory.literal(1),
                 [rdf.ns("_1").toString()]: rdfFactory.literal("2"),
                 [rdf.ns("_2").toString()]: rdfFactory.literal(d),
-                [rdf.ns("_3").toString()]: defaultNS.ex("t"),
+                [rdf.ns("_3").toString()]: ex.ns("t"),
             });
         });
 

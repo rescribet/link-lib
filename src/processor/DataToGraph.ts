@@ -8,11 +8,12 @@ import {
     DataObject,
     DataTuple,
     NamedBlobTuple,
+    NamespaceMap,
     ParsedObject,
     SerializableDataTypes,
     SomeNode,
 } from "../types";
-import { defaultNS, MAIN_NODE_DEFAULT_IRI, NON_DATA_OBJECTS_CTORS } from "../utilities/constants";
+import { MAIN_NODE_DEFAULT_IRI, NON_DATA_OBJECTS_CTORS } from "../utilities/constants";
 import { expandProperty } from "../utilities/memoizedNamespace";
 
 const BASE = 36;
@@ -64,17 +65,18 @@ export function seq<T = any>(arr: T[], id?: SomeNode): DataObject {
 export function processObject(subject: Node,
                               predicate: NamedNode,
                               datum: DataObject | SerializableDataTypes | null | undefined,
-                              store: LowLevelStore): NamedBlobTuple[] {
+                              store: LowLevelStore,
+                              ns?: NamespaceMap): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
 
     if (isIterable(datum)) {
         for (const subResource of datum) {
             if (isPlainObject(subResource)) {
                 const id = (subResource as DataObject)["@id"] as SomeNode | undefined || rdfFactory.blankNode();
-                blobs = blobs.concat(processDataObject(id, subResource as DataObject, store));
+                blobs = blobs.concat(processDataObject(id, subResource as DataObject, store, ns));
                 store.add(subject, predicate, id);
             } else {
-                blobs = blobs.concat(processObject(subject, predicate, subResource, store));
+                blobs = blobs.concat(processObject(subject, predicate, subResource, store, ns));
             }
         }
     } else if (typeof datum === "string"
@@ -89,7 +91,7 @@ export function processObject(subject: Node,
         store.addQuad(file);
     } else if (isPlainObject(datum)) {
         const id = datum["@id"] as SomeNode | undefined || rdfFactory.blankNode();
-        blobs = blobs.concat(processDataObject(id, datum, store));
+        blobs = blobs.concat(processDataObject(id, datum, store, ns));
         store.add(subject, predicate, id);
     } else if (datum && datum.termType === TermType.NamedNode) {
         store.add(subject, predicate, rdfFactory.namedNode(datum.value));
@@ -109,27 +111,27 @@ export function processObject(subject: Node,
     return blobs;
 }
 
-function processDataObject(subject: Node, data: DataObject, store: LowLevelStore): NamedBlobTuple[] {
+function processDataObject(subject: Node, data: DataObject, store: LowLevelStore, ns?: NamespaceMap): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
         if (keys[i] === "@id") { continue; }
-        const predicate = expandProperty(keys[i], defaultNS);
+        const predicate = expandProperty(keys[i], ns || {});
         const datum = data[keys[i]];
 
         if (predicate === undefined) {
             throw new Error(`Unknown predicate ${keys[i]} given (for subject '${subject}').`);
         }
 
-        blobs = blobs.concat(processObject(subject, predicate, datum, store));
+        blobs = blobs.concat(processObject(subject, predicate, datum, store, ns));
     }
 
     return blobs;
 }
 
-export function dataToGraphTuple(data: DataObject): DataTuple {
+export function dataToGraphTuple(data: DataObject, ns?: NamespaceMap): DataTuple {
     const store = new RDFIndex();
-    const blobs = processDataObject(MAIN_NODE_DEFAULT_IRI, data, store);
+    const blobs = processDataObject(MAIN_NODE_DEFAULT_IRI, data, store, ns);
 
     return [store, blobs];
 }
@@ -138,12 +140,14 @@ export function dataToGraphTuple(data: DataObject): DataTuple {
  * Convert a DataObject into a graph. Useful for writing test data in semi-plain JS objects
  * @param iriOrData The data object or an iri for the top-level object.
  * @param data The data object if an IRI was passed.
- * @param graph A graph to write the statements into.
+ * @param store A graph to write the statements into.
+ * @param ns Namespace mapping for converting shortened keys.
  */
 export function toGraph(
     iriOrData: SomeNode | DataObject,
     data?: DataObject,
     store?: LowLevelStore,
+    ns?: NamespaceMap,
 ): ParsedObject {
 
     const passedIRI = iriOrData.termType === TermType.BlankNode || iriOrData.termType === TermType.NamedNode;
@@ -164,7 +168,7 @@ export function toGraph(
 
     const s = store || new RDFIndex();
 
-    const blobs = processDataObject(iri, dataObj, s);
+    const blobs = processDataObject(iri, dataObj, s, ns);
 
     return [iri, s, blobs];
 }

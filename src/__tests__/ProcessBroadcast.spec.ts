@@ -1,36 +1,40 @@
 import "./useHashFactory";
 
 import rdfFactory from "@ontologies/core";
+import rdfx from "@ontologies/rdf";
+import rdfs from "@ontologies/rdfs";
+import schema from "@ontologies/schema";
 import "jest";
 
+import ex from "../ontology/ex";
+import example from "../ontology/example";
 import { ProcessBroadcast, ProcessBroadcastOpts } from "../ProcessBroadcast";
 import { Quad } from "../rdf";
 import { SubscriptionRegistrationBase } from "../types";
-import { defaultNS as NS} from "../utilities/constants";
 
-const schemaT = NS.schema("Thing");
-// const resource1 = NS.ex("1");
-const resource2 = NS.ex("2");
-const resource3 = NS.ex("3");
-const resource4 = NS.ex("4");
-const resource5 = NS.ex("5");
-const resource6 = NS.ex("6");
+const schemaT = schema.Thing;
+// const resource1 = ex.ns("1");
+const resource2 = ex.ns("2");
+const resource3 = ex.ns("3");
+const resource4 = ex.ns("4");
+const resource5 = ex.ns("5");
+const resource6 = ex.ns("6");
 
 const mixedWork = [
-    rdfFactory.quad(resource5, NS.ex("prop"), NS.ex("unknown"), NS.example("why")),
-    rdfFactory.quad(schemaT, NS.rdf("type"), NS.rdfs("Class"), NS.example("why")),
-    rdfFactory.quad(schemaT, NS.rdf("label"), rdfFactory.literal("A class"), NS.example("why")),
-    rdfFactory.quad(resource2, NS.schema("name"), rdfFactory.literal("resource 1"), NS.example("why")),
-    rdfFactory.quad(resource2, NS.schema("name"), rdfFactory.literal("resource 2"), NS.example("why")),
-    rdfFactory.quad(resource3, NS.rdf("label"), rdfFactory.literal("D. Adams"), NS.example("why")),
-    rdfFactory.quad(resource4, NS.schema("name"), rdfFactory.literal("Resource Name"), NS.example("why")),
-    rdfFactory.quad(resource4, NS.schema("text"), rdfFactory.literal("Resource text"), NS.example("why")),
-    rdfFactory.quad(resource4, NS.schema("author"), resource3, NS.example("why")),
+    rdfFactory.quad(resource5, ex.ns("prop"), ex.ns("unknown"), example.ns("why")),
+    rdfFactory.quad(schemaT, rdfx.type, rdfs.Class, example.ns("why")),
+    rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("A class"), example.ns("why")),
+    rdfFactory.quad(resource2, schema.name, rdfFactory.literal("resource 1"), example.ns("why")),
+    rdfFactory.quad(resource2, schema.name, rdfFactory.literal("resource 2"), example.ns("why")),
+    rdfFactory.quad(resource3, rdfs.label, rdfFactory.literal("D. Adams"), example.ns("why")),
+    rdfFactory.quad(resource4, schema.name, rdfFactory.literal("Resource Name"), example.ns("why")),
+    rdfFactory.quad(resource4, schema.text, rdfFactory.literal("Resource text"), example.ns("why")),
+    rdfFactory.quad(resource4, schema.author, resource3, example.ns("why")),
     rdfFactory.quad(
         resource6,
-        NS.schema("text"),
+        schema.text,
         rdfFactory.literal("Should contain only deleted regs"),
-        NS.example("why"),
+        example.ns("why"),
     ),
 ];
 
@@ -59,7 +63,7 @@ describe("ProcessBroadcast", () => {
 
         describe("and work", () => {
             const processor = new ProcessBroadcast(getOpts([
-                rdfFactory.quad(schemaT, NS.rdf("type"), NS.rdfs("Class"), NS.example("why")),
+                rdfFactory.quad(schemaT, rdfx.type, rdfs.Class, example.ns("why")),
             ]));
 
             it("is done", () => expect(processor.done()).toBeTruthy());

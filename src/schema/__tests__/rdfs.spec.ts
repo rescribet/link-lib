@@ -1,12 +1,15 @@
 import "../../__tests__/useHashFactory";
 
 import rdfFactory, { Node } from "@ontologies/core";
+import rdfx from "@ontologies/rdf";
+import rdfs from "@ontologies/rdfs";
+import schemaNS from "@ontologies/schema";
 import "jest";
 
+import example from "../../ontology/example";
 import { RDFStore } from "../../RDFStore";
 import { Schema } from "../../Schema";
 import { VocabularyProcessingContext } from "../../types";
-import { defaultNS as NS } from "../../utilities/constants";
 import { RDFS } from "../rdfs";
 
 describe("RDFS", () => {
@@ -19,8 +22,8 @@ describe("RDFS", () => {
         it("infers type domain resource", () => {
             const schema = new Schema(new RDFStore());
 
-            const data = rdfFactory.quad(NS.example("1"), NS.rdf("type"), NS.schema("Person"));
-            const inference = rdfFactory.quad(NS.example("1"), NS.rdf("type"), NS.rdfs("Resource"));
+            const data = rdfFactory.quad(example.ns("1"), rdfx.type, schemaNS.Person);
+            const inference = rdfFactory.quad(example.ns("1"), rdfx.type, rdfs.Resource);
 
             expect(schema.holdsQuad(inference)).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
@@ -31,8 +34,8 @@ describe("RDFS", () => {
         it("infers type range class", () => {
             const schema = new Schema(new RDFStore());
 
-            const data = rdfFactory.quad(NS.example("1"), NS.rdf("type"), NS.schema("Person"));
-            const inference = rdfFactory.quad(NS.schema("Person"), NS.rdf("type"), NS.rdfs("Class"));
+            const data = rdfFactory.quad(example.ns("1"), rdfx.type, schemaNS.Person);
+            const inference = rdfFactory.quad(schemaNS.Person, rdfx.type, rdfs.Class);
 
             expect(schema.holdsQuad(inference)).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
@@ -45,32 +48,32 @@ describe("RDFS", () => {
 
             const ctx = schema.getProcessingCtx();
 
-            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork")))).toBeUndefined();
+            expect(ctx.superMap.get(rdfFactory.id(schemaNS.CreativeWork))).toBeUndefined();
 
             RDFS.processStatement(
-                rdfFactory.quad(NS.schema("BlogPost"), NS.rdfs("subClassOf"), NS.schema("CreativeWork")),
+                rdfFactory.quad(schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork),
                 ctx,
             );
-            expectSuperMap(ctx, NS.schema("BlogPost"), [
-                    NS.schema("BlogPost"),
-                    NS.schema("CreativeWork"),
-                    NS.rdfs("Resource"),
+            expectSuperMap(ctx, schemaNS.BlogPosting, [
+                    schemaNS.BlogPosting,
+                    schemaNS.CreativeWork,
+                    rdfs.Resource,
                 ]);
 
             RDFS.processStatement(
-                rdfFactory.quad(NS.schema("CreativeWork"), NS.rdfs("subClassOf"), NS.schema("Thing")),
+                rdfFactory.quad(schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing),
                 ctx,
             );
-            expectSuperMap(ctx, NS.schema("CreativeWork"), [
-                    NS.schema("CreativeWork"),
-                    NS.schema("Thing"),
-                    NS.rdfs("Resource"),
+            expectSuperMap(ctx, schemaNS.CreativeWork, [
+                    schemaNS.CreativeWork,
+                    schemaNS.Thing,
+                    rdfs.Resource,
                 ]);
-            expectSuperMap(ctx, NS.schema("BlogPost"), [
-                    NS.schema("BlogPost"),
-                    NS.schema("CreativeWork"),
-                    NS.schema("Thing"),
-                    NS.rdfs("Resource"),
+            expectSuperMap(ctx, schemaNS.BlogPosting, [
+                    schemaNS.BlogPosting,
+                    schemaNS.CreativeWork,
+                    schemaNS.Thing,
+                    rdfs.Resource,
                 ]);
         });
     });
@@ -84,11 +87,11 @@ describe("RDFS", () => {
             const schema = new Schema(new RDFStore());
 
             const ctx = schema.getProcessingCtx();
-            const inference = rdfFactory.quad(NS.schema("CreativeWork"), NS.rdf("type"), NS.rdfs("Class"));
+            const inference = rdfFactory.quad(schemaNS.CreativeWork, rdfx.type, rdfs.Class);
 
             expect(schema.holdsQuad(inference)).toBeFalsy();
 
-            RDFS.processType(NS.schema("CreativeWork"), ctx);
+            RDFS.processType(schemaNS.CreativeWork, ctx);
 
             expect(schema.holdsQuad(inference)).toBeTruthy();
         });
@@ -101,12 +104,12 @@ describe("RDFS", () => {
             const schema = new Schema(new RDFStore());
 
             const ctx = schema.getProcessingCtx();
-            expect(ctx.superMap.get(rdfFactory.id(NS.schema("CreativeWork")))).toBeUndefined();
-            RDFS.processType(NS.schema("CreativeWork"), ctx);
+            expect(ctx.superMap.get(rdfFactory.id(schemaNS.CreativeWork))).toBeUndefined();
+            RDFS.processType(schemaNS.CreativeWork, ctx);
 
-            expectSuperMap(ctx, NS.schema("CreativeWork"), [
-                    NS.schema("CreativeWork"),
-                    NS.rdfs("Resource"),
+            expectSuperMap(ctx, schemaNS.CreativeWork, [
+                    schemaNS.CreativeWork,
+                    rdfs.Resource,
                 ]);
         });
     });

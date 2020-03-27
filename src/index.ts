@@ -26,7 +26,6 @@ export {
     normalizeType,
 } from "./utilities";
 export {
-    defaultNS,
     DEFAULT_TOPOLOGY,
     RENDER_CLASS_NAME,
 } from "./utilities/constants";

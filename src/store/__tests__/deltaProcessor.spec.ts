@@ -6,16 +6,16 @@ import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
 import "jest";
 
-import { defaultNS as NS } from "../../utilities/constants";
+import ex from "../../ontology/ex";
 import { deltaProcessor } from "../deltaProcessor";
 import RDFIndex from "../RDFIndex";
 
 describe("deltaProcessor", () => {
     const graph = rdfFactory.namedNode("http://example.com/graph");
 
-    const alice = NS.ex("person/alice");
-    const bob = NS.ex("person/bob");
-    const erin = NS.ex("person/erin");
+    const alice = ex.ns("person/alice");
+    const bob = ex.ns("person/bob");
+    const erin = ex.ns("person/erin");
 
     const defaultProcessor = deltaProcessor(
         [ld.add],
@@ -35,8 +35,8 @@ describe("deltaProcessor", () => {
         store.add(bob, rdf.type, schema.Person);
         store.add(bob, schema.name, rdfFactory.literal("bob"));
         store.add(bob, schema.children, alice);
-        store.add(bob, schema.children, NS.ex("person/charlie"));
-        store.add(bob, schema.children, NS.ex("person/dave"));
+        store.add(bob, schema.children, ex.ns("person/charlie"));
+        store.add(bob, schema.children, ex.ns("person/dave"));
 
         store.add(alice, rdf.type, schema.Person);
         store.add(alice, schema.name, rdfFactory.literal("Alice"));
@@ -44,8 +44,8 @@ describe("deltaProcessor", () => {
         store.add(bob, rdf.type, schema.Person, graph);
         store.add(bob, schema.name, rdfFactory.literal("bob"), graph);
         store.add(bob, schema.children, alice, graph);
-        store.add(bob, schema.children, NS.ex("person/charlie"), graph);
-        store.add(bob, schema.children, NS.ex("person/dave"), graph);
+        store.add(bob, schema.children, ex.ns("person/charlie"), graph);
+        store.add(bob, schema.children, ex.ns("person/dave"), graph);
 
         store.add(alice, rdf.type, schema.Person, graph);
         store.add(alice, schema.name, rdfFactory.literal("Alice"), graph);

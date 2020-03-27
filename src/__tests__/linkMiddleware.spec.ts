@@ -3,9 +3,9 @@ import "./useHashFactory";
 
 import { LinkedRenderStore } from "../LinkedRenderStore";
 import { linkMiddleware } from "../linkMiddleware";
+import example from "../ontology/example";
 import ll from "../ontology/ll";
 import { MiddlewareActionHandler } from "../types";
-import { defaultNS } from "../utilities/constants";
 
 interface ExplodedMiddleware {
     dispatch: MiddlewareActionHandler;
@@ -40,7 +40,7 @@ describe("linkMiddleware", () => {
     it("calls touch for data events", async () => {
         const middleware = createTestMiddleware();
 
-        await middleware.dispatch(ll.ns("data/rdflib/done"), [defaultNS.example("test"), undefined]);
+        await middleware.dispatch(ll.ns("data/rdflib/done"), [example.ns("test"), undefined]);
 
         expect(middleware.execActionByIRI).toHaveBeenCalledTimes(0);
         expect(middleware.next).toHaveBeenCalledTimes(0);
@@ -50,7 +50,7 @@ describe("linkMiddleware", () => {
     it("passes actions down", async () => {
         const middleware = createTestMiddleware();
 
-        await middleware.dispatch(defaultNS.example("action/1"), undefined);
+        await middleware.dispatch(example.ns("action/1"), undefined);
 
         expect(middleware.execActionByIRI).toHaveBeenCalledTimes(1);
         expect(middleware.next).toHaveBeenCalledTimes(0);
@@ -61,7 +61,7 @@ describe("linkMiddleware", () => {
         it("passes actions down", async () => {
             const middleware = createTestMiddleware(false);
 
-            await middleware.dispatch(defaultNS.example("action/1"), undefined);
+            await middleware.dispatch(example.ns("action/1"), undefined);
 
             expect(middleware.execActionByIRI).toHaveBeenCalledTimes(0);
             expect(middleware.next).toHaveBeenCalledTimes(1);

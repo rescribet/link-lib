@@ -3,20 +3,18 @@ import { NamedNode, Term } from "../rdf";
 
 import { NamespaceMap } from "../types";
 
-import { defaultNS } from "./constants";
-
 const CI_MATCH_PREFIX = 0;
 const CI_MATCH_SUFFIX = 1;
 
 /**
  * Expands a property if it's in short-form while preserving long-form.
- * Note: The vocabulary needs to be present in the store prefix library
+ * Note: The vocabulary needs to be present in the store prefix mapping
  * @param prop The short- or long-form property
  * @param namespaces Object of namespaces by their abbreviation.
  * @returns The (expanded) property
  */
 export function expandProperty(prop: NamedNode | Term | string | undefined,
-                               namespaces: NamespaceMap = defaultNS): NamedNode | undefined {
+                               namespaces: NamespaceMap): NamedNode | undefined {
     if (!prop) {
         return prop as undefined;
     }
@@ -41,7 +39,7 @@ export function expandProperty(prop: NamedNode | Term | string | undefined,
         return rdfFactory.namedNode(prop);
     }
     const matches = prop.split(":");
-    const constructor: Namespace | undefined = namespaces[matches[CI_MATCH_PREFIX]];
+    const constructor: Namespace | undefined = namespaces[matches[CI_MATCH_PREFIX]]?.ns;
 
     return constructor && constructor(matches[CI_MATCH_SUFFIX]);
 }
