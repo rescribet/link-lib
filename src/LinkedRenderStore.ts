@@ -133,7 +133,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
     public get dispatch(): MiddlewareActionHandler {
         if (typeof this._dispatch === "undefined") {
-            throw new Error("Invariant: cannot call `dispatch` before initialization is complete");
+            throw new Error("Invariant: cannot call `dispatch` before initialization is complete, see createStore");
         }
 
         return this._dispatch;

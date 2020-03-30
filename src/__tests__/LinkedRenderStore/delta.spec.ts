@@ -1,10 +1,21 @@
 import rdfFactory, { Quadruple } from "@ontologies/core";
 
 import { getBasicStore } from "../../testUtilities";
+import { DeltaProcessor } from "../../types";
 
 import { ex, ld } from "./fixtures";
 
 describe("LinkedRenderStore", () => {
+    describe("#addDeltaProcessor", () => {
+        it ("adds the processor", () => {
+            const processor = jest.fn();
+            const { lrs } = getBasicStore();
+
+            lrs.addDeltaProcessor(processor as unknown as DeltaProcessor);
+            expect(lrs.deltaProcessors).toContain(processor);
+        });
+    });
+
     describe("#queueDelta", () => {
         const quadDelta = [
             [ex("1"), ex("p"), ex("2"), ld.add],

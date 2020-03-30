@@ -14,7 +14,7 @@ const CI_MATCH_SUFFIX = 1;
  * @returns The (expanded) property
  */
 export function expandProperty(prop: NamedNode | Term | string | undefined,
-                               namespaces: NamespaceMap): NamedNode | undefined {
+                               namespaces: NamespaceMap = {}): NamedNode | undefined {
     if (!prop) {
         return prop as undefined;
     }

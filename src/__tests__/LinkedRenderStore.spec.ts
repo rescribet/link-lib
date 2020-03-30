@@ -5,12 +5,49 @@ import rdfFactory, { Quad } from "@ontologies/core";
 import owl from "@ontologies/owl";
 import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
+import { LinkedRenderStore } from "../LinkedRenderStore";
 
 import { getBasicStore } from "../testUtilities";
 
 import { example } from "./LinkedRenderStore/fixtures";
 
 describe("LinkedRenderStore", () => {
+    describe("actions", () => {
+        it("allows overriding dispach", () => {
+            const dispatch = jest.fn();
+            const lrs = new LinkedRenderStore({
+                dispatch,
+            });
+
+            expect(lrs.dispatch).toStrictEqual(dispatch);
+        });
+
+        it ("prevents premature executions", () => {
+            const lrs = new LinkedRenderStore();
+
+            expect(lrs.exec(rdf.type)).rejects.toBeInstanceOf(Error);
+        });
+    });
+
+    describe("data fetching", () => {
+        it("allows data reload", async () => {
+            const apiGetEntity = jest.fn();
+            const iri = rdf.type;
+            // @ts-ignore
+            const store = getBasicStore({ api: { getEntity: apiGetEntity } });
+
+            await store.lrs.getEntity(iri, { reload: true });
+
+            expect(apiGetEntity).toHaveBeenCalledWith(
+                iri,
+                {
+                    clearPreviousData: true,
+                    force: true,
+                },
+            );
+        });
+    });
+
     describe("reasons correctly", () => {
         it("combines sameAs declarations", async () => {
             const store = getBasicStore();

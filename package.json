@@ -36,7 +36,7 @@
   },
   "peerDependencies": {
     "@ontologies/as": ">=1.0.1",
-    "@ontologies/core": ">=2.0.0-10",
+    "@ontologies/core": ">=2.0.0",
     "@ontologies/ld": ">=1.0.0",
     "@ontologies/schema": ">=1.0.0",
     "@ontologies/shacl": ">=1.0.0",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@ontola/memoized-hash-factory": "^2.0.0",
     "@ontologies/as": "^1.0.1",
-    "@ontologies/core": "2.0.0-10",
+    "@ontologies/core": "^2.0.0",
     "@ontologies/dcterms": "^1.0.0",
     "@ontologies/ld": "^1.0.0",
     "@ontologies/owl": "^1.0.0",
@@ -62,20 +62,25 @@
     "@pika/plugin-bundle-web": "^0.8.1",
     "@pika/plugin-ts-standard-pkg": "^0.8.1",
     "@rdfdev/iri": "^1.0.0",
-    "@types/jest": "^24.0.25",
+    "@types/jest": "^25.1.4",
     "@types/murmurhash-js": "^1.0.3",
     "@types/node": "^12.11.2",
     "core-js": "^3.6.3",
     "esdoc": "^1.1.0",
     "gh-pages": "^2.2.0",
     "http-status-codes": ">= 1.x",
-    "jest": "^24.9.0",
-    "jest-fetch-mock": "^2.1.2",
-    "n-quads-parser": "^2.1.0-2",
+    "jest": "^25.2.4",
+    "jest-fetch-mock": "^3.0.3",
+    "n-quads-parser": "^2.1.0",
     "ts-jest": "^24.3.0",
     "tslint": "^5.20.1",
     "typedoc": "^0.16.2",
     "typescript": "^3.7.4"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-typescript"
+    ]
   },
   "jest": {
     "automock": false,
@@ -91,7 +96,6 @@
         "statements": 85
       }
     },
-    "preset": "ts-jest",
     "setupFiles": [
       "core-js",
       "./jest-plugins"
@@ -103,9 +107,6 @@
       "js",
       "ts"
     ],
-    "testURL": "http://example.org/resources/5",
-    "transform": {
-      "\\.ts$": "ts-jest"
-    }
+    "testURL": "http://example.org/resources/5"
   }
 }

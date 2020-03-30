@@ -77,6 +77,16 @@ describe("deltaProcessor", () => {
         expect((store as any).quads).toHaveLength(initialCount);
     });
 
+    it("requires explicit graph names", () => {
+        expect(() => {
+            deltaProcessor([], [], [], [], []);
+        }).toThrow("Pass a default graph explicitly");
+    });
+
+    it("ignores unknown methods", () => {
+        testDelta([ [bob, schema.children, alice, ld.ns("unknown")] ], [0, 0, 0]);
+    });
+
     describe("with an existing value", () => {
         it("add", () => {
             testDelta([ [bob, schema.children, alice, ld.add] ], [1, 0, 0]);
