@@ -1,6 +1,8 @@
 import { LinkedRenderStore } from "./LinkedRenderStore";
 
 export { createStore } from "./createStore";
+/** @internal */
+export * from "./factoryHelpers";
 export { linkMiddleware } from "./linkMiddleware";
 export { DataProcessor } from "./processor/DataProcessor";
 export { RequestInitGenerator } from "./processor/RequestInitGenerator";

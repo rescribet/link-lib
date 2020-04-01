@@ -12,7 +12,7 @@ import rdf from "@ontologies/rdf";
 import schema from "@ontologies/schema";
 
 import { ComponentStore } from "./ComponentStore";
-import { id } from "./factoryHelpers";
+import { equals, id } from "./factoryHelpers";
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
@@ -244,8 +244,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
 
         if (props && remaining.length === 0) {
             const finder = Array.isArray(match)
-                ? (p: Term): boolean => match.some((m) => rdfFactory.equals(m, p))
-                : (p: Term): boolean => rdfFactory.equals(match, p);
+                ? (p: Term): boolean => match.some((m) => equals(m, p))
+                : (p: Term): boolean => equals(match, p);
 
             return props.find(finder) ? [subject] : [];
         } else if (props) {
@@ -418,7 +418,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             return emptyRequest as EmptyRequestStatus;
         }
 
-        if (this.resourceQueue.find(([resource]) => rdfFactory.equals(resource, iri))) {
+        if (this.resourceQueue.find(([resource]) => equals(resource, iri))) {
             return {
                 lastRequested: new Date(),
                 lastResponseHeaders: null,
@@ -542,7 +542,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      */
     public shouldLoadResource(subject: Node): boolean {
         return (this.store.changeTimestamps[id(subject)] === undefined || this.api.isInvalid(subject))
-            && !this.resourceQueue.find(([i]) => rdfFactory.equals(i, subject))
+            && !this.resourceQueue.find(([i]) => equals(i, subject))
             && !isPending(this.api.getStatus(subject));
     }
 
