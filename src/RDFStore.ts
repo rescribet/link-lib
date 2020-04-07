@@ -17,7 +17,7 @@ import rdfFactory, {
 import { deltaProcessor } from "./store/deltaProcessor";
 import RDFIndex from "./store/RDFIndex";
 import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
-import { getPropBestLang } from "./utilities";
+import { doc, getPropBestLang } from "./utilities";
 import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
@@ -112,6 +112,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             },
             flushFilter: (changeStamp: number): any => (s: Quad): boolean => {
                 this.changeTimestamps[id(s.subject)] = changeStamp;
+                this.changeTimestamps[id(doc(s.subject))] = changeStamp;
                 return equals(s.predicate, rdf.type);
             },
             processTypeQuad: (quad: Quad): boolean => {
@@ -151,6 +152,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             },
             flushFilter: (changeStamp: number): any => (s: Quad): boolean => {
                 this.changeTimestamps[s.subject.id as number] = changeStamp;
+                this.changeTimestamps[doc(s.subject).id as number] = changeStamp;
                 return s.predicate === rdf.type;
             },
             processTypeQuad: (quad: Quad): boolean => {

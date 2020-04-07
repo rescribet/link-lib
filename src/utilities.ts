@@ -2,7 +2,7 @@
 import rdfFactory, { TermType } from "@ontologies/core";
 import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
-import { Literal, Quad, Term } from "./rdf";
+import { BlankNode, Literal, NamedNode, Quad, Term } from "./rdf";
 
 import { SomeNode } from "./types";
 
@@ -61,6 +61,14 @@ export function anyRDFValue(obj: Quad[] | undefined, predicate: SomeNode): Term 
     }
 
     return match.object;
+}
+
+export function doc<T extends NamedNode | BlankNode>(iri: T): T {
+    if (iri.value.includes("#")) {
+        return rdfFactory.namedNode(iri.value.split("#").shift()!);
+    }
+
+    return iri;
 }
 
 export function getPropBestLang<T extends Term = Term>(rawProp: Quad | Quad[], langPrefs: string[]): T {

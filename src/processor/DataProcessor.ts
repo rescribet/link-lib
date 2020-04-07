@@ -42,7 +42,7 @@ import {
     SomeNode,
     SomeRequestStatus,
 } from "../types";
-import { anyRDFValue } from "../utilities";
+import { anyRDFValue, doc } from "../utilities";
 import {
     F_NTRIPLES,
     MSG_BAD_REQUEST,
@@ -302,14 +302,6 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         };
     }
 
-    public fetchableURLFromIRI(iri: NamedNode): NamedNode {
-        if (iri.value.includes("#")) {
-            return rdfFactory.namedNode(iri.value.split("#").shift()!);
-        }
-
-        return iri;
-    }
-
     public flush(): Quad[] {
         const deltas = this.deltas;
         this.deltas = [];
@@ -431,7 +423,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      * @see LinkedDataAPI#getStatus for documentation
      */
     public getStatus(iri: NamedNode): SomeRequestStatus {
-        const irl = this.fetchableURLFromIRI(iri);
+        const irl = doc(iri);
         const existing = this.statusMap[id(irl)];
 
         if (existing) {
@@ -650,7 +642,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private setStatus(iri: NamedNode, status: number | null): void {
-        const url = this.fetchableURLFromIRI(iri);
+        const url = doc(iri);
         const prevStatus = this.statusMap[id(url)];
         this.store.touch(url);
         this.store.touch(iri);
