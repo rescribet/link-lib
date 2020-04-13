@@ -119,7 +119,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 if (!equals(quad.predicate, rdf.type)) {
                     return false;
                 }
-                const subjId = id(quad.subject);
+                const subjId = id(this.canon(quad.subject));
                 if (!Array.isArray(this.typeCache[subjId])) {
                     this.typeCache[subjId] = [];
                 }
@@ -159,7 +159,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 if (quad.predicate !== rdf.type) {
                     return false;
                 }
-                const subjId = quad.subject.id as number;
+                const subjId = this.canon(quad.subject).id as number;
                 if (!Array.isArray(this.typeCache[subjId])) {
                     this.typeCache[subjId] = [];
                 }
@@ -269,8 +269,9 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public removeResource(subject: SomeNode): void {
-        this.touch(subject);
-        this.typeCache[id(subject)] = [];
+        const canSubj = this.canon(subject);
+        this.touch(canSubj);
+        this.typeCache[id(canSubj)] = [];
         this.removeQuads(this.quadsFor(subject));
     }
 
@@ -342,7 +343,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
 
     public getResourceProperties<TT extends Term = Term>(subject: SomeNode, property: SomeNode | SomeNode[]): TT[] {
         if (property === rdf.type) {
-            return (this.typeCache[id(subject)] || []) as TT[];
+            return (this.typeCache[id(this.canon(subject))] || []) as TT[];
         }
 
         return this
@@ -356,7 +357,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     ): T | undefined {
 
         if (!Array.isArray(property) && equals(property, rdf.type)) {
-            const entry = this.typeCache[id(subject)];
+            const entry = this.typeCache[id(this.canon(subject))];
 
             return entry ? entry[0] as T : undefined;
         }
