@@ -639,14 +639,17 @@ export class LinkedRenderStore<T> implements Dispatcher {
         }
 
         const work = this.deltaProcessors.flatMap((dp) => dp.flush());
-        const subjects = work
-            .flatMap((w) => [
-                id(w.subject),
-                id(w.graph),
-                id(this.store.canon(w.subject)),
-                id(this.store.canon(w.graph)),
-            ])
-            .reduce<number[]>((acc, w) => acc.includes(w) ? acc : acc.concat(w), []);
+        const uniqueSubjects = new Set<number>();
+        const wLen = work.length;
+        let w;
+        for (let i = 0; i < wLen; i++) {
+            w = work[i];
+            uniqueSubjects.add(id(w.subject));
+            uniqueSubjects.add(id(w.graph));
+            uniqueSubjects.add(id(this.store.canon(w.subject)));
+            uniqueSubjects.add(id(this.store.canon(w.graph)));
+        }
+        const subjects = Array.from(uniqueSubjects);
         const subjectRegs = subjects
             .flatMap((sId) => this.subjectSubscriptions[sId])
             .filter((reg) => reg
