@@ -71,13 +71,7 @@ export function processObject(subject: Node,
 
     if (isIterable(datum)) {
         for (const subResource of datum) {
-            if (isPlainObject(subResource)) {
-                const id = (subResource as DataObject)["@id"] as SomeNode | undefined || rdfFactory.blankNode();
-                blobs = blobs.concat(processDataObject(id, subResource as DataObject, store, ns));
-                store.add(subject, predicate, id);
-            } else {
-                blobs = blobs.concat(processObject(subject, predicate, subResource, store, ns));
-            }
+            blobs = blobs.concat(processObject(subject, predicate, subResource, store, ns));
         }
     } else if (typeof datum === "string"
         || typeof datum === "number"
