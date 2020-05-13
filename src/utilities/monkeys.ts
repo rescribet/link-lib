@@ -6,7 +6,7 @@ import { ChangeBuffer } from "../types";
  * For browsers that don't support Proxy.
  */
 export function patchRDFLibStoreWithOverrides<T extends any = any>(
-    graph: T,
+    graph: any,
     changeBufferTarget: ChangeBuffer,
 ): T {
     if (typeof graph.indices !== "undefined") {

@@ -220,7 +220,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
                     && this.dig(term as Node, remaining))
                 .flat(1)
-                .filter(Boolean);
+                .filter<Term>(Boolean as any);
         }
 
         return [];
@@ -253,7 +253,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
                     && this.findSubject(term as Node, remaining, match))
                 .flat(1)
-                .filter(Boolean);
+                .filter<Node>(Boolean as any);
         }
 
         return [];
