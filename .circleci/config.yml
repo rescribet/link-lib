@@ -19,6 +19,35 @@ jobs:
           paths:
             - cc-test-reporter
 
+  build-node-14:
+    <<: *defaults
+    docker:
+      - image: circleci/node:14
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/link-lib/tmp
+      - restore_cache:
+          keys:
+            - v1-dependencies-14-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-14-
+
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-14-{{ checksum "package.json" }}
+      - run: yarn lint
+      - run: yarn test -w 1
+      - run: ./tmp/cc-test-reporter format-coverage -t lcov -o ~/link-lib/tmp/codeclimate.node-14.json coverage/lcov.info
+      - run: yarn build
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - codeclimate.node-14.json
+
   build-node-13:
     <<: *defaults
     docker:
@@ -41,12 +70,7 @@ jobs:
           key: v1-dependencies-13-{{ checksum "package.json" }}
       - run: yarn lint
       - run: yarn test -w 1
-      - run: ./tmp/cc-test-reporter format-coverage -t lcov -o ~/link-lib/tmp/codeclimate.node-13.json coverage/lcov.info
       - run: yarn build
-      - persist_to_workspace:
-          root: tmp
-          paths:
-            - codeclimate.node-13.json
 
   build-node-12:
     <<: *defaults
@@ -70,28 +94,6 @@ jobs:
       - run: yarn test -w 1
       - run: yarn build
 
-  build-node-10:
-    <<: *defaults
-    docker:
-      - image: circleci/node:10
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-10-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-10-
-
-      - run: yarn install
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-10-{{ checksum "package.json" }}
-      - run: yarn lint
-      - run: yarn test -w 1
-      - run: yarn build
-
   upload-coverage:
     <<: *defaults
     environment:
@@ -110,11 +112,11 @@ workflows:
   commit:
     jobs:
       - build
-      - build-node-13:
+      - build-node-14:
           requires:
             - build
+      - build-node-13
       - build-node-12
-      - build-node-10
       - upload-coverage:
           requires:
-            - build-node-13
+            - build-node-14
