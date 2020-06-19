@@ -8,6 +8,7 @@ import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";
 import { RDFS } from "./schema/rdfs";
+import { XSD } from "./schema/xsd";
 
 import {
     SomeNode,
@@ -23,7 +24,7 @@ import { DisjointSet } from "./utilities/DisjointSet";
  * optimized so it can be used in real-time by low-power devices as well.
  */
 export class Schema<IndexType = number | string> {
-    private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
+    private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB, XSD];
 
     private equivalenceSet: DisjointSet<IndexType> = new DisjointSet();
     // Typescript can't handle generic index types, so it is set to string.
@@ -50,7 +51,7 @@ export class Schema<IndexType = number | string> {
      */
     public addQuads(quads: Quad[]): Quad[] {
         const unique = quads.filter((s) => !this.store.holdsQuad(s));
-        const eligible = unique.filter(this.process.bind(this));
+        const eligible = unique.reduce((acc: Quad[], q) => [...acc, ...this.process(q)], []);
         if (eligible.length === 0) {
             return [];
         }
@@ -62,12 +63,8 @@ export class Schema<IndexType = number | string> {
         return this.liveStore.addQuads(eligible);
     }
 
-    public allEquals(resource: IndexType, grade = 1.0): IndexType[] {
-        if (grade >= 0) {
-            return this.equivalenceSet.allValues(resource);
-        }
-
-        return [resource];
+    public allEquals(resource: IndexType): IndexType[] {
+        return this.equivalenceSet.allValues(resource);
     }
 
     public expand(types: IndexType[]): IndexType[] {
@@ -135,24 +132,26 @@ export class Schema<IndexType = number | string> {
     }
 
     /**
-     * Expands the given lookupTypes to include all their equivalent and subclasses.
+     * Expands the given lookupTypes to include all their equivalent and superclasses.
      * This is done in multiple iterations until no new types are found.
      * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
      */
     public mineForTypes(lookupTypes: IndexType[]): IndexType[] {
-        if (lookupTypes.length === 0) {
-            return [id(rdfs.Resource) as unknown as IndexType];
+        const everyThingIsAResource = id(rdfs.Resource) as unknown as IndexType;
+        const lookupTypesExpanded = [...lookupTypes];
+        if (!lookupTypesExpanded.includes(everyThingIsAResource)) {
+            lookupTypesExpanded.push(everyThingIsAResource);
         }
 
         const canonicalTypes: IndexType[] = [];
-        const lookupTypesExpanded = [];
-        for (let i = 0; i < lookupTypes.length; i++) {
-            lookupTypesExpanded.push(...this.allEquals(lookupTypes[i]));
+        const initialSlice = lookupTypesExpanded.length;
+        for (let i = 0; i < initialSlice; i++) {
+            lookupTypesExpanded.push(...this.allEquals(lookupTypesExpanded[i]));
         }
         for (let i = 0; i < lookupTypesExpanded.length; i++) {
             const canon = id(
                 this.liveStore.canon(
-                    rdfFactory.fromId(lookupTypes[i]) as NamedNode,
+                    rdfFactory.fromId(lookupTypesExpanded[i]) as NamedNode,
                 ),
             ) as unknown as IndexType;
 
@@ -213,14 +212,15 @@ export class Schema<IndexType = number | string> {
         });
     }
 
-    private process(item: Quad): Quad[] | null {
+    private process(item: Quad): Quad[] {
+        const acc = [];
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             const res = Schema.vocabularies[i].processStatement(item, this.getProcessingCtx());
             if (res !== null) {
-                return res;
+                acc.push(...res);
             }
         }
 
-        return null;
+        return acc;
     }
 }

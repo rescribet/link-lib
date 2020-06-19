@@ -614,7 +614,10 @@ describe("DataProcessor", () => {
 
             expect(fetchMock.mock.calls[0]).toBeDefined();
             expect(fetchMock.mock.calls[0][0]).toEqual("http://schema.org/Person");
-            expect(fetchMock.mock.calls[0][1].body).toEqual((store.processor as any).serialize(data));
+            expect(fetchMock.mock.calls[0][1].body).toEqual((store.processor as any).serialize([
+                ...data,
+                rdfFactory.quad(schema.Person, rdfx.type, rdfs.Resource),
+            ]));
         });
 
         it("posts a graph", () => {

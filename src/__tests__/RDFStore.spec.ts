@@ -224,6 +224,12 @@ describe("RDFStore", () => {
 
             rdfFactory.quad(ex("b"), ex("p"), ex("xx")),
             rdfFactory.quad(ex("b"), ex("p"), ex("yy")),
+
+            rdfFactory.quad(ex("c"), rdf.ns("_1"), ex("z0")),
+            rdfFactory.quad(ex("c"), rdf.ns("_2"), ex("z1")),
+            rdfFactory.quad(ex("c"), rdf.ns("_3"), ex("z2")),
+            rdfFactory.quad(ex("c"), rdf.ns("_4"), ex("z3")),
+            rdfFactory.quad(ex("c"), rdf.ns("_5"), ex("z4")),
         ]);
 
         it("resolves empty values for single property", () => {
@@ -255,6 +261,19 @@ describe("RDFStore", () => {
             expect(store.getResourcePropertyRaw(ex("a"), [ex("r"), ex("p")]))
                 .toEqual([
                     rdfFactory.quad(ex("a"), ex("r"), ex("y"), rdfFactory.namedNode("rdf:defaultGraph")),
+                ]);
+        });
+
+        it("handles rdfs:member statements", () => {
+            const defaultG = rdfFactory.namedNode("rdf:defaultGraph");
+
+            expect(store.getResourcePropertyRaw(ex("c"), [rdfs.member]))
+                .toEqual([
+                    rdfFactory.quad(ex("c"), rdf.ns("_1"), ex("z0"), defaultG),
+                    rdfFactory.quad(ex("c"), rdf.ns("_2"), ex("z1"), defaultG),
+                    rdfFactory.quad(ex("c"), rdf.ns("_3"), ex("z2"), defaultG),
+                    rdfFactory.quad(ex("c"), rdf.ns("_4"), ex("z3"), defaultG),
+                    rdfFactory.quad(ex("c"), rdf.ns("_5"), ex("z4"), defaultG),
                 ]);
         });
     });

@@ -29,6 +29,7 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
      */
     constructor(opts: Partial<IndexedFormulaOpts> = {}) {
         super(opts);
+        this.addDataCallback(this.processPropertyAction.bind(this));
     }
 
     public any(
@@ -115,5 +116,12 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
         ));
 
         return this;
+    }
+
+    private processPropertyAction(quad: Quad): void {
+        const actions = this.propertyActions[id(quad.predicate)];
+        if (actions?.length > 0) {
+            actions.forEach((action) => action(quad));
+        }
     }
 }

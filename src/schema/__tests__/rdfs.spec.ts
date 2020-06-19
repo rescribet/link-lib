@@ -4,7 +4,9 @@ import rdfFactory, { Node } from "@ontologies/core";
 import rdfx from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import schemaNS from "@ontologies/schema";
+import xsd from "@ontologies/xsd";
 import "jest";
+import { id } from "../../factoryHelpers";
 
 import example from "../../ontology/example";
 import { RDFStore } from "../../RDFStore";
@@ -75,6 +77,22 @@ describe("RDFS", () => {
                     schemaNS.Thing,
                     rdfs.Resource,
                 ]);
+        });
+
+        /** https://www.w3.org/TR/rdf-schema/#ch_datatype */
+        it("Each instance of rdfs:Datatype is a subclass of rdfs:Literal", () => {
+            const schema = new Schema(new RDFStore());
+            const ctx = schema.getProcessingCtx();
+
+            expect(ctx.store.isInstanceOf(id(xsd.string), id(rdfs.Datatype))).toBeTruthy();
+            expectSuperMap(ctx, xsd.string, [
+                // Each instance of rdfs:Datatype is a subclass of rdfs:Literal
+                rdfs.Literal,
+                // rdfs:Literal is a subclass of rdfs:Resource
+                rdfs.Resource,
+                // Identity
+                xsd.string,
+            ]);
         });
     });
 

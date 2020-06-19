@@ -52,10 +52,28 @@ export const RDFS = {
 
         rdfFactory.quad(rdfs.isDefinedBy, rdfs.subPropertyOf, rdfs.seeAlso),
 
+        rdfFactory.quad(rdfs.Literal, rdfs.subClassOf, rdfs.Resource),
         rdfFactory.quad(rdfs.Datatype, rdfs.subClassOf, rdfs.Class),
 
         rdfFactory.quad(rdfs.Resource, rdf.type, rdfs.Class),
         rdfFactory.quad(rdfs.Class, rdf.type, rdfs.Class),
+
+        rdfFactory.quad(rdfs.Resource, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdfs.Literal, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.langString, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.HTML, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.XMLLiteral, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdfs.Class, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.Property, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdfs.Datatype, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.Statement, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.Bag, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.Seq, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.Alt, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdfs.Container, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdfs.ContainerMembershipProperty, rdf.type, rdfs.Class),
+        rdfFactory.quad(rdf.List, rdf.type, rdfs.Class),
+
     ],
 
     processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
@@ -140,6 +158,9 @@ export const RDFS = {
         } else if (equals(rdfs.subPropertyOf, item.predicate)) {
             // TODO: Implement
             return result;
+        } else if (equals(rdf.type, item.predicate) && equals(rdfs.Datatype, item.object)) {
+            /** https://www.w3.org/TR/rdf-schema/#h3_ch_datatype */
+            result.push(rdfFactory.quad(item.subject, rdfs.subClassOf, rdfs.Literal));
         }
 
         return result.length === 1 ? null : result;

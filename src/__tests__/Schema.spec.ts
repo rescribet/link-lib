@@ -5,6 +5,7 @@ import rdf from "@ontologies/rdf";
 import rdfs from "@ontologies/rdfs";
 import schemaNS from "@ontologies/schema";
 import "jest";
+import { id } from "../factoryHelpers";
 
 import ex from "../ontology/ex";
 import example from "../ontology/example";
@@ -24,19 +25,14 @@ describe("Schema", () => {
         describe("initializes with the correct statements", () => {
             const schema = blankSchema();
 
-            // TODO: Implement core rdf logic
-            // it("holds rdfs:Class to be an instance of rdfs:Class", () => {
-            //     expect(schema.isInstanceOf(rdfs.Class, rdfs.Class))
-            //         .toBeTruthy();
-            // });
-            //
-            // it("has rdfs:Resource as rdfs:Class", () => {
-            //     expect(schema.mineForTypes([rdfs.Resource]))
-            //         .toEqual([
-            //             rdfs.Resource,
-            //             rdfs.Class,
-            //         ]);
-            // });
+            it("holds rdfs:Class to be an instance of rdfs:Class", () => {
+                expect(schema.isInstanceOf(id(rdfs.Class), id(rdfs.Class)))
+                    .toBeTruthy();
+            });
+
+            it("has rdfs:Resource as rdfs:Class", () => {
+                expect(schema.isInstanceOf(id(rdfs.Resource), id(rdfs.Class))).toBeTruthy();
+            });
 
             it("has holds rdf:predicate, RDFSrange, RDFSResource", () => {
                 const expected = rdfFactory.quad(
@@ -73,6 +69,23 @@ describe("Schema", () => {
                 schema.addQuads([statement]);
 
                 expect(schema.holdsQuad(statement)).toBeFalsy();
+            });
+        });
+
+        describe("#isSubclassOf", () => {
+            it("rdfs:Literal is a subclass of rdfs:Resource", () => {
+                const s = blankSchema();
+                expect(s.isSubclassOf(id(rdfs.Literal), id(rdfs.Resource))).toBeTruthy();
+            });
+
+            it("rdfs:Literal is not a subclass of schema:CreativeWork.", () => {
+                const s = blankSchema();
+                expect(s.isSubclassOf(id(rdfs.Literal), id(schemaNS.CreativeWork))).toBeFalsy();
+            });
+
+            it("handles non-classes", () => {
+                const s = blankSchema();
+                expect(s.isSubclassOf(id(rdfFactory.blankNode()), id(schemaNS.CreativeWork))).toBeFalsy();
             });
         });
 
