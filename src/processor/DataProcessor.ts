@@ -345,7 +345,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const chain = this.fetch(this.bulkEndpoint, opts)
             .then(this.feedResponse)
             .catch((err) => {
-                const hasStatus = Object.hasOwnProperty.call(err, "status");
+                const hasStatus = err && Object.prototype.hasOwnProperty.call(err, "status");
                 if (!hasStatus) {
                     this.report(err);
                 }
@@ -401,7 +401,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 })
                 .then(this.feedResponse)
                 .catch((err) => {
-                    const hasStatus = Object.hasOwnProperty.call(err, "status");
+                    const hasStatus = err && Object.prototype.hasOwnProperty.call(err, "status");
                     if (!hasStatus) {
                         this.report(err);
                     }
