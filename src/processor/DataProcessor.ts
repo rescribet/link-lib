@@ -341,9 +341,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             .then(this.feedResponse)
             .catch((err) => {
                 const hasStatus = err && Object.prototype.hasOwnProperty.call(err, "status");
-                if (!hasStatus) {
-                    this.report(err);
-                }
+                this.report(err);
                 const status = rdfFactory.literal(hasStatus ? err.status : 499, xsd.integer);
                 const delta = resources
                     .map(([s]) => [s, http.statusCode, status, ll.meta] as Quadruple);
@@ -397,9 +395,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 .then(this.feedResponse)
                 .catch((err) => {
                     const hasStatus = err && Object.prototype.hasOwnProperty.call(err, "status");
-                    if (!hasStatus) {
-                        this.report(err);
-                    }
+                    this.report(err);
                     const status = rdfFactory.literal(hasStatus ? err.status : 499, xsd.integer);
                     const delta: Quadruple[] = [
                         [requestIRI, http.statusCode, status, ll.meta],
