@@ -24,7 +24,6 @@ import { FulfilledRequestStatus, ResponseAndFallbacks } from "../../types";
 
 import {
     MSG_INCORRECT_TARGET,
-    MSG_OBJECT_NOT_IRI,
     MSG_URL_UNDEFINED,
     MSG_URL_UNRESOLVABLE,
 } from "../../utilities/constants";
@@ -62,7 +61,7 @@ describe("DataProcessor", () => {
             }
 
             expect(error).toBeDefined();
-            expect((error as ProcessorError).message).toEqual(MSG_OBJECT_NOT_IRI);
+            expect((error as ProcessorError).message).toEqual(MSG_INCORRECT_TARGET);
         });
 
         it("throws an error when the target isn't a node", async () => {

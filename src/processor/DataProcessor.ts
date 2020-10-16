@@ -47,7 +47,6 @@ import {
     F_NTRIPLES,
     MSG_BAD_REQUEST,
     MSG_INCORRECT_TARGET,
-    MSG_OBJECT_NOT_IRI,
     MSG_URL_UNDEFINED,
     MSG_URL_UNRESOLVABLE,
 } from "../utilities/constants";
@@ -236,10 +235,6 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             await this.getEntity(subject);
         }
 
-        const object = this.store.getResourceProperty(subject, schema.object);
-        if (!object || object.termType !== TermType.BlankNode && object.termType !== TermType.NamedNode) {
-            throw new ProcessorError(MSG_OBJECT_NOT_IRI);
-        }
         const target = this.store.getResourceProperty(subject, schema.target);
 
         if (!target || target.termType === "Collection" || target.termType === TermType.Literal) {
