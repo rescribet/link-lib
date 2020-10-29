@@ -20,6 +20,9 @@ export type PropertyActionCallback = (quad: Quad) => void;
 
 /** Query and modify an array of quads. */
 export default class RDFIndex extends Equatable(Indexable(BasicStore)) implements LowLevelStore {
+    /** Returns the number of quads in the store. */
+    public length: number = 0;
+
     private readonly propertyActions: PropertyActionCallback[][] = [];
 
     /**
@@ -29,6 +32,15 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
      */
     constructor(opts: Partial<IndexedFormulaOpts> = {}) {
         super(opts);
+
+        Object.defineProperty(this, "length", {
+            get(): number {
+                return this.quads.length;
+            },
+            set(value: number): void {
+                this.quads.length = value;
+            },
+        });
     }
 
     public any(
@@ -61,20 +73,6 @@ export default class RDFIndex extends Equatable(Indexable(BasicStore)) implement
         graph: SomeNode | null,
     ): Quad | undefined {
         return this.match(subject, predicate, object, graph, true)?.[0];
-    }
-
-    /**
-     * Returns the number of quads contained in this IndexedFormula.
-     * (Getter proxy to this.quads).
-     * Usage:
-     *    ```
-     *    const kb = rdf.graph()
-     *    kb.length  // -> 0
-     *    ```
-     * @returns {Number}
-     */
-    public get length(): number {
-        return this.quads.length;
     }
 
     public holds(s: SomeNode, p: NamedNode, o: SomeTerm, g: SomeNode): boolean {
