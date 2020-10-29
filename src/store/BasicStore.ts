@@ -19,6 +19,9 @@ export default class BasicStore implements LowLevelStore {
     public readonly dataCallbacks: Array<(quad: Quad) => void>;
     public readonly removeCallback: ((quad: Quad) => void) | undefined;
 
+    /** Returns the number of quads in the store. */
+    public length: number = 0;
+
     constructor(opts: Partial<IndexedFormulaOpts> = {}) {
         this.dataCallbacks = [];
         this.quads = opts.quads || [];
@@ -26,6 +29,15 @@ export default class BasicStore implements LowLevelStore {
         this.rdfArrayRemove = this.rdfFactory.supports?.[Feature.identity]
             ? this.identityRemove
             : this.searchRemove;
+
+        Object.defineProperty(this, "length", {
+            get(): number {
+                return this.quads.length;
+            },
+            set(value: number): void {
+                this.quads.length = value;
+            },
+        });
     }
 
     /** Add a quad to the store. */
@@ -76,11 +88,6 @@ export default class BasicStore implements LowLevelStore {
 
     public addDataCallback(callback: (q: Quad) => void): void {
         this.dataCallbacks.push(callback);
-    }
-
-    /** Returns the number of quads in the store. */
-    public get length(): number {
-        return this.quads.length;
     }
 
     /** Remove a quad from the store */
