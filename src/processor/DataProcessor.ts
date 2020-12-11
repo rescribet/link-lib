@@ -317,14 +317,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const toBeFetched = new Set<NamedNode>();
 
-        for (const resource of resources) {
-            const rId = id(resource[0]);
-            if (resource[1] && resource[1].reload) {
-                reload.push(resource[0]);
+        for (const [iri, fetchOpts] of resources) {
+            const rId = id(iri);
+            if (fetchOpts && fetchOpts.reload) {
+                reload.push(iri);
             } else if (this.requestMap.has(rId)) {
                 continue;
             }
-            toBeFetched.add(resource[0]);
+            toBeFetched.add(iri);
         }
 
         if (toBeFetched.size === 0) {
