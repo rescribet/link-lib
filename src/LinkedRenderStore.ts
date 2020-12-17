@@ -40,7 +40,7 @@ import {
     SomeRequestStatus,
     SubscriptionRegistrationBase,
 } from "./types";
-import { normalizeType } from "./utilities";
+import { doc, normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "./utilities/constants";
 
 const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
@@ -306,11 +306,13 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @renderlibrary This should only be used by render-libraries, not by application code.
      */
     public queueEntity(iri: NamedNode, opts?: FetchOpts): void {
-        if (!(opts && opts.reload) && !this.shouldLoadResource(iri)) {
+        const document = doc(iri);
+
+        if (!(opts && opts.reload) && !this.shouldLoadResource(document)) {
             return;
         }
 
-        this.resourceQueue.push([iri, opts]);
+        this.resourceQueue.push([document, opts]);
         this.scheduleResourceQueue();
     }
 
