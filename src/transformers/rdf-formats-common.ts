@@ -33,7 +33,7 @@ export const createProcessRDF = (rdfParse: RDFLibParse): (response: ResponseAndF
         const format = getContentType(response);
         const g = new RDFIndex();
 
-        await new Promise((resolve): void => {
+        await new Promise<void>((resolve): void => {
             rdfParse(data, g, getURL(response), format, () => {
                 resolve();
             });
