@@ -198,7 +198,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         return statements;
     }
 
-    public canon(term: SomeNode): SomeNode {
+    public canon<T = Term>(term: T): T {
         return this.store.canon(term);
     }
 
