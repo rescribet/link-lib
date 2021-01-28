@@ -1,8 +1,8 @@
 import rdfFactory from "@ontologies/core";
-import dcterms from "@ontologies/dcterms";
-import rdf from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
-import schema from "@ontologies/schema";
+import * as dcterms from "@ontologies/dcterms";
+import * as rdf from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
+import * as schema from "@ontologies/schema";
 
 import { RENDER_CLASS_NAME } from "../../ComponentStore";
 import { createNS } from "../../rdf";

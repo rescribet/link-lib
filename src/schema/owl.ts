@@ -1,5 +1,5 @@
 import rdfFactory, { NamedNode, Quad } from "@ontologies/core";
-import owl from "@ontologies/owl";
+import { sameAs } from "@ontologies/owl";
 
 import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
@@ -69,7 +69,7 @@ import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../t
 // const nsOWLqualifiedCardinality = NS.owl("qualifiedCardinality");
 // const nsOWLReflexiveProperty = NS.owl("ReflexiveProperty");
 // const nsOWLRestriction = NS.owl("Restriction");
-const nsOWLsameAs = owl.sameAs;
+const nsOWLsameAs = sameAs;
 // const nsOWLsomeValuesFrom = NS.owl("someValuesFrom");
 // const nsOWLsourceIndividual = NS.owl("sourceIndividual");
 // const nsOWLSymmetricProperty = NS.owl("SymmetricProperty");

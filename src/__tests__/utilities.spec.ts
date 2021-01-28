@@ -1,9 +1,9 @@
 import "./useHashFactory";
 
 import rdfFactory from "@ontologies/core";
-import rdfx from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
-import schema from "@ontologies/schema";
+import * as rdfx from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
+import * as schema from "@ontologies/schema";
 import "jest";
 
 import example from "../ontology/example";

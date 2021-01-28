@@ -3,8 +3,8 @@ import "./useHashFactory";
 
 import rdfFactory, { Quad } from "@ontologies/core";
 import owl from "@ontologies/owl";
-import rdf from "@ontologies/rdf";
-import schema from "@ontologies/schema";
+import * as rdf from "@ontologies/rdf";
+import * as schema from "@ontologies/schema";
 import { LinkedRenderStore } from "../LinkedRenderStore";
 
 import { getBasicStore } from "../testUtilities";

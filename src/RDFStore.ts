@@ -1,7 +1,7 @@
 import { DataFactory, Feature, QuadPosition } from "@ontologies/core";
-import ld from "@ontologies/ld";
-import rdf from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
+import * as ld from "@ontologies/ld";
+import * as rdf from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
 
 import { equals, id } from "./factoryHelpers";
 import ll from "./ontology/ll";

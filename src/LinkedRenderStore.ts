@@ -8,8 +8,8 @@ import rdfFactory, {
     Term,
     TermType,
 } from "@ontologies/core";
-import rdf from "@ontologies/rdf";
-import schema from "@ontologies/schema";
+import * as rdf from "@ontologies/rdf";
+import * as schema from "@ontologies/schema";
 
 import { ComponentStore } from "./ComponentStore";
 import { equals, id } from "./factoryHelpers";

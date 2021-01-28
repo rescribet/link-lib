@@ -2,7 +2,7 @@ import "jest";
 import "./useHashFactory";
 
 import rdfFactory from "@ontologies/core";
-import schema from "@ontologies/schema";
+import * as schema from "@ontologies/schema";
 import { equals, id } from "../factoryHelpers";
 
 describe("factoryHelpers", () => {

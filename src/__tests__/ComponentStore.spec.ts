@@ -2,8 +2,8 @@ import "jest";
 import "./useHashFactory";
 
 import rdfFactory from "@ontologies/core";
-import rdfs from "@ontologies/rdfs";
-import schema from "@ontologies/schema";
+import * as rdfs from "@ontologies/rdfs";
+import * as schema from "@ontologies/schema";
 
 import { ComponentStore } from "../ComponentStore";
 import { RDFStore } from "../RDFStore";

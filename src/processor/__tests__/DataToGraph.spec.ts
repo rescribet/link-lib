@@ -2,9 +2,9 @@
 import "../../__tests__/useHashFactory";
 
 import rdfFactory, { TermType } from "@ontologies/core";
-import rdf from "@ontologies/rdf";
-import schema from "@ontologies/schema";
-import xsd from "@ontologies/xsd";
+import * as rdf from "@ontologies/rdf";
+import * as schema from "@ontologies/schema";
+import * as xsd from "@ontologies/xsd";
 import "jest";
 
 import ex from "../../ontology/ex";

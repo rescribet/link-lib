@@ -1,5 +1,5 @@
 import rdfFactory, { Literal, LowLevelStore, NamedNode, Node, TermType } from "@ontologies/core";
-import rdf from "@ontologies/rdf";
+import * as rdf from "@ontologies/rdf";
 
 import ll from "../ontology/ll";
 import RDFIndex from "../store/RDFIndex";

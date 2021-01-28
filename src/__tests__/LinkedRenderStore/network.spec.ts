@@ -2,9 +2,9 @@ import "jest";
 import "../useHashFactory";
 
 import rdfFactory from "@ontologies/core";
-import rdf from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
-import schema from "@ontologies/schema";
+import * as rdf from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
+import * as schema from "@ontologies/schema";
 
 import { getBasicStore } from "../../testUtilities";
 

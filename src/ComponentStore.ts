@@ -1,4 +1,4 @@
-import rdfs from "@ontologies/rdfs";
+import * as rdfs from "@ontologies/rdfs";
 
 import { id } from "./factoryHelpers";
 import ll from "./ontology/ll";

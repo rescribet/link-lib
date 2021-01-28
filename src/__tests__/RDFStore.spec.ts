@@ -3,10 +3,10 @@ import "./useHashFactory";
 
 import rdfFactory, { Quadruple } from "@ontologies/core";
 import owl from "@ontologies/owl";
-import rdf from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
-import schema from "@ontologies/schema";
-import xsd from "@ontologies/xsd";
+import * as rdf from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
+import * as schema from "@ontologies/schema";
+import * as xsd from "@ontologies/xsd";
 
 import ll from "../ontology/ll";
 import { createNS } from "../rdf";

@@ -1,7 +1,7 @@
 /* Taken, stripped and modified from rdflib.js */
 
 import { isNode, TermType } from "@ontologies/core";
-import owl from "@ontologies/owl";
+import { sameAs } from "@ontologies/owl";
 
 import { equals, id } from "../factoryHelpers";
 import { NamedNode, Node, Quad, SomeTerm, Term } from "../rdf";
@@ -27,7 +27,7 @@ export function Equatable<BC extends Constructable<IndexedStore & BasicStore>>(b
             super(...args);
 
             this.addDataCallback((quad: Quad) => {
-                if (equals(quad.predicate, owl.sameAs)) {
+                if (equals(quad.predicate, sameAs)) {
                     this.equate(quad.subject, quad.object as Node);
                 }
             });

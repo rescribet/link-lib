@@ -1,5 +1,5 @@
 import rdfFactory from "@ontologies/core";
-import schema from "@ontologies/schema";
+import * as schema from "@ontologies/schema";
 
 import { getBasicStore } from "../../testUtilities";
 import { SubscriptionRegistrationBase } from "../../types";

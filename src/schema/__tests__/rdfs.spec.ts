@@ -1,8 +1,8 @@
 import "../../__tests__/useHashFactory";
 
 import rdfFactory, { Node } from "@ontologies/core";
-import rdfx from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
+import * as rdfx from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
 import schemaNS from "@ontologies/schema";
 import "jest";
 

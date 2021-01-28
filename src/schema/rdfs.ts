@@ -1,6 +1,6 @@
 import rdfFactory, { NamedNode, Quad, TermType } from "@ontologies/core";
-import rdf from "@ontologies/rdf";
-import rdfs from "@ontologies/rdfs";
+import * as rdf from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
 
 import { equals, id } from "../factoryHelpers";
 import { VocabularyProcessingContext, VocabularyProcessor } from "../types";

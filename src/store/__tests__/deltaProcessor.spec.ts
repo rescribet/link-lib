@@ -1,9 +1,9 @@
 import "../../__tests__/useHashFactory";
 
 import rdfFactory, { LowLevelStore, NamedNode, Quadruple } from "@ontologies/core";
-import ld from "@ontologies/ld";
-import rdf from "@ontologies/rdf";
-import schema from "@ontologies/schema";
+import * as ld from "@ontologies/ld";
+import * as rdf from "@ontologies/rdf";
+import * as schema from "@ontologies/schema";
 import "jest";
 
 import ex from "../../ontology/ex";

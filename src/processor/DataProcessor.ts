@@ -1,6 +1,6 @@
 import rdfFactory, { isBlankNode, QuadPosition, TermType } from "@ontologies/core";
-import schema from "@ontologies/schema";
-import xsd from "@ontologies/xsd";
+import * as schema from "@ontologies/schema";
+import * as xsd from "@ontologies/xsd";
 import { site } from "@rdfdev/iri";
 import {
     BAD_REQUEST,

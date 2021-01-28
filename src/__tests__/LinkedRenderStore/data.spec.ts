@@ -1,5 +1,5 @@
 import rdfFactory from "@ontologies/core";
-import rdfs from "@ontologies/rdfs";
+import * as rdfs from "@ontologies/rdfs";
 import { getBasicStore } from "../../testUtilities";
 
 import {
