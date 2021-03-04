@@ -202,8 +202,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param subject The resource to start descending on
      * @param path A list of linked predicates to descend on.
      */
-    public dig(subject: Node, path: NamedNode[]): Term[] {
-        if (path.length === 0) {
+    public dig(subject: Node | undefined, path: NamedNode[]): Term[] {
+        if (path.length === 0 || typeof subject === "undefined") {
             return [];
         }
 
@@ -233,8 +233,8 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param path A list of linked predicates to descend on.
      * @param match The value which the predicate at the end of {path} has to match for its subject to return.
      */
-    public findSubject(subject: Node, path: NamedNode[], match: Term | Term[]): Node[] {
-        if (path.length === 0) {
+    public findSubject(subject: Node | undefined, path: NamedNode[], match: Term | Term[]): Node[] {
+        if (path.length === 0 || typeof subject === "undefined") {
             return [];
         }
 
@@ -375,7 +375,11 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Statement[]} All the statements of {property} on {subject}, or an empty array when none are present.
      */
-    public getResourcePropertyRaw(subject: Node, property: Node | Node[]): Quad[] {
+    public getResourcePropertyRaw(subject: Node | undefined, property: Node | Node[] | undefined): Quad[] {
+        if (typeof subject === "undefined" || typeof property === "undefined") {
+            return [];
+        }
+
         return this.store.getResourcePropertyRaw(subject, property);
     }
 
@@ -388,7 +392,14 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Term[]} The resolved values of {property}, or an empty array when none are present.
      */
-    public getResourceProperties<TT extends Term = Term>(subject: Node, property: Node | Node[]): TT[] {
+    public getResourceProperties<TT extends Term = Term>(
+      subject: Node | undefined,
+      property: Node | Node[] | undefined,
+    ): TT[] {
+        if (typeof subject === "undefined" || typeof property === "undefined") {
+           return [];
+        }
+
         return this.store.getResourceProperties<TT>(subject, property);
     }
 
@@ -404,7 +415,14 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Term | undefined} The resolved value of {property}, or undefined when none are present.
      */
-    public getResourceProperty<TT extends Term = Term>(subject: Node, property: Node | Node[]): TT | undefined {
+    public getResourceProperty<TT extends Term = Term>(
+      subject: Node | undefined,
+      property: Node | Node[] | undefined,
+    ): TT | undefined {
+        if (typeof subject === "undefined" || typeof property === "undefined") {
+            return undefined;
+        }
+
         return this.store.getResourceProperty<TT>(subject, property);
     }
 
