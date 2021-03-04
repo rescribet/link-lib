@@ -5,6 +5,7 @@ import rdfFactory, {
     Quad,
     QuadPosition,
     Quadruple,
+    SomeTerm,
     Term,
     TermType,
 } from "@ontologies/core";
@@ -202,7 +203,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param subject The resource to start descending on
      * @param path A list of linked predicates to descend on.
      */
-    public dig(subject: Node | undefined, path: NamedNode[]): Term[] {
+    public dig(subject: Node | undefined, path: NamedNode[]): SomeTerm[] {
         if (path.length === 0 || typeof subject === "undefined") {
             return [];
         }
@@ -220,7 +221,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
                 .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
                     && this.dig(term as Node, remaining))
                 .flat(1)
-                .filter<Term>(Boolean as any);
+                .filter<SomeTerm>(Boolean as any);
         }
 
         return [];
@@ -392,7 +393,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Term[]} The resolved values of {property}, or an empty array when none are present.
      */
-    public getResourceProperties<TT extends Term = Term>(
+    public getResourceProperties<TT extends Term = SomeTerm>(
       subject: Node | undefined,
       property: Node | Node[] | undefined,
     ): TT[] {
@@ -415,7 +416,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      * @param {Node | Node[]} property
      * @return {Term | undefined} The resolved value of {property}, or undefined when none are present.
      */
-    public getResourceProperty<TT extends Term = Term>(
+    public getResourceProperty<TT extends Term = SomeTerm>(
       subject: Node | undefined,
       property: Node | Node[] | undefined,
     ): TT | undefined {
