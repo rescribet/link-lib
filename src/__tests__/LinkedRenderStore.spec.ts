@@ -2,7 +2,7 @@ import "jest";
 import "./useHashFactory";
 
 import rdfFactory, { Quad } from "@ontologies/core";
-import owl from "@ontologies/owl";
+import * as owl from "@ontologies/owl";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 import { LinkedRenderStore } from "../LinkedRenderStore";

@@ -3,7 +3,7 @@ import "../../__tests__/useHashFactory";
 import rdfFactory, { Node } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
-import schemaNS from "@ontologies/schema";
+import * as schemaNS from "@ontologies/schema";
 import "jest";
 
 import example from "../../ontology/example";

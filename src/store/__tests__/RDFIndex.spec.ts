@@ -1,7 +1,7 @@
 import "../../__tests__/useHashFactory";
 
 import rdf from "@ontologies/core";
-import owl from "@ontologies/owl";
+import * as owl from "@ontologies/owl";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
