@@ -1,6 +1,5 @@
 import { ComponentStore } from "./ComponentStore";
 import { createStore } from "./createStore";
-import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RDFStore } from "./RDFStore";
@@ -23,7 +22,7 @@ export class ComponentStoreTestProxy<T> extends ComponentStore<T> {
 }
 
 export interface ExplodedLRS<T> {
-    api: LinkedDataAPI;
+    api: DataProcessor;
     apiOpts: Partial<DataProcessorOpts>;
     dispatch: MiddlewareActionHandler;
     forceBroadcast: () => Promise<void>;
@@ -50,7 +49,7 @@ export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicC
         report,
         schema,
         store,
-    } as LinkedRenderStoreOptions<BasicComponent>;
+    } as LinkedRenderStoreOptions<BasicComponent, DataProcessor>;
     const lrs = createStore(conf);
 
     return {

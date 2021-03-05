@@ -31,6 +31,7 @@ export {
     DEFAULT_TOPOLOGY,
     RENDER_CLASS_NAME,
 } from "./utilities/constants";
+export * from "./LinkedDataAPI";
 
 import * as rdflib from "./rdflib";
 

@@ -54,7 +54,7 @@ const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): 
  * see if it exposes an API which covers your use-case. Skipping the render library might cause unexpected behaviour and
  * hard to solve bugs.
  */
-export class LinkedRenderStore<T> implements Dispatcher {
+export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> implements Dispatcher {
     public static registerRenderer<T>(
         component: T,
         type: LazyNNArgument,
@@ -89,7 +89,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
      */
     public namespaces: NamespaceMap = {};
 
-    public api: LinkedDataAPI;
+    public api: API;
     public mapping: ComponentStore<T>;
     public schema: Schema<Indexable>;
     public store: RDFStore = new RDFStore();
@@ -106,7 +106,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
     private resourceQueueHandle: number | undefined;
 
     // tslint:disable-next-line no-object-literal-type-assertion
-    public constructor(opts: LinkedRenderStoreOptions<T> = {}) {
+    public constructor(opts: LinkedRenderStoreOptions<T, API> = {}) {
         if (opts.store) {
             this.store = opts.store;
         }
@@ -117,7 +117,7 @@ export class LinkedRenderStore<T> implements Dispatcher {
             dispatch: opts.dispatch,
             report: this.report,
             store: this.store,
-        });
+        }) as unknown as API;
         this.deltaProcessors = [this.api, this.store];
         if (opts.dispatch) {
             this.dispatch = opts.dispatch;

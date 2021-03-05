@@ -2,7 +2,6 @@ import { NamedNode, Quad } from "@ontologies/core";
 
 import { RDFFetchOpts } from "./rdflib";
 import {
-    DataProcessorOpts,
     DeltaProcessor,
     Dispatcher,
     PendingRequestStatus,
@@ -86,8 +85,3 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      */
     setAcceptForHost(origin: string, acceptValue: string): void;
 }
-
-declare var LinkedDataAPI: {
-    new (opts?: DataProcessorOpts): any;
-    (): any;
-};

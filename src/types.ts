@@ -4,6 +4,7 @@ import { Node, SomeTerm } from "@ontologies/core/dist-types/types";
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
+import { DataProcessor } from "./processor/DataProcessor";
 import { RequestInitGenerator } from "./processor/RequestInitGenerator";
 import {
     BlankNode,
@@ -79,8 +80,8 @@ export interface FetchOpts {
 
 export type SomeNode = NamedNode | BlankNode;
 
-export interface LinkedRenderStoreOptions<T> {
-    api?: LinkedDataAPI | undefined;
+export interface LinkedRenderStoreOptions<T, API extends LinkedDataAPI = DataProcessor> {
+    api?: API | undefined;
     apiOpts?: Partial<DataProcessorOpts> | undefined;
     defaultType?: NamedNode | undefined;
     dispatch?: MiddlewareActionHandler;
@@ -108,7 +109,8 @@ export interface Dispatcher {
     dispatch: MiddlewareActionHandler;
 }
 
-export type MiddlewareFn<T> = (store: LinkedRenderStore<T>) => MiddlewareWithBoundLRS;
+export type MiddlewareFn<T, API extends LinkedDataAPI = DataProcessor> = (store: LinkedRenderStore<T, API>) =>
+  MiddlewareWithBoundLRS;
 
 export type MiddlewareWithBoundLRS = (next: MiddlewareActionHandler) => MiddlewareActionHandler;
 

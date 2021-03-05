@@ -1,5 +1,7 @@
+import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import ll from "./ontology/ll";
+import { DataProcessor } from "./processor/DataProcessor";
 import { NamedNode } from "./rdf";
 import { MiddlewareActionHandler, MiddlewareFn, MiddlewareWithBoundLRS } from "./types";
 
@@ -9,8 +11,8 @@ import { MiddlewareActionHandler, MiddlewareFn, MiddlewareWithBoundLRS } from ".
  * @see {createStore}
  * @param catchActions {boolean} Set to true to catch all left-over actions to {LinkedRenderStore#execActionByIRI}.
  */
-export const linkMiddleware = <T>(catchActions = true): MiddlewareFn<T> =>
-    (lrs: LinkedRenderStore<T>): MiddlewareWithBoundLRS =>
+export const linkMiddleware = <T, API extends LinkedDataAPI = DataProcessor>(catchActions = true):
+  MiddlewareFn<T, API> => (lrs: LinkedRenderStore<T, API>): MiddlewareWithBoundLRS =>
         (next: MiddlewareActionHandler): MiddlewareActionHandler =>
             (action: NamedNode, args: any): Promise<any> => {
 

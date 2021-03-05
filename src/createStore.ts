@@ -1,9 +1,14 @@
+import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { linkMiddleware } from "./linkMiddleware";
+import { DataProcessor } from "./processor/DataProcessor";
 import { NamedNode } from "./rdf";
 import { LinkedRenderStoreOptions, MiddlewareActionHandler, MiddlewareFn } from "./types";
 
-function applyMiddleware<T>(lrs: LinkedRenderStore<T>, ...layers: Array<MiddlewareFn<T>>): MiddlewareActionHandler {
+function applyMiddleware<T, API extends LinkedDataAPI = DataProcessor>(
+  lrs: LinkedRenderStore<T, API>,
+  ...layers: Array<MiddlewareFn<T, API>>
+): MiddlewareActionHandler {
     const storeBound = layers.map((middleware) => middleware(lrs));
 
     const finish: MiddlewareActionHandler = (a: NamedNode, _o: any): Promise<any> => Promise.resolve(a);
@@ -19,13 +24,14 @@ function applyMiddleware<T>(lrs: LinkedRenderStore<T>, ...layers: Array<Middlewa
  *  causes actions not to be executed via {LinkedRenderStore#execActionByIRI} anymore, this behaviour can be enabled
  *  manually in one of the defined middlewares if still desired.
  */
-export function createStore<T>(storeOpts: LinkedRenderStoreOptions<T>,
-                               middleware: Array<MiddlewareFn<any>> = [],
-                               trailingMiddleware: Array<MiddlewareFn<any>> = []): LinkedRenderStore<T> {
+export function createStore<T, API extends LinkedDataAPI = DataProcessor>(
+  storeOpts: LinkedRenderStoreOptions<T, API>,
+  middleware: Array<MiddlewareFn<any, API>> = [],
+  trailingMiddleware: Array<MiddlewareFn<any, API>> = [],
+): LinkedRenderStore<T, API> {
+    const LRS = new LinkedRenderStore<T, API>(storeOpts);
 
-    const LRS = new LinkedRenderStore<T>(storeOpts);
-
-    LRS.dispatch = applyMiddleware<T>(
+    LRS.dispatch = applyMiddleware<T, API>(
         LRS,
         ...middleware,
         linkMiddleware(trailingMiddleware.length === 0),
