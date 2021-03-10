@@ -1,9 +1,14 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import { DataFactory, LowLevelStore } from "@ontologies/core";
+import {
+  DataFactory,
+  LowLevelStore,
+  NamedNode,
+  Quad,
+  SomeTerm,
+} from "@ontologies/core";
 
 import { id } from "../factoryHelpers";
-import { NamedNode, Quad, SomeTerm } from "../rdf";
 import { SomeNode } from "../types";
 
 import BasicStore from "./BasicStore";

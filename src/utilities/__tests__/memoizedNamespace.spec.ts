@@ -1,9 +1,8 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { NamedNode } from "@ontologies/core";
 
 import ex from "../../ontology/ex";
-import { NamedNode } from "../../rdf";
 import { expandProperty } from "../memoizedNamespace";
 
 describe("memoizedNamespace", () => {

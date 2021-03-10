@@ -1,8 +1,8 @@
+import { NamedNode } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 
 import { id } from "./factoryHelpers";
 import ll from "./ontology/ll";
-import { NamedNode } from "./rdf";
 import { Schema } from "./Schema";
 import {
     ComponentMapping,

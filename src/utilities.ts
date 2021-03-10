@@ -1,8 +1,14 @@
 /* global chrome */
-import rdfFactory, { TermType } from "@ontologies/core";
+import rdfFactory, {
+  BlankNode,
+  Literal,
+  NamedNode,
+  Quad,
+  Term,
+  TermType,
+} from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
-import { BlankNode, Literal, NamedNode, Quad, Term } from "./rdf";
 
 import { SomeNode } from "./types";
 

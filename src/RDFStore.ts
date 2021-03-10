@@ -1,18 +1,22 @@
-import { DataFactory, Feature, QuadPosition } from "@ontologies/core";
+import rdfFactory, {
+  DataFactory,
+  Feature,
+  NamedNode,
+  Quad,
+  QuadPosition,
+  Quadruple,
+  Term,
+} from "@ontologies/core";
 import * as ld from "@ontologies/ld";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
 import { equals, id } from "./factoryHelpers";
 import ll from "./ontology/ll";
-import rdfFactory, {
-    NamedNode,
+import {
     OptionalNamedNode,
     OptionalNode,
     OptionalTerm,
-    Quad,
-    Quadruple,
-    Term,
 } from "./rdf";
 import { deltaProcessor } from "./store/deltaProcessor";
 import RDFIndex from "./store/RDFIndex";

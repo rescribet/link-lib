@@ -1,4 +1,4 @@
-import { createNS } from "../rdf";
+import { createNS } from "@ontologies/core";
 
 const ll = createNS("http://purl.org/link-lib/");
 

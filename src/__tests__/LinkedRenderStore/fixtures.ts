@@ -1,11 +1,10 @@
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { createNS } from "@ontologies/core";
 import * as dcterms from "@ontologies/dcterms";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 
 import { RENDER_CLASS_NAME } from "../../ComponentStore";
-import { createNS } from "../../rdf";
 import { DEFAULT_TOPOLOGY } from "../../utilities/constants";
 
 export const DT = rdfFactory.id(DEFAULT_TOPOLOGY);

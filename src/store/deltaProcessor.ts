@@ -1,12 +1,13 @@
-import { LowLevelStore, QuadPosition } from "@ontologies/core";
+import rdfFactory, {
+  LowLevelStore,
+  NamedNode,
+  Node,
+  Quad,
+  QuadPosition,
+  Quadruple,
+} from "@ontologies/core";
 
 import { equals } from "../factoryHelpers";
-import rdfFactory, {
-    NamedNode,
-    Node,
-    Quad,
-    Quadruple,
-} from "../rdf";
 import { StoreProcessor, StoreProcessorResult } from "../types";
 
 const matchSingle = (graphIRI: NamedNode): (graph: Node) => boolean => {

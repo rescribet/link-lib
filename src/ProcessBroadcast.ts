@@ -1,4 +1,4 @@
-import { Quad } from "./rdf";
+import { Quad } from "@ontologies/core";
 
 import { SubscriptionRegistrationBase } from "./types";
 

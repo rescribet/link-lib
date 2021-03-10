@@ -1,6 +1,5 @@
-import { LowLevelStore } from "@ontologies/core";
+import { LowLevelStore, NamedNode } from "@ontologies/core";
 
-import { NamedNode } from "./rdf";
 import { SomeNode } from "./types";
 
 /**

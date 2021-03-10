@@ -1,5 +1,4 @@
-import rdfFactory, { Namespace } from "@ontologies/core";
-import { NamedNode, Term } from "../rdf";
+import rdfFactory, { NamedNode, Namespace, Term } from "@ontologies/core";
 
 import { NamespaceMap } from "../types";
 

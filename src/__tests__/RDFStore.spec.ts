@@ -1,7 +1,7 @@
 import "jest";
 import "./useHashFactory";
 
-import rdfFactory, { Quadruple } from "@ontologies/core";
+import rdfFactory, { createNS, Quadruple } from "@ontologies/core";
 import * as owl from "@ontologies/owl";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
@@ -9,7 +9,6 @@ import * as schema from "@ontologies/schema";
 import * as xsd from "@ontologies/xsd";
 
 import ll from "../ontology/ll";
-import { createNS } from "../rdf";
 import { RDFStore } from "../RDFStore";
 import RDFIndex from "../store/RDFIndex";
 import { getBasicStore } from "../testUtilities";

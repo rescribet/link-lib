@@ -1,10 +1,16 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import { LowLevelStore, QuadPosition } from "@ontologies/core";
-import { Node, Term } from "@ontologies/core/dist-types/types";
+import {
+  LowLevelStore,
+  NamedNode,
+  Node,
+  Quad,
+  QuadPosition,
+  SomeTerm,
+  Term,
+} from "@ontologies/core";
 
 import { equals, id } from "../factoryHelpers";
-import { NamedNode, Quad, SomeTerm } from "../rdf";
 import { IdTerm, SomeNode, WildQuadruple } from "../types";
 
 import BasicStore from "./BasicStore";

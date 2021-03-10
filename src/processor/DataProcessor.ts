@@ -1,4 +1,12 @@
-import rdfFactory, { isBlankNode, QuadPosition, TermType } from "@ontologies/core";
+import rdfFactory, {
+  BlankNode,
+  isBlankNode,
+  NamedNode,
+  Quad,
+  QuadPosition,
+  Quadruple,
+  TermType,
+} from "@ontologies/core";
 import * as schema from "@ontologies/schema";
 import * as xsd from "@ontologies/xsd";
 import { site } from "@rdfdev/iri";
@@ -15,12 +23,6 @@ import http07 from "../ontology/http07";
 import httph from "../ontology/httph";
 import link from "../ontology/link";
 import ll from "../ontology/ll";
-import {
-    BlankNode,
-    NamedNode,
-    Quad,
-    Quadruple,
-} from "../rdf";
 import {
     Fetcher,
     RDFFetchOpts,

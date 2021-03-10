@@ -1,8 +1,16 @@
 /* Parts taken, stripped and modified from rdflib.js */
 
-import rdfFactory, { DataFactory, Feature, LowLevelStore, QuadPosition } from "@ontologies/core";
+import rdfFactory, {
+  DataFactory,
+  Feature,
+  LowLevelStore,
+  NamedNode,
+  Quad,
+  QuadPosition,
+  Quadruple,
+  SomeTerm,
+} from "@ontologies/core";
 
-import { NamedNode, Quad, Quadruple, SomeTerm } from "../rdf";
 import { SomeNode } from "../types";
 
 export interface IndexedFormulaOpts {

@@ -1,7 +1,7 @@
 /* @globals set, generator, init */
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { TermType } from "@ontologies/core";
+import rdfFactory, { Node, TermType } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 import * as xsd from "@ontologies/xsd";
@@ -10,7 +10,6 @@ import "jest";
 import ex from "../../ontology/ex";
 import example from "../../ontology/example";
 import ll from "../../ontology/ll";
-import { Node } from "../../rdf";
 import RDFIndex from "../../store/RDFIndex";
 
 import { dataToGraphTuple, list, processObject, seq, toGraph } from "../DataToGraph";

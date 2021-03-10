@@ -1,8 +1,9 @@
+import { NamedNode } from "@ontologies/core";
+
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import ll from "./ontology/ll";
 import { DataProcessor } from "./processor/DataProcessor";
-import { NamedNode } from "./rdf";
 import { MiddlewareActionHandler, MiddlewareFn, MiddlewareWithBoundLRS } from "./types";
 
 /**

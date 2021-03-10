@@ -1,6 +1,6 @@
 import "./useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { Quad } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
@@ -9,7 +9,6 @@ import "jest";
 import ex from "../ontology/ex";
 import example from "../ontology/example";
 import { ProcessBroadcast, ProcessBroadcastOpts } from "../ProcessBroadcast";
-import { Quad } from "../rdf";
 import { SubscriptionRegistrationBase } from "../types";
 
 const schemaT = schema.Thing;

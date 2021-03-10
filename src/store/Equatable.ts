@@ -1,10 +1,17 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import { isNode, TermType } from "@ontologies/core";
+import {
+  isNode,
+  NamedNode,
+  Node,
+  Quad,
+  SomeTerm,
+  Term,
+  TermType,
+} from "@ontologies/core";
 import { sameAs } from "@ontologies/owl";
 
 import { equals, id } from "../factoryHelpers";
-import { NamedNode, Node, Quad, SomeTerm, Term } from "../rdf";
 import { SomeNode } from "../types";
 
 import BasicStore from "./BasicStore";

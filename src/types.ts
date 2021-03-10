@@ -1,18 +1,20 @@
-import { CustomPredicateCreator, LowLevelStore } from "@ontologies/core";
-import { Node, SomeTerm } from "@ontologies/core/dist-types/types";
+import {
+  BlankNode,
+  CustomPredicateCreator,
+  Literal,
+  LowLevelStore,
+  NamedNode,
+  Node,
+  Quad,
+  Quadruple,
+  SomeTerm,
+} from "@ontologies/core";
 
 import { ComponentStore } from "./ComponentStore";
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RequestInitGenerator } from "./processor/RequestInitGenerator";
-import {
-    BlankNode,
-    Literal,
-    NamedNode,
-    Quad,
-    Quadruple,
-} from "./rdf";
 import { Fetcher } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";

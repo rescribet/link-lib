@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { Quad } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
@@ -17,7 +17,6 @@ import http from "../../ontology/http";
 import httph from "../../ontology/httph";
 import link from "../../ontology/link";
 import ll from "../../ontology/ll";
-import { Quad } from "../../rdf";
 import RDFIndex from "../../store/RDFIndex";
 import { BasicComponent, ExplodedLRS, getBasicStore } from "../../testUtilities";
 import { FulfilledRequestStatus, ResponseAndFallbacks } from "../../types";

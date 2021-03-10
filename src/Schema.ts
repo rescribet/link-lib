@@ -1,9 +1,9 @@
+import rdfFactory, { NamedNode, Quad, SomeTerm } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import { id } from "./factoryHelpers";
 import RDFIndex from "./store/RDFIndex";
 
-import rdfFactory, { NamedNode, Quad, SomeTerm } from "./rdf";
 import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFLIB } from "./schema/rdflib";

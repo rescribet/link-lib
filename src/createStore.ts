@@ -1,8 +1,9 @@
+import { NamedNode } from "@ontologies/core";
+
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { linkMiddleware } from "./linkMiddleware";
 import { DataProcessor } from "./processor/DataProcessor";
-import { NamedNode } from "./rdf";
 import { LinkedRenderStoreOptions, MiddlewareActionHandler, MiddlewareFn } from "./types";
 
 function applyMiddleware<T, API extends LinkedDataAPI = DataProcessor>(
