@@ -38,6 +38,7 @@ import {
     MiddlewareActionHandler,
     NamespaceMap,
     ResourceQueueItem,
+    SomeNode,
     SomeRequestStatus,
     SubscriptionRegistrationBase,
 } from "./types";
@@ -204,27 +205,48 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param path A list of linked predicates to descend on.
      */
     public dig(subject: Node | undefined, path: NamedNode[]): SomeTerm[] {
+        const [result] = this.digDeeper(subject, path);
+
+        return result;
+    }
+
+    /**
+     * @internal See {dig}
+     * @param subject
+     * @param path
+     * @param subjects - The subjects traversed.
+     */
+    public digDeeper(subject: Node | undefined, path: NamedNode[]): [SomeTerm[], SomeNode[]] {
         if (path.length === 0 || typeof subject === "undefined") {
-            return [];
+            return [[], []];
         }
 
         const remaining = path.slice();
         const pred = remaining.shift();
 
         if (remaining.length === 0) {
-            return this.getResourceProperties(subject, pred!);
+            return [this.getResourceProperties(subject, pred!), [subject]];
         }
 
         const props = this.getResourceProperties(subject, pred!);
         if (props) {
-            return props
-                .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
-                    && this.dig(term as Node, remaining))
-                .flat(1)
-                .filter<SomeTerm>(Boolean as any);
+            const allTerms = [];
+            const allSubjects = [subject];
+
+            for (const term of props) {
+              if (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode) {
+                const [terms, subs] = this.digDeeper(term, remaining);
+                allSubjects.push(...subs);
+                if (terms.length > 0) {
+                    allTerms.push(...terms);
+                }
+              }
+            }
+
+            return [allTerms, allSubjects];
         }
 
-        return [];
+        return [[], [subject]];
     }
 
     /**

@@ -78,8 +78,18 @@ describe("LinkedRenderStore", () => {
         });
 
         it("resolves values through holey oneToMany", () => {
-            expect(store.lrs.dig(start, [ex("oneToManyHoley"), ex("p"), ex("q")]))
-                .toEqual([ex("3.6"), ex("3.8")]);
+            const [terms, subjects] = store.lrs.digDeeper(start, [ex("oneToManyHoley"), ex("p"), ex("q")]);
+
+            expect(terms).toEqual([ex("3.6"), ex("3.8")]);
+            expect(subjects).toEqual([
+                start,
+                ex("1.6"),
+                ex("2.6"),
+                ex("1.7"),
+                ex("2.7"),
+                ex("1.8"),
+                ex("2.8"),
+            ]);
         });
 
         it("resolves empty through holey oneToMany without end value", () => {
