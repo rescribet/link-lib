@@ -457,6 +457,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                     lastResponseHeaders: null,
                     requested: true,
                     status: 202,
+                    subject: iri,
                     timesRequested: totalRequested,
                 },
             );
@@ -496,6 +497,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 lastResponseHeaders: requestObj,
                 requested: true,
                 status: Number.parseInt(requestStatus.value, 10),
+                subject: iri,
                 timesRequested: totalRequested,
             },
         );
@@ -655,6 +657,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 lastResponseHeaders: null,
                 requested: true,
                 status,
+                subject: iri,
                 timesRequested: prevStatus ? prevStatus.timesRequested + 1 : 1,
             },
         );

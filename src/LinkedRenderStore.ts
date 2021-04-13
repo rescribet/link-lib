@@ -443,6 +443,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
                 lastResponseHeaders: null,
                 requested: true,
                 status: 202,
+                subject: iri,
                 timesRequested: 1,
             };
         }

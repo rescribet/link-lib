@@ -180,6 +180,7 @@ export interface RequestStatus {
     lastRequested: Date | null;
     requested: boolean;
     status: number | null;
+    subject: NamedNode;
     timesRequested: number;
 }
 
