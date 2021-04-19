@@ -89,6 +89,9 @@ export const OWL = {
 
     processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
         if (rdfFactory.equals(item.predicate, nsOWLsameAs)) {
+            if (rdfFactory.equals(item.subject, item.object)) {
+                return null;
+            }
             const a = ctx.equivalenceSet.add((item.object as SomeNode).id as number);
             const b = ctx.equivalenceSet.add(item.subject.id as number);
             ctx.equivalenceSet.union(a, b);
