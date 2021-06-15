@@ -389,7 +389,6 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             );
             const req = this.fetch(requestIRI.value, reqOpts)
                 .then((response) => {
-                    this.invalidate(iri);
                     this.setStatus(iri, response.status);
 
                     return response;
