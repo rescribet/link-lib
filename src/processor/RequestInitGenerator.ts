@@ -13,17 +13,12 @@ export class RequestInitGenerator {
     public readonly mode: "same-origin" | "navigate" | "no-cors" | "cors" | undefined;
     public readonly xRequestedWith: string;
 
-    constructor(opts: RequestInitGeneratorOpts = {
-        credentials: "include",
-        csrfFieldName: "csrf-token",
-        mode: "same-origin",
-        xRequestedWith: "XMLHttpRequest",
-    }) {
+    constructor(opts: Partial<RequestInitGeneratorOpts> = {}) {
         this.baseHeaders = opts.headers || {};
-        this.csrfFieldName = opts.csrfFieldName;
-        this.credentials = opts.credentials;
-        this.mode = opts.mode;
-        this.xRequestedWith = opts.xRequestedWith;
+        this.csrfFieldName = opts.csrfFieldName ?? "csrf-token";
+        this.credentials = opts.credentials ?? "include";
+        this.mode = opts.mode ?? "same-origin";
+        this.xRequestedWith = opts.xRequestedWith ?? "XMLHttpRequest";
     }
 
     public authenticityHeader(options = {}): Record<string, string> {
