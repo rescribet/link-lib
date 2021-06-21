@@ -53,12 +53,12 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      */
     public changeTimestamps: number[] = [];
     public typeCache: NamedNode[][] = [];
+    public langPrefs: string[] = Array.from(typeof navigator !== "undefined"
+        ? (navigator.languages || [navigator.language])
+        : ["en"]);
 
     private deltas: Quadruple[][] = [];
     private deltaProcessor: StoreProcessor;
-    private langPrefs: string[] = Array.from(typeof navigator !== "undefined"
-        ? (navigator.languages || [navigator.language])
-        : ["en"]);
     private store: RDFIndex = new RDFIndex();
     private funlets: Funlets;
 

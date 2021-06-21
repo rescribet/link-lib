@@ -94,9 +94,12 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public mapping: ComponentStore<T>;
     public schema: Schema<Indexable>;
     public store: RDFStore = new RDFStore();
+    /**
+     * Enable the bulk api to fetch data with.
+     */
+    public bulkFetch: boolean = false;
 
     private _dispatch?: MiddlewareActionHandler;
-    private bulkFetch: boolean = false;
     private cleanupTimer: number | undefined;
     private currentBroadcast: Promise<void> | undefined;
     private broadcastHandle: number | undefined;
