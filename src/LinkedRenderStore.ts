@@ -193,7 +193,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      *
      * Every action will fall through the execution middleware layers.
      *
-     * @see https://github.com/fletcher91/link-lib/wiki/%5BDesign-draft%5D-Actions,-data-streams,-and-middleware
+     * @see https://github.com/rescribet/link-lib/wiki/%5BDesign-draft%5D-Actions,-data-streams,-and-middleware
      *
      * @param {NamedNode} subject The resource to execute (can be either an IRI or an URI)
      * @param {Object} args The arguments to the function defined by the subject.

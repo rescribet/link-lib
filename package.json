@@ -2,10 +2,10 @@
   "name": "link-lib",
   "version": "2.0.0-4",
   "description": "The Link library for creating information based applications",
-  "repository": "https://github.com/fletcher91/link-lib.git",
+  "repository": "https://github.com/rescribet/link-lib.git",
   "scripts": {
     "build": "pika build",
-    "doc": "rm -rf dist/docs/* && typedoc --exclude **/*.spec.ts --excludeExternals --excludePrivate --mode file --theme minimal --target ES6 --includeDeclarations --out dist/docs/ src/",
+    "doc": "rm -rf dist/docs/* && typedoc --exclude **/*.spec.ts --excludeExternals --excludePrivate --theme minimal --out dist/docs/ src/",
     "doc:deploy": "gh-pages -d ./dist/docs",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "prepublish": "npm run build && npm run doc",
@@ -14,7 +14,7 @@
     "test": "jest --coverage",
     "version": "yarn run build"
   },
-  "author": "Fletcher91 <thom@argu.co>",
+  "author": "Thom van Kalkeren <thom@argu.co>",
   "license": "LGPL-3.0",
   "@pika/pack": {
     "pipeline": [
