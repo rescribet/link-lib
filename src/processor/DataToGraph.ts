@@ -61,6 +61,8 @@ export function seq<T = any>(arr: T[], id?: SomeNode): DataObject {
     );
 }
 
+const isFile = (value: any): value is File => typeof File !== "undefined" && value instanceof File;
+
 /** @private */
 export function processObject(subject: Node,
                               predicate: NamedNode,
@@ -78,7 +80,7 @@ export function processObject(subject: Node,
         || typeof datum === "boolean"
         || datum instanceof Date) {
         store.add(subject, predicate, rdfFactory.literal(datum));
-    } else if (datum instanceof File) {
+    } else if (isFile(datum)) {
         const f = uploadIRI();
         const file = rdfFactory.quad(subject, predicate, f);
         blobs.push([f, datum as File]);
