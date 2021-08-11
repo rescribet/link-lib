@@ -85,8 +85,8 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public report: ErrorReporter;
     /**
      * Can aid in parsing an creating prefix mapping strings.
-     * Please use @ontologies/<namespace> packages in your programs, canonicalizing certain prefixes will lead to
-     * brittle and hard to refactor code!
+     * @deprecated Please use @ontologies/<namespace> packages in your programs, canonicalizing certain
+     *   prefixes will lead to brittle and hard to refactor code!
      */
     public namespaces: NamespaceMap = {};
 
