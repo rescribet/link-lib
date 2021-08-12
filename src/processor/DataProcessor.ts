@@ -1,5 +1,4 @@
 import rdfFactory, {
-  BlankNode,
   isBlankNode,
   NamedNode,
   Quad,
@@ -17,16 +16,10 @@ import {
 } from "http-status-codes";
 import { equals, id } from "../factoryHelpers";
 
-import { LinkedDataAPI } from "../LinkedDataAPI";
+import { APIFetchOpts, LinkedDataAPI } from "../LinkedDataAPI";
 import http from "../ontology/http";
-import http07 from "../ontology/http07";
 import httph from "../ontology/httph";
-import link from "../ontology/link";
 import ll from "../ontology/ll";
-import {
-    Fetcher,
-    RDFFetchOpts,
-} from "../rdflib";
 import { RDFStore } from "../RDFStore";
 import {
     DataProcessorOpts,
@@ -44,7 +37,7 @@ import {
     SomeNode,
     SomeRequestStatus,
 } from "../types";
-import { anyRDFValue, doc } from "../utilities";
+import { doc } from "../utilities";
 import {
     F_NTRIPLES,
     MSG_BAD_REQUEST,
@@ -56,10 +49,9 @@ import { getContentType, getHeader, getJSON, getURL } from "../utilities/respons
 
 import { ProcessorError } from "./ProcessorError";
 import { RequestInitGenerator } from "./RequestInitGenerator";
-import { failedRequest, queuedDeltaStatus, timedOutRequest } from "./requestStatus";
+import { queuedDeltaStatus } from "./requestStatus";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
-const FETCHER_CALLBACKS = ["done", "fail", "refresh", "request", "retract"];
 
 async function handleStatus(res: ResponseAndFallbacks): Promise<ResponseAndFallbacks> {
     if (res.status === NOT_FOUND) {
@@ -136,15 +128,9 @@ export const emptyRequest = Object.freeze({
     timesRequested: 0,
 }) as EmptyRequestStatus;
 
-export const isRDFLibFetcher = (v: any): v is any => {
-    return typeof v.appNode !== "undefined";
-};
-
 export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     public accept: { [k: string]: string };
-    public timeout: number = 30000;
 
-    private _fetcher?: Fetcher | undefined;
     private _dispatch?: MiddlewareActionHandler;
     private readonly bulkEndpoint: string;
     private report: ErrorReporter;
@@ -156,31 +142,6 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private readonly requestMap: Map<number, Promise<Quad[]>>;
     private readonly statusMap: { [k: string]: SomeRequestStatus | undefined };
     private readonly store: RDFStore;
-
-    private get fetcher(): Fetcher | undefined {
-        return this._fetcher;
-    }
-
-    private set fetcher(v: Fetcher | undefined) {
-        this._fetcher = v;
-
-        if (isRDFLibFetcher(v)) {
-            (v as any).fetch = typeof fetch !== "undefined"
-                ? fetch
-                : typeof window !== "undefined" && window.fetch.bind(window) || (v as any).fetch;
-            (v as any).timeout = this.timeout;
-
-            FETCHER_CALLBACKS.forEach((hook) => {
-                const hookIRI = ll.ns(`data/rdflib/${hook}`);
-                this._fetcher!.addCallback(hook, this.invalidate.bind(this));
-                this._fetcher!.addCallback(hook, (iri: string | NamedNode | BlankNode, _err?: Error) => {
-                    this.dispatch(hookIRI, [typeof iri === "string" ? rdfFactory.namedNode(iri) : iri, _err]);
-
-                    return true;
-                });
-            });
-        }
-    }
 
     public constructor(opts: DataProcessorOpts) {
         this.accept = opts.accept || {
@@ -198,16 +159,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this.fetch = opts.fetch || (typeof window !== "undefined" && typeof fetch !== "undefined"
             ? fetch.bind(window)
             : (_: any, __: any): Promise<Response> => Promise.reject());
-        if (opts.fetcher) {
-            this.fetcher = opts.fetcher;
-            if (!opts.fetch) {
-                this.fetch = (url: RequestInfo, fetchOpts?: RequestInit): Promise<Response> => {
-                    const iri = this.store.rdfFactory.namedNode(typeof url === "string" ? url : url.url);
 
-                    return this.fetcher!.load(iri, fetchOpts as RDFFetchOpts);
-                };
-            }
-        }
         if (opts.transformers) {
             opts.transformers.forEach((t) => this.registerTransformer(t.transformer, t.mediaType, t.acceptValue));
         }
@@ -367,7 +319,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public async getEntity(iri: NamedNode, opts?: RDFFetchOpts): Promise<Quad[]> {
+    public async getEntity(iri: NamedNode, opts?: APIFetchOpts): Promise<Quad[]> {
         const url = new URL(iri.value);
         url.hash = "";
         const requestIRI = rdfFactory.namedNode(url.toString());
@@ -429,77 +381,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         if (existing) {
             return existing;
         }
-        const fetcherStatus = this.fetcher?.requested[irl.value];
 
-        if (fetcherStatus === undefined) {
-            if (this.fetcher && irl.value in this.fetcher.requested) {
-                return this.memoizeStatus(irl, failedRequest());
-            }
-            return this.memoizeStatus(irl, emptyRequest);
-        }
-
-        const requests = this.store.match(
-            null,
-            link.requestedURI,
-            rdfFactory.literal(irl.value),
-            null,
-        );
-        const totalRequested = requests.length;
-        if (requests.length === 0) {
-            return this.memoizeStatus(irl, emptyRequest);
-        }
-        if (fetcherStatus === true) {
-            return this.memoizeStatus(
-                irl,
-                {
-                    lastRequested: new Date(),
-                    lastResponseHeaders: null,
-                    requested: true,
-                    status: 202,
-                    subject: iri,
-                    timesRequested: totalRequested,
-                },
-            );
-        }
-        if (fetcherStatus === "timeout") {
-            return this.memoizeStatus(irl, timedOutRequest(totalRequested));
-        }
-        const requestIRI = requests.pop()!.subject as BlankNode;
-        const requestObj = anyRDFValue(
-            this.store.quadsFor(requestIRI),
-            link.response,
-        ) as BlankNode | undefined;
-
-        if (!requestObj) {
-            return this.memoizeStatus(irl, emptyRequest);
-        }
-
-        const requestObjData = this.store.quadsFor(requestObj);
-
-        // RDFLib has different behaviour across browsers and code-paths, so we must check for multiple properties.
-        const requestStatus = anyRDFValue(requestObjData, http.status)
-            || anyRDFValue(requestObjData, http07.status)
-            || anyRDFValue(requestObjData, httph.status);
-        const requestDate = anyRDFValue(requestObjData, httph.date);
-
-        if (!requestStatus) {
-            if (fetcherStatus === "done") {
-                return this.memoizeStatus(irl, timedOutRequest(totalRequested));
-            }
-            return this.memoizeStatus(irl, emptyRequest);
-        }
-
-        return this.memoizeStatus(
-            irl,
-            {
-                lastRequested: requestDate ? new Date(requestDate.value) : new Date(0),
-                lastResponseHeaders: requestObj,
-                requested: true,
-                status: Number.parseInt(requestStatus.value, 10),
-                subject: iri,
-                timesRequested: totalRequested,
-            },
-        );
+        return this.memoizeStatus(irl, emptyRequest);
     }
 
     public invalidate(iri: string | SomeNode, _err?: Error): boolean {

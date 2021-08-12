@@ -15,7 +15,6 @@ import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RequestInitGenerator } from "./processor/RequestInitGenerator";
-import { Fetcher } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import RDFIndex from "./store/RDFIndex";
@@ -257,7 +256,6 @@ export interface DataProcessorOpts {
     dispatch?: MiddlewareActionHandler;
     requestInitGenerator?: RequestInitGenerator;
     fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-    fetcher?: Fetcher;
     mapping?: { [k: string]: ResponseTransformer[] };
     transformers?: TransformerRegistrationRequest[];
     report: ErrorReporter;

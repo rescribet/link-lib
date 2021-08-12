@@ -42,7 +42,6 @@ describe("LinkedRenderStore", () => {
                 iri,
                 {
                     clearPreviousData: true,
-                    force: true,
                 },
             );
         });

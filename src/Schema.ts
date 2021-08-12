@@ -6,7 +6,6 @@ import RDFIndex from "./store/RDFIndex";
 
 import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
-import { RDFLIB } from "./schema/rdflib";
 import { RDFS } from "./schema/rdfs";
 
 import {
@@ -23,7 +22,7 @@ import { DisjointSet } from "./utilities/DisjointSet";
  * optimized so it can be used in real-time by low-power devices as well.
  */
 export class Schema<IndexType = number | string> {
-    private static vocabularies: VocabularyProcessor[] = [OWL, RDFS, RDFLIB];
+    private static vocabularies: VocabularyProcessor[] = [OWL, RDFS];
 
     private equivalenceSet: DisjointSet<IndexType> = new DisjointSet();
     // Typescript can't handle generic index types, so it is set to string.

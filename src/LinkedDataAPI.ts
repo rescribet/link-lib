@@ -1,6 +1,5 @@
 import { NamedNode, Quad } from "@ontologies/core";
 
-import { RDFFetchOpts } from "./rdflib";
 import {
     DeltaProcessor,
     Dispatcher,
@@ -16,6 +15,11 @@ import {
     ResponseTransformer,
     SomeNode,
 } from "./types";
+
+export interface APIFetchOpts {
+    clearPreviousData?: boolean;
+    force?: boolean;
+}
 
 export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
 
@@ -33,7 +37,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    getEntity(iri: NamedNode, opts?: RDFFetchOpts): Promise<Quad[]>;
+    getEntity(iri: NamedNode, opts?: APIFetchOpts): Promise<Quad[]>;
 
     /**
      * Retrieve the (network) status for a resource.

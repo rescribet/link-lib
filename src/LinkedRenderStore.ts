@@ -14,12 +14,11 @@ import * as schema from "@ontologies/schema";
 
 import { ComponentStore } from "./ComponentStore";
 import { equals, id } from "./factoryHelpers";
-import { LinkedDataAPI } from "./LinkedDataAPI";
+import { APIFetchOpts, LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
 import { dataToGraphTuple } from "./processor/DataToGraph";
 import { isPending } from "./processor/requestStatus";
-import { RDFFetchOpts } from "./rdflib";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import {
@@ -379,10 +378,9 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @return A promise with the resulting entity
      */
     public async getEntity(iri: NamedNode, opts?: FetchOpts): Promise<void> {
-        const apiOpts: RDFFetchOpts = {};
+        const apiOpts: APIFetchOpts = {};
         let preExistingData;
         if (opts && opts.reload) {
-            apiOpts.force = true;
             apiOpts.clearPreviousData = true;
             preExistingData = this.tryEntity(iri);
         }

@@ -33,11 +33,8 @@ export {
 } from "./utilities/constants";
 export * from "./LinkedDataAPI";
 
-import * as rdflib from "./rdflib";
-
 export {
     LinkedRenderStore,
-    rdflib,
 };
 
 export default LinkedRenderStore; // tslint:disable-line no-default-export

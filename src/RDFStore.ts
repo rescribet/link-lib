@@ -22,7 +22,7 @@ import { deltaProcessor } from "./store/deltaProcessor";
 import RDFIndex from "./store/RDFIndex";
 import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { doc, getPropBestLang } from "./utilities";
-import { patchRDFLibStoreWithOverrides } from "./utilities/monkeys";
+import { addChangeBufferCallbacks } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 
@@ -73,7 +73,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         this.processDelta = this.processDelta.bind(this);
 
         const g = innerStore || new RDFIndex();
-        this.store = patchRDFLibStoreWithOverrides(g, this);
+        this.store = addChangeBufferCallbacks(g, this);
 
         const defaults =  {
             addGraphIRIS: [ll.add, ld.add],
