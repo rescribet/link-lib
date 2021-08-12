@@ -20,13 +20,13 @@ function applyMiddleware<T, API extends LinkedDataAPI = DataProcessor>(
 /**
  * Initializes a {LinkedRenderStore} with tied together middleware.
  * @param storeOpts Constructor arguments for the LRS.
- * @param middleware Main middleware, to be executed before the {linkMiddelware}.
+ * @param middleware Main middleware, to be executed before the {linkMiddleware}.
  * @param trailingMiddleware Middleware to be placed after the {linkMiddleware}. Note: defining trailing middleware
  *  causes actions not to be executed via {LinkedRenderStore#execActionByIRI} anymore, this behaviour can be enabled
  *  manually in one of the defined middlewares if still desired.
  */
 export function createStore<T, API extends LinkedDataAPI = DataProcessor>(
-  storeOpts: LinkedRenderStoreOptions<T, API>,
+  storeOpts: LinkedRenderStoreOptions<T, API> = {},
   middleware: Array<MiddlewareFn<any, API>> = [],
   trailingMiddleware: Array<MiddlewareFn<any, API>> = [],
 ): LinkedRenderStore<T, API> {
