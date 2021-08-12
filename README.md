@@ -40,11 +40,6 @@ execute actions against the service.
 
 See [Link Redux](https://github.com/rescribet/link-redux) for documentation on how to use Link in a React application.
 
-### Included namespace prefixes
-
-See the [utilities](https://github.com/rescribet/link-lib/blob/master/src/utilities.ts) for the namespaces included by
-default.
-
 # Contributing
 
 The usual stuff. Open an issue to discuss a change, open PR's from topic-branches targeted to master for bugfixes and

@@ -376,7 +376,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * Will fetch the entity with the URL {iri}. When a resource under that subject is already present, it will not
      * be fetched again.
      *
-     * @renderlibrary This should only be used by render-libraries, not by application code.
+     * @deprecated Use {queueEntity} instead
      * @param iri The Node of the resource
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
