@@ -99,12 +99,14 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public bulkFetch: boolean = false;
 
     private _dispatch?: MiddlewareActionHandler;
+    private cleanupTimout: number = 500;
     private cleanupTimer: number | undefined;
     private currentBroadcast: Promise<void> | undefined;
     private broadcastHandle: number | undefined;
     private bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [];
     private subjectSubscriptions: { [k: string]: Array<SubscriptionRegistrationBase<unknown>> } = {};
     private lastPostponed: number | undefined;
+    private resourceQueueFlushTimer: number = 100;
     private resourceQueue: ResourceQueueItem[];
     private resourceQueueHandle: number | undefined;
 
@@ -267,21 +269,23 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         const pred = remaining.shift();
         const props = this.getResourceProperties(subject, pred!);
 
-        if (props && remaining.length === 0) {
+        if (props.length === 0) {
+            return [];
+        }
+
+        if (remaining.length === 0) {
             const finder = Array.isArray(match)
                 ? (p: Term): boolean => match.some((m) => equals(m, p))
                 : (p: Term): boolean => equals(match, p);
 
             return props.find(finder) ? [subject] : [];
-        } else if (props) {
-            return props
-                .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
-                    && this.findSubject(term as Node, remaining, match))
-                .flat(1)
-                .filter<Node>(Boolean as any);
         }
 
-        return [];
+        return props
+            .map((term) => (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode)
+                && this.findSubject(term as Node, remaining, match))
+            .flat(1)
+            .filter<Node>(Boolean as any);
     }
 
     /**
@@ -734,7 +738,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             for (const [ k, value ] of Object.entries(this.subjectSubscriptions)) {
                 this.subjectSubscriptions[k] = value.filter((p) => !p.markedForDelete);
             }
-        }, 500);
+        }, this.cleanupTimout);
     }
 
     private scheduleResourceQueue(): void {
@@ -743,11 +747,17 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         }
 
         if (typeof window === "undefined") {
-            setTimeout(this.processResourceQueue, 100);
+            setTimeout(this.processResourceQueue, this.resourceQueueFlushTimer);
         } else if (typeof window.requestIdleCallback !== "undefined") {
-            this.resourceQueueHandle = window.requestIdleCallback(this.processResourceQueue, { timeout: 100 });
+            this.resourceQueueHandle = window.requestIdleCallback(
+              this.processResourceQueue,
+              { timeout: this.resourceQueueFlushTimer },
+            );
         } else {
-            this.resourceQueueHandle = window.setTimeout(this.processResourceQueue, 100);
+            this.resourceQueueHandle = window.setTimeout(
+              this.processResourceQueue,
+              this.resourceQueueFlushTimer,
+            );
         }
     }
 

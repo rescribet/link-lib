@@ -6,6 +6,8 @@ import { SubscriptionRegistrationBase } from "../../types";
 
 import { schemaT } from "./fixtures";
 
+jest.useFakeTimers("legacy");
+
 describe("LinkedRenderStore", () => {
     describe("subscriptions", () => {
         describe("in bulk", () => {
@@ -20,6 +22,21 @@ describe("LinkedRenderStore", () => {
 
                 store.lrs.subscribe(reg);
                 expect(callback).not.toHaveBeenCalled();
+            });
+
+            it("unregisters the subscription", async () => {
+                const store = getBasicStore();
+                const callback = jest.fn();
+                const reg = {
+                    callback,
+                    markedForDelete: false,
+                    onlySubjects: false,
+                };
+
+                const unregister = store.lrs.subscribe(reg);
+                expect(reg.markedForDelete).toBeFalsy();
+                unregister();
+                expect(reg.markedForDelete).toBeTruthy();
             });
 
             it("calls the subscription", async () => {
@@ -52,6 +69,29 @@ describe("LinkedRenderStore", () => {
 
                 store.lrs.subscribe(reg);
                 expect(callback).not.toHaveBeenCalled();
+            });
+
+            it("unregisters the subscription", async () => {
+                const store = getBasicStore();
+                (store.lrs as any).cleanupTimout = 0;
+                const callback = jest.fn();
+                const reg = {
+                    callback,
+                    markedForDelete: false,
+                    onlySubjects: true,
+                    subjectFilter: [schemaT],
+                };
+
+                const unregister = store.lrs.subscribe(reg);
+                expect(reg.markedForDelete).toBeFalsy();
+                expect(setTimeout).toHaveBeenCalledTimes(0);
+                unregister();
+                expect(setTimeout).toHaveBeenCalledTimes(1);
+                expect(reg.markedForDelete).toBeTruthy();
+
+                expect((store.lrs as any).subjectSubscriptions[`<${schemaT.value}>`]).toContain(reg);
+                jest.runAllTimers();
+                expect((store.lrs as any).subjectSubscriptions[`<${schemaT.value}>`]).not.toContain(reg);
             });
 
             it("skips the subscription when irrelevant", async () => {
@@ -87,6 +127,7 @@ describe("LinkedRenderStore", () => {
 
                 store.store.addQuads([rdfFactory.quad(schemaT, schema.name, rdfFactory.literal("Thing"))]);
                 await store.forceBroadcast();
+                jest.runAllTimers();
                 expect(callback).toHaveBeenCalledTimes(1);
                 expect(callback.mock.calls[0][0]).toEqual([
                     rdfFactory.id(schemaT),

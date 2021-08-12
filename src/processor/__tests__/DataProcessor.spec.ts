@@ -119,6 +119,39 @@ describe("DataProcessor", () => {
             expect((error as ProcessorError).message).toEqual(MSG_URL_UNRESOLVABLE);
         });
 
+        it("sets a request body", async () => {
+            const store = getBasicStore();
+
+            const url = example.ns("test");
+            store.store.addQuads([
+                object1,
+                target5,
+                rdfFactory.quad(example.ns("targets/5"), schema.httpMethod, rdfFactory.literal("POST")),
+                rdfFactory.quad(example.ns("targets/5"), schema.url, url),
+            ]);
+
+            // @ts-ignore
+            store.processor.processExecAction = jest.fn((res) => Promise.resolve(res));
+            const fetch = jest.fn((res) => Promise.resolve(res));
+            // @ts-ignore
+            store.processor.fetch = fetch;
+            const data = new RDFIndex();
+            data.addQuad(rdfFactory.quad(ll.targetResource, schema.name, rdfFactory.literal("body")));
+
+            await store.processor.execActionByIRI(subject, [data, []]);
+
+            expect(fetch).toHaveBeenCalledTimes(1);
+            const [fetchUrl, req] = fetch.mock.calls[0];
+
+            expect(fetchUrl).toEqual(url.value);
+            expect(req.method).toEqual("POST");
+
+            const body = req.body.get("<http://purl.org/link-lib/graph>");
+            expect(body).toBeDefined();
+            expect(body.name).toEqual("blob");
+            expect(body.type).toEqual("application/n-triples");
+        });
+
         it("calls processExecAction", async () => {
             const store = getBasicStore();
 

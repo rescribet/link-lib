@@ -339,6 +339,19 @@ describe("RDFStore", () => {
         });
     });
 
+    describe("#rdfFactory", () => {
+        it("returns the @ontologies/core factory", () => {
+            expect(new RDFStore().rdfFactory).toBe(rdfFactory);
+        });
+
+        it("throws setting the factory", () => {
+            const store = new RDFStore();
+            expect(() => {
+                store.rdfFactory = {} as any;
+            }).toThrow();
+        });
+    });
+
     describe("#removeResource", () => {
         it("bumps the changeTimestamp", async () => {
             const store = getBasicStore();

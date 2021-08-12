@@ -51,6 +51,7 @@ export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicC
         store,
     } as LinkedRenderStoreOptions<BasicComponent, DataProcessor>;
     const lrs = createStore(conf);
+    (lrs as any).resourceQueueFlushTimer = 0;
 
     return {
         dispatch: lrs.dispatch,

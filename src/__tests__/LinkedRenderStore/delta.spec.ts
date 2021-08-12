@@ -1,9 +1,11 @@
 import rdfFactory, { Quadruple } from "@ontologies/core";
+import * as rdfs from "@ontologies/rdfs";
+import { LinkedRenderStore } from "../../LinkedRenderStore";
 
 import { getBasicStore } from "../../testUtilities";
 import { DeltaProcessor } from "../../types";
 
-import { ex, ld } from "./fixtures";
+import { ex, ld, schemaT } from "./fixtures";
 
 describe("LinkedRenderStore", () => {
     describe("#addDeltaProcessor", () => {
@@ -13,6 +15,34 @@ describe("LinkedRenderStore", () => {
 
             lrs.addDeltaProcessor(processor as unknown as DeltaProcessor);
             expect(lrs.deltaProcessors).toContain(processor);
+        });
+    });
+
+    describe("#processDelta", () => {
+        const getLabel = (lrs: LinkedRenderStore<any>): string | undefined => lrs
+          .tryEntity(schemaT)
+          .find((q) => q.predicate === rdfs.label)
+          ?.object
+          ?.value;
+
+        it("processes quad delta", () => {
+            const { lrs } = getBasicStore();
+
+            lrs.processDelta([
+              rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("test"), ld.replace),
+            ], true);
+
+            expect(getLabel(lrs)).toEqual("test");
+        });
+
+        it("processes quadruple delta", () => {
+            const { lrs } = getBasicStore();
+
+            lrs.processDelta([
+              [schemaT, rdfs.label, rdfFactory.literal("test"), ld.replace],
+            ], true);
+
+            expect(getLabel(lrs)).toEqual("test");
         });
     });
 
@@ -26,7 +56,7 @@ describe("LinkedRenderStore", () => {
         it("queues an empty delta", async () => {
             const store = getBasicStore();
 
-            await store.lrs.queueDelta([]);
+            await store.lrs.queueDelta([undefined]);
         });
 
         it("queues a quadruple delta", async () => {

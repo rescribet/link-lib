@@ -7,6 +7,7 @@ import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 
 import { getBasicStore } from "../../testUtilities";
+import { ResourceQueueItem } from "../../types";
 
 import { ex, example } from "./fixtures";
 
@@ -104,12 +105,29 @@ describe("LinkedRenderStore", () => {
             expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
         });
 
+        it("should not queue loaded resources", () => {
+            const store = getBasicStore();
+            store.lrs.queueDelta([
+                rdfFactory.quad(resource, rdf.type, schema.CreateAction),
+            ]);
+            store.store.flush();
+            store.lrs.queueEntity(resource);
+            const queueItem = (store.lrs as any).resourceQueue
+              .find(([iri]: ResourceQueueItem) => iri === resource);
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
+            expect(queueItem).not.toBeDefined();
+        });
+
         it("should not load queued resources", () => {
             const store = getBasicStore();
             store.store.flush();
             store.lrs.queueEntity(resource);
+            const queueItem = (store.lrs as any).resourceQueue
+              .find(([iri]: ResourceQueueItem) => iri === resource);
 
             expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
+            expect(queueItem).toBeDefined();
         });
 
         it("should not queue resources being fetched", () => {
