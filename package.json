@@ -5,11 +5,8 @@
   "repository": "https://github.com/rescribet/link-lib.git",
   "scripts": {
     "build": "pika build",
-    "doc": "rm -rf dist/docs/* && typedoc --exclude **/*.spec.ts --excludeExternals --excludePrivate --theme minimal --out dist/docs/ src/",
-    "doc:deploy": "gh-pages -d ./dist/docs",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
-    "prepublish": "npm run build && npm run doc",
-    "postpublish": "npm run doc:deploy",
+    "prepublish": "npm run build",
     "pretest": "npm run lint",
     "test": "jest --coverage",
     "version": "yarn run build"
@@ -67,20 +64,19 @@
     "@pika/plugin-bundle-web": "^0.9.2",
     "@pika/plugin-ts-standard-pkg": "^0.9.2",
     "@rdfdev/iri": "^1.0.0",
-    "@types/jest": "^25.1.4",
+    "@types/jest": "^27.0.0",
     "@types/murmurhash-js": "^1.0.3",
     "@types/node": "^12.11.2",
-    "core-js": "^3.8.3",
+    "core-js": "^3.16.1",
     "esdoc": "^1.1.0",
     "gh-pages": "^2.2.0",
     "http-status-codes": ">= 1.x",
-    "jest": "^25.2.4",
+    "jest": "^27.0.6",
     "jest-fetch-mock": "^3.0.3",
     "n-quads-parser": "^2.1.1",
-    "ts-jest": "^24.3.0",
+    "ts-jest": "^27.0.4",
     "tslint": "^5.20.1",
-    "typedoc": "^0.16.2",
-    "typescript": "^4.1.3"
+    "typescript": "^4.3.5"
   },
   "babel": {
     "presets": [
@@ -101,6 +97,7 @@
         "statements": 85
       }
     },
+    "testEnvironment": "jsdom",
     "setupFiles": [
       "core-js",
       "./jest-plugins"
