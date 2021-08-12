@@ -112,6 +112,8 @@ describe("LinkedRenderStore", () => {
             });
 
             it("calls the subscription when relevant", async () => {
+                jest.useRealTimers();
+
                 const store = getBasicStore();
                 await store.forceBroadcast();
                 const callback = jest.fn();
@@ -127,14 +129,14 @@ describe("LinkedRenderStore", () => {
 
                 store.store.addQuads([rdfFactory.quad(schemaT, schema.name, rdfFactory.literal("Thing"))]);
                 await store.forceBroadcast();
-                jest.runAllTimers();
+
                 expect(callback).toHaveBeenCalledTimes(1);
                 expect(callback.mock.calls[0][0]).toEqual([
                     rdfFactory.id(schemaT),
                     rdfFactory.id(store.store.defaultGraph()),
                 ]);
                 expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
-                expect(callback.mock.calls[0][1]).toBeLessThan(Date.now());
+                expect(callback.mock.calls[0][1]).toBeLessThanOrEqual(Date.now());
             });
         });
     });

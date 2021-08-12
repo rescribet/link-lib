@@ -19,6 +19,30 @@ jobs:
           paths:
             - cc-test-reporter
 
+  build-node-16:
+    <<: *defaults
+    docker:
+      - image: circleci/node:16
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/link-lib/tmp
+      - restore_cache:
+          keys:
+            - v1-dependencies-16-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-16-
+
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-16-{{ checksum "package.json" }}
+      - run: yarn lint
+      - run: yarn test -w 1
+      - run: yarn build
+
   build-node-14:
     <<: *defaults
     docker:
@@ -48,30 +72,6 @@ jobs:
           paths:
             - codeclimate.node-14.json
 
-  build-node-13:
-    <<: *defaults
-    docker:
-      - image: circleci/node:13
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/link-lib/tmp
-      - restore_cache:
-          keys:
-            - v1-dependencies-13-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-13-
-
-      - run: yarn install
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-13-{{ checksum "package.json" }}
-      - run: yarn lint
-      - run: yarn test -w 1
-      - run: yarn build
-
   build-node-12:
     <<: *defaults
     docker:
@@ -97,7 +97,7 @@ jobs:
   upload-coverage:
     <<: *defaults
     environment:
-      - CC_TEST_REPORTER_ID: c5cb6a4fe5e0beaf6d812394bcedd0f15e70ddf035fc1f51ea0ea2a842fdcfad
+      CC_TEST_REPORTER_ID: f49a72b364886e0b9aae7a678c2fc1235276270cce13dc92f0b856f3438df624
     steps:
       - attach_workspace:
           at: ~/link-lib/tmp
@@ -112,10 +112,10 @@ workflows:
   commit:
     jobs:
       - build
+      - build-node-16
       - build-node-14:
           requires:
             - build
-      - build-node-13
       - build-node-12
       - upload-coverage:
           requires:
