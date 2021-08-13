@@ -1,23 +1,72 @@
 import "jest";
 
-import rdfFactory from "@ontologies/core";
+import { DataFactory, Feature } from "@ontologies/core";
 import * as schema from "@ontologies/schema";
-import { equals, id } from "../factoryHelpers";
+import { createEqualComparator, id } from "../factoryHelpers";
 
 describe("factoryHelpers", () => {
-    describe("without identity factory", () => {
-        describe("equals", () => {
-            it("compares nodes", () => {
-                expect(equals(schema.name, rdfFactory.namedNode("http://schema.org/name"))).toBeTruthy();
-            });
+    describe("createEqualComparator", () => {
+        describe("without idStamp factory", () => {
+            const factory = {
+                equals: jest.fn(),
+                supports: {
+                    [Feature.identity]: false,
+                    [Feature.idStamp]: false,
+                },
+            } as unknown as DataFactory;
+            const equals = createEqualComparator(factory);
 
-            it("compares undefined", () => {
-                expect(equals(undefined, rdfFactory.namedNode("http://schema.org/name"))).toBeFalsy();
-                expect(equals(schema.name, undefined)).toBeFalsy();
+            it("calls the factory comparison method", () => {
+                equals("a", "b");
+                expect(factory.equals).toHaveBeenCalledWith("a", "b");
             });
         });
 
-        describe("id", () => {
+        describe("without idStamp factory", () => {
+            const factory = {
+                supports: {
+                    [Feature.identity]: false,
+                    [Feature.idStamp]: true,
+                },
+            } as DataFactory;
+            const equals = createEqualComparator(factory);
+
+            it("compares equal nodes", () => {
+                expect(equals({  id: 2 }, { id: 2 })).toBeTruthy();
+            });
+
+            it("compares unequal nodes", () => {
+                expect(equals({  id: 2 }, { id: 3 })).toBeFalsy();
+            });
+        });
+
+        describe("with identity factory", () => {
+            const factory = {
+                supports: {
+                    [Feature.identity]: true,
+                    [Feature.idStamp]: false,
+                },
+            } as DataFactory;
+            const equals = createEqualComparator(factory);
+
+            it("compares equal nodes", () => {
+                const node = {};
+                expect(equals(node, node)).toBeTruthy();
+            });
+
+            it("compares unequal nodes", () => {
+                expect(equals({}, {})).toBeFalsy();
+            });
+
+            it("compares undefined", () => {
+                expect(equals(undefined, {})).toBeFalsy();
+                expect(equals({}, undefined)).toBeFalsy();
+            });
+        });
+    });
+
+    describe("id", () => {
+        describe("without identity factory", () => {
             it("retrieves node ids", () => {
                 expect(id(schema.name)).toEqual("<http://schema.org/name>");
             });

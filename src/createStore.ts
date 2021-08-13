@@ -14,7 +14,13 @@ function applyMiddleware<T, API extends LinkedDataAPI = DataProcessor>(
 
     const finish: MiddlewareActionHandler = (a: NamedNode, _o: any): Promise<any> => Promise.resolve(a);
 
-    return storeBound.reduceRight((composed, f) => f(composed), finish);
+    return storeBound.reduceRight((composed, f) => {
+        const next = f(composed);
+        if (!next) {
+            throw new Error("Provided middleware did not return handler.");
+        }
+        return next;
+    }, finish);
 }
 
 /**

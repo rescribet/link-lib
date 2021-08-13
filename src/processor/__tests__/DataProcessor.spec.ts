@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { Quad } from "@ontologies/core";
+import rdfFactory, { NamedNode, Quad } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
@@ -29,12 +29,13 @@ import {
     ProcessorError,
 } from "../ProcessorError";
 
-const getFulfilledRequest = (): FulfilledRequestStatus => {
+const getFulfilledRequest = (subject: NamedNode): FulfilledRequestStatus => {
     return {
         lastRequested: new Date(),
         lastResponseHeaders: null,
         requested: true,
         status: 200,
+        subject,
         timesRequested: 1,
     };
 };
@@ -262,7 +263,7 @@ describe("DataProcessor", () => {
         it("returns a memoized status if present", () => {
             const store = getBasicStore();
             const subject = example.ns("resource/2");
-            const request = getFulfilledRequest();
+            const request = getFulfilledRequest(subject);
 
             // @ts-ignore
             store.processor.memoizeStatus(subject, request);
@@ -275,7 +276,7 @@ describe("DataProcessor", () => {
         it("checks for the base document", () => {
             const store = getBasicStore();
             const subject = example.ns("resource/3#subDocument");
-            const request = getFulfilledRequest();
+            const request = getFulfilledRequest(subject);
 
             // @ts-ignore
             store.processor.memoizeStatus(example.ns("resource/3"), request);

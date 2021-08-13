@@ -1,11 +1,15 @@
-import rdfFactory, { Feature, Quad, Term } from "@ontologies/core";
+import rdfFactory, { DataFactory, Feature, Quad, Term } from "@ontologies/core";
+
+export type Comparator = (a: any, b: any) => boolean;
+
+export const createEqualComparator = (factory: DataFactory): Comparator => factory.supports[Feature.identity]
+  ? (a: any, b: any): boolean => a === b
+  : factory.supports[Feature.idStamp]
+    ? (a: any, b: any): boolean => a?.id === b?.id
+    : (a: any, b: any): boolean => factory.equals(a, b);
 
 /** @internal */
-export const equals = rdfFactory.supports[Feature.identity]
-    ? (a: any, b: any): boolean => a === b
-    : rdfFactory.supports[Feature.idStamp]
-        ? (a: any, b: any): boolean => a?.id === b?.id
-        : (a: any, b: any): boolean => rdfFactory.equals(a, b);
+export const equals = createEqualComparator(rdfFactory);
 
 const noIdError = (obj: any): void => {
     throw new TypeError(`Factory has idStamp feature, but the property wasn't present on ${obj}`);
