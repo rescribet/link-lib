@@ -253,7 +253,7 @@ describe("RDFStore", () => {
         it("resolves value for multiple properties multiple existent", () => {
             expect(store.getResourcePropertyRaw(ex("a"), [ex("r"), ex("p")]))
                 .toEqual([
-                    rdfFactory.quad(ex("a"), ex("r"), ex("y"), rdfFactory.namedNode("rdf:defaultGraph")),
+					rdfFactory.quad(ex("a"), ex("r"), ex("p"), ex("y"), rdfFactory.namedNode("rdf:defaultGraph")),
                 ]);
         });
     });

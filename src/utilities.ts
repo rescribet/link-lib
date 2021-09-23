@@ -1,9 +1,11 @@
 /* global chrome */
 import rdfFactory, {
   BlankNode,
+  isLiteral,
   Literal,
   NamedNode,
   Quad,
+  SomeTerm,
   Term,
   TermType,
 } from "@ontologies/core";
@@ -13,6 +15,13 @@ import * as rdfs from "@ontologies/rdfs";
 import { SomeNode } from "./types";
 
 const memberPrefix = rdf.ns("_").value;
+
+const find = (x: SomeTerm | undefined, langPrefs: string[]): number => {
+    const language = isLiteral(x) ? x.language : null;
+    const index = langPrefs.findIndex((pref) => pref === language);
+
+    return index !== -1 ? index : Infinity;
+};
 
 /**
  * Filters {obj} to only include statements where the subject equals {predicate}.
@@ -117,9 +126,7 @@ export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Te
 }
 
 export function sortByBestLang(statements: Quad[], langPrefs: string[]): Quad[] {
-    return statements.sort((a, b) => {
-        return 0;
-    });
+    return statements.sort((a, b) => find(a.object, langPrefs) - find(b.object, langPrefs));
 }
 
 /**
