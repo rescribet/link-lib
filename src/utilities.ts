@@ -84,15 +84,8 @@ export function getPropBestLang<T extends Term = Term>(rawProp: Quad | Quad[], l
     if (rawProp.length === 1) {
         return rawProp[0].object as T;
     }
-    for (let i = 0; i < langPrefs.length; i++) {
-        const pIndex = rawProp.findIndex((p) => "language" in p.object
-            && (p.object as Literal).language === langPrefs[i]);
-        if (pIndex >= 0) {
-            return rawProp[pIndex].object as T;
-        }
-    }
 
-    return rawProp[0].object as T;
+    return sortByBestLang(rawProp, langPrefs)[0].object as T;
 }
 
 export function getPropBestLangRaw(statements: Quad | Quad[], langPrefs: string[]): Quad {
@@ -102,15 +95,8 @@ export function getPropBestLangRaw(statements: Quad | Quad[], langPrefs: string[
     if (statements.length === 1) {
         return statements[0];
     }
-    for (let i = 0; i < langPrefs.length; i++) {
-        const pIndex = statements.findIndex((s) => "language" in s.object
-            && (s.object as Literal).language === langPrefs[i]);
-        if (pIndex >= 0) {
-            return statements[pIndex];
-        }
-    }
 
-    return statements[0];
+    return sortByBestLang(statements, langPrefs)[0];
 }
 
 export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Term {
@@ -128,6 +114,12 @@ export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Te
     }
 
     return rawTerm[0];
+}
+
+export function sortByBestLang(statements: Quad[], langPrefs: string[]): Quad[] {
+    return statements.sort((a, b) => {
+        return 0;
+    });
 }
 
 /**
