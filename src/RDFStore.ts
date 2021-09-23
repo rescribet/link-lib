@@ -21,7 +21,7 @@ import {
 import { deltaProcessor } from "./store/deltaProcessor";
 import RDFIndex from "./store/RDFIndex";
 import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
-import { doc, getPropBestLang } from "./utilities";
+import { doc, getPropBestLang, sortByBestLang } from "./utilities";
 import { addChangeBufferCallbacks } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
@@ -332,17 +332,19 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         const props = this.quadsFor(subject);
         const allProps = this.funlets.allRDFPropertyStatements;
         if (Array.isArray(property)) {
+            let matched: Quad[] = [];
             for (let i = 0; i < property.length; i++) {
-                const values = allProps(props, property[i]);
-                if (values.length > 0) {
-                    return values;
-                }
+                matched = matched.concat(allProps(props, property[i]));
+            }
+
+            if (matched.length > 0) {
+                return sortByBestLang(matched, this.langPrefs);
             }
 
             return EMPTY_ST_ARR as Quad[];
         }
 
-        return allProps(props, property);
+        return sortByBestLang(allProps(props, property), this.langPrefs);
     }
 
     public getResourceProperties<TT extends Term = Term>(subject: SomeNode, property: SomeNode | SomeNode[]): TT[] {
