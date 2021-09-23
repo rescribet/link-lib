@@ -115,7 +115,7 @@ export type MiddlewareFn<T, API extends LinkedDataAPI = DataProcessor> = (store:
 
 export type MiddlewareWithBoundLRS = (next: MiddlewareActionHandler) => MiddlewareActionHandler;
 
-export type MiddlewareActionHandler = (action: NamedNode, args?: any) => Promise<any>;
+export type MiddlewareActionHandler = (action: SomeNode, args?: any) => Promise<any>;
 
 export interface NamespaceMap {
     [k: string]: CustomPredicateCreator;

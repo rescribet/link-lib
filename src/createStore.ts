@@ -1,10 +1,13 @@
-import { NamedNode } from "@ontologies/core";
-
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { linkMiddleware } from "./linkMiddleware";
 import { DataProcessor } from "./processor/DataProcessor";
-import { LinkedRenderStoreOptions, MiddlewareActionHandler, MiddlewareFn } from "./types";
+import {
+    LinkedRenderStoreOptions,
+    MiddlewareActionHandler,
+    MiddlewareFn,
+    SomeNode,
+} from "./types";
 
 function applyMiddleware<T, API extends LinkedDataAPI = DataProcessor>(
   lrs: LinkedRenderStore<T, API>,
@@ -12,7 +15,7 @@ function applyMiddleware<T, API extends LinkedDataAPI = DataProcessor>(
 ): MiddlewareActionHandler {
     const storeBound = layers.map((middleware) => middleware(lrs));
 
-    const finish: MiddlewareActionHandler = (a: NamedNode, _o: any): Promise<any> => Promise.resolve(a);
+    const finish: MiddlewareActionHandler = (a: SomeNode, _o: any): Promise<any> => Promise.resolve(a);
 
     return storeBound.reduceRight((composed, f) => {
         const next = f(composed);

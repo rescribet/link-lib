@@ -1,10 +1,13 @@
-import { NamedNode } from "@ontologies/core";
-
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import ll from "./ontology/ll";
 import { DataProcessor } from "./processor/DataProcessor";
-import { MiddlewareActionHandler, MiddlewareFn, MiddlewareWithBoundLRS } from "./types";
+import {
+    MiddlewareActionHandler,
+    MiddlewareFn,
+    MiddlewareWithBoundLRS,
+    SomeNode,
+} from "./types";
 
 /**
  * Binds various uris to link actions.
@@ -15,7 +18,7 @@ import { MiddlewareActionHandler, MiddlewareFn, MiddlewareWithBoundLRS } from ".
 export const linkMiddleware = <T, API extends LinkedDataAPI = DataProcessor>(catchActions = true):
   MiddlewareFn<T, API> => (lrs: LinkedRenderStore<T, API>): MiddlewareWithBoundLRS =>
         (next: MiddlewareActionHandler): MiddlewareActionHandler =>
-            (action: NamedNode, args: any): Promise<any> => {
+            (action: SomeNode, args: any): Promise<any> => {
 
     if (action.value.startsWith(ll.ns("data/rdflib/").value)) {
         return Promise.resolve(lrs.touch(args[0], args[1]));

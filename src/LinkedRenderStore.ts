@@ -172,13 +172,12 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
 
     /**
      * Execute an Action by its IRI. This will result in an HTTP request being done and probably some state changes.
-     * @param {NamedNode} subject The resource to execute. Generally a schema:Action derivative with a
+     * @param subject The resource to execute. Generally a schema:Action derivative with a
      *   schema:EntryPoint to describe the request. Currently schema:url is used over schema:urlTemplate
      *   to acquire the request URL, since template processing isn't implemented (yet).
-     * @param {DataObject} data An object to send in the body when a non-safe method is used.
-     * @return {Promise<LinkedActionResponse>}
+     * @param data An object to send in the body when a non-safe method is used.
      */
-    public execActionByIRI(subject: NamedNode, data?: DataObject): Promise<LinkedActionResponse> {
+    public execActionByIRI(subject: SomeNode, data?: DataObject): Promise<LinkedActionResponse> {
         const preparedData = dataToGraphTuple(data || {}, this.namespaces);
         return this
             .api
@@ -196,10 +195,10 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      *
      * @see https://github.com/rescribet/link-lib/wiki/%5BDesign-draft%5D-Actions,-data-streams,-and-middleware
      *
-     * @param {NamedNode} subject The resource to execute (can be either an IRI or an URI)
-     * @param {Object} args The arguments to the function defined by the subject.
+     * @param subject The resource to execute (can be either an IRI or an URI)
+     * @param args The arguments to the function defined by the subject.
      */
-    public async exec(subject: NamedNode, args?: DataObject): Promise<any> {
+    public async exec(subject: SomeNode, args?: DataObject): Promise<any> {
         return this.dispatch(subject, args);
     }
 

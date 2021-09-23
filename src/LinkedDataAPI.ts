@@ -1,18 +1,16 @@
 import { NamedNode, Quad } from "@ontologies/core";
 
 import {
+    DataTuple,
     DeltaProcessor,
     Dispatcher,
-    PendingRequestStatus,
-    ResourceQueueItem,
-    SaveOpts,
-} from "./types";
-import {
-    DataTuple,
     EmptyRequestStatus,
     FulfilledRequestStatus,
     LinkedActionResponse,
+    PendingRequestStatus,
+    ResourceQueueItem,
     ResponseTransformer,
+    SaveOpts,
     SomeNode,
 } from "./types";
 
@@ -23,7 +21,7 @@ export interface APIFetchOpts {
 
 export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
 
-    execActionByIRI(subject: NamedNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
+    execActionByIRI(subject: SomeNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
     /** @private */
     getEntities(resources: ResourceQueueItem[]): Promise<Quad[]>;
