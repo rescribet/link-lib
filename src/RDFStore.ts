@@ -331,20 +331,21 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public getResourcePropertyRaw(subject: SomeNode, property: SomeNode | SomeNode[]): Quad[] {
         const props = this.quadsFor(subject);
         const allProps = this.funlets.allRDFPropertyStatements;
+        let matched: Quad[] = [];
+
         if (Array.isArray(property)) {
-            let matched: Quad[] = [];
             for (let i = 0; i < property.length; i++) {
                 matched = matched.concat(allProps(props, property[i]));
             }
+        } else {
+            matched = allProps(props, property);
+        }
 
-            if (matched.length > 0) {
-                return sortByBestLang(matched, this.langPrefs);
-            }
-
+        if (matched.length === 0) {
             return EMPTY_ST_ARR as Quad[];
         }
 
-        return sortByBestLang(allProps(props, property), this.langPrefs);
+        return sortByBestLang(matched, this.langPrefs);
     }
 
     public getResourceProperties<TT extends Term = Term>(subject: SomeNode, property: SomeNode | SomeNode[]): TT[] {

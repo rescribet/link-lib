@@ -243,17 +243,18 @@ describe("RDFStore", () => {
                 ]);
         });
 
-        it("resolves value for multiple properties one existent", () => {
+        it("resolves values for multiple properties one existent", () => {
             expect(store.getResourcePropertyRaw(ex("a"), [ex("p"), ex("q")]))
                 .toEqual([
                     rdfFactory.quad(ex("a"), ex("p"), ex("x"), rdfFactory.namedNode("rdf:defaultGraph")),
                 ]);
         });
 
-        it("resolves value for multiple properties multiple existent", () => {
+        it("resolves values for multiple properties multiple existent", () => {
             expect(store.getResourcePropertyRaw(ex("a"), [ex("r"), ex("p")]))
                 .toEqual([
-					rdfFactory.quad(ex("a"), ex("r"), ex("p"), ex("y"), rdfFactory.namedNode("rdf:defaultGraph")),
+                  rdfFactory.quad(ex("a"), ex("r"), ex("y"), rdfFactory.namedNode("rdf:defaultGraph")),
+                  rdfFactory.quad(ex("a"), ex("p"), ex("x"), rdfFactory.namedNode("rdf:defaultGraph")),
                 ]);
         });
     });
