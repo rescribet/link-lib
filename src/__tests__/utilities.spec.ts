@@ -15,6 +15,7 @@ import {
     getPropBestLangRaw,
     getTermBestLang,
     isDifferentOrigin,
+    sortByBestLang,
 } from "../utilities";
 
 const ex = example.ns;
@@ -139,7 +140,7 @@ describe("utilities", () => {
             expect(getPropBestLang([abc, abde, abnl, abd], langs)).toEqual(nlString);
         });
 
-        it("returns the first if no match could be fount", () => {
+        it("returns the first if no match could be found", () => {
             expect(getPropBestLang([abc, abd], langs)).toEqual(ex("c"));
         });
     });
@@ -173,7 +174,7 @@ describe("utilities", () => {
             ).toEqual(nlStmt);
         });
 
-        it("returns the first if no match could be fount", () => {
+        it("returns the first if no match could be found", () => {
             const c = abc;
             const d = rdfFactory.quad(ex("a"), ex("b"), ex("d"));
             expect(getPropBestLangRaw([c, d], langs)).toEqual(c);
@@ -213,6 +214,43 @@ describe("utilities", () => {
 
         it("is true on a different origin", () => {
             expect(isDifferentOrigin(rdfFactory.namedNode("http://example.com/test"))).toBeTruthy();
+        });
+    });
+
+    describe("#sortByBestLang", () => {
+        const langs = ["en", "nl", "de", "fr"];
+        const deStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("Wert", "de"));
+        const enStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("value", "en"));
+        const nlStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("waarde", "nl"));
+
+        it("returns when a single statement arr is given", () => {
+            expect(sortByBestLang([nlStmt], langs)).toEqual([nlStmt]);
+        });
+
+        it("returns the correct language when present", () => {
+            expect(sortByBestLang([nlStmt, enStmt, deStmt], langs)).toEqual([enStmt, nlStmt, deStmt]);
+        });
+
+        it("returns the next best value when main is not present", () => {
+            expect(
+              sortByBestLang([
+                  abc,
+                  deStmt,
+                  nlStmt,
+                  rdfFactory.quad(ex("a"), ex("b"), ex("d")),
+              ], langs),
+            ).toEqual([
+                nlStmt,
+                deStmt,
+                abc,
+                rdfFactory.quad(ex("a"), ex("b"), ex("d")),
+            ]);
+        });
+
+        it("returns identity if no match could be found", () => {
+            const c = abc;
+            const d = rdfFactory.quad(ex("a"), ex("b"), ex("d"));
+            expect(sortByBestLang([c, d], langs)).toEqual([c, d]);
         });
     });
 
