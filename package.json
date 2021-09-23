@@ -1,6 +1,6 @@
 {
   "name": "link-lib",
-  "version": "2.0.0-4",
+  "version": "2.1.0",
   "description": "The Link library for creating information based applications",
   "repository": "https://github.com/rescribet/link-lib.git",
   "scripts": {
