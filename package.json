@@ -43,6 +43,7 @@
     "@ontologies/schema": ">=1.0.0",
     "@ontologies/shacl": ">=1.0.0",
     "@ontologies/xsd": ">=1.0.0",
+    "can-ndjson-stream": "^1.0.2",
     "http-status-codes": ">= 1.x",
     "n-quads-parser": "^2.1.0-3"
   },
