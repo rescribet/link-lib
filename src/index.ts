@@ -32,6 +32,10 @@ export {
     RENDER_CLASS_NAME,
 } from "./utilities/constants";
 export * from "./LinkedDataAPI";
+export {
+    AttributeKey,
+    TypedRecord,
+} from "./TypedRecord";
 
 export {
     LinkedRenderStore,

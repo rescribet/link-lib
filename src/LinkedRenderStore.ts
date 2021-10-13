@@ -21,6 +21,7 @@ import { dataToGraphTuple } from "./processor/DataToGraph";
 import { isPending } from "./processor/requestStatus";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
+import { TypedRecord } from "./TypedRecord";
 import {
     ActionMap,
     ComponentRegistration,
@@ -93,6 +94,8 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public mapping: ComponentStore<T>;
     public schema: Schema<Indexable>;
     public store: RDFStore = new RDFStore();
+    public settings: TypedRecord = new TypedRecord();
+
     /**
      * Enable the bulk api to fetch data with.
      */
