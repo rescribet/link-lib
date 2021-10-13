@@ -210,7 +210,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public dig(subject: Node | undefined, path: NamedNode[]): SomeTerm[] {
         const [result] = this.digDeeper(subject, path);
 
-        return result;
+        return result.map((q) => q.object);
     }
 
     /**
@@ -219,7 +219,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param path
      * @param subjects - The subjects traversed.
      */
-    public digDeeper(subject: Node | undefined, path: NamedNode[]): [SomeTerm[], SomeNode[]] {
+    public digDeeper(subject: Node | undefined, path: Array<NamedNode | NamedNode[]>): [Quad[], SomeNode[]] {
         if (path.length === 0 || typeof subject === "undefined") {
             return [[], []];
         }
@@ -228,25 +228,26 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         const pred = remaining.shift();
 
         if (remaining.length === 0) {
-            return [this.getResourceProperties(subject, pred!), [subject]];
+            return [this.getResourcePropertyRaw(subject, pred!), [subject]];
         }
 
-        const props = this.getResourceProperties(subject, pred!);
+        const props = this.getResourcePropertyRaw(subject, pred!);
         if (props) {
-            const allTerms = [];
+            const allData = [];
             const allSubjects = [subject];
 
-            for (const term of props) {
+            for (const quad of props) {
+              const term = quad.object;
               if (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode) {
                 const [terms, subs] = this.digDeeper(term, remaining);
                 allSubjects.push(...subs);
                 if (terms.length > 0) {
-                    allTerms.push(...terms);
+                    allData.push(...terms);
                 }
               }
             }
 
-            return [allTerms, allSubjects];
+            return [allData, allSubjects];
         }
 
         return [[], [subject]];
