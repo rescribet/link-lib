@@ -78,7 +78,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * actions will be dispatched, but it should be the same as if a back-end would have executed the action (via the
      * Exec-Action header).
      */
-    public actions: { [k: string]: ActionMap } = {};
+    public actions: ActionMap = new TypedRecord();
     /** Whenever a resource has no type, assume it to be this. */
     public defaultType: NamedNode = schema.Thing;
     public deltaProcessors: DeltaProcessor[];

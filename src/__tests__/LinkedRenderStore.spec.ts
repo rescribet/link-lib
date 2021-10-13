@@ -8,6 +8,8 @@ import * as schema from "@ontologies/schema";
 import { LinkedRenderStore } from "../LinkedRenderStore";
 
 import { getBasicStore } from "../testUtilities";
+import { AttributeKey } from '../TypedRecord';
+import { SomeNode } from '../types';
 
 import { example } from "./LinkedRenderStore/fixtures";
 
@@ -26,6 +28,20 @@ describe("LinkedRenderStore", () => {
             const lrs = new LinkedRenderStore();
 
             expect(lrs.exec(rdf.type)).rejects.toBeInstanceOf(Error);
+        });
+
+        it("registers an action", () => {
+            const lrs = new LinkedRenderStore();
+
+            const dispatcher = (subject: SomeNode): Promise<string> => Promise.resolve(subject.value);
+            const myAction = new AttributeKey<typeof dispatcher>("myAction");
+
+            lrs.actions.set(myAction, dispatcher);
+
+            const handler = lrs.actions.get(myAction);
+
+            const result = handler(rdf.Seq);
+            result.then((a: string) => console.log(a));
         });
     });
 

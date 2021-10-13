@@ -18,11 +18,10 @@ import { RequestInitGenerator } from "./processor/RequestInitGenerator";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import RDFIndex from "./store/RDFIndex";
+import { TypedRecord } from "./TypedRecord";
 import { DisjointSet } from "./utilities/DisjointSet";
 
-export interface ActionMap {
-    [k: string]: (...args: any[]) => Promise<any>;
-}
+export type ActionMap = TypedRecord;
 
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
