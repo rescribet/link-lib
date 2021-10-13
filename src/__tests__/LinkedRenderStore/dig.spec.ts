@@ -80,7 +80,10 @@ describe("LinkedRenderStore", () => {
         it("resolves values through holey oneToMany", () => {
             const [terms, subjects] = store.lrs.digDeeper(start, [ex("oneToManyHoley"), ex("p"), ex("q")]);
 
-            expect(terms).toEqual([ex("3.6"), ex("3.8")]);
+            expect(terms).toEqual([
+              rdfFactory.quad(ex("2.6"), ex("q"), ex("3.6")),
+              rdfFactory.quad(ex("2.8"), ex("q"), ex("3.8")),
+            ]);
             expect(subjects).toEqual([
                 start,
                 ex("1.6"),
