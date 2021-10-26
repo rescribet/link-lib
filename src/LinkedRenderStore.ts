@@ -610,7 +610,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         registration.subscribedAt = Date.now();
         const subjectFilter = registration.subjectFilter;
 
-        if (typeof subjectFilter !== "undefined" && subjectFilter.length > 0) {
+        if (typeof subjectFilter !== "undefined") {
             for (let i = 0, len = subjectFilter.length; i < len; i++) {
                 const sId = id(subjectFilter[i]);
                 if (!this.subjectSubscriptions[sId]) {
