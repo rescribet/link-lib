@@ -43,7 +43,7 @@
     "@ontologies/schema": ">=1.0.0",
     "@ontologies/shacl": ">=1.0.0",
     "@ontologies/xsd": ">=1.0.0",
-    "can-ndjson-stream": "^1.0.2",
+    "hextuples": ">=2.0.0",
     "http-status-codes": ">= 1.x",
     "n-quads-parser": "^2.1.1"
   },
@@ -71,6 +71,7 @@
     "core-js": "^3.16.1",
     "esdoc": "^1.1.0",
     "gh-pages": "^2.2.0",
+    "hextuples": "^2.0.0",
     "http-status-codes": ">= 1.x",
     "jest": "^27.0.6",
     "jest-fetch-mock": "^3.0.3",

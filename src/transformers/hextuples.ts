@@ -1,11 +1,11 @@
 import { Quad } from "@ontologies/core";
+import { hextuplesTransformer } from "hextuples";
 
 import { LinkedRenderStore } from "../LinkedRenderStore";
 import {
   ResponseAndFallbacks,
   ResponseTransformer,
 } from "../types";
-import { hextupleTransformer } from "../utilities/hextupleProcessor";
 
 export const hextupleProcessor = {
   acceptValue: 1.0,
@@ -16,7 +16,7 @@ export const hextupleProcessor = {
       ? (res as any).expedite
       : false;
 
-    return hextupleTransformer(res)
+    return hextuplesTransformer(res)
       .then((delta) => store.queueDelta(delta, isExpedited))
       .then(() => []);
   },
