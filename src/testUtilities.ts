@@ -1,4 +1,4 @@
-import { ComponentStore } from "./ComponentStore";
+import { ComponentStore } from "./ComponentStore/ComponentStore";
 import { createStore } from "./createStore";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";

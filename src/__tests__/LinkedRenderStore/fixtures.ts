@@ -4,7 +4,7 @@ import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 
-import { RENDER_CLASS_NAME } from "../../ComponentStore";
+import { RENDER_CLASS_NAME } from "../../ComponentStore/ComponentStore";
 import { DEFAULT_TOPOLOGY } from "../../utilities/constants";
 
 export const DT = rdfFactory.id(DEFAULT_TOPOLOGY);

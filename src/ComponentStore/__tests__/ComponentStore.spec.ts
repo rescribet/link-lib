@@ -1,16 +1,16 @@
 import "jest";
-import "./useHashFactory";
+import "../../__tests__/useHashFactory";
 
 import rdfFactory from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 
+import { RDFStore } from "../../RDFStore";
+import { Schema } from "../../Schema";
+import { getBasicStore } from "../../testUtilities";
+import { Indexable } from "../../types";
+import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../../utilities/constants";
 import { ComponentStore } from "../ComponentStore";
-import { RDFStore } from "../RDFStore";
-import { Schema } from "../Schema";
-import { getBasicStore } from "../testUtilities";
-import { Indexable } from "../types";
-import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../utilities/constants";
 
 const DT = rdfFactory.id(DEFAULT_TOPOLOGY);
 const RCN = rdfFactory.id(RENDER_CLASS_NAME);

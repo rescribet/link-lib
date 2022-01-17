@@ -12,7 +12,7 @@ import rdfFactory, {
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 
-import { ComponentStore } from "./ComponentStore";
+import { ComponentStore } from "./ComponentStore/ComponentStore";
 import { equals, id } from "./factoryHelpers";
 import { APIFetchOpts, LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";

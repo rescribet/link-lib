@@ -2,7 +2,7 @@ import rdfFactory, { NamedNode } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 
-import { RENDER_CLASS_NAME } from "../../ComponentStore";
+import { RENDER_CLASS_NAME } from "../../ComponentStore/ComponentStore";
 import { LinkedRenderStore } from "../../LinkedRenderStore";
 import argu from "../../ontology/argu";
 import { getBasicStore } from "../../testUtilities";
