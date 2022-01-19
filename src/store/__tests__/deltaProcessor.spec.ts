@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { LowLevelStore, NamedNode, Quadruple } from "@ontologies/core";
+import rdfFactory, { Quadruple } from "@ontologies/core";
 import * as ld from "@ontologies/ld";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
@@ -11,8 +11,6 @@ import { deltaProcessor } from "../deltaProcessor";
 import RDFIndex from "../RDFIndex";
 
 describe("deltaProcessor", () => {
-    const graph = rdfFactory.namedNode("http://example.com/graph");
-
     const alice = ex.ns("person/alice");
     const bob = ex.ns("person/bob");
     const erin = ex.ns("person/erin");
@@ -29,7 +27,7 @@ describe("deltaProcessor", () => {
         [ld.slice],
     );
 
-    const filledStore = (): LowLevelStore => {
+    const filledStore = (): RDFIndex => {
         const store = new RDFIndex();
 
         store.add(bob, rdf.type, schema.Person);
@@ -41,18 +39,9 @@ describe("deltaProcessor", () => {
         store.add(alice, rdf.type, schema.Person);
         store.add(alice, schema.name, rdfFactory.literal("Alice"));
 
-        store.add(bob, rdf.type, schema.Person, graph);
-        store.add(bob, schema.name, rdfFactory.literal("bob"), graph);
-        store.add(bob, schema.children, alice, graph);
-        store.add(bob, schema.children, ex.ns("person/charlie"), graph);
-        store.add(bob, schema.children, ex.ns("person/dave"), graph);
-
-        store.add(alice, rdf.type, schema.Person, graph);
-        store.add(alice, schema.name, rdfFactory.literal("Alice"), graph);
-
         return store;
     };
-    const initialCount = 14;
+    const initialCount = 7;
 
     const testDelta = (delta: Quadruple[], [adds, replaces, removes]: [number, number, number]): void => {
         const store = filledStore();
@@ -128,31 +117,6 @@ describe("deltaProcessor", () => {
 
         it("slice", () => {
             testDelta([ [bob, schema.children, erin, ld.slice] ], [0, 0, 0]);
-        });
-    });
-
-    describe("with graph", () => {
-        const graphify = (iri: NamedNode): NamedNode =>
-            rdfFactory.namedNode(iri.value + `?graph=${encodeURIComponent(graph)}`);
-
-        it("add", () => {
-            testDelta([ [bob, schema.children, erin, graphify(ld.add)] ], [1, 0, 0]);
-        });
-
-        it("replace", () => {
-            testDelta([ [bob, schema.children, erin, graphify(ld.replace)] ], [0, 1, 0]);
-        });
-
-        it("remove", () => {
-            testDelta([ [bob, schema.children, erin, graphify(ld.remove)] ], [0, 0, 3]);
-        });
-
-        it("purge", () => {
-            testDelta([ [bob, schema.children, erin, graphify(ld.purge)] ], [0, 0, 5]);
-        });
-
-        it("slice", () => {
-            testDelta([ [bob, schema.children, erin, graphify(ld.slice)] ], [0, 0, 0]);
         });
     });
 });

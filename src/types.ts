@@ -2,7 +2,6 @@ import {
   BlankNode,
   CustomPredicateCreator,
   Literal,
-  LowLevelStore,
   NamedNode,
   Node,
   Quad,
@@ -137,7 +136,7 @@ export interface DataObject {
 }
 
 export type DataTuple = [RDFIndex, NamedBlobTuple[]];
-export type ParsedObject = [SomeNode, LowLevelStore, NamedBlobTuple[]];
+export type ParsedObject = [SomeNode, RDFIndex, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
     changeBuffer: Quad[];

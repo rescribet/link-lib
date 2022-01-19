@@ -61,14 +61,14 @@ export const RDFS = {
     processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
         const result = [item];
 
-        const domainStatements = ctx.store.match(item.predicate, rdfs.domain, null, null);
+        const domainStatements = ctx.store.match(item.predicate, rdfs.domain, null);
         if (domainStatements.length > 0) {
             for (let i = 0; i < domainStatements.length; i++) {
                 result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, domainStatements[i].object));
             }
         }
 
-        const rangeStatements = ctx.store.match(item.predicate, rdfs.range, null, null);
+        const rangeStatements = ctx.store.match(item.predicate, rdfs.range, null);
         if (rangeStatements.length > 0) {                                                     // P rdfs:range C..Cn
             for (let i = 0; i < rangeStatements.length; i++) {
                 result.push(rdfFactory.quad(item.object as NamedNode, rdf.type, rangeStatements[i].object));
@@ -79,7 +79,7 @@ export const RDFS = {
             result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
             result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.match(item.subject, null, null, null);
+            const dereferences = ctx.store.match(item.subject, null, null);
             for (let i = 0; i < dereferences.length; i++) {
                 result.push(rdfFactory.quad(item.subject as NamedNode, rdf.type, dereferences[i].object));
             }
@@ -97,7 +97,7 @@ export const RDFS = {
             result.push(rdfFactory.quad(item.subject, rdf.type, rdf.Property));     // P rdf:type rdf:Property
             result.push(rdfFactory.quad(item.object, rdf.type, rdfs.Class));        // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.match(null, null, item.subject, null);
+            const dereferences = ctx.store.match(null, null, item.subject);
             for (let i = 0; i < dereferences.length; i++) {
                 result.push(rdfFactory.quad(dereferences[i].subject, rdf.type, item.object));
             }

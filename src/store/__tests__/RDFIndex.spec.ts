@@ -57,7 +57,7 @@ describe("RDFIndex", () => {
 
         it ("queries through owl:sameAs", () => {
             expect(store.match(schema.name, null, null, null))
-                .toHaveLength(5);
+                .toHaveLength(4);
         });
 
         it ("holds through owl:sameAs", () => {

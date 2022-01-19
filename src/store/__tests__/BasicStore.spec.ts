@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdf, { DataFactory } from "@ontologies/core";
+import rdf, { DataFactory, NamedNode, Quad, Term } from "@ontologies/core";
 import * as owl from "@ontologies/owl";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
@@ -19,12 +19,23 @@ describe("BasicStore", () => {
         });
 
         describe("with arguments", () => {
-            const rdfFactory = {} as DataFactory;
-            const quads = [rdf.quad()];
-            const store = new BasicStore({ quads, rdfFactory });
+            it("sets quads", () => {
+                const quads = [rdf.quad(schema.Person, schema.name, rdf.literal("Person"))];
+                const store = new BasicStore({ quads, rdfFactory: rdf });
 
-            it("sets quads", () => expect(store.quads).toEqual(quads));
-            it("sets rdfFactory", () => expect(store.rdfFactory).toEqual(rdfFactory));
+                expect(store.quads).toEqual(quads);
+            });
+            it("sets rdfFactory", () => {
+                const rdfFactory = {
+                    defaultGraph(): NamedNode { return rdf.namedNode("rdf:defaultGraph"); },
+                    quad(subject: Node, predicate: NamedNode, object: Term, graph?: NamedNode): Quad {
+                        return rdf.quad(subject, predicate, object, graph);
+                    },
+                } as unknown as DataFactory;
+                const store = new BasicStore({ rdfFactory });
+
+                expect(store.rdfFactory).toEqual(rdfFactory);
+            });
         });
     });
 
@@ -49,7 +60,8 @@ describe("BasicStore", () => {
         });
 
         it("returns a single quad", () => {
-            expect(store.match(schema.Person, rdfx.type, null, null, true))
+            const value = store.match(schema.Person, rdfx.type, null, null, true);
+            expect(value)
                 .toEqual([rdf.quad(schema.Person, rdfx.type, schema.Thing)]);
         });
 

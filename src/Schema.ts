@@ -55,7 +55,7 @@ export class Schema<IndexType = number | string> {
         }
 
         for (const quad of eligible) {
-            this.store.addQuad(quad);
+            this.store.add(quad.subject, quad.predicate, quad.object);
         }
 
         return this.liveStore.addQuads(eligible);
@@ -127,7 +127,7 @@ export class Schema<IndexType = number | string> {
     public match(subject: SomeNode | null,
                  predicate: NamedNode | null,
                  object: SomeTerm | null,
-                 graph: SomeNode | null,
+                 graph: SomeNode | null = rdfFactory.defaultGraph(),
                  justOne: boolean = false,
     ): Quad[] {
         return this.store.match(subject, predicate, object, graph, justOne);

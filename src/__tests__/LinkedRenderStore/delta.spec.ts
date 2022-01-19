@@ -1,3 +1,5 @@
+import "../../__tests__/useHashFactory";
+
 import rdfFactory, { Quadruple } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 import { LinkedRenderStore } from "../../LinkedRenderStore";

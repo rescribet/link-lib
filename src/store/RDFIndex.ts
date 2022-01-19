@@ -2,7 +2,6 @@
 
 import {
   DataFactory,
-  LowLevelStore,
   NamedNode,
   Quad,
   SomeTerm,
@@ -13,7 +12,6 @@ import { SomeNode } from "../types";
 
 import BasicStore from "./BasicStore";
 import { Equatable } from "./Equatable";
-import { Indexable } from "./Indexable";
 
 export interface IndexedFormulaOpts {
     quads: Quad[];
@@ -24,7 +22,7 @@ export interface IndexedFormulaOpts {
 export type PropertyActionCallback = (quad: Quad) => void;
 
 /** Query and modify an array of quads. */
-export default class RDFIndex extends Equatable(Indexable(BasicStore)) implements LowLevelStore {
+export default class RDFIndex extends Equatable(BasicStore) {
     /** Returns the number of quads in the store. */
     public length: number = 0;
 

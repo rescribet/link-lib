@@ -30,7 +30,7 @@ const thingIsAbout = [
 ];
 
 describe("RDFStore", () => {
-    describe("#addStatements", () => {
+    describe("#addQuads", () => {
         it("requires an array", () => {
             const store = new RDFStore();
 
@@ -202,10 +202,10 @@ describe("RDFStore", () => {
         });
     });
 
-    describe("#replaceStatements", () => {
-        it("replaces statements", () => {
-            const old = [rdfFactory.quad(ex("a"), ex("p"), ex("x"), ex("g"))];
-            const next = [rdfFactory.quad(ex("a"), ex("q"), ex("x"), ex("g"))];
+    describe("#replaceQuads", () => {
+        it("replaces quads", () => {
+            const old = [rdfFactory.quad(ex("a"), ex("p"), ex("x"), rdfFactory.defaultGraph())];
+            const next = [rdfFactory.quad(ex("a"), ex("q"), ex("x"), rdfFactory.defaultGraph())];
             const store = new RDFStore();
             store.addQuads(old);
             store.replaceQuads(old, next);
@@ -306,7 +306,7 @@ describe("RDFStore", () => {
         });
     });
 
-    describe("#processTypeStatement", () => {
+    describe("#processTypeQuad", () => {
         it("initializes new resources", () => {
             const store = new RDFStore();
 

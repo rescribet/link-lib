@@ -1,5 +1,4 @@
 import rdfFactory, {
-  LowLevelStore,
   NamedNode,
   Node,
   Quad,
@@ -9,6 +8,7 @@ import rdfFactory, {
 
 import { equals } from "../factoryHelpers";
 import { StoreProcessor, StoreProcessorResult } from "../types";
+import RDFIndex from "./RDFIndex";
 
 const matchSingle = (graphIRI: NamedNode): (graph: Node) => boolean => {
     const value = graphIRI.value;
@@ -39,7 +39,7 @@ export const deltaProcessor = (
     removeGraphIRIS: NamedNode[],
     purgeGraphIRIS: NamedNode[],
     sliceGraphIRIS: NamedNode[],
-): (store: LowLevelStore) => StoreProcessor => {
+): (store: RDFIndex) => StoreProcessor => {
     const defaultGraph = rdfFactory.defaultGraph();
 
     const isAdd = isInGraph(addGraphIRIS);
@@ -48,7 +48,7 @@ export const deltaProcessor = (
     const isPurge = isInGraph(purgeGraphIRIS);
     const isSlice = isInGraph(sliceGraphIRIS);
 
-    return (store: LowLevelStore): StoreProcessor => (delta: Quadruple[]): StoreProcessorResult => {
+    return (store: RDFIndex): StoreProcessor => (delta: Quadruple[]): StoreProcessorResult => {
         const addable: Quadruple[] = [];
         const replaceable: Quadruple[] = [];
         const removable: Quad[] = [];

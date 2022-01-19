@@ -65,7 +65,7 @@ describe("LinkedRenderStore", () => {
             ];
 
             store.store.addQuads(testData);
-            const entity = await store.lrs.tryEntity(id) as Quad[];
+            const entity = store.lrs.tryEntity(id) as Quad[];
 
             expect(entity.map((s) => s.object.value)).toContainEqual("other");
         });

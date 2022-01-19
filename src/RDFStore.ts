@@ -3,7 +3,6 @@ import rdfFactory, {
   Feature,
   NamedNode,
   Quad,
-  QuadPosition,
   Quadruple,
   Term,
 } from "@ontologies/core";
@@ -19,6 +18,7 @@ import {
     OptionalTerm,
 } from "./rdf";
 import { deltaProcessor } from "./store/deltaProcessor";
+import { RDFAdapter } from "./store/RDFAdapter";
 import RDFIndex from "./store/RDFIndex";
 import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { doc, getPropBestLang, sortByBestLang } from "./utilities";
@@ -211,17 +211,6 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     /**
-     * Find the first quad matching the given arguments.
-     * Use null or undefined as a wild-card.
-     */
-    public find(subj: OptionalNode,
-                pred: OptionalNamedNode,
-                obj: OptionalTerm,
-                graph: OptionalNode): Quad | undefined {
-        return this.match(subj, pred, obj, graph, true)[0];
-    }
-
-    /**
      * Flushes the change buffer to the return value.
      * @return Statements held in memory since the last flush.
      */
@@ -276,7 +265,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         const canSubj = this.canon(subject);
         this.touch(canSubj);
         this.typeCache[id(canSubj)] = [];
-        this.removeQuads(this.quadsFor(subject));
+        (this.store as RDFAdapter).deleteRecord(subject);
     }
 
     public removeQuads(statements: Quad[]): void {
@@ -385,11 +374,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @param subject The identifier of the resource.
      */
     public quadsFor(subject: SomeNode): Quad[] {
-        const sId = id(this.store.canon(subject));
-
-        return typeof this.store.indices[QuadPosition.subject][sId] !== "undefined"
-            ? this.store.indices[QuadPosition.subject][sId]
-            : EMPTY_ST_ARR as Quad[];
+        return this.store.quadsForRecord(subject.value);
     }
 
     public touch(iri: SomeNode): void {

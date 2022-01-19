@@ -1,4 +1,9 @@
-import rdfFactory, { Literal, LowLevelStore, NamedNode, Node, TermType } from "@ontologies/core";
+import rdfFactory, {
+    Literal,
+    NamedNode,
+    Node,
+    TermType,
+} from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 
 import ll from "../ontology/ll";
@@ -67,7 +72,7 @@ const isFile = (value: any): value is File => typeof File !== "undefined" && val
 export function processObject(subject: Node,
                               predicate: NamedNode,
                               datum: DataObject | SerializableDataTypes | null | undefined,
-                              store: LowLevelStore,
+                              store: RDFIndex,
                               ns?: NamespaceMap): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
 
@@ -82,9 +87,8 @@ export function processObject(subject: Node,
         store.add(subject, predicate, rdfFactory.literal(datum));
     } else if (isFile(datum)) {
         const f = uploadIRI();
-        const file = rdfFactory.quad(subject, predicate, f);
         blobs.push([f, datum as File]);
-        store.addQuad(file);
+        store.add(subject, predicate, f);
     } else if (isPlainObject(datum)) {
         const id = datum["@id"] as SomeNode | undefined || rdfFactory.blankNode();
         blobs = blobs.concat(processDataObject(id, datum, store, ns));
@@ -107,7 +111,7 @@ export function processObject(subject: Node,
     return blobs;
 }
 
-function processDataObject(subject: Node, data: DataObject, store: LowLevelStore, ns?: NamespaceMap): NamedBlobTuple[] {
+function processDataObject(subject: Node, data: DataObject, store: RDFIndex, ns?: NamespaceMap): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
@@ -142,7 +146,7 @@ export function dataToGraphTuple(data: DataObject, ns?: NamespaceMap): DataTuple
 export function toGraph(
     iriOrData: SomeNode | DataObject,
     data?: DataObject,
-    store?: LowLevelStore,
+    store?: RDFIndex,
     ns?: NamespaceMap,
 ): ParsedObject {
 

@@ -1,6 +1,10 @@
 import "jest";
 
-import { DataFactory, Feature } from "@ontologies/core";
+import rdfFactory, {
+    DataFactory,
+    Feature,
+    NamedNode,
+} from "@ontologies/core";
 import * as schema from "@ontologies/schema";
 import { createEqualComparator, id } from "../factoryHelpers";
 
@@ -8,6 +12,7 @@ describe("factoryHelpers", () => {
     describe("createEqualComparator", () => {
         describe("without idStamp factory", () => {
             const factory = {
+                defaultGraph(): NamedNode { return rdfFactory.namedNode("rdf:defaultGraph"); },
                 equals: jest.fn(),
                 supports: {
                     [Feature.identity]: false,
@@ -24,6 +29,7 @@ describe("factoryHelpers", () => {
 
         describe("without idStamp factory", () => {
             const factory = {
+                defaultGraph(): NamedNode { return rdfFactory.namedNode("rdf:defaultGraph"); },
                 supports: {
                     [Feature.identity]: false,
                     [Feature.idStamp]: true,
@@ -42,6 +48,7 @@ describe("factoryHelpers", () => {
 
         describe("with identity factory", () => {
             const factory = {
+                defaultGraph(): NamedNode { return rdfFactory.namedNode("rdf:defaultGraph"); },
                 supports: {
                     [Feature.identity]: true,
                     [Feature.idStamp]: false,

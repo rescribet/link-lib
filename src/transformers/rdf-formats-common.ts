@@ -1,4 +1,4 @@
-import { LowLevelStore, Quad } from "@ontologies/core";
+import { Quad } from "@ontologies/core";
 import RDFIndex from "../store/RDFIndex";
 import { RDFLibFetcherResponse, ResponseAndFallbacks } from "../types";
 
@@ -8,7 +8,7 @@ const isRdfLibResponse = (res: any): res is RDFLibFetcherResponse =>
     typeof res.req !== "undefined" && typeof res.req.termType !== "undefined";
 
 export type RDFLibParse = (str: string,
-                           kb: LowLevelStore,
+                           kb: RDFIndex,
                            base: string,
                            contentType: string,
                            callback: () => void) => void;
