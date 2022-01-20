@@ -1,4 +1,4 @@
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { NamedNode } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 import { getBasicStore } from "../../testUtilities";
 import { ResourceQueueItem } from "../../types";
@@ -9,6 +9,8 @@ import {
     schemaT,
     thingStatements,
 } from "./fixtures";
+
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
 
 describe("LinkedRenderStore", () => {
     describe("adds new graph items", () => {
@@ -82,7 +84,7 @@ describe("LinkedRenderStore", () => {
 
         it("returns data when available", () => {
             const res = store.lrs.getResourcePropertyRaw(schemaT, rdfs.label);
-            expect(res).toEqual([rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing."))]);
+            expect(res).toEqual([[schemaT, rdfs.label, rdfFactory.literal("Thing."), defaultGraph]]);
         });
     });
 

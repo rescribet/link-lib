@@ -1,6 +1,6 @@
 import "./useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
@@ -19,11 +19,12 @@ import {
 } from "../utilities";
 
 const ex = example.ns;
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
 
 describe("utilities", () => {
-    const abc = rdfFactory.quad(ex("a"), ex("b"), ex("c"));
-    const dpe = rdfFactory.quad(ex("d"), ex("p"), ex("e"));
-    const dpn = rdfFactory.quad(ex("d"), ex("p"), ex("n"));
+    const abc: Quadruple = [ex("a"), ex("b"), ex("c"), defaultGraph];
+    const dpe: Quadruple = [ex("d"), ex("p"), ex("e"), defaultGraph];
+    const dpn: Quadruple = [ex("d"), ex("p"), ex("n"), defaultGraph];
 
     describe("#allRDFPropertyStatements", () => {
         it("returns an empty array when undefined is passed", () => {
@@ -35,12 +36,12 @@ describe("utilities", () => {
         });
 
         it("returns an empty array when no matches were found", () => {
-            const stmts = [
+            const stmts: Quadruple[] = [
                 abc,
                 dpe,
-                rdfFactory.quad(ex("f"), ex("g"), ex("h")),
+                [ex("f"), ex("g"), ex("h"), defaultGraph],
                 dpn,
-                rdfFactory.quad(ex("f"), ex("g"), ex("x")),
+                [ex("f"), ex("g"), ex("x"), defaultGraph],
             ];
             expect(allRDFPropertyStatements(stmts, ex("p"))).toEqual([
                 dpe,
@@ -56,20 +57,20 @@ describe("utilities", () => {
 
         it("returns an empty array without matches", () => {
             expect(allRDFValues([
-                rdfFactory.quad(ex("a"), ex("p"), ex("b")),
-                rdfFactory.quad(ex("c"), ex("p"), ex("d")),
+                [ex("a"), ex("p"), ex("b"), defaultGraph],
+                [ex("c"), ex("p"), ex("d"), defaultGraph],
             ], ex("p"))).toHaveLength(2);
         });
 
         it("returns all rdfs:member properties", () => {
-            const stmts = [
+            const stmts: Quadruple[] = [
                 abc,
-                rdfFactory.quad(ex("c"), rdfx.ns("_1"), ex("1")),
-                rdfFactory.quad(ex("c"), rdfx.ns("_0"), ex("0")),
-                rdfFactory.quad(ex("c"), rdfx.ns("_2"), ex("2")),
-                rdfFactory.quad(ex("c"), rdfx.ns("_3"), ex("3")),
-                rdfFactory.quad(ex("c"), rdfx.ns("_5"), ex("5")),
-                rdfFactory.quad(ex("c"), rdfs.member, ex("6")),
+                [ex("c"), rdfx.ns("_1"), ex("1"), defaultGraph],
+                [ex("c"), rdfx.ns("_0"), ex("0"), defaultGraph],
+                [ex("c"), rdfx.ns("_2"), ex("2"), defaultGraph],
+                [ex("c"), rdfx.ns("_3"), ex("3"), defaultGraph],
+                [ex("c"), rdfx.ns("_5"), ex("5"), defaultGraph],
+                [ex("c"), rdfs.member, ex("6"), defaultGraph],
             ];
             expect(allRDFValues(stmts, rdfs.member))
                 .toEqual([
@@ -93,21 +94,21 @@ describe("utilities", () => {
         });
 
         it("returns the value if found", () => {
-            const stmts = [
+            const stmts: Quadruple[] = [
                 abc,
-                rdfFactory.quad(ex("c"), ex("b"), ex("d")),
-                rdfFactory.quad(ex("d"), ex("h"), ex("f")),
-                rdfFactory.quad(ex("d"), ex("b"), ex("g")),
+                [ex("c"), ex("b"), ex("d"), defaultGraph],
+                [ex("d"), ex("h"), ex("f"), defaultGraph],
+                [ex("d"), ex("b"), ex("g"), defaultGraph],
             ];
             expect(anyRDFValue(stmts, ex("b"))).toEqual(ex("c"));
         });
 
         it("returns all rdfs:member properties", () => {
-            const stmts = [
+            const stmts: Quadruple[] = [
                 abc,
-                rdfFactory.quad(ex("c"), rdfx.ns("_1"), ex("1")),
-                rdfFactory.quad(ex("c"), rdfx.ns("_0"), ex("0")),
-                rdfFactory.quad(ex("c"), rdfx.ns("_2"), ex("2")),
+                [ex("c"), rdfx.ns("_1"), ex("1"), defaultGraph],
+                [ex("c"), rdfx.ns("_0"), ex("0"), defaultGraph],
+                [ex("c"), rdfx.ns("_2"), ex("2"), defaultGraph],
             ];
             expect(anyRDFValue(stmts, rdfs.member)).toEqual(ex("1"));
         });
@@ -119,14 +120,10 @@ describe("utilities", () => {
         const enString = rdfFactory.literal("value", "en");
         const nlString = rdfFactory.literal("waarde", "nl");
 
-        const abnl = rdfFactory.quad(ex("a"), ex("b"), nlString);
-        const aben = rdfFactory.quad(ex("a"), ex("b"), enString);
-        const abde = rdfFactory.quad(ex("a"), ex("b"), deString);
-        const abd = rdfFactory.quad(ex("a"), ex("b"), ex("d"));
-
-        it("returns when a single statement is given", () => {
-            expect(getPropBestLang(abnl, langs)).toEqual(nlString);
-        });
+        const abnl: Quadruple = [ex("a"), ex("b"), nlString, defaultGraph];
+        const aben: Quadruple = [ex("a"), ex("b"), enString, defaultGraph];
+        const abde: Quadruple = [ex("a"), ex("b"), deString, defaultGraph];
+        const abd: Quadruple = [ex("a"), ex("b"), ex("d"), defaultGraph];
 
         it("returns when a single statement arr is given", () => {
             expect(getPropBestLang([abnl], langs)).toEqual(nlString);
@@ -147,13 +144,9 @@ describe("utilities", () => {
 
     describe("#getPropBestLangRaw", () => {
         const langs = ["en", "nl", "de", "fr"];
-        const deStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("Wert", "de"));
-        const enStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("value", "en"));
-        const nlStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("waarde", "nl"));
-
-        it("returns when a single statement is given", () => {
-            expect(getPropBestLangRaw(nlStmt, langs)).toEqual(nlStmt);
-        });
+        const deStmt: Quadruple = [ex("a"), ex("b"), rdfFactory.literal("Wert", "de"), defaultGraph];
+        const enStmt: Quadruple = [ex("a"), ex("b"), rdfFactory.literal("value", "en"), defaultGraph];
+        const nlStmt: Quadruple = [ex("a"), ex("b"), rdfFactory.literal("waarde", "nl"), defaultGraph];
 
         it("returns when a single statement arr is given", () => {
             expect(getPropBestLangRaw([nlStmt], langs)).toEqual(nlStmt);
@@ -219,9 +212,9 @@ describe("utilities", () => {
 
     describe("#sortByBestLang", () => {
         const langs = ["en", "nl", "de", "fr"];
-        const deStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("Wert", "de"));
-        const enStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("value", "en"));
-        const nlStmt = rdfFactory.quad(ex("a"), ex("b"), rdfFactory.literal("waarde", "nl"));
+        const deStmt: Quadruple = [ex("a"), ex("b"), rdfFactory.literal("Wert", "de"), defaultGraph];
+        const enStmt: Quadruple = [ex("a"), ex("b"), rdfFactory.literal("value", "en"), defaultGraph];
+        const nlStmt: Quadruple = [ex("a"), ex("b"), rdfFactory.literal("waarde", "nl"), defaultGraph];
 
         it("returns when a single statement arr is given", () => {
             expect(sortByBestLang([nlStmt], langs)).toEqual([nlStmt]);
@@ -237,19 +230,19 @@ describe("utilities", () => {
                   abc,
                   deStmt,
                   nlStmt,
-                  rdfFactory.quad(ex("a"), ex("b"), ex("d")),
+                  [ex("a"), ex("b"), ex("d"), defaultGraph],
               ], langs),
             ).toEqual([
                 nlStmt,
                 deStmt,
                 abc,
-                rdfFactory.quad(ex("a"), ex("b"), ex("d")),
+                [ex("a"), ex("b"), ex("d"), defaultGraph],
             ]);
         });
 
         it("returns identity if no match could be found", () => {
             const c = abc;
-            const d = rdfFactory.quad(ex("a"), ex("b"), ex("d"));
+            const d: Quadruple = [ex("a"), ex("b"), ex("d"), defaultGraph];
             expect(sortByBestLang([c, d], langs)).toEqual([c, d]);
         });
     });

@@ -1,11 +1,13 @@
 import "jest";
 import "../useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { NamedNode } from "@ontologies/core";
 
 import { getBasicStore } from "../../testUtilities";
 
 import { ex } from "./fixtures";
+
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
 
 describe("LinkedRenderStore", () => {
     describe("#dig", () => {
@@ -13,39 +15,39 @@ describe("LinkedRenderStore", () => {
         const start = ex("1");
         const bn = rdfFactory.blankNode();
         store.store.addQuads([
-            rdfFactory.quad(start, ex("oneToOne"), ex("1.1")),
+            [start, ex("oneToOne"), ex("1.1"), defaultGraph],
 
-            rdfFactory.quad(start, ex("oneToOneLiteral"), ex("1.2")),
+            [start, ex("oneToOneLiteral"), ex("1.2"), defaultGraph],
 
-            rdfFactory.quad(start, ex("oneToOneBN"), bn),
+            [start, ex("oneToOneBN"), bn, defaultGraph],
 
-            rdfFactory.quad(start, ex("oneToOneMissing"), ex("1.3")),
+            [start, ex("oneToOneMissing"), ex("1.3"), defaultGraph],
 
-            rdfFactory.quad(start, ex("oneToMany"), ex("1.4")),
-            rdfFactory.quad(start, ex("oneToMany"), ex("1.5")),
+            [start, ex("oneToMany"), ex("1.4"), defaultGraph],
+            [start, ex("oneToMany"), ex("1.5"), defaultGraph],
 
-            rdfFactory.quad(start, ex("oneToManyHoley"), ex("1.6")),
-            rdfFactory.quad(start, ex("oneToManyHoley"), ex("1.7")),
-            rdfFactory.quad(start, ex("oneToManyHoley"), ex("1.8")),
+            [start, ex("oneToManyHoley"), ex("1.6"), defaultGraph],
+            [start, ex("oneToManyHoley"), ex("1.7"), defaultGraph],
+            [start, ex("oneToManyHoley"), ex("1.8"), defaultGraph],
 
-            rdfFactory.quad(ex("1.2"), ex("p"), rdfFactory.literal("value", "en")),
+            [ex("1.2"), ex("p"), rdfFactory.literal("value", "en"), defaultGraph],
 
-            rdfFactory.quad(bn, ex("p"), rdfFactory.literal("test")),
+            [bn, ex("p"), rdfFactory.literal("test"), defaultGraph],
 
-            rdfFactory.quad(ex("1.2"), ex("p"), rdfFactory.literal("value", "nl")),
+            [ex("1.2"), ex("p"), rdfFactory.literal("value", "nl"), defaultGraph],
 
-            rdfFactory.quad(ex("1.2"), ex("p"), ex("2.3")),
+            [ex("1.2"), ex("p"), ex("2.3"), defaultGraph],
 
-            rdfFactory.quad(ex("1.4"), ex("p"), ex("2.4")),
-            rdfFactory.quad(ex("1.5"), ex("p"), ex("2.5")),
+            [ex("1.4"), ex("p"), ex("2.4"), defaultGraph],
+            [ex("1.5"), ex("p"), ex("2.5"), defaultGraph],
 
-            rdfFactory.quad(ex("1.6"), ex("p"), ex("2.6")),
-            rdfFactory.quad(ex("1.7"), ex("p"), ex("2.7")),
-            rdfFactory.quad(ex("1.8"), ex("p"), ex("2.8")),
+            [ex("1.6"), ex("p"), ex("2.6"), defaultGraph],
+            [ex("1.7"), ex("p"), ex("2.7"), defaultGraph],
+            [ex("1.8"), ex("p"), ex("2.8"), defaultGraph],
 
-            rdfFactory.quad(ex("2.6"), ex("q"), ex("3.6")),
-            rdfFactory.quad(ex("2.7"), ex("other"), ex("3.7")),
-            rdfFactory.quad(ex("2.8"), ex("q"), ex("3.8")),
+            [ex("2.6"), ex("q"), ex("3.6"), defaultGraph],
+            [ex("2.7"), ex("other"), ex("3.7"), defaultGraph],
+            [ex("2.8"), ex("q"), ex("3.8"), defaultGraph],
         ]);
         store.store.flush();
 
@@ -81,8 +83,8 @@ describe("LinkedRenderStore", () => {
             const [terms, subjects] = store.lrs.digDeeper(start, [ex("oneToManyHoley"), ex("p"), ex("q")]);
 
             expect(terms).toEqual([
-              rdfFactory.quad(ex("2.6"), ex("q"), ex("3.6")),
-              rdfFactory.quad(ex("2.8"), ex("q"), ex("3.8")),
+              [ex("2.6"), ex("q"), ex("3.6"), defaultGraph],
+              [ex("2.8"), ex("q"), ex("3.8"), defaultGraph],
             ]);
             expect(subjects).toEqual([
                 start,

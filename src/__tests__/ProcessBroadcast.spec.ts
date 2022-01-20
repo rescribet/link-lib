@@ -1,6 +1,6 @@
 import "./useHashFactory";
 
-import rdfFactory, { Quad } from "@ontologies/core";
+import rdfFactory, { QuadPosition, Quadruple } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
@@ -19,32 +19,34 @@ const resource4 = ex.ns("4");
 const resource5 = ex.ns("5");
 const resource6 = ex.ns("6");
 
-const mixedWork = [
-    rdfFactory.quad(resource5, ex.ns("prop"), ex.ns("unknown"), example.ns("why")),
-    rdfFactory.quad(schemaT, rdfx.type, rdfs.Class, example.ns("why")),
-    rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("A class"), example.ns("why")),
-    rdfFactory.quad(resource2, schema.name, rdfFactory.literal("resource 1"), example.ns("why")),
-    rdfFactory.quad(resource2, schema.name, rdfFactory.literal("resource 2"), example.ns("why")),
-    rdfFactory.quad(resource3, rdfs.label, rdfFactory.literal("D. Adams"), example.ns("why")),
-    rdfFactory.quad(resource4, schema.name, rdfFactory.literal("Resource Name"), example.ns("why")),
-    rdfFactory.quad(resource4, schema.text, rdfFactory.literal("Resource text"), example.ns("why")),
-    rdfFactory.quad(resource4, schema.author, resource3, example.ns("why")),
-    rdfFactory.quad(
+const mixedWork: Quadruple[] = [
+    [resource5, ex.ns("prop"), ex.ns("unknown"), example.ns("why")],
+    [schemaT, rdfx.type, rdfs.Class, example.ns("why")],
+    [schemaT, rdfs.label, rdfFactory.literal("A class"), example.ns("why")],
+    [resource2, schema.name, rdfFactory.literal("resource 1"), example.ns("why")],
+    [resource2, schema.name, rdfFactory.literal("resource 2"), example.ns("why")],
+    [resource3, rdfs.label, rdfFactory.literal("D. Adams"), example.ns("why")],
+    [resource4, schema.name, rdfFactory.literal("Resource Name"), example.ns("why")],
+    [resource4, schema.text, rdfFactory.literal("Resource text"), example.ns("why")],
+    [resource4, schema.author, resource3, example.ns("why")],
+    [
         resource6,
         schema.text,
         rdfFactory.literal("Should contain only deleted regs"),
         example.ns("why"),
-    ),
+    ],
 ];
 
 const getOpts = (
-    work: Quad[] = [],
+    work: Quadruple[] = [],
     bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [],
     subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>> = [],
 ): ProcessBroadcastOpts => ({
     bulkSubscriptions,
     changedSubjects: work.reduce(
-        (acc, cur) => acc.includes(rdfFactory.id(cur.subject)) ? acc : acc.concat(rdfFactory.id(cur.subject)),
+        (acc, cur) => acc.includes(rdfFactory.id(cur[QuadPosition.subject]))
+            ? acc
+            : acc.concat(rdfFactory.id(cur[QuadPosition.subject])),
         [] as number[],
     ),
     subjectSubscriptions,
@@ -62,7 +64,7 @@ describe("ProcessBroadcast", () => {
 
         describe("and work", () => {
             const processor = new ProcessBroadcast(getOpts([
-                rdfFactory.quad(schemaT, rdfx.type, rdfs.Class, example.ns("why")),
+                [schemaT, rdfx.type, rdfs.Class, example.ns("why")],
             ]));
 
             it("is done", () => expect(processor.done()).toBeTruthy());

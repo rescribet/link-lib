@@ -1,7 +1,6 @@
 import rdfFactory, {
   NamedNode,
   Node,
-  Quad,
   QuadPosition,
   Quadruple,
 } from "@ontologies/core";
@@ -51,7 +50,7 @@ export const deltaProcessor = (
     return (store: RDFIndex): StoreProcessor => (delta: Quadruple[]): StoreProcessorResult => {
         const addable: Quadruple[] = [];
         const replaceable: Quadruple[] = [];
-        const removable: Quad[] = [];
+        const removable: Quadruple[] = [];
 
         let quad: Quadruple;
         for (let i = 0, len = delta.length; i < len; i++) {
@@ -72,21 +71,18 @@ export const deltaProcessor = (
                     quad[QuadPosition.subject],
                     quad[QuadPosition.predicate],
                     null,
-                    graph,
                 ));
             } else if (isPurge(quad[QuadPosition.graph])) {
                 removable.push(...store.match(
                     quad[QuadPosition.subject],
                     null,
                     null,
-                    graph,
                 ));
             } else if (isSlice(quad[QuadPosition.graph])) {
                 removable.push(...store.match(
                     quad[QuadPosition.subject],
                     quad[QuadPosition.predicate],
                     quad[QuadPosition.object],
-                    graph,
                 ));
             }
         }

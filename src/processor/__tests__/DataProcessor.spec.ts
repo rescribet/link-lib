@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { NamedNode, Quad } from "@ontologies/core";
+import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
@@ -29,6 +29,8 @@ import {
     ProcessorError,
 } from "../ProcessorError";
 
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
+
 const getFulfilledRequest = (subject: NamedNode): FulfilledRequestStatus => {
     return {
         lastRequested: new Date(),
@@ -43,8 +45,8 @@ const getFulfilledRequest = (subject: NamedNode): FulfilledRequestStatus => {
 describe("DataProcessor", () => {
     describe("#execActionByIRI", () => {
         const subject = example.ns("actions/5");
-        const object1 = rdfFactory.quad(subject, schema.object, example.ns("objects/1"));
-        const target5 = rdfFactory.quad(subject, schema.target, example.ns("targets/5"));
+        const object1: Quadruple = [subject, schema.object, example.ns("objects/1"), defaultGraph];
+        const target5: Quadruple = [subject, schema.target, example.ns("targets/5"), defaultGraph];
         const exec = (store: ExplodedLRS<BasicComponent>): Promise<any> =>
             store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
 
@@ -67,7 +69,7 @@ describe("DataProcessor", () => {
 
             store.store.addQuads([
                 object1,
-                rdfFactory.quad(subject, schema.target, rdfFactory.literal("targets/5")),
+                [subject, schema.target, rdfFactory.literal("targets/5"), defaultGraph],
             ]);
 
             let error;
@@ -106,7 +108,7 @@ describe("DataProcessor", () => {
             store.store.addQuads([
                 object1,
                 target5,
-                rdfFactory.quad(example.ns("targets/5"), schema.url, rdfFactory.blankNode()),
+                [example.ns("targets/5"), schema.url, rdfFactory.blankNode(), defaultGraph],
             ]);
 
             let error;
@@ -127,8 +129,8 @@ describe("DataProcessor", () => {
             store.store.addQuads([
                 object1,
                 target5,
-                rdfFactory.quad(example.ns("targets/5"), schema.httpMethod, rdfFactory.literal("POST")),
-                rdfFactory.quad(example.ns("targets/5"), schema.url, url),
+                [example.ns("targets/5"), schema.httpMethod, rdfFactory.literal("POST"), defaultGraph],
+                [example.ns("targets/5"), schema.url, url, defaultGraph],
             ]);
 
             // @ts-ignore
@@ -159,7 +161,7 @@ describe("DataProcessor", () => {
             store.store.addQuads([
                 object1,
                 target5,
-                rdfFactory.quad(example.ns("targets/5"), schema.url, example.ns("test")),
+                [example.ns("targets/5"), schema.url, example.ns("test"), defaultGraph],
             ]);
 
             const process = jest.fn((res) => Promise.resolve(res));
@@ -459,12 +461,12 @@ describe("DataProcessor", () => {
             const fetchMock = (fetch as any);
             fetchMock.mockResponse("/link-lib/bulk", 200);
             const store = getBasicStore();
-            const data = [
-                rdfFactory.quad(schema.Person, rdfx.type, schema.Thing),
-                rdfFactory.quad(schema.Person, rdfs.label, rdfFactory.literal("Person class")),
+            const data: Quadruple[] = [
+                [schema.Person, rdfx.type, schema.Thing, defaultGraph],
+                [schema.Person, rdfs.label, rdfFactory.literal("Person class"), defaultGraph],
             ];
             store.store.addQuads([
-                // rdfFactory.quad(schema.Person, rdfx.type, schema.RejectAction, schema.Person),
+                // [schema.Person, rdfx.type, schema.RejectAction, schema.Person, defaultGraph],
                 ...data,
             ]);
 
@@ -481,12 +483,12 @@ describe("DataProcessor", () => {
         //     const store = getBasicStore();
         //     const blankNode = rdfFactory.blankNode();
         //     const data = [
-        //         rdfFactory.quad(schema.Person, rdfx.type, schema.Thing, schema.Person),
-        //         rdfFactory.quad(schema.Person, rdfs.label, rdfFactory.literal("Person class"), schema.Person),
-        //         rdfFactory.quad(blankNode, rdfs.label, rdfFactory.literal("included"), schema.Person),
+        //         [schema.Person, rdfx.type, schema.Thing, schema.Person, defaultGraph],
+        //         [schema.Person, rdfs.label, rdfFactory.literal("Person class"), schema.Person, defaultGraph],
+        //         [blankNode, rdfs.label, rdfFactory.literal("included"), schema.Person, defaultGraph],
         //     ];
         //     store.store.addQuads([
-        //         rdfFactory.quad(schema.Person, rdfx.type, schema.RejectAction, rdfFactory.defaultGraph()),
+        //         [schema.Person, rdfx.type, schema.RejectAction, rdfFactory.defaultGraph(), defaultGraph],
         //         ...data,
         //     ]);
         //
@@ -531,7 +533,7 @@ describe("DataProcessor", () => {
             // @ts-ignore
             const mapping = store.processor.mapping;
 
-            const transformer = (_res: ResponseAndFallbacks): Promise<Quad[]> => Promise.resolve([]);
+            const transformer = (_res: ResponseAndFallbacks): Promise<Quadruple[]> => Promise.resolve([]);
 
             store.processor.registerTransformer(transformer, "text/n3", 0.9);
 

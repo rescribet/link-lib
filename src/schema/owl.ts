@@ -1,4 +1,4 @@
-import rdfFactory, { NamedNode, Quad } from "@ontologies/core";
+import rdfFactory, {NamedNode, QuadPosition, Quadruple} from "@ontologies/core";
 import { sameAs } from "@ontologies/owl";
 
 import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
@@ -87,13 +87,13 @@ const nsOWLsameAs = sameAs;
 export const OWL = {
     axioms: [],
 
-    processStatement(item: Quad, ctx: VocabularyProcessingContext): Quad[] | null {
-        if (rdfFactory.equals(item.predicate, nsOWLsameAs)) {
-            if (rdfFactory.equals(item.subject, item.object)) {
+    processStatement(item: Quadruple, ctx: VocabularyProcessingContext): Quadruple[] | null {
+        if (rdfFactory.equals(item[QuadPosition.predicate], nsOWLsameAs)) {
+            if (rdfFactory.equals(item[QuadPosition.subject], item[QuadPosition.object])) {
                 return null;
             }
-            const a = ctx.equivalenceSet.add((item.object as SomeNode).id as number);
-            const b = ctx.equivalenceSet.add(item.subject.id as number);
+            const a = ctx.equivalenceSet.add((item[QuadPosition.object] as SomeNode).id as number);
+            const b = ctx.equivalenceSet.add(item[QuadPosition.subject].id as number);
             ctx.equivalenceSet.union(a, b);
 
             return [item];

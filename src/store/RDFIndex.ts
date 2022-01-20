@@ -1,28 +1,28 @@
 /* Taken, stripped and modified from rdflib.js */
 
 import {
-  DataFactory,
-  NamedNode,
-  Quad,
-  SomeTerm,
+    DataFactory,
+    NamedNode,
+    Quadruple,
+    SomeTerm,
 } from "@ontologies/core";
 
 import { id } from "../factoryHelpers";
 import { SomeNode } from "../types";
 
-import BasicStore from "./BasicStore";
 import { Equatable } from "./Equatable";
+import { RDFAdapter } from "./RDFAdapter";
 
 export interface IndexedFormulaOpts {
-    quads: Quad[];
-    dataCallback: (quad: Quad) => void;
+    quads: Quadruple[];
+    dataCallback: (quad: Quadruple) => void;
     rdfFactory: DataFactory;
 }
 
-export type PropertyActionCallback = (quad: Quad) => void;
+export type PropertyActionCallback = (quad: Quadruple) => void;
 
 /** Query and modify an array of quads. */
-export default class RDFIndex extends Equatable(BasicStore) {
+export default class RDFIndex extends Equatable(RDFAdapter) {
     /** Returns the number of quads in the store. */
     public length: number = 0;
 
@@ -46,48 +46,8 @@ export default class RDFIndex extends Equatable(BasicStore) {
         });
     }
 
-    public any(
-        subject: SomeNode | null,
-        predicate: NamedNode | null,
-        object: SomeTerm | null,
-        graph: SomeNode | null,
-    ): SomeTerm | undefined {
-        const st = this.anyQuadMatching(subject, predicate, object, graph);
-
-        if (st === undefined) {
-            return undefined;
-        } else if (subject === null) {
-            return st.subject;
-        } else if (predicate === null) {
-            return st.predicate;
-        } else if (object === null) {
-            return st.object;
-        } else if (graph === null) {
-            return st.graph;
-        }
-
-        return undefined;
-    }
-
-    public anyQuadMatching(
-        subject: SomeNode | null,
-        predicate: NamedNode | null,
-        object: SomeTerm | null,
-        graph: SomeNode | null,
-    ): Quad | undefined {
-        return this.match(subject, predicate, object, graph, true)?.[0];
-    }
-
-    public holds(s: SomeNode, p: NamedNode, o: SomeTerm, g: SomeNode): boolean {
-        return this.match(s, p, o, g, true)?.[0] !== undefined;
-    }
-
-    public holdsAll(quads: Quad[]): boolean {
-        return quads.every((q) => this.holds(q.subject, q.predicate, q.object, q.graph));
-    }
-
-    public holdsQuad(quad: Quad): boolean {
-        return this.holds(quad.subject, quad.predicate, quad.object, quad.graph);
+    public holds(s: SomeNode, p: NamedNode, o: SomeTerm): boolean {
+        return this.match(s, p, o, true)?.[0] !== undefined;
     }
 
     public newPropertyAction(predicate: NamedNode, action: PropertyActionCallback): void {
@@ -96,25 +56,9 @@ export default class RDFIndex extends Equatable(BasicStore) {
             this.propertyActions[hash] = [];
         }
         this.propertyActions[hash].push(action);
-        const toBeFixed = this.match(null, predicate, null, null);
+        const toBeFixed = this.match(null, predicate, null);
         for (let i = 0; i < toBeFixed.length; i++) {
             action(toBeFixed[i]);
         }
-    }
-
-    public removeMatches(
-        subject: SomeNode | null,
-        predicate: NamedNode | null,
-        object: SomeTerm | null,
-        graph: SomeNode | null,
-    ): this {
-        this.removeQuads(this.match(
-            subject,
-            predicate,
-            object,
-            graph,
-        ));
-
-        return this;
     }
 }

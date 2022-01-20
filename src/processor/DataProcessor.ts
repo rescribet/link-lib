@@ -1,7 +1,6 @@
 import rdfFactory, {
   isBlankNode,
   NamedNode,
-  Quad,
   QuadPosition,
   Quadruple,
   TermType,
@@ -101,7 +100,7 @@ function pushToMap<T>(map: { [key: string]: T[] }, k: string, v: T): void {
  * @param res The (fetch) response object from the request.
  * @returns A graph with metadata about the response.
  */
-function processResponse(iri: string | NamedNode, res: Response): Quad[] {
+function processResponse(iri: string | NamedNode, res: Response): Quadruple[] {
     const rawURL = getURL(res);
     const origin = typeof iri === "string"
         ? rdfFactory.namedNode(new URL(rawURL).origin)
@@ -109,12 +108,12 @@ function processResponse(iri: string | NamedNode, res: Response): Quad[] {
 
     if (rawURL && iri !== rawURL) {
         return [
-            rdfFactory.quad(
+            [
                 typeof iri === "string" ? rdfFactory.namedNode(iri) : iri,
                 rdfFactory.namedNode("http://www.w3.org/2002/07/owl#sameAs"),
                 rdfFactory.namedNode(rawURL),
                 origin,
-            ),
+            ],
         ];
     }
 
@@ -139,7 +138,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private readonly invalidationMap: Map<number, void>;
     private readonly mapping: { [k: string]: ResponseTransformer[] };
     private readonly requestInitGenerator: RequestInitGenerator;
-    private readonly requestMap: Map<number, Promise<Quad[]>>;
+    private readonly requestMap: Map<number, Promise<Quadruple[]>>;
     private readonly statusMap: { [k: string]: SomeRequestStatus | undefined };
     private readonly store: RDFStore;
 
@@ -251,7 +250,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         };
     }
 
-    public flush(): Quad[] {
+    public flush(): Quadruple[] {
         const deltas = this.deltas;
         this.deltas = [];
 
@@ -266,7 +265,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return [];
     }
 
-    public getEntities(resources: ResourceQueueItem[]): Promise<Quad[]> {
+    public getEntities(resources: ResourceQueueItem[]): Promise<Quadruple[]> {
         const reload: NamedNode[] = [];
 
         const toBeFetched = new Set<NamedNode>();
@@ -319,7 +318,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    public async getEntity(iri: NamedNode, opts?: APIFetchOpts): Promise<Quad[]> {
+    public async getEntity(iri: NamedNode, opts?: APIFetchOpts): Promise<Quadruple[]> {
         const url = new URL(iri.value);
         url.hash = "";
         const requestIRI = rdfFactory.namedNode(url.toString());
@@ -328,7 +327,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             return existing;
         }
 
-        let preExistingData: Quad[] = [];
+        let preExistingData: Quadruple[] = [];
         if (opts && opts.clearPreviousData) {
             preExistingData = this.store.quadsFor(iri);
             preExistingData = preExistingData.concat(this.store.quadsFor(requestIRI));
@@ -358,11 +357,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             this.requestMap.set(id(requestIRI), req);
             return await req;
         } catch (e) {
-            if (typeof e.res === "undefined") {
+            if (typeof (e as any).res === "undefined") {
                 throw e;
             }
             this.store.removeQuads(preExistingData);
-            const responseQuads = processResponse(iri, e.res);
+            const responseQuads = processResponse(iri, (e as any).res);
             this.store.addQuads(responseQuads);
 
             return responseQuads;
@@ -398,12 +397,12 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return this.invalidationMap.has(id(iri));
     }
 
-    public processExternalResponse(response: Response): Promise<Quad[] | undefined> {
+    public processExternalResponse(response: Response): Promise<Quadruple[] | undefined> {
         return handleStatus(response)
             .then(this.feedResponse);
     }
 
-    public processDelta(delta: Array<Quadruple|void>): Quad[] {
+    public processDelta(delta: Array<Quadruple|void>): Quadruple[] {
         let s: Quadruple|void;
         for (let i = 0, len = delta.length; i < len; i++) {
             s = delta[i];
@@ -445,10 +444,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             throw new Error("Can't resolve");
         }
 
-        const target = isBlankNode(iri) ? opts.url! : (opts?.url || iri);
-        const targetData = opts.data || !opts?.useDefaultGraph
-            ? this.store.match(null, null, null, iri)
-            : this.store.match(iri, null, null, this.store.rdfFactory.defaultGraph());
+        const target = isBlankNode(iri) ? opts.url! : (opts?.url ?? iri);
+        const targetData = this.store.match(null, null, null);
 
         const options = this.requestInitGenerator.generate(
             opts.method || "PUT",
@@ -488,7 +485,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         }
     }
 
-    private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Quad[]> {
+    private feedResponse(res: ResponseAndFallbacks, expedite: boolean = false): Promise<Quadruple[]> {
         if (res.status >= INTERNAL_SERVER_ERROR) {
             return Promise.reject(res);
         }
@@ -522,8 +519,13 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         this.invalidationMap.delete(id(subject));
     }
 
-    private serialize(data: Quad[]): string {
-        return data.reduce((acc, quad) => acc.concat(rdfFactory.toNQ(quad)), "");
+    private serialize(data: Quadruple[]): string {
+        return data.reduce((acc, qdr) => acc.concat(rdfFactory.toNQ(rdfFactory.quad(
+            qdr[QuadPosition.subject],
+            qdr[QuadPosition.predicate],
+            qdr[QuadPosition.object],
+            qdr[QuadPosition.graph],
+        ))), "");
     }
 
     private setStatus(iri: NamedNode, status: number | null): void {

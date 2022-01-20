@@ -1,7 +1,7 @@
 import "jest";
 import "../useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
@@ -11,23 +11,25 @@ import { ResourceQueueItem } from "../../types";
 
 import { ex, example } from "./fixtures";
 
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
+
 describe("LinkedRenderStore", () => {
     describe("#execActionByIRI", () => {
         const store = getBasicStore();
         const action = example("location/everest/pictures/create");
         const entryPoint = example("location/everest/pictures/create#entrypoint");
-        const actionStatements = [
-            rdfFactory.quad(action, rdf.type, schema.CreateAction),
-            rdfFactory.quad(action, schema.name, rdfFactory.literal("Upload a picture of Mt. Everest!")),
-            rdfFactory.quad(action, schema.object, example("location/everest")),
-            rdfFactory.quad(action, schema.result, schema.ImageObject),
-            rdfFactory.quad(action, schema.target, example("location/everest/pictures/create#entrypoint")),
+        const actionStatements: Quadruple[] = [
+            [action, rdf.type, schema.CreateAction, defaultGraph],
+            [action, schema.name, rdfFactory.literal("Upload a picture of Mt. Everest!"), defaultGraph],
+            [action, schema.object, example("location/everest"), defaultGraph],
+            [action, schema.result, schema.ImageObject, defaultGraph],
+            [action, schema.target, example("location/everest/pictures/create#entrypoint"), defaultGraph],
 
-            rdfFactory.quad(entryPoint, rdf.type, schema.EntryPoint),
-            rdfFactory.quad(entryPoint, schema.httpMethod, rdfFactory.literal("POST")),
-            rdfFactory.quad(entryPoint, schema.url, example("location/everest/pictures")),
-            rdfFactory.quad(entryPoint, schema.image, rdfFactory.namedNode("http://fontawesome.io/icon/plus")),
-            rdfFactory.quad(entryPoint, schema.name, rdfFactory.literal("Add a picture")),
+            [entryPoint, rdf.type, schema.EntryPoint, defaultGraph],
+            [entryPoint, schema.httpMethod, rdfFactory.literal("POST"), defaultGraph],
+            [entryPoint, schema.url, example("location/everest/pictures"), defaultGraph],
+            [entryPoint, schema.image, rdfFactory.namedNode("http://fontawesome.io/icon/plus"), defaultGraph],
+            [entryPoint, schema.name, rdfFactory.literal("Add a picture"), defaultGraph],
         ];
         store.store.addQuads(actionStatements);
 
@@ -86,9 +88,7 @@ describe("LinkedRenderStore", () => {
 
         it("should load invalidated resources", () => {
             const store = getBasicStore();
-            store.store.addQuads([
-                rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
-            ]);
+            store.store.add(resource, rdfs.label, rdfFactory.literal("test"));
             store.store.flush();
             store.processor.invalidate(resource);
 
@@ -97,9 +97,7 @@ describe("LinkedRenderStore", () => {
 
         it("should not load existent resources", () => {
             const store = getBasicStore();
-            store.store.addQuads([
-                rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
-            ]);
+            store.store.add(resource, rdfs.label, rdfFactory.literal("test"));
             store.store.flush();
 
             expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
@@ -108,7 +106,7 @@ describe("LinkedRenderStore", () => {
         it("should not queue loaded resources", () => {
             const store = getBasicStore();
             store.lrs.queueDelta([
-                rdfFactory.quad(resource, rdf.type, schema.CreateAction),
+                [resource, rdf.type, schema.CreateAction, defaultGraph],
             ]);
             store.store.flush();
             store.lrs.queueEntity(resource);
@@ -141,9 +139,7 @@ describe("LinkedRenderStore", () => {
         it("should not load invalidated queued resources", () => {
             const store = getBasicStore();
             store.store.flush();
-            store.store.addQuads([
-                rdfFactory.quad(resource, rdfs.label, rdfFactory.literal("test")),
-            ]);
+            store.store.add(resource, rdfs.label, rdfFactory.literal("test"));
             store.store.flush();
             store.processor.invalidate(resource);
             store.lrs.queueEntity(resource);
@@ -156,10 +152,10 @@ describe("LinkedRenderStore", () => {
         it("resolves statements for the resource", () => {
             const store = getBasicStore();
             const resource = ex("1");
-            const testData = [
-                rdfFactory.quad(resource, rdf.type, ex("Organization")),
-                rdfFactory.quad(resource, schema.name, rdfFactory.literal("Some org")),
-                rdfFactory.quad(resource, schema.employee, ex("2")),
+            const testData: Quadruple[] = [
+                [resource, rdf.type, ex("Organization"), defaultGraph],
+                [resource, schema.name, rdfFactory.literal("Some org"), defaultGraph],
+                [resource, schema.employee, ex("2"), defaultGraph],
             ];
             store.store.addQuads(testData);
             store.store.flush();

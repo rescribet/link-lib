@@ -1,4 +1,4 @@
-import { NamedNode, Quad } from "@ontologies/core";
+import { NamedNode, Quadruple } from "@ontologies/core";
 
 import {
     DataTuple,
@@ -24,7 +24,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
     execActionByIRI(subject: SomeNode, dataTuple: DataTuple): Promise<LinkedActionResponse>;
 
     /** @private */
-    getEntities(resources: ResourceQueueItem[]): Promise<Quad[]>;
+    getEntities(resources: ResourceQueueItem[]): Promise<Quadruple[]>;
 
     /**
      * Gets an entity by its SomeNode.
@@ -35,7 +35,7 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
      * @param opts The options for fetch-/processing the resource.
      * @return A promise with the resulting entity
      */
-    getEntity(iri: NamedNode, opts?: APIFetchOpts): Promise<Quad[]>;
+    getEntity(iri: NamedNode, opts?: APIFetchOpts): Promise<Quadruple[]>;
 
     /**
      * Retrieve the (network) status for a resource.

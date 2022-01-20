@@ -4,7 +4,6 @@ import {
   Literal,
   NamedNode,
   Node,
-  Quad,
   Quadruple,
   SomeTerm,
 } from "@ontologies/core";
@@ -43,7 +42,7 @@ export interface SubscriptionRegistrationBase<T> {
     subscribedAt?: number;
 }
 
-export interface StatementSubscriptionRegistration extends SubscriptionRegistrationBase<ReadonlyArray<Quad>> {
+export interface StatementSubscriptionRegistration extends SubscriptionRegistrationBase<ReadonlyArray<Quadruple>> {
     onlySubjects: false;
 }
 
@@ -60,7 +59,7 @@ export interface ComponentRegistration<T> {
     type: Indexable;
 }
 
-export type ResponseTransformer = (response: ResponseAndFallbacks) => Promise<Quad[]>;
+export type ResponseTransformer = (response: ResponseAndFallbacks) => Promise<Quadruple[]>;
 
 export interface ErrorResponse {
     errors?: Array<{ message: string }>;
@@ -71,7 +70,7 @@ export interface FailedResponse {
     res: Response | undefined;
 }
 
-export type ErrorReporter = (e: Error, ...args: any) => void;
+export type ErrorReporter = (e: unknown, ...args: any) => void;
 
 export interface FetchOpts {
     /** Force-reload the resource discarding any previously held data. */
@@ -98,11 +97,11 @@ export interface DeltaProcessor {
      * Process all queued deltas
      * @note: Be sure to assign a new buffer array before starting processing to prevent infinite loops.
      */
-    flush: () => Quad[];
-    processDelta: (delta: Quadruple[]) => Quad[];
+    flush: () => Quadruple[];
+    processDelta: (delta: Quadruple[]) => Quadruple[];
 }
 
-export type StoreProcessorResult = [Quadruple[], Quadruple[], Quad[]];
+export type StoreProcessorResult = [Quadruple[], Quadruple[], Quadruple[]];
 export type StoreProcessor = (delta: Quadruple[]) => StoreProcessorResult;
 
 export interface Dispatcher {
@@ -139,18 +138,18 @@ export type DataTuple = [RDFIndex, NamedBlobTuple[]];
 export type ParsedObject = [SomeNode, RDFIndex, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
-    changeBuffer: Quad[];
+    changeBuffer: Quadruple[];
     changeBufferCount: number;
 }
 
 export interface LinkedActionResponse {
     /** The IRI of the created resource, based from the Location header. */
     iri: NamedNode | null;
-    data: Quad[];
+    data: Quadruple[];
 }
 
 export interface SaveOpts extends RequestInit {
-    data?: Quad[];
+    data?: Quadruple[];
     url?: NamedNode;
     useDefaultGraph?: boolean;
 }
@@ -232,9 +231,9 @@ export interface VocabularyProcessingContext<IndexType = Indexable> {
 }
 
 export interface VocabularyProcessor {
-    axioms: Quad[];
+    axioms: Quadruple[];
 
-    processStatement: (item: Quad, ctx: VocabularyProcessingContext<any>) => Quad[] | null;
+    processStatement: (item: Quadruple, ctx: VocabularyProcessingContext<any>) => Quadruple[] | null;
 
     /**
      * Processes class instances (object to rdf:type). If an IRI is given, processors must assume the resource to be an

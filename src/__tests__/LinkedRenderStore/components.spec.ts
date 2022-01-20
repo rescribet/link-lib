@@ -136,9 +136,7 @@ describe("LinkedRenderStore", () => {
 
         it("returns the view when one is registered", () => {
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(nameComp, schema.Thing, property));
-            store.store.addQuads([
-                rdfFactory.quad(resource, rdf.type, schema.Thing),
-            ]);
+            store.store.add(resource, rdf.type, schema.Thing);
 
             expect(store.lrs.resourcePropertyComponent(resource, property)).toEqual(nameComp);
         });
@@ -155,9 +153,7 @@ describe("LinkedRenderStore", () => {
 
         it("returns the view when one is registered", () => {
             store.lrs.registerAll(LinkedRenderStore.registerRenderer(thingComp, schema.Thing));
-            store.store.addQuads([
-                rdfFactory.quad(resource, rdf.type, schema.Thing),
-            ]);
+            store.store.add(resource, rdf.type, schema.Thing);
 
             expect(store.lrs.resourceComponent(resource)).toEqual(thingComp);
         });

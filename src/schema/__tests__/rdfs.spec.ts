@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { Node } from "@ontologies/core";
+import rdfFactory, { NamedNode, Node, QuadPosition, Quadruple } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schemaNS from "@ontologies/schema";
@@ -12,6 +12,8 @@ import { Schema } from "../../Schema";
 import { VocabularyProcessingContext } from "../../types";
 import { RDFS } from "../rdfs";
 
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
+
 describe("RDFS", () => {
     const expectSuperMap = (ctx: VocabularyProcessingContext, mapItem: Node, equalValues: Node[]): void => {
         expect(ctx.superMap.get(rdfFactory.id(mapItem)))
@@ -22,10 +24,14 @@ describe("RDFS", () => {
         it("infers type domain resource", () => {
             const schema = new Schema(new RDFStore());
 
-            const data = rdfFactory.quad(example.ns("1"), rdfx.type, schemaNS.Person);
-            const inference = rdfFactory.quad(example.ns("1"), rdfx.type, rdfs.Resource);
+            const data: Quadruple = [example.ns("1"), rdfx.type, schemaNS.Person, defaultGraph];
+            const inference: Quadruple = [example.ns("1"), rdfx.type, rdfs.Resource, defaultGraph];
 
-            expect(schema.holdsQuad(inference)).toBeFalsy();
+            expect(schema.holds(
+                inference[QuadPosition.subject],
+                inference[QuadPosition.predicate],
+                inference[QuadPosition.object],
+            )).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
             expect(inferred).not.toBeNull();
             expect(inferred).toContainEqual(inference);
@@ -34,10 +40,14 @@ describe("RDFS", () => {
         it("infers type range class", () => {
             const schema = new Schema(new RDFStore());
 
-            const data = rdfFactory.quad(example.ns("1"), rdfx.type, schemaNS.Person);
-            const inference = rdfFactory.quad(schemaNS.Person, rdfx.type, rdfs.Class);
+            const data: Quadruple = [example.ns("1"), rdfx.type, schemaNS.Person, defaultGraph];
+            const inference: Quadruple = [schemaNS.Person, rdfx.type, rdfs.Class, defaultGraph];
 
-            expect(schema.holdsQuad(inference)).toBeFalsy();
+            expect(schema.holds(
+                inference[QuadPosition.subject],
+                inference[QuadPosition.predicate],
+                inference[QuadPosition.object],
+            )).toBeFalsy();
             const inferred = RDFS.processStatement(data, schema.getProcessingCtx());
             expect(inferred).not.toBeNull();
             expect(inferred).toContainEqual(inference);
@@ -51,7 +61,7 @@ describe("RDFS", () => {
             expect(ctx.superMap.get(rdfFactory.id(schemaNS.CreativeWork))).toBeUndefined();
 
             RDFS.processStatement(
-                rdfFactory.quad(schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork),
+                [schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork, defaultGraph],
                 ctx,
             );
             expectSuperMap(ctx, schemaNS.BlogPosting, [
@@ -61,7 +71,7 @@ describe("RDFS", () => {
                 ]);
 
             RDFS.processStatement(
-                rdfFactory.quad(schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing),
+                [schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing, defaultGraph],
                 ctx,
             );
             expectSuperMap(ctx, schemaNS.CreativeWork, [
@@ -87,13 +97,12 @@ describe("RDFS", () => {
             const schema = new Schema(new RDFStore());
 
             const ctx = schema.getProcessingCtx();
-            const inference = rdfFactory.quad(schemaNS.CreativeWork, rdfx.type, rdfs.Class);
 
-            expect(schema.holdsQuad(inference)).toBeFalsy();
+            expect(schema.holds(schemaNS.CreativeWork, rdfx.type, rdfs.Class)).toBeFalsy();
 
             RDFS.processType(schemaNS.CreativeWork, ctx);
 
-            expect(schema.holdsQuad(inference)).toBeTruthy();
+            expect(schema.holds(schemaNS.CreativeWork, rdfx.type, rdfs.Class)).toBeTruthy();
         });
 
         /**

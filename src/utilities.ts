@@ -1,13 +1,14 @@
 /* global chrome */
 import rdfFactory, {
-  BlankNode,
-  isLiteral,
-  Literal,
-  NamedNode,
-  Quad,
-  SomeTerm,
-  Term,
-  TermType,
+    BlankNode,
+    isLiteral,
+    Literal,
+    NamedNode,
+    QuadPosition,
+    Quadruple,
+    SomeTerm,
+    Term,
+    TermType,
 } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
@@ -30,8 +31,8 @@ const find = (x: SomeTerm | undefined, langPrefs: string[]): number => {
  * @return A possibly empty filtered array of statements.
  */
 export function allRDFPropertyStatements(
-    obj: Quad[] | undefined,
-    predicate: SomeNode): Quad[] {
+    obj: Quadruple[] | undefined,
+    predicate: SomeNode): Quadruple[] {
 
     if (typeof obj === "undefined") {
         return [];
@@ -39,43 +40,43 @@ export function allRDFPropertyStatements(
 
     if (rdfFactory.equals(predicate, rdfs.member)) {
         return obj.filter((s) =>
-            rdfFactory.equals(s.predicate, rdfs.member)
-            || s.predicate.value.startsWith(memberPrefix));
+            rdfFactory.equals(s[QuadPosition.predicate], rdfs.member)
+            || s[QuadPosition.predicate].value.startsWith(memberPrefix));
     }
 
-    return obj.filter((s) => rdfFactory.equals(s.predicate, predicate));
+    return obj.filter((s) => rdfFactory.equals(s[QuadPosition.predicate], predicate));
 }
 
 /**
  * Filters {obj} on subject {predicate} returning the resulting statements' objects.
  * @see allRDFPropertyStatements
  */
-export function allRDFValues(obj: Quad[], predicate: SomeNode): Term[] {
+export function allRDFValues(obj: Quadruple[], predicate: SomeNode): Term[] {
     const props = allRDFPropertyStatements(obj, predicate);
     if (props.length === 0) {
         return [];
     }
 
-    return props.map((s) => s.object);
+    return props.map((s) => s[QuadPosition.object]);
 }
 
 /**
  * Resolve {predicate} to any value, if any. If present, additional values are ignored.
  */
-export function anyRDFValue(obj: Quad[] | undefined, predicate: SomeNode): Term | undefined {
+export function anyRDFValue(obj: Quadruple[] | undefined, predicate: SomeNode): Term | undefined {
     if (!Array.isArray(obj)) {
         return undefined;
     }
 
     const match = rdfFactory.equals(predicate, rdfs.member)
-        ? obj.find((s) => s.predicate.value.startsWith(memberPrefix))
-        :  obj.find((s) => rdfFactory.equals(s.predicate, predicate));
+        ? obj.find((s) => s[QuadPosition.predicate].value.startsWith(memberPrefix))
+        :  obj.find((s) => rdfFactory.equals(s[QuadPosition.predicate], predicate));
 
     if (typeof match === "undefined") {
         return undefined;
     }
 
-    return match.object;
+    return match[QuadPosition.object];
 }
 
 export function doc<T extends NamedNode | BlankNode>(iri: T): T {
@@ -86,21 +87,15 @@ export function doc<T extends NamedNode | BlankNode>(iri: T): T {
     return iri;
 }
 
-export function getPropBestLang<T extends Term = Term>(rawProp: Quad | Quad[], langPrefs: string[]): T {
-    if (!Array.isArray(rawProp)) {
-        return rawProp.object as T;
-    }
+export function getPropBestLang<T extends Term = Term>(rawProp: Quadruple[], langPrefs: string[]): T {
     if (rawProp.length === 1) {
-        return rawProp[0].object as T;
+        return rawProp[0][QuadPosition.object] as T;
     }
 
-    return sortByBestLang(rawProp, langPrefs)[0].object as T;
+    return sortByBestLang(rawProp, langPrefs)[0][QuadPosition.object] as T;
 }
 
-export function getPropBestLangRaw(statements: Quad | Quad[], langPrefs: string[]): Quad {
-    if (!Array.isArray(statements)) {
-        return statements;
-    }
+export function getPropBestLangRaw(statements: Quadruple[], langPrefs: string[]): Quadruple {
     if (statements.length === 1) {
         return statements[0];
     }
@@ -125,8 +120,9 @@ export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Te
     return rawTerm[0];
 }
 
-export function sortByBestLang(statements: Quad[], langPrefs: string[]): Quad[] {
-    return statements.sort((a, b) => find(a.object, langPrefs) - find(b.object, langPrefs));
+export function sortByBestLang(statements: Quadruple[], langPrefs: string[]): Quadruple[] {
+    return statements.sort((a, b) =>
+      find(a[QuadPosition.object], langPrefs) - find(b[QuadPosition.object], langPrefs));
 }
 
 /**

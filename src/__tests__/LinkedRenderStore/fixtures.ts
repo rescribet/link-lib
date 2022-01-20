@@ -1,4 +1,4 @@
-import rdfFactory, { createNS } from "@ontologies/core";
+import rdfFactory, { createNS, NamedNode, Quadruple } from "@ontologies/core";
 import * as dcterms from "@ontologies/dcterms";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
@@ -7,31 +7,35 @@ import * as schema from "@ontologies/schema";
 import { RENDER_CLASS_NAME } from "../../ComponentStore/ComponentStore";
 import { DEFAULT_TOPOLOGY } from "../../utilities/constants";
 
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
+
 export const DT = rdfFactory.id(DEFAULT_TOPOLOGY);
 export const RCN = rdfFactory.id(RENDER_CLASS_NAME);
 
 export const schemaT = schema.Thing;
-export const thingStatements = [
-    rdfFactory.quad(schemaT, rdf.type, rdfs.Class),
-    rdfFactory.quad(schemaT, rdfs.comment, rdfFactory.literal("The most generic type of item.")),
-    rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("Thing.")),
+export const thingStatements: Quadruple[] = [
+    [schemaT, rdf.type, rdfs.Class, defaultGraph],
+    [schemaT, rdfs.comment, rdfFactory.literal("The most generic type of item."), defaultGraph],
+    [schemaT, rdfs.label, rdfFactory.literal("Thing."), defaultGraph],
 ];
 
 export const schemaCW = schema.CreativeWork;
-export const creativeWorkStatements = [
-    rdfFactory.quad(schemaCW, rdf.type, rdfs.Class),
-    rdfFactory.quad(schemaCW, rdfs.label, rdfFactory.literal("CreativeWork")),
-    rdfFactory.quad(schemaCW, rdfs.subClassOf, schemaT),
-    rdfFactory.quad(
+export const creativeWorkStatements: Quadruple[] = [
+    [schemaCW, rdf.type, rdfs.Class, defaultGraph],
+    [schemaCW, rdfs.label, rdfFactory.literal("CreativeWork"), defaultGraph],
+    [schemaCW, rdfs.subClassOf, schemaT, defaultGraph],
+    [
         schemaCW,
         dcterms.source,
         rdfFactory.namedNode("http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_rNews"),
-    ),
-    rdfFactory.quad(
+        defaultGraph,
+    ],
+    [
         schemaCW,
         rdfs.comment,
         rdfFactory.literal("The most generic kind of creative work, including books, movies, [...], etc."),
-    ),
+        defaultGraph,
+    ],
 ];
 
 export const example = createNS("http://example.com/");

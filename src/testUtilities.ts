@@ -36,7 +36,7 @@ export interface ExplodedLRS<T> {
 export type GetBasicStoreOpts = Partial<ExplodedLRS<BasicComponent>>;
 
 export const getBasicStore = (opts: GetBasicStoreOpts  = {}): ExplodedLRS<BasicComponent> => {
-    const report = (e: Error): void => { throw e; };
+    const report = (e: unknown): void => { throw e; };
     const store = opts.store || new RDFStore();
     const processor = opts.processor || new DataProcessor({ report, store, ...opts.apiOpts });
     const api = opts.api || processor;

@@ -1,6 +1,6 @@
 import "../__tests__/useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { NamedNode, QuadPosition, Quadruple } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schemaNS from "@ontologies/schema";
@@ -11,10 +11,11 @@ import example from "../ontology/example";
 import { RDFStore } from "../RDFStore";
 import { Schema } from "../Schema";
 
-const resource1 = [
-    rdfFactory.quad(example.ns("5"), rdf.type, schemaNS.CreativeWork),
-    rdfFactory.quad(example.ns("5"), schemaNS.name, rdfFactory.literal("The name")),
-    rdfFactory.quad(example.ns("5"), schemaNS.text, rdfFactory.literal("Body text")),
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
+const resource1: Quadruple[] = [
+    [example.ns("5"), rdf.type, schemaNS.CreativeWork, defaultGraph],
+    [example.ns("5"), schemaNS.name, rdfFactory.literal("The name"), defaultGraph],
+    [example.ns("5"), schemaNS.text, rdfFactory.literal("Body text"), defaultGraph],
 ];
 
 const blankSchema = (): Schema => new Schema(new RDFStore());
@@ -39,14 +40,18 @@ describe("Schema", () => {
             // });
 
             it("has holds rdf:predicate, RDFSrange, RDFSResource", () => {
-                const expected = rdfFactory.quad(
+                const expected: Quadruple = [
                     rdf.predicate,
                     rdfs.range,
                     rdfs.Resource,
-                );
+                    defaultGraph,
+                ];
 
-                expect(schema.holdsQuad(expected))
-                    .toBeTruthy();
+                expect(schema.holds(
+                    expected[QuadPosition.subject],
+                    expected[QuadPosition.predicate],
+                    expected[QuadPosition.object],
+                )).toBeTruthy();
             });
         });
 
@@ -57,22 +62,34 @@ describe("Schema", () => {
 
             it("adds ontology statements", () => {
                 const schema = blankSchema();
-                const personIsAClass = rdfFactory.quad(schemaNS.Person, rdf.type, rdfs.Class);
+                const personIsAClass: Quadruple = [schemaNS.Person, rdf.type, rdfs.Class, defaultGraph];
 
-                expect(schema.holdsQuad(personIsAClass)).toBeFalsy();
+                expect(schema.holds(
+                    personIsAClass[QuadPosition.subject],
+                    personIsAClass[QuadPosition.predicate],
+                    personIsAClass[QuadPosition.object],
+                )).toBeFalsy();
 
                 schema.addQuads([personIsAClass]);
 
-                expect(schema.holdsQuad(personIsAClass)).toBeTruthy();
+                expect(schema.holds(
+                    personIsAClass[QuadPosition.subject],
+                    personIsAClass[QuadPosition.predicate],
+                    personIsAClass[QuadPosition.object],
+                )).toBeTruthy();
             });
 
             it("doesn't add generic statements", () => {
                 const schema = blankSchema();
-                const statement = resource1[1];
+                const s = resource1[1];
 
-                schema.addQuads([statement]);
+                schema.addQuads([s]);
 
-                expect(schema.holdsQuad(statement)).toBeFalsy();
+                expect(schema.holds(
+                    s[QuadPosition.subject],
+                    s[QuadPosition.predicate],
+                    s[QuadPosition.object],
+                )).toBeFalsy();
             });
         });
 
@@ -104,8 +121,8 @@ describe("Schema", () => {
                 ];
 
                 schema.addQuads([
-                    rdfFactory.quad(schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing),
-                    rdfFactory.quad(schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork),
+                    [schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing, defaultGraph],
+                    [schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork, defaultGraph],
                 ]);
 
                 expect(schema.mineForTypes([rdfFactory.id(schemaNS.BlogPosting)]))
@@ -117,19 +134,19 @@ describe("Schema", () => {
     describe("when filled", () => {
         const schema = blankSchema();
         schema.addQuads([
-            rdfFactory.quad(ex.ns("A"), rdfs.subClassOf, rdfs.Class),
+            [ex.ns("A"), rdfs.subClassOf, rdfs.Class, defaultGraph],
 
-            rdfFactory.quad(ex.ns("B"), rdfs.subClassOf, ex.ns("A")),
+            [ex.ns("B"), rdfs.subClassOf, ex.ns("A"), defaultGraph],
 
-            rdfFactory.quad(ex.ns("C"), rdfs.subClassOf, ex.ns("A")),
+            [ex.ns("C"), rdfs.subClassOf, ex.ns("A"), defaultGraph],
 
-            rdfFactory.quad(ex.ns("D"), rdfs.subClassOf, ex.ns("C")),
+            [ex.ns("D"), rdfs.subClassOf, ex.ns("C"), defaultGraph],
 
-            rdfFactory.quad(ex.ns("E"), rdfs.subClassOf, rdfs.Class),
+            [ex.ns("E"), rdfs.subClassOf, rdfs.Class, defaultGraph],
 
-            rdfFactory.quad(ex.ns("F"), rdfs.subClassOf, rdfs.Class),
+            [ex.ns("F"), rdfs.subClassOf, rdfs.Class, defaultGraph],
 
-            rdfFactory.quad(ex.ns("G"), rdfs.subClassOf, example.ns("E")), // TODO: check if typo
+            [ex.ns("G"), rdfs.subClassOf, example.ns("E"), defaultGraph], // TODO: check if typo
         ]);
 
         describe("#sort", () => {

@@ -21,6 +21,7 @@ import { dataToGraphTuple } from "./processor/DataToGraph";
 import { isPending } from "./processor/requestStatus";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
+import { DataRecord } from "./store/StructuredStore";
 import { TypedRecord } from "./TypedRecord";
 import {
     ActionMap,
@@ -169,7 +170,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      *
      * Statements added here will also be added to the data store so views can access the statements.
      */
-    public addOntologySchematics(items: Quad[]): void {
+    public addOntologySchematics(items: Quadruple[]): void {
         this.schema.addQuads(items);
     }
 
@@ -213,7 +214,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public dig(subject: Node | undefined, path: NamedNode[]): SomeTerm[] {
         const [result] = this.digDeeper(subject, path);
 
-        return result.map((q) => q.object);
+        return result.map((q) => q[QuadPosition.object]);
     }
 
     /**
@@ -222,7 +223,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param path
      * @param subjects - The subjects traversed.
      */
-    public digDeeper(subject: Node | undefined, path: Array<NamedNode | NamedNode[]>): [Quad[], SomeNode[]] {
+    public digDeeper(subject: Node | undefined, path: Array<NamedNode | NamedNode[]>): [Quadruple[], SomeNode[]] {
         if (path.length === 0 || typeof subject === "undefined") {
             return [[], []];
         }
@@ -240,7 +241,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             const allSubjects = [subject];
 
             for (const quad of props) {
-              const term = quad.object;
+              const term = quad[QuadPosition.object];
               if (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode) {
                 const [terms, subs] = this.digDeeper(term, remaining);
                 allSubjects.push(...subs);
@@ -302,7 +303,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public getComponentForProperty(type: NamedNode | NamedNode[] | undefined = this.defaultType,
                                    predicate: NamedNode | NamedNode[],
-                                   topology: NamedNode = DEFAULT_TOPOLOGY): T | undefined {
+                                   topology: NamedNode = DEFAULT_TOPOLOGY): T | null | undefined {
         if (type === undefined || (Array.isArray(type) && type.length === 0)) {
             return undefined;
         }
@@ -326,7 +327,10 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param [topology] The topology of the resource, if any
      * @returns The most appropriate renderer, if any.
      */
-    public getComponentForType(type: NamedNode | NamedNode[], topology: NamedNode = DEFAULT_TOPOLOGY): T | undefined {
+    public getComponentForType(
+        type: NamedNode | NamedNode[],
+        topology: NamedNode = DEFAULT_TOPOLOGY,
+    ): T | null | undefined {
         return this.getComponentForProperty(type, RENDER_CLASS_NAME, topology);
     }
 
@@ -406,7 +410,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param {Node | Node[]} property
      * @return {Statement[]} All the statements of {property} on {subject}, or an empty array when none are present.
      */
-    public getResourcePropertyRaw(subject: Node | undefined, property: Node | Node[] | undefined): Quad[] {
+    public getResourcePropertyRaw(subject: Node | undefined, property: Node | Node[] | undefined): Quadruple[] {
         if (typeof subject === "undefined" || typeof property === "undefined") {
             return [];
         }
@@ -489,14 +493,11 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param expedite Will immediately process the delta rather than waiting for an idle moment, useful in conjunction
      *  with event handlers within the UI needing immediate feedback. Might cause jumpy interfaces.
      */
-    public processDelta(delta: Array<Quadruple|void> | Quad[], expedite = false): Promise<Quad[]> {
-        const quadArr = Object.prototype.hasOwnProperty.call(delta[0], "subject")
-            ? (delta as Quad[]).map((s: Quad) => rdfFactory.qdrFromQuad(s))
-            : delta as Quadruple[];
+    public processDelta(delta: Quadruple[], expedite = false): Promise<Quadruple[]> {
         const processors = this.deltaProcessors;
-        const statements: Quad[] = [];
+        const statements: Quadruple[] = [];
         for (let i = 0; i < processors.length; i++) {
-            statements.push(...processors[i].processDelta(quadArr));
+            statements.push(...processors[i].processDelta(delta));
         }
 
         return this.broadcastWithExpedite(expedite)
@@ -558,9 +559,11 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param {NamedNode} topology
      * @return {T | undefined}
      */
-    public resourcePropertyComponent(subject: Node,
-                                     predicate: NamedNode | NamedNode[],
-                                     topology?: NamedNode): T | undefined {
+    public resourcePropertyComponent(
+        subject: Node,
+        predicate: NamedNode | NamedNode[],
+        topology?: NamedNode,
+    ): T | null | undefined {
         return this.getComponentForProperty(
             this.store.getResourceProperties(subject, rdf.type) as NamedNode[],
             predicate,
@@ -576,7 +579,10 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param {NamedNode} topology The topology to take into account when picking the renderer.
      * @return {T | undefined}
      */
-    public resourceComponent(subject: Node, topology?: NamedNode): T | undefined {
+    public resourceComponent(
+        subject: Node,
+        topology?: NamedNode,
+    ): T | null | undefined {
         return this.getComponentForProperty(
             this.store.getResourceProperties(subject, rdf.type) as NamedNode[],
             RENDER_CLASS_NAME,
@@ -647,8 +653,20 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param iri The Node of the resource.
      * @returns The object if found, or undefined.
      */
-    public tryEntity(iri: Node): Quad[] {
+    public tryEntity(iri: Node): Quadruple[] {
         return this.store.quadsFor(iri);
+    }
+
+    /**
+     * Returns an entity from the cache directly.
+     * This won't cause any network requests even if the entity can't be found.
+     *
+     * @renderlibrary This should only be used by render-libraries, not by application code.
+     * @param iri The Node of the resource.
+     * @returns The object if found, or undefined.
+     */
+    public tryRecord(iri: Node): DataRecord | undefined {
+        return this.store.getInternalStore().store.getRecord(iri.value);
     }
 
     /**
@@ -694,10 +712,10 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         let w;
         for (let i = 0; i < wLen; i++) {
             w = work[i];
-            uniqueSubjects.add(id(w.subject));
-            uniqueSubjects.add(id(w.graph));
-            uniqueSubjects.add(id(this.store.canon(w.subject)));
-            uniqueSubjects.add(id(this.store.canon(w.graph)));
+            uniqueSubjects.add(id(w[QuadPosition.subject]));
+            uniqueSubjects.add(id(w[QuadPosition.graph]));
+            uniqueSubjects.add(id(this.store.canon(w[QuadPosition.subject])));
+            uniqueSubjects.add(id(this.store.canon(w[QuadPosition.graph])));
         }
         const subjects = Array.from(uniqueSubjects);
         const subjectRegs = subjects

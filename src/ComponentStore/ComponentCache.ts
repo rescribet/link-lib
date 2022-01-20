@@ -1,5 +1,5 @@
 export class ComponentCache<T> {
-  private lookupCache: { [s: string]: T } = {};
+  private lookupCache: { [s: string]: T | null } = {};
 
   /**
    * Adds a renderer to {this.lookupCache}
@@ -7,7 +7,7 @@ export class ComponentCache<T> {
    * @param key The memoization key.
    * @returns The renderer passed with {component}
    */
-  public add(component: T, key: string): T {
+  public add(component: T | null, key: string): T | null {
     this.lookupCache[key] = component;
 
     return this.lookupCache[key];
@@ -22,7 +22,7 @@ export class ComponentCache<T> {
    * @param key The key to look up.
    * @returns If saved the render component, otherwise undefined.
    */
-  public get(key: string): T | undefined {
+  public get(key: string): T | null | undefined {
     return this.lookupCache[key];
   }
 }

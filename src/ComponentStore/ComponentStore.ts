@@ -85,7 +85,7 @@ export class ComponentStore<T> {
         predicates: Indexable[],
         topology: Indexable,
         defaultType: Indexable,
-    ): T | undefined {
+    ): T | null {
         const oTypes = this.schema.expand(types);
         const key = convertToCacheKey(oTypes, predicates, topology);
         const cached = this.lookupCache.get(key);
@@ -105,7 +105,7 @@ export class ComponentStore<T> {
         const possibleComponents = this.possibleComponents(predicates, topology);
         if (possibleComponents.length === 0) {
             if (topology === id(DEFAULT_TOPOLOGY)) {
-                return undefined;
+                return this.lookupCache.add(null, key);
             }
             const foundComponent = this.getRenderComponent(
                 oTypes,
@@ -114,7 +114,7 @@ export class ComponentStore<T> {
                 defaultType,
             );
             if (!foundComponent) {
-                return undefined;
+                return this.lookupCache.add(null, key);
             }
 
             return this.lookupCache.add(foundComponent, key);
@@ -137,7 +137,7 @@ export class ComponentStore<T> {
             }
         }
 
-        return undefined;
+        return this.lookupCache.add(null, key);
     }
 
     /**

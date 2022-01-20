@@ -1,4 +1,4 @@
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 
@@ -6,31 +6,33 @@ import { getBasicStore } from "../../testUtilities";
 
 import { ex } from "./fixtures";
 
+const defaultGraph: NamedNode = rdfFactory.defaultGraph();
+
 describe("LinkedRenderStore", () => {
     describe("#findSubject", () => {
         const store = getBasicStore();
         const bill = rdfFactory.literal("Bill");
         const bookTitle = rdfFactory.literal("His first work");
         const alternativeTitle = rdfFactory.literal("Some alternative title");
-        const testData = [
-            rdfFactory.quad(ex("1"), rdf.type, ex("Organization")),
-            rdfFactory.quad(ex("1"), schema.name, rdfFactory.literal("Some org")),
-            rdfFactory.quad(ex("1"), schema.employee, ex("2")),
+        const testData: Quadruple[] = [
+            [ex("1"), rdf.type, ex("Organization"), defaultGraph],
+            [ex("1"), schema.name, rdfFactory.literal("Some org"), defaultGraph],
+            [ex("1"), schema.employee, ex("2"), defaultGraph],
 
-            rdfFactory.quad(ex("2"), rdf.type, schema.Person),
-            rdfFactory.quad(ex("2"), schema.name, bill),
-            rdfFactory.quad(ex("2"), schema.author, ex("3")),
-            rdfFactory.quad(ex("2"), schema.author, ex("4")),
+            [ex("2"), rdf.type, schema.Person, defaultGraph],
+            [ex("2"), schema.name, bill, defaultGraph],
+            [ex("2"), schema.author, ex("3"), defaultGraph],
+            [ex("2"), schema.author, ex("4"), defaultGraph],
 
-            rdfFactory.quad(ex("3"), rdf.type, schema.Book),
-            rdfFactory.quad(ex("3"), schema.name, bookTitle),
-            rdfFactory.quad(ex("3"), schema.name, alternativeTitle),
-            rdfFactory.quad(ex("3"), schema.numberOfPages, rdfFactory.literal(75)),
+            [ex("3"), rdf.type, schema.Book, defaultGraph],
+            [ex("3"), schema.name, bookTitle, defaultGraph],
+            [ex("3"), schema.name, alternativeTitle, defaultGraph],
+            [ex("3"), schema.numberOfPages, rdfFactory.literal(75), defaultGraph],
 
-            rdfFactory.quad(ex("4"), rdf.type, schema.Book),
-            rdfFactory.quad(ex("4"), schema.name, rdfFactory.literal("His second work")),
-            rdfFactory.quad(ex("4"), schema.numberOfPages, rdfFactory.literal(475)),
-            rdfFactory.quad(ex("4"), schema.bookEdition, rdfFactory.literal("1st")),
+            [ex("4"), rdf.type, schema.Book, defaultGraph],
+            [ex("4"), schema.name, rdfFactory.literal("His second work"), defaultGraph],
+            [ex("4"), schema.numberOfPages, rdfFactory.literal(475), defaultGraph],
+            [ex("4"), schema.bookEdition, rdfFactory.literal("1st"), defaultGraph],
         ];
         store.store.addQuads(testData);
 

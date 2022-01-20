@@ -1,4 +1,6 @@
 import { SomeTerm } from "@ontologies/core";
+import * as rdf from "@ontologies/rdf";
+import * as rdfs from "@ontologies/rdfs";
 
 import { normalizeType } from "../utilities";
 
@@ -7,6 +9,9 @@ export type FieldId = string;
 export type MultimapTerm = SomeTerm[];
 export type FieldValue = SomeTerm | MultimapTerm;
 export type DataRecord = Record<FieldId, FieldValue>;
+
+const member = rdfs.member.value;
+const memberPrefix = rdf.ns("_").value;
 
 const merge = (a: SomeTerm | MultimapTerm | undefined, b: SomeTerm | MultimapTerm): SomeTerm | MultimapTerm => {
   if (Array.isArray(a)) {
@@ -29,7 +34,7 @@ export class StructuredStore {
 
   private aliases: Record<string, Id & FieldId> = {};
 
-  constructor(base: string = "") {
+  constructor(base: string = "rdf:defaultGraph") {
     this.base = base;
     this.data = {};
   }
@@ -39,7 +44,30 @@ export class StructuredStore {
   }
 
   public getField(recordId: Id, field: FieldId): FieldValue | undefined {
-    return this.getRecord(recordId)?.[this.primary(field)];
+    if (field === member) {
+      const record = this.getRecord(recordId);
+      if (record === undefined) {
+        return undefined;
+      }
+      const values: FieldValue = [];
+      const sortedEntries = Object
+        .entries(record)
+        .sort(([k1], [k2]) => {
+          const a = k1.split(memberPrefix).pop() ?? k1;
+          const b = k2.split(memberPrefix).pop() ?? k2;
+
+          return a < b ? -1 : (a > b ? 1 : 0);
+        });
+      for (const [f, v] of sortedEntries) {
+        if (f === member || f.startsWith(memberPrefix)) {
+          values.push(...normalizeType(v));
+        }
+      }
+
+      return values;
+    } else {
+      return this.getRecord(recordId)?.[this.primary(field)];
+    }
   }
 
   public setField(recordId: Id, field: FieldId, value: FieldValue): void {

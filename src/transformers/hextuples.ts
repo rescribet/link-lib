@@ -1,4 +1,4 @@
-import { Quad } from "@ontologies/core";
+import { Quadruple } from "@ontologies/core";
 import { hextuplesTransformer } from "hextuples";
 
 import { LinkedRenderStore } from "../LinkedRenderStore";
@@ -11,7 +11,8 @@ export const hextupleProcessor = {
   acceptValue: 1.0,
   mediaTypes: ["application/hex+x-ndjson"],
 
-  transformer: (store: LinkedRenderStore<any>): ResponseTransformer => (res: ResponseAndFallbacks): Promise<Quad[]> => {
+  transformer: (store: LinkedRenderStore<any>): ResponseTransformer =>
+      (res: ResponseAndFallbacks): Promise<Quadruple[]> => {
     const isExpedited = res.hasOwnProperty("expedite")
       ? (res as any).expedite
       : false;

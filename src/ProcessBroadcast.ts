@@ -1,18 +1,6 @@
-import { Quad } from "@ontologies/core";
+import { Quadruple } from "@ontologies/core";
 
 import { SubscriptionRegistrationBase } from "./types";
-
-declare global {
-    interface Window {
-        requestIdleCallback: (callback: any, opts: object) => number;
-        cancelIdleCallback: (handle: number) => void;
-    }
-
-    interface IdleDeadline {
-        timeRemaining: () => number;
-        didTimeout: boolean;
-    }
-}
 
 export interface ProcessBroadcastOpts {
     bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
@@ -25,7 +13,7 @@ export interface ProcessBroadcastOpts {
     subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
     timeout: number;
     /** Statements which have changed in the store */
-    work: Quad[] | ReadonlyArray<Quad>;
+    work: Quadruple[] | ReadonlyArray<Quadruple>;
 }
 
 /**
@@ -38,7 +26,7 @@ export class ProcessBroadcast {
     private readonly hasRequestAnimationFrame: boolean;
     private readonly regUpdateTime: number;
     private subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
-    private readonly work: ReadonlyArray<Quad>;
+    private readonly work: ReadonlyArray<Quadruple>;
     private resolve: () => void;
     private readonly timeout: number;
 

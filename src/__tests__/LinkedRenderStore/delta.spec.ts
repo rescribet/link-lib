@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory, { Quadruple } from "@ontologies/core";
+import rdfFactory, { QuadPosition, Quadruple } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 import { LinkedRenderStore } from "../../LinkedRenderStore";
 
@@ -23,15 +23,15 @@ describe("LinkedRenderStore", () => {
     describe("#processDelta", () => {
         const getLabel = (lrs: LinkedRenderStore<any>): string | undefined => lrs
           .tryEntity(schemaT)
-          .find((q) => q.predicate === rdfs.label)
-          ?.object
+          .find((q) => q[QuadPosition.predicate] === rdfs.label)
+          ?.[QuadPosition.object]
           ?.value;
 
         it("processes quad delta", () => {
             const { lrs } = getBasicStore();
 
             lrs.processDelta([
-              rdfFactory.quad(schemaT, rdfs.label, rdfFactory.literal("test"), ld.replace),
+              [schemaT, rdfs.label, rdfFactory.literal("test"), ld.replace],
             ], true);
 
             expect(getLabel(lrs)).toEqual("test");
@@ -88,10 +88,10 @@ describe("LinkedRenderStore", () => {
             const store = getBasicStore();
             store.lrs.deltaProcessors.push(processor);
 
-            const delta = [
-                rdfFactory.quad(ex("1"), ex("p"), ex("2"), ld.add),
-                rdfFactory.quad(ex("1"), ex("t"), rdfFactory.literal("Test"), ld.add),
-                rdfFactory.quad(ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add),
+            const delta: Quadruple[] = [
+                [ex("1"), ex("p"), ex("2"), ld.add],
+                [ex("1"), ex("t"), rdfFactory.literal("Test"), ld.add],
+                [ex("2"), ex("t"), rdfFactory.literal("Value"), ld.add],
             ];
             await store.lrs.queueDelta(delta);
 

@@ -1,6 +1,6 @@
 import "../../__tests__/useHashFactory";
 
-import rdfFactory from "@ontologies/core";
+import rdfFactory, { QuadPosition } from "@ontologies/core";
 
 import ex from "../../ontology/ex";
 import { RDFAdapter } from "../../store/RDFAdapter";
@@ -52,7 +52,7 @@ describe("monkeys", () => {
               rdfFactory.namedNode("http://example.com/4"),
             );
 
-            expect((g as any).quads[0].subject).toHaveProperty("id");
+            expect((g as any).quads[0][QuadPosition.subject]).toHaveProperty("id");
         });
     });
 });

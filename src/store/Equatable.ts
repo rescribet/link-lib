@@ -1,26 +1,27 @@
 /* Taken, stripped and modified from rdflib.js */
 
 import {
-  isNode,
-  NamedNode,
-  Node,
-  Quad,
-  SomeTerm,
-  Term,
-  TermType,
+    isNode,
+    NamedNode,
+    Node,
+    QuadPosition,
+    Quadruple,
+    SomeTerm,
+    Term,
+    TermType,
 } from "@ontologies/core";
 import { sameAs } from "@ontologies/owl";
 
 import { equals } from "../factoryHelpers";
 import { SomeNode } from "../types";
 
-import BasicStore from "./BasicStore";
+import { RDFAdapter } from "./RDFAdapter";
 import { StructuredStore } from "./StructuredStore";
 
 export type Constructable<T = object> = new (...args: any[]) => T;
 
 // tslint:disable-next-line:typedef
-export function Equatable<BC extends Constructable<BasicStore>>(base: BC) {
+export function Equatable<BC extends Constructable<RDFAdapter>>(base: BC) {
     return class extends base {
         public classOrder: Record<TermType, number> = {
             BlankNode: 6,
@@ -34,9 +35,9 @@ export function Equatable<BC extends Constructable<BasicStore>>(base: BC) {
             super(...args);
             this.defaultGraphValue = this.rdfFactory.defaultGraph().value;
 
-            this.addDataCallback((quad: Quad) => {
-                if (equals(quad.predicate, sameAs)) {
-                    this.equate(quad.subject, quad.object as Node);
+            this.addDataCallback((quad: Quadruple) => {
+                if (equals(quad[QuadPosition.predicate], sameAs)) {
+                    this.equate(quad[QuadPosition.subject], quad[QuadPosition.object] as Node);
                 }
             });
         }
@@ -101,16 +102,14 @@ export function Equatable<BC extends Constructable<BasicStore>>(base: BC) {
             subject: SomeNode | null,
             predicate: NamedNode | null,
             object: SomeTerm | null,
-            graph: SomeNode | null = this.rdfFactory.defaultGraph(),
             justOne: boolean = false,
-        ): Quad[] {
+        ): Quadruple[] {
             return super.match(
                 subject ? this.canon(subject) : null,
                 predicate ? this.canon(predicate) as NamedNode : null,
                 object
                     ? (isNode(object) ? this.canon(object) : object)
                     : null,
-                graph ? this.canon(graph) : null,
                 justOne,
             );
         }

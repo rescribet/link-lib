@@ -1,4 +1,4 @@
-import rdfFactory, { NamedNode, Quad, SomeTerm } from "@ontologies/core";
+import rdfFactory, { NamedNode, QuadPosition, Quadruple, SomeTerm } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import { id } from "./factoryHelpers";
@@ -47,15 +47,23 @@ export class Schema<IndexType = number | string> {
      * Push quads onto the graph so it can be used by the render store for component determination.
      * @return The quads added to the store.
      */
-    public addQuads(quads: Quad[]): Quad[] {
-        const unique = quads.filter((s) => !this.store.holdsQuad(s));
+    public addQuads(quads: Quadruple[]): Quadruple[] {
+        const unique = quads.filter((s) => !this.store.holds(
+            s[QuadPosition.subject],
+            s[QuadPosition.predicate],
+            s[QuadPosition.object],
+        ));
         const eligible = unique.filter(this.process.bind(this));
         if (eligible.length === 0) {
             return [];
         }
 
         for (const quad of eligible) {
-            this.store.add(quad.subject, quad.predicate, quad.object);
+            this.store.add(
+                quad[QuadPosition.subject],
+                quad[QuadPosition.predicate],
+                quad[QuadPosition.object],
+            );
         }
 
         return this.liveStore.addQuads(eligible);
@@ -92,16 +100,16 @@ export class Schema<IndexType = number | string> {
     }
 
     /** @ignore */
-    public holdsQuad(quad: Quad): boolean {
-        return this.store.holdsQuad(quad);
+    public holds(s: SomeNode, p: NamedNode, o: SomeTerm): boolean {
+        return this.store.holds(s, p, o);
     }
 
     public isInstanceOf(resource: IndexType, superClass: IndexType): boolean {
-        return this.store.holdsQuad(rdfFactory.quad(
+        return this.store.holds(
             rdfFactory.fromId(resource) as NamedNode,
             rdf.type,
             rdfFactory.fromId(superClass) as SomeTerm,
-        ));
+        );
     }
 
     public isSubclassOf(resource: IndexType, superClass: IndexType): boolean {
@@ -124,13 +132,13 @@ export class Schema<IndexType = number | string> {
     }
 
     /** @ignore */
-    public match(subject: SomeNode | null,
-                 predicate: NamedNode | null,
-                 object: SomeTerm | null,
-                 graph: SomeNode | null = rdfFactory.defaultGraph(),
-                 justOne: boolean = false,
-    ): Quad[] {
-        return this.store.match(subject, predicate, object, graph, justOne);
+    public match(
+        subject: SomeNode | null,
+        predicate: NamedNode | null,
+        object: SomeTerm | null,
+        justOne: boolean = false,
+    ): Quadruple[] {
+        return this.store.match(subject, predicate, object, justOne);
     }
 
     /**
@@ -212,7 +220,7 @@ export class Schema<IndexType = number | string> {
         });
     }
 
-    private process(item: Quad): Quad[] | null {
+    private process(item: Quadruple): Quadruple[] | null {
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             const res = Schema.vocabularies[i].processStatement(item, this.getProcessingCtx());
             if (res !== null) {

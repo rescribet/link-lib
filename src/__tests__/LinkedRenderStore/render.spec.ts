@@ -84,7 +84,7 @@ describe("LinkedRenderStore", () => {
     describe("returns renderer for", () => {
         it("class renders", () => {
             const LRS = new LinkedRenderStore();
-            expect(LRS.getComponentForType(schema.Thing)).toBeUndefined();
+            expect(LRS.getComponentForType(schema.Thing)).toBeNull();
             const ident = (a: string): string => a;
             const registrations = LinkedRenderStore.registerRenderer(ident, schema.Thing);
             LRS.registerAll(registrations);

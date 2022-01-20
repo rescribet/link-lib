@@ -1,7 +1,7 @@
 import "jest";
 import "./useHashFactory";
 
-import rdfFactory, { Quad } from "@ontologies/core";
+import rdfFactory, { QuadPosition, Quadruple } from "@ontologies/core";
 import * as owl from "@ontologies/owl";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
@@ -10,6 +10,8 @@ import { LinkedRenderStore } from "../LinkedRenderStore";
 import { getBasicStore } from "../testUtilities";
 
 import { example } from "./LinkedRenderStore/fixtures";
+
+const defaultGraph = rdfFactory.defaultGraph();
 
 describe("LinkedRenderStore", () => {
     describe("actions", () => {
@@ -53,21 +55,21 @@ describe("LinkedRenderStore", () => {
 
             const id = example("sameFirst");
             const idSecond = example("sameSecond");
-            const testData = [
-                rdfFactory.quad(id, rdf.type, schema.CreativeWork),
-                rdfFactory.quad(id, schema.text, rdfFactory.literal("text")),
-                rdfFactory.quad(id, schema.author, rdfFactory.namedNode("http://example.org/people/0")),
+            const testData: Quadruple[] = [
+                [id, rdf.type, schema.CreativeWork, defaultGraph],
+                [id, schema.text, rdfFactory.literal("text"), defaultGraph],
+                [id, schema.author, rdfFactory.namedNode("http://example.org/people/0"), defaultGraph],
 
-                rdfFactory.quad(idSecond, rdf.type, schema.CreativeWork),
-                rdfFactory.quad(idSecond, schema.name, rdfFactory.literal("other")),
+                [idSecond, rdf.type, schema.CreativeWork, defaultGraph],
+                [idSecond, schema.name, rdfFactory.literal("other"), defaultGraph],
 
-                rdfFactory.quad(idSecond, owl.sameAs, id),
+                [idSecond, owl.sameAs, id, defaultGraph],
             ];
 
             store.store.addQuads(testData);
-            const entity = store.lrs.tryEntity(id) as Quad[];
+            const entity = store.lrs.tryEntity(id);
 
-            expect(entity.map((s) => s.object.value)).toContainEqual("other");
+            expect(entity.map((s) => s[QuadPosition.object].value)).toContainEqual("other");
         });
     });
 

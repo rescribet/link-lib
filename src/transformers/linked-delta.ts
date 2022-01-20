@@ -1,4 +1,4 @@
-import { Quad, Quadruple } from "@ontologies/core";
+import { Quadruple } from "@ontologies/core";
 import { NQuadsParser } from "n-quads-parser";
 
 import { LinkedRenderStore } from "../LinkedRenderStore";
@@ -14,7 +14,7 @@ import {
  */
 
 export function linkedDeltaProcessor(lrs: LinkedRenderStore<any>): ResponseTransformer {
-    return async function processLinkedDelta(response: ResponseAndFallbacks): Promise<Quad[]> {
+    return async function processLinkedDelta(response: ResponseAndFallbacks): Promise<Quadruple[]> {
         let data: string;
         if (response instanceof Response) {
             data = response.bodyUsed ? "" : await response.text();
