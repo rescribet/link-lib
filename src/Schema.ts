@@ -1,19 +1,16 @@
-import rdfFactory, { NamedNode, QuadPosition, Quadruple, SomeTerm } from "@ontologies/core";
-import * as rdf from "@ontologies/rdf";
+import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 import { id } from "./factoryHelpers";
-import RDFIndex from "./store/RDFIndex";
 
-import { RDFStore } from "./RDFStore";
 import { OWL } from "./schema/owl";
 import { RDFS } from "./schema/rdfs";
+import { DisjointSet } from "./utilities/DisjointSet";
 
+import { RDFStore } from "./RDFStore";
 import {
-    SomeNode,
     VocabularyProcessingContext,
     VocabularyProcessor,
 } from "./types";
-import { DisjointSet } from "./utilities/DisjointSet";
 
 /**
  * Implements some RDF/OWL logic to enhance the functionality of the property lookups.
@@ -27,46 +24,23 @@ export class Schema<IndexType = number | string> {
     private equivalenceSet: DisjointSet<IndexType> = new DisjointSet();
     // Typescript can't handle generic index types, so it is set to string.
     private expansionCache: { [k: string]: IndexType[] };
-    private store: RDFIndex;
     private liveStore: RDFStore;
     private superMap: Map<IndexType, Set<IndexType>> = new Map();
     private processedTypes: IndexType[] = [];
 
     public constructor(liveStore: RDFStore) {
         this.liveStore = liveStore;
-        this.store = new RDFIndex();
         this.liveStore.getInternalStore().addDataCallback(this.process.bind(this));
         this.expansionCache = {};
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
-            this.addQuads(Schema.vocabularies[i].axioms);
-        }
-    }
-
-    /**
-     * Push quads onto the graph so it can be used by the render store for component determination.
-     * @return The quads added to the store.
-     */
-    public addQuads(quads: Quadruple[]): Quadruple[] {
-        const unique = quads.filter((s) => !this.store.holds(
-            s[QuadPosition.subject],
-            s[QuadPosition.predicate],
-            s[QuadPosition.object],
-        ));
-        const eligible = unique.filter(this.process.bind(this));
-        if (eligible.length === 0) {
-            return [];
+            this.liveStore.addQuadruples(Schema.vocabularies[i].axioms);
         }
 
-        for (const quad of eligible) {
-            this.store.add(
-                quad[QuadPosition.subject],
-                quad[QuadPosition.predicate],
-                quad[QuadPosition.object],
-            );
+        const preexisting = liveStore.getInternalStore().quads;
+        for (const quad of preexisting) {
+            this.process(quad);
         }
-
-        return this.liveStore.addQuads(eligible);
     }
 
     public allEquals(resource: IndexType, grade = 1.0): IndexType[] {
@@ -97,48 +71,6 @@ export class Schema<IndexType = number | string> {
             store: this,
             superMap: this.superMap,
         };
-    }
-
-    /** @ignore */
-    public holds(s: SomeNode, p: NamedNode, o: SomeTerm): boolean {
-        return this.store.holds(s, p, o);
-    }
-
-    public isInstanceOf(resource: IndexType, superClass: IndexType): boolean {
-        return this.store.holds(
-            rdfFactory.fromId(resource) as NamedNode,
-            rdf.type,
-            rdfFactory.fromId(superClass) as SomeTerm,
-        );
-    }
-
-    public isSubclassOf(resource: IndexType, superClass: IndexType): boolean {
-        const resourceMap = this.superMap.get(resource);
-
-        if (resourceMap) {
-            return resourceMap.has(superClass);
-        }
-        return false;
-    }
-
-    /**
-     * Returns the hierarchical depth of the type, or -1 if unknown.
-     * @param type the type to check
-     */
-    public superTypeDepth(type: IndexType): number {
-        const superMap = this.superMap.get(type);
-
-        return superMap ? superMap.size : -1;
-    }
-
-    /** @ignore */
-    public match(
-        subject: SomeNode | null,
-        predicate: NamedNode | null,
-        object: SomeTerm | null,
-        justOne: boolean = false,
-    ): Quadruple[] {
-        return this.store.match(subject, predicate, object, justOne);
     }
 
     /**
@@ -218,6 +150,25 @@ export class Schema<IndexType = number | string> {
 
             return 0;
         });
+    }
+
+    /**
+     * Returns the hierarchical depth of the type, or -1 if unknown.
+     * @param type the type to check
+     */
+    private superTypeDepth(type: IndexType): number {
+        const superMap = this.superMap.get(type);
+
+        return superMap ? superMap.size : -1;
+    }
+
+    private isSubclassOf(resource: IndexType, superClass: IndexType): boolean {
+        const resourceMap = this.superMap.get(resource);
+
+        if (resourceMap) {
+            return resourceMap.has(superClass);
+        }
+        return false;
     }
 
     private process(item: Quadruple): Quadruple[] | null {

@@ -1,6 +1,5 @@
 import rdfFactory, {
     DataFactory,
-    Feature,
     NamedNode,
     QuadPosition,
     Quadruple, SomeTerm,
@@ -8,7 +7,6 @@ import rdfFactory, {
 } from "@ontologies/core";
 import * as ld from "@ontologies/ld";
 import * as rdf from "@ontologies/rdf";
-import * as rdfs from "@ontologies/rdfs";
 
 import { equals, id } from "./factoryHelpers";
 import ll from "./ontology/ll";
@@ -20,24 +18,18 @@ import {
 import { deltaProcessor } from "./store/deltaProcessor";
 import { RDFAdapter } from "./store/RDFAdapter";
 import RDFIndex from "./store/RDFIndex";
+import { DataRecord, Id } from "./store/StructuredStore";
 import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
-import { doc, getPropBestLang, normalizeType, sortByBestLang } from "./utilities";
+import { getPropBestLang, normalizeType, sortByBestLang } from "./utilities";
 import { addChangeBufferCallbacks } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quadruple> = Object.freeze([]);
 
 export interface RDFStoreOpts {
+    data?: Record<Id, DataRecord>;
     deltaProcessorOpts?: { [k: string]: NamedNode[] };
     innerStore?: RDFIndex;
 }
-
-export interface Funlets {
-    allRDFPropertyStatements: (obj: Quadruple[] | undefined, predicate: SomeNode) => Quadruple[];
-    flushFilter: (changeStamp: number) => (s: Quadruple) => boolean;
-    /** Builds a cache of types per resource. Can be omitted when compiled against a well known service. */
-    processTypeQuad: (quad: Quadruple) => boolean;
-}
-const memberPrefix = rdf.ns("_").value;
 
 /**
  * Provides a clean consistent interface to stored (RDF) data.
@@ -51,7 +43,6 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * @note Not to be confused with the last change in the store, which might be later than the flush time.
      */
     public changeTimestamps: number[] = [];
-    public typeCache: NamedNode[][] = [];
     public langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
@@ -59,7 +50,6 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     private deltas: Quadruple[][] = [];
     private deltaProcessor: StoreProcessor;
     private store: RDFIndex = new RDFIndex();
-    private funlets: Funlets;
 
     public get rdfFactory(): DataFactory {
         return rdfFactory;
@@ -70,10 +60,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
 
     private defaultGraph: NamedNode = this.rdfFactory.defaultGraph();
 
-    constructor({ deltaProcessorOpts, innerStore }: RDFStoreOpts = {}) {
+    constructor({ data, deltaProcessorOpts, innerStore }: RDFStoreOpts = {}) {
         this.processDelta = this.processDelta.bind(this);
 
-        const g = innerStore || new RDFIndex();
+        const g = innerStore || new RDFIndex({ data });
         this.store = addChangeBufferCallbacks(g, this);
 
         const defaults =  {
@@ -95,97 +85,6 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             deltaProcessorOpts?.purgeGraphIRIS || defaults.purgeGraphIRIS,
             deltaProcessorOpts?.sliceGraphIRIS || defaults.sliceGraphIRIS,
         )(this.store);
-
-        const defaultFunlets: Funlets = Object.freeze({
-            allRDFPropertyStatements: (obj: Quadruple[] | undefined, predicate: SomeNode): Quadruple[] => {
-                if (typeof obj === "undefined") {
-                    return [];
-                }
-
-                if (equals(predicate, rdfs.member)) {
-                    return obj.filter((s) => equals(s[QuadPosition.predicate], rdfs.member)
-                      || s[QuadPosition.predicate].value.startsWith(memberPrefix));
-                }
-
-                const t = [];
-                for (let i = 0; i < obj.length; i++) {
-                    if (equals(predicate, obj[i][QuadPosition.predicate])) {
-                        t.push(obj[i]);
-                    }
-                }
-                return t;
-            },
-            flushFilter: (changeStamp: number): any => (s: Quadruple): boolean => {
-                this.changeTimestamps[id(s[QuadPosition.subject])] = changeStamp;
-                this.changeTimestamps[id(doc(s[QuadPosition.subject]))] = changeStamp;
-                return equals(s[QuadPosition.predicate], rdf.type);
-            },
-            processTypeQuad: (quad: Quadruple): boolean => {
-                if (!equals(quad[QuadPosition.predicate], rdf.type)) {
-                    return false;
-                }
-                const subjId = id(this.canon(quad[QuadPosition.subject]));
-                if (!Array.isArray(this.typeCache[subjId])) {
-                    this.typeCache[subjId] = [];
-                }
-                this.typeCache[subjId] = normalizeType(
-                    this
-                        .store
-                        .store
-                        .getField(quad[QuadPosition.subject].value, rdf.type.value) as NamedNode | NamedNode[]
-                    ?? [],
-                );
-                return false;
-            },
-        });
-
-        const idFunlets: Funlets = Object.freeze({
-            allRDFPropertyStatements: (obj: Quadruple[] | undefined, predicate: SomeNode): Quadruple[] => {
-                if (typeof obj === "undefined") {
-                    return [];
-                }
-
-                if (predicate === rdfs.member) {
-                    return obj.filter((s) => s[QuadPosition.predicate] === rdfs.member
-                      || s[QuadPosition.predicate].value.startsWith(memberPrefix));
-                }
-
-                const t = [];
-                for (let i = 0; i < obj.length; i++) {
-                    if (equals(predicate, obj[i][QuadPosition.predicate])) {
-                        t.push(obj[i]);
-                    }
-                }
-                return t;
-            },
-            flushFilter: (changeStamp: number): any => (s: Quadruple): boolean => {
-                this.changeTimestamps[s[QuadPosition.subject].id as number] = changeStamp;
-                this.changeTimestamps[doc(s[QuadPosition.subject]).id as number] = changeStamp;
-
-                return s[QuadPosition.predicate] === rdf.type;
-            },
-            processTypeQuad: (quad: Quadruple): boolean => {
-                if (quad[QuadPosition.predicate] !== rdf.type) {
-                    return false;
-                }
-                const subjId = this.canon(quad[QuadPosition.subject]).id as number;
-                if (!Array.isArray(this.typeCache[subjId])) {
-                    this.typeCache[subjId] = [];
-                }
-                this.typeCache[subjId] = normalizeType(
-                    this
-                        .store
-                        .store
-                        .getField(quad[QuadPosition.subject].value, rdf.type.value) as NamedNode | NamedNode[]
-                    ?? [],
-                );
-                return false;
-            },
-        });
-
-        this.funlets = rdfFactory.supports[Feature.identity] ? idFunlets : defaultFunlets;
-
-        g.addDataCallback(this.funlets.processTypeQuad.bind(this));
     }
 
     public add(subject: SomeNode, predicate: NamedNode, object: SomeTerm): Quadruple {
@@ -245,10 +144,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
         const processingBuffer = this.changeBuffer;
         this.changeBuffer = new Array(100);
         this.changeBufferCount = 0;
-        const changeStamp = Date.now();
-        processingBuffer
-            .filter(this.funlets.flushFilter(changeStamp))
-            .map(this.funlets.processTypeQuad);
+        // const changeStamp = Date.now();
+        // processingBuffer
+        //     .filter(this.funlets.flushFilter(changeStamp))
+        //     .map(this.funlets.processTypeQuad);
 
         return processingBuffer;
     }
@@ -256,6 +155,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     /** @private */
     public getInternalStore(): RDFIndex {
         return this.store;
+    }
+
+    public references(recordId: SomeNode): Id[] {
+        return this.store.references(recordId);
     }
 
     /** @deprecated */
@@ -283,7 +186,6 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     public removeResource(subject: SomeNode): void {
         const canSubj = this.canon(subject);
         this.touch(canSubj);
-        this.typeCache[id(canSubj)] = [];
         (this.store as RDFAdapter).deleteRecord(subject);
     }
 
@@ -322,7 +224,13 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
 
     public getResourceProperties<TT extends Term = Term>(subject: SomeNode, property: SomeNode | SomeNode[]): TT[] {
         if (property === rdf.type) {
-            return (this.typeCache[id(this.canon(subject))] || []) as TT[];
+            const value = this.store.store.getField(subject.value, rdf.type.value);
+
+            if (!value) {
+                return EMPTY_ST_ARR as unknown as TT[];
+            } else {
+                return normalizeType(value) as TT[];
+            }
         }
 
         const properties = normalizeType(property);
@@ -346,9 +254,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     ): T | undefined {
 
         if (!Array.isArray(property) && equals(property, rdf.type)) {
-            const entry = this.typeCache[id(this.canon(subject))];
-
-            return entry ? entry[0] as T : undefined;
+            return this.store.store.getField(subject.value, rdf.type.value) as T;
         }
         const rawProp = this.getResourcePropertyRaw(subject, property);
         if (rawProp.length === 0) {

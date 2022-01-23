@@ -18,12 +18,16 @@ const resource1: Quadruple[] = [
     [example.ns("5"), schemaNS.text, rdfFactory.literal("Body text"), defaultGraph],
 ];
 
-const blankSchema = (): Schema => new Schema(new RDFStore());
+const blankSchema = (): [RDFStore, Schema] => {
+    const store = new RDFStore();
+    const schema = new Schema(store);
+    return [store, schema];
+};
 
 describe("Schema", () => {
     describe("when empty", () => {
         describe("initializes with the correct statements", () => {
-            const schema = blankSchema();
+            const [_, schema] = blankSchema();
 
             // TODO: Implement core rdf logic
             // it("holds rdfs:Class to be an instance of rdfs:Class", () => {
@@ -57,11 +61,11 @@ describe("Schema", () => {
 
         describe("#addStatements", () => {
             it("adds an empty array", () => {
-                expect(blankSchema().addQuads([])).toHaveLength(0);
+                expect(blankSchema()[0].addQuadruples([])).toHaveLength(0);
             });
 
             it("adds ontology statements", () => {
-                const schema = blankSchema();
+                const [store, schema] = blankSchema();
                 const personIsAClass: Quadruple = [schemaNS.Person, rdf.type, rdfs.Class, defaultGraph];
 
                 expect(schema.holds(
@@ -70,7 +74,7 @@ describe("Schema", () => {
                     personIsAClass[QuadPosition.object],
                 )).toBeFalsy();
 
-                schema.addQuads([personIsAClass]);
+                store.addQuadruples([personIsAClass]);
 
                 expect(schema.holds(
                     personIsAClass[QuadPosition.subject],
@@ -80,10 +84,10 @@ describe("Schema", () => {
             });
 
             it("doesn't add generic statements", () => {
-                const schema = blankSchema();
+                const [store, schema] = blankSchema();
                 const s = resource1[1];
 
-                schema.addQuads([s]);
+                store.addQuadruples([s]);
 
                 expect(schema.holds(
                     s[QuadPosition.subject],
@@ -95,13 +99,13 @@ describe("Schema", () => {
 
         describe("#mineForTypes", () => {
             it("returns the default ", () => {
-                const s = blankSchema();
+                const [, s] = blankSchema();
                 expect(s.mineForTypes([]))
                     .toEqual([rdfFactory.id(rdfs.Resource)]);
             });
 
             it("ensures all have rdfs:Resource as base class", () => {
-                const schema = blankSchema();
+                const [_, schema] = blankSchema();
                 const result = [
                     rdfFactory.id(schemaNS.CreativeWork),
                     rdfFactory.id(rdfs.Resource),
@@ -112,7 +116,7 @@ describe("Schema", () => {
             });
 
             it("adds superclasses", () => {
-                const schema = blankSchema();
+                const [store, schema] = blankSchema();
                 const result = [
                     rdfFactory.id(schemaNS.BlogPosting),
                     rdfFactory.id(schemaNS.CreativeWork),
@@ -120,7 +124,7 @@ describe("Schema", () => {
                     rdfFactory.id(rdfs.Resource),
                 ];
 
-                schema.addQuads([
+                store.addQuadruples([
                     [schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing, defaultGraph],
                     [schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork, defaultGraph],
                 ]);
@@ -132,8 +136,8 @@ describe("Schema", () => {
     });
 
     describe("when filled", () => {
-        const schema = blankSchema();
-        schema.addQuads([
+        const [store, schema] = blankSchema();
+        store.addQuadruples([
             [ex.ns("A"), rdfs.subClassOf, rdfs.Class, defaultGraph],
 
             [ex.ns("B"), rdfs.subClassOf, ex.ns("A"), defaultGraph],

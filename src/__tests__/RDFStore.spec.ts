@@ -295,40 +295,6 @@ describe("RDFStore", () => {
         });
     });
 
-    describe("#processTypeQuad", () => {
-        it("initializes new resources", () => {
-            const store = new RDFStore();
-
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toBeUndefined();
-            store.addQuads([
-                [ex("1"), rdf.type, ex("type"), ex("_")],
-            ]);
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type")]);
-        });
-
-        it("adds new types for cached resources", () => {
-            const store = new RDFStore();
-            store.addQuads([
-                [ex("1"), rdf.type, ex("type"), ex("_")],
-                [ex("1"), rdf.type, ex("type2"), ex("_")],
-            ]);
-
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type"), ex("type2")]);
-        });
-
-        it("removes type statements after they are removed from the store", () => {
-            const store = new RDFStore();
-            store.addQuads([
-                [ex("1"), rdf.type, ex("type"), ex("_")],
-                [ex("1"), rdf.type, ex("type2"), ex("_")],
-            ]);
-            store.removeQuads([[ex("1"), rdf.type, ex("type"), ex("_")]]);
-            store.flush();
-
-            expect(store.typeCache[rdfFactory.id(ex("1"))]).toEqual([ex("type2")]);
-        });
-    });
-
     describe("#rdfFactory", () => {
         it("returns the @ontologies/core factory", () => {
             expect(new RDFStore().rdfFactory).toBe(rdfFactory);
@@ -354,16 +320,6 @@ describe("RDFStore", () => {
 
             store.store.removeResource(resource);
             expect(store.store.changeTimestamps[rdfFactory.id(resource)]).toBeGreaterThan(before);
-        });
-
-        it("clears the type cache", () => {
-            const store = getBasicStore();
-            const resource = example("test");
-            store.store.add(resource, rdf.type, schema.Person);
-
-            expect(store.store.typeCache[rdfFactory.id(resource)]).toHaveLength(1);
-            store.store.removeResource(resource);
-            expect(store.store.typeCache[rdfFactory.id(resource)]).toHaveLength(0);
         });
 
         it("removes the resource data", () => {

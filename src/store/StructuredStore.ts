@@ -1,7 +1,8 @@
-import { SomeTerm } from "@ontologies/core";
+import rdfFactory, { SomeTerm } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
+import { SomeNode } from "../types";
 import { normalizeType } from "../utilities";
 import { RecordJournal } from "./RecordJournal";
 import { RecordState } from "./RecordState";
@@ -10,10 +11,14 @@ export type Id = string;
 export type FieldId = string;
 export type MultimapTerm = SomeTerm[];
 export type FieldValue = SomeTerm | MultimapTerm;
-export type DataRecord = Record<FieldId, FieldValue>;
+export type DataRecord = { _id: SomeNode } & Record<string, FieldValue>;
+export type DataSlice = Record<Id, DataRecord>;
 
+export const idField = "_id";
 const member = rdfs.member.value;
 const memberPrefix = rdf.ns("_").value;
+const namedNode = rdfFactory.namedNode.bind(rdfFactory);
+const blankNode = rdfFactory.blankNode.bind(rdfFactory);
 
 const merge = (a: SomeTerm | MultimapTerm | undefined, b: SomeTerm | MultimapTerm): SomeTerm | MultimapTerm => {
   if (Array.isArray(a)) {
@@ -51,15 +56,21 @@ export class StructuredStore {
   public base: string;
 
   /** @private */
-  public data: Record<Id, DataRecord> = {};
+  public data: Record<Id, DataRecord>;
 
   /** @private */
   public journal: RecordJournal = new RecordJournal();
 
   private aliases: Record<string, Id & FieldId> = {};
 
-  constructor(base: string = "rdf:defaultGraph") {
+  constructor(base: string = "rdf:defaultGraph", data: Record<Id, DataRecord> | undefined = {}) {
     this.base = base;
+    this.data = data ?? {};
+    for (const key in this.data) {
+      if (!this.data.hasOwnProperty(key)) {
+        this.journal.transition(key, RecordState.Present);
+      }
+    }
   }
 
   public deleteRecord(recordId: Id): void {
@@ -82,18 +93,24 @@ export class StructuredStore {
   }
 
   public setField(recordId: Id, field: FieldId, value: FieldValue): void {
+    if (field === idField) {
+      throw new Error("Can't set system fields");
+    }
     this.initializeRecord(recordId);
     this.setRecord(recordId, {
-      ...this.getRecord(recordId),
+      ...this.getRecord(recordId)!,
       [field]: value,
     });
   }
 
   /** @deprecated */
   public addField(recordId: Id, field: FieldId, value: SomeTerm): void {
+    if (field === idField) {
+      throw new Error("Can't set system fields");
+    }
     this.initializeRecord(recordId);
 
-    const existingRecord = this.getRecord(recordId);
+    const existingRecord = this.getRecord(recordId)!;
     const existingValue = existingRecord?.[field];
 
     const combined = Array.isArray(existingValue)
@@ -114,7 +131,7 @@ export class StructuredStore {
     }
 
     const next = {
-      ...this.getRecord(recordId),
+      ...this.getRecord(recordId)!,
     };
     delete next[field];
     this.setRecord(recordId, next);
@@ -164,21 +181,19 @@ export class StructuredStore {
       return this.withAlias(previous, this.aliases[current]);
     }
 
-    const next = new StructuredStore(this.base);
-    next.journal = this.journal;
-    next.aliases = {
-      ...this.aliases,
-      [previous]: current,
-    };
-    next.data = {
+    const nextData = {
       ...this.data,
       [current]: Object
         .entries(this.data[previous] ?? {})
         .reduce((acc, [k, v]) => ({
           ...acc,
-          [k]: merge(acc[k], v),
+          [k]: k === idField
+              ? v
+              : merge(acc[k], v),
         }), this.data[current] ?? {}),
     };
+    const next = this.copy(nextData);
+    next.aliases[previous] = current;
     delete next.data[previous];
 
     // Process incoming aliases
@@ -192,11 +207,33 @@ export class StructuredStore {
     return this.data[this.primary(recordId)];
   }
 
+  private copy(data: DataSlice): StructuredStore {
+    const next = new StructuredStore(this.base, data);
+    next.journal = this.journal.copy();
+    next.aliases = JSON.parse(JSON.stringify(this.aliases));
+
+    return next;
+  }
+
   private initializeRecord(recordId: Id): void {
-    this.data[this.primary(recordId)] ||= {};
+    const primary = this.primary(recordId);
+    this.journal.transition(primary, RecordState.Receiving);
+    this.data[primary] ||= {
+      _id: this.toSomeNode(primary),
+    };
   }
 
   private setRecord(recordId: Id, record: DataRecord): DataRecord | undefined {
-    return this.data[this.primary(recordId)] = record;
+    const primary = this.primary(recordId);
+    this.journal.transition(primary, RecordState.Present);
+    return this.data[primary] = record;
+  }
+
+  private toSomeNode(id: Id): SomeNode {
+    if (id.includes("/")) {
+      return namedNode(id);
+    } else {
+      return blankNode(id);
+    }
   }
 }

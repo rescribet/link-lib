@@ -16,13 +16,13 @@ describe("LinkedRenderStore", () => {
     describe("adds new graph items", () => {
         it("add a single graph item", () => {
             const store = getBasicStore();
-            store.lrs.addOntologySchematics(thingStatements);
+            store.lrs.store.addQuadruples(thingStatements);
             expect(store.schema.isInstanceOf(rdfFactory.id(schemaT), rdfFactory.id(rdfs.Class))).toBeTruthy();
         });
 
         it("adds multiple graph items", () => {
             const store = getBasicStore();
-            store.lrs.addOntologySchematics(thingStatements.concat(creativeWorkStatements));
+            store.lrs.store.addQuadruples(thingStatements.concat(creativeWorkStatements));
             expect(store.schema.isInstanceOf(rdfFactory.id(schemaT), rdfFactory.id(rdfs.Class))).toBeTruthy();
             expect(store.schema.isInstanceOf(rdfFactory.id(schemaCW), rdfFactory.id(rdfs.Class))).toBeTruthy();
         });
@@ -30,7 +30,7 @@ describe("LinkedRenderStore", () => {
 
     describe("#getResourceProperties", () => {
         const store = getBasicStore();
-        store.lrs.addOntologySchematics(thingStatements);
+        store.lrs.store.addQuadruples(thingStatements);
 
         it("returns empty data for empty subject", () => {
             const res = store.lrs.getResourceProperties(undefined, rdfs.label);
@@ -50,7 +50,7 @@ describe("LinkedRenderStore", () => {
 
     describe("#getResourceProperty", () => {
         const store = getBasicStore();
-        store.lrs.addOntologySchematics(thingStatements);
+        store.lrs.store.addQuadruples(thingStatements);
 
         it("returns empty data for empty subject", () => {
             const res = store.lrs.getResourceProperty(undefined, rdfs.label);
@@ -70,7 +70,7 @@ describe("LinkedRenderStore", () => {
 
     describe("#getResourcePropertyRaw", () => {
         const store = getBasicStore();
-        store.lrs.addOntologySchematics(thingStatements);
+        store.lrs.store.addQuadruples(thingStatements);
 
         it("returns empty data for empty subject", () => {
             const res = store.lrs.getResourcePropertyRaw(undefined, rdfs.label);

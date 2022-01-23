@@ -8,11 +8,12 @@ import rdfFactory, {
 } from "@ontologies/core";
 
 import { SomeNode } from "../types";
-import { Id, StructuredStore } from "./StructuredStore";
+import { DataRecord, Id, idField, StructuredStore } from "./StructuredStore";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 
 export interface RDFAdapterOpts {
+  data?: Record<Id, DataRecord>;
   quads: Quadruple[];
   dataCallback: (quad: Quadruple) => void;
   rdfFactory: DataFactory;
@@ -25,12 +26,13 @@ export class RDFAdapter {
   public readonly removeCallback: ((quad: Quadruple) => void) | undefined;
 
   /** @private */
-  public store: StructuredStore = new StructuredStore();
+  public store: StructuredStore;
   /** @private */
   public storeGraph: NamedNode;
 
   constructor(opts: Partial<RDFAdapterOpts> = {}) {
     this.dataCallbacks = [];
+    this.store = new StructuredStore("rdf:defaultGraph", opts.data);
     this.rdfFactory = opts.rdfFactory ?? rdfFactory;
     opts.quads?.forEach((q) => this.add(
         q[QuadPosition.subject],
@@ -85,15 +87,15 @@ export class RDFAdapter {
 
   /** Remove a quad from the store */
   public remove(st: Quadruple): this {
-    const sts = this.match(
-      st[QuadPosition.subject],
-      st[QuadPosition.predicate],
-      st[QuadPosition.object],
-    );
-    if (!sts.length) {
+    const value = this.store.getField(st[QuadPosition.subject].value, st[QuadPosition.predicate].value);
+    if (value === undefined) {
       throw new Error(`Quad to be removed is not on store: ${st}`);
     }
-    this.removeQuad(sts[0]);
+    this.store.deleteFieldMatching(
+        st[QuadPosition.subject].value,
+        st[QuadPosition.predicate].value,
+        st[QuadPosition.object],
+    );
 
     return this;
   }
@@ -143,11 +145,10 @@ export class RDFAdapter {
       quads = this.graphToQuads();
     }
 
-    const factory = this.rdfFactory;
     const filter = (q: Quadruple): boolean =>
-      (subject === null || factory.equals(q[QuadPosition.subject], subject))
-      && (predicate === null || factory.equals(q[QuadPosition.predicate], predicate))
-      && (object === null || factory.equals(q[QuadPosition.object], object));
+      (subject === null || q[QuadPosition.subject] === subject)
+      && (predicate === null || q[QuadPosition.predicate] === predicate)
+      && (object === null || q[QuadPosition.object] === object);
 
     if (justOne) {
       const res = quads.find(filter);
@@ -169,17 +170,39 @@ export class RDFAdapter {
       ? factory.namedNode(recordId)
       : factory.blankNode(recordId);
 
-    return Object
-      .entries(record)
-      .map(([field, value]) => Array.isArray(value)
-        ? value.map((v) => [subject, factory.namedNode(field), v, this.storeGraph] as Quadruple)
-        : [[subject, factory.namedNode(field), value, this.storeGraph] as Quadruple],
-      ).flat(1);
+    const quadruples: Quadruple[] = [];
+
+    for (const field in record) {
+      if (!record.hasOwnProperty(field) || field === idField) {
+        continue;
+      }
+
+      const value = record[field];
+      const fieldTerm = factory.namedNode(field);
+      if (Array.isArray(value)) {
+        for (const v of value) {
+          quadruples.push([subject, fieldTerm, v, this.storeGraph] as Quadruple);
+        }
+      } else {
+        quadruples.push([subject, fieldTerm, value, this.storeGraph] as Quadruple);
+      }
+    }
+
+    return quadruples;
   }
 
   public graphToQuads(): Quadruple[] {
-    return Object
-      .keys(this.store.data)
-      .flatMap((resource) => this.quadsForRecord(resource));
+    const qdrs = [];
+    const data = this.store.data;
+
+    for (const recordId in data) {
+      if (!data.hasOwnProperty(recordId)) {
+        continue;
+      }
+
+      qdrs.push(...this.quadsForRecord(recordId));
+    }
+
+    return qdrs;
   }
 }

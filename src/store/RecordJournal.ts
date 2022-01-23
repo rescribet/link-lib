@@ -19,7 +19,17 @@ const absentStatus: RecordStatus = {
 };
 
 export class RecordJournal {
-    private data: Record<Id, RecordStatus> = {};
+    private readonly data: Record<Id, RecordStatus> = {};
+
+    constructor(data?: Record<Id, RecordStatus> | undefined) {
+        if (data) {
+            this.data = data;
+        }
+    }
+
+    public copy(): RecordJournal {
+        return new RecordJournal(JSON.parse(JSON.stringify(this.data)));
+    }
 
     public get(recordId: Id): RecordStatus {
         if (!recordId.includes(":")) {

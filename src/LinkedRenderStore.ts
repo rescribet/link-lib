@@ -18,10 +18,10 @@ import { APIFetchOpts, LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
 import { dataToGraphTuple } from "./processor/DataToGraph";
-import { isPending } from "./processor/requestStatus";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { RecordState } from "./store/RecordState";
+import { RecordStatus } from "./store/RecordStatus";
 import { DataRecord, Id } from "./store/StructuredStore";
 import { TypedRecord } from "./TypedRecord";
 import {
@@ -46,7 +46,6 @@ import {
 } from "./types";
 import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "./utilities/constants";
-import { RecordStatus } from "./store/RecordStatus";
 
 const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
     .map((t) => id(t || defaultValue));
@@ -96,7 +95,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public api: API;
     public mapping: ComponentStore<T>;
     public schema: Schema<Indexable>;
-    public store: RDFStore = new RDFStore();
+    public store: RDFStore;
     public settings: TypedRecord = new TypedRecord();
 
     /**
@@ -120,6 +119,8 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public constructor(opts: LinkedRenderStoreOptions<T, API> = {}) {
         if (opts.store) {
             this.store = opts.store;
+        } else {
+            this.store = new RDFStore({ data: opts.data });
         }
 
         this.report = opts.report || ((e): void => { throw e; });
@@ -161,19 +162,6 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public addDeltaProcessor(processor: DeltaProcessor): void {
         this.deltaProcessors.unshift(processor);
-    }
-
-    /**
-     * Push one or more ontological items onto the graph so it can be used by the render store for component
-     * determination.
-     *
-     * Adding information after the initial render currently conflicts with the caching and will result in inconsistent
-     * results.
-     *
-     * Statements added here will also be added to the data store so views can access the statements.
-     */
-    public addOntologySchematics(items: Quadruple[]): void {
-        this.schema.addQuads(items);
     }
 
     /**
@@ -605,9 +593,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @unstable
      */
     public shouldLoadResource(subject: Node): boolean {
-        return (this.store.changeTimestamps[id(subject)] === undefined || this.api.isInvalid(subject))
-            && !this.resourceQueue.find(([i]) => equals(i, subject))
-            && !isPending(this.api.getStatus(subject));
+        return this.getState(subject.value).current === RecordState.Absent;
     }
 
     /**

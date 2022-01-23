@@ -3,7 +3,8 @@ import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
 import { equals, id } from "../factoryHelpers";
-import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
+import { DataRecord } from "../store/StructuredStore";
+import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();
 
@@ -61,27 +62,46 @@ export const RDFS = {
     ],
 
     processStatement(item: Quadruple, ctx: VocabularyProcessingContext): Quadruple[] | null {
+        const dataStore = ctx.dataStore.getInternalStore().store;
         const result: Quadruple[] = [item];
 
-        const domainStatements = ctx.store.match(item[QuadPosition.predicate], rdfs.domain, null);
-        if (domainStatements.length > 0) {
-            for (let i = 0; i < domainStatements.length; i++) {
+        const domainValues = dataStore.getField(item[QuadPosition.predicate].value, rdfs.domain.value);
+        if (domainValues !== undefined) {
+            if (Array.isArray(domainValues)) {
+                for (let i = 0; i < domainValues.length; i++) {
+                    result.push([
+                        item[QuadPosition.subject],
+                        rdf.type,
+                        domainValues[i],
+                        defaultGraph,
+                    ]);
+                }
+            } else {
                 result.push([
                     item[QuadPosition.subject],
                     rdf.type,
-                    domainStatements[i][QuadPosition.object],
+                    domainValues,
                     defaultGraph,
                 ]);
             }
         }
 
-        const rangeStatements = ctx.store.match(item[QuadPosition.predicate], rdfs.range, null);
-        if (rangeStatements.length > 0) {                                                     // P rdfs:range C..Cn
-            for (let i = 0; i < rangeStatements.length; i++) {
+        const rangeValues = dataStore.getField(item[QuadPosition.predicate].value, rdfs.range.value);
+        if (rangeValues !== undefined) {                                                     // P rdfs:range C..Cn
+            if (Array.isArray(rangeValues)) {
+                for (let i = 0; i < rangeValues.length; i++) {
+                    result.push([
+                        item[QuadPosition.object] as NamedNode,
+                        rdf.type,
+                        rangeValues[i],
+                        defaultGraph,
+                    ]);
+                }
+            } else {
                 result.push([
                     item[QuadPosition.object] as NamedNode,
                     rdf.type,
-                    rangeStatements[i][QuadPosition.object],
+                    rangeValues,
                     defaultGraph,
                 ]);
             }
@@ -96,23 +116,45 @@ export const RDFS = {
                 defaultGraph,
             ]);    // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.match(item[QuadPosition.subject], null, null);
-            for (let i = 0; i < dereferences.length; i++) {
-                result.push([
-                    item[QuadPosition.subject] as NamedNode,
-                    rdf.type,
-                    dereferences[i][QuadPosition.object],
-                    defaultGraph,
-                ]);
+            const record = dataStore.getRecord(item[QuadPosition.subject].value);
+            if (record !== undefined) {
+                const entries = Object.values(record);
+                for (const field in record) {
+                    if (!record.hasOwnProperty(field)) {
+                        continue;
+                    }
+
+                    for (const value of entries) {
+                        if (Array.isArray(value)) {
+                            for (const v of value) {
+                                result.push([
+                                    item[QuadPosition.subject] as NamedNode,
+                                    rdf.type,
+                                    v,
+                                    defaultGraph,
+                                ]);
+                            }
+                        } else {
+                            result.push([
+                                item[QuadPosition.subject] as NamedNode,
+                                rdf.type,
+                                value,
+                                defaultGraph,
+                            ]);
+                        }
+                    }
+                }
             }
 
             if (!equals(item[QuadPosition.subject], rdf.type)) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
                     item[QuadPosition.subject] as NamedNode,
-                    (quad: Quadruple) => {
-                        ctx.store.addQuads([
-                            [quad[QuadPosition.subject], rdf.type, item[QuadPosition.object], defaultGraph],
-                        ]);
+                    (updated: DataRecord) => {
+                        ctx.dataStore.add(
+                            updated._id,
+                            rdf.type,
+                            item[QuadPosition.object],
+                        );
                         return true;
                     },
                 );
@@ -126,23 +168,35 @@ export const RDFS = {
                 defaultGraph,
             ]); // C rdf:type rdfs:Class
 
-            const dereferences = ctx.store.match(null, null, item[QuadPosition.subject]);
+            const dereferences = ctx.dataStore.references(item[QuadPosition.subject]);
             for (let i = 0; i < dereferences.length; i++) {
-                result.push([dereferences[i][QuadPosition.subject], rdf.type, item[QuadPosition.object], defaultGraph]);
+                let s: SomeNode;
+                if (dereferences[i].includes("/")) {
+                    s = rdfFactory.namedNode(dereferences[i]);
+                } else {
+                    s = rdfFactory.blankNode(dereferences[i]);
+                }
+                result.push([s, rdf.type, item[QuadPosition.object], defaultGraph]);
             }
 
             if (!equals(item[QuadPosition.subject], rdf.type)) {
+                const predicate = item[QuadPosition.subject] as NamedNode;
+                const range = item[QuadPosition.object];
+
                 ctx.dataStore.getInternalStore().newPropertyAction(
-                    item[QuadPosition.subject] as NamedNode,
-                    (quad: Quadruple) => {
-                        const subject = quad[QuadPosition.object];
-                        if (subject.termType !== TermType.Literal) {
-                            ctx.store.addQuads([[
-                                subject,
-                                rdf.type,
-                                item[QuadPosition.object],
-                                defaultGraph,
-                            ]]);
+                    predicate,
+                    (updated: DataRecord) => {
+                        const subject = updated[predicate.value];
+                        if (Array.isArray(subject)) {
+                            for (const s of subject) {
+                                if (s.termType !== TermType.Literal) {
+                                    ctx.dataStore.add(s, rdf.type, range);
+                                }
+                            }
+                        } else {
+                            if (subject.termType !== TermType.Literal) {
+                                ctx.dataStore.add(subject, rdf.type, range);
+                            }
                         }
                         return true;
                     },
@@ -186,7 +240,6 @@ export const RDFS = {
 
     processType(type: NamedNode, ctx: VocabularyProcessingContext): boolean {
         RDFS.processStatement([type, rdfs.subClassOf, rdfs.Resource, defaultGraph], ctx);
-        ctx.store.addQuads([[type, rdf.type, rdfs.Class, defaultGraph]]);
         return false;
     },
 } as VocabularyProcessor;

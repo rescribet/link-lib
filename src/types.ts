@@ -17,6 +17,7 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import RDFIndex from "./store/RDFIndex";
 import { DisjointSet } from "./utilities/DisjointSet";
+import { DataRecord, Id } from "./store/StructuredStore";
 
 export interface ActionMap {
     [k: string]: (...args: any[]) => Promise<any>;
@@ -82,10 +83,12 @@ export type SomeNode = NamedNode | BlankNode;
 export interface LinkedRenderStoreOptions<T, API extends LinkedDataAPI = DataProcessor> {
     api?: API | undefined;
     apiOpts?: Partial<DataProcessorOpts> | undefined;
+    data?: Record<Id, DataRecord>;
     defaultType?: NamedNode | undefined;
     dispatch?: MiddlewareActionHandler;
     mapping?: ComponentStore<T> | undefined;
     namespaces?: NamespaceMap | undefined;
+    rehydration?: {} | undefined;
     report?: ErrorReporter;
     schema?: Schema | undefined;
     store?: RDFStore | undefined;
