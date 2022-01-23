@@ -3,6 +3,8 @@ import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
 import { normalizeType } from "../utilities";
+import { RecordJournal } from "./RecordJournal";
+import { RecordState } from "./RecordState";
 
 export type Id = string;
 export type FieldId = string;
@@ -23,6 +25,25 @@ const merge = (a: SomeTerm | MultimapTerm | undefined, b: SomeTerm | MultimapTer
   }
 };
 
+const getSortedFieldMembers = (record: DataRecord): MultimapTerm => {
+  const values: FieldValue = [];
+  const sortedEntries = Object
+      .entries(record)
+      .sort(([k1], [k2]) => {
+        const a = k1.split(memberPrefix).pop() ?? k1;
+        const b = k2.split(memberPrefix).pop() ?? k2;
+
+        return a < b ? -1 : (a > b ? 1 : 0);
+      });
+  for (const [f, v] of sortedEntries) {
+    if (f === member || f.startsWith(memberPrefix)) {
+      values.push(...normalizeType(v));
+    }
+  }
+
+  return values;
+};
+
 export class StructuredStore {
   /**
    * The base URI of the data.
@@ -30,17 +51,21 @@ export class StructuredStore {
   public base: string;
 
   /** @private */
-  public data: Record<Id, DataRecord>;
+  public data: Record<Id, DataRecord> = {};
+
+  /** @private */
+  public journal: RecordJournal = new RecordJournal();
 
   private aliases: Record<string, Id & FieldId> = {};
 
   constructor(base: string = "rdf:defaultGraph") {
     this.base = base;
-    this.data = {};
   }
 
   public deleteRecord(recordId: Id): void {
-    delete this.data[this.primary(recordId)];
+    const primary = this.primary(recordId);
+    this.journal.transition(primary, RecordState.Absent);
+    delete this.data[primary];
   }
 
   public getField(recordId: Id, field: FieldId): FieldValue | undefined {
@@ -49,22 +74,8 @@ export class StructuredStore {
       if (record === undefined) {
         return undefined;
       }
-      const values: FieldValue = [];
-      const sortedEntries = Object
-        .entries(record)
-        .sort(([k1], [k2]) => {
-          const a = k1.split(memberPrefix).pop() ?? k1;
-          const b = k2.split(memberPrefix).pop() ?? k2;
 
-          return a < b ? -1 : (a > b ? 1 : 0);
-        });
-      for (const [f, v] of sortedEntries) {
-        if (f === member || f.startsWith(memberPrefix)) {
-          values.push(...normalizeType(v));
-        }
-      }
-
-      return values;
+      return getSortedFieldMembers(record);
     } else {
       return this.getRecord(recordId)?.[this.primary(field)];
     }
@@ -154,6 +165,7 @@ export class StructuredStore {
     }
 
     const next = new StructuredStore(this.base);
+    next.journal = this.journal;
     next.aliases = {
       ...this.aliases,
       [previous]: current,

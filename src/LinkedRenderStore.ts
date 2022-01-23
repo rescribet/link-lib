@@ -21,7 +21,8 @@ import { dataToGraphTuple } from "./processor/DataToGraph";
 import { isPending } from "./processor/requestStatus";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
-import { DataRecord } from "./store/StructuredStore";
+import { RecordState } from "./store/RecordState";
+import { DataRecord, Id } from "./store/StructuredStore";
 import { TypedRecord } from "./TypedRecord";
 import {
     ActionMap,
@@ -45,6 +46,7 @@ import {
 } from "./types";
 import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "./utilities/constants";
+import { RecordStatus } from "./store/RecordStatus";
 
 const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
     .map((t) => id(t || defaultValue));
@@ -346,6 +348,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             return;
         }
 
+        this.store.getInternalStore().store.journal.transition(iri.value, RecordState.Queued);
         this.resourceQueue.push([iri, opts]);
         this.scheduleResourceQueue();
     }
@@ -396,6 +399,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             preExistingData = this.tryEntity(iri);
         }
         if (preExistingData !== undefined) {
+            // TODO: refactor to use removeRecord
             this.store.removeQuads(preExistingData);
         }
         await this.api.getEntity(iri, apiOpts);
@@ -459,6 +463,10 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         }
 
         return this.store.getResourceProperty<TT>(subject, property);
+    }
+
+    public getState(recordId: Id): RecordStatus {
+        return this.store.getInternalStore().store.journal.get(recordId);
     }
 
     /**

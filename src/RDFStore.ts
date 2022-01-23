@@ -128,9 +128,13 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 if (!Array.isArray(this.typeCache[subjId])) {
                     this.typeCache[subjId] = [];
                 }
-                this.typeCache[subjId] = this.quadsFor((quad[QuadPosition.subject] as NamedNode))
-                    .filter((s) => equals(s[QuadPosition.predicate], rdf.type))
-                    .map((s) => s[QuadPosition.object] as NamedNode);
+                this.typeCache[subjId] = normalizeType(
+                    this
+                        .store
+                        .store
+                        .getField(quad[QuadPosition.subject].value, rdf.type.value) as NamedNode | NamedNode[]
+                    ?? [],
+                );
                 return false;
             },
         });
@@ -168,9 +172,13 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
                 if (!Array.isArray(this.typeCache[subjId])) {
                     this.typeCache[subjId] = [];
                 }
-                this.typeCache[subjId] = this.quadsFor((quad[QuadPosition.subject] as NamedNode))
-                    .filter((s) => s[QuadPosition.predicate] === rdf.type)
-                    .map((s) => s[QuadPosition.object] as NamedNode);
+                this.typeCache[subjId] = normalizeType(
+                    this
+                        .store
+                        .store
+                        .getField(quad[QuadPosition.subject].value, rdf.type.value) as NamedNode | NamedNode[]
+                    ?? [],
+                );
                 return false;
             },
         });

@@ -1,18 +1,8 @@
-import rdfFactory, {
-  isBlankNode,
-  NamedNode,
-  QuadPosition,
-  Quadruple,
-  TermType,
-} from "@ontologies/core";
+import rdfFactory, { isBlankNode, NamedNode, QuadPosition, Quadruple, TermType } from "@ontologies/core";
 import * as schema from "@ontologies/schema";
 import * as xsd from "@ontologies/xsd";
 import { site } from "@rdfdev/iri";
-import {
-    BAD_REQUEST,
-    INTERNAL_SERVER_ERROR,
-    NOT_FOUND,
-} from "http-status-codes";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NON_AUTHORITATIVE_INFORMATION, NOT_FOUND } from "http-status-codes";
 import { equals, id } from "../factoryHelpers";
 
 import { APIFetchOpts, LinkedDataAPI } from "../LinkedDataAPI";
@@ -29,6 +19,7 @@ import {
     FailedResponse,
     LinkedActionResponse,
     MiddlewareActionHandler,
+    RequestStatus,
     ResourceQueueItem,
     ResponseAndFallbacks,
     ResponseTransformer,
@@ -46,6 +37,7 @@ import {
 } from "../utilities/constants";
 import { getContentType, getHeader, getJSON, getURL } from "../utilities/responses";
 
+import { RecordState } from "../store/RecordState";
 import { ProcessorError } from "./ProcessorError";
 import { RequestInitGenerator } from "./RequestInitGenerator";
 import { queuedDeltaStatus } from "./requestStatus";
@@ -184,7 +176,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const [graph, blobs = []] = dataTuple;
 
-        if (this.store.quadsFor(subject).length === 0) {
+        if (this.store.getInternalStore().store.getRecord(subject.value) === undefined) {
             await this.getEntity(subject);
         }
 
@@ -297,7 +289,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 this.report(err);
                 const status = rdfFactory.literal(hasStatus ? err.status : 499, xsd.integer);
                 const delta = resources
-                    .map(([s]) => [s, http.statusCode, status, ll.meta] as Quadruple);
+                    .map(([s]) => {
+                        this.setStatus(s, status);
+                        return [s, http.statusCode, status, ll.meta] as Quadruple;
+                    });
 
                 return this.processDelta(delta);
             }).finally(() => {
@@ -349,6 +344,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                     this.report(err);
                     const hasStatus = err && "status" in err;
                     const status = rdfFactory.literal(hasStatus ? err.status : 499, xsd.integer);
+                    this.setStatus(iri, status);
                     const delta: Quadruple[] = [
                         [requestIRI, http.statusCode, status, ll.meta],
                     ];
@@ -362,6 +358,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             }
             this.store.removeQuads(preExistingData);
             const responseQuads = processResponse(iri, (e as any).res);
+            this.setStatus(iri, 499);
             this.store.addQuads(responseQuads);
 
             return responseQuads;
@@ -381,14 +378,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             return existing;
         }
 
-        return this.memoizeStatus(irl, emptyRequest);
+        return emptyRequest;
     }
 
     public invalidate(iri: string | SomeNode, _err?: Error): boolean {
         const iriId = id(typeof iri === "string" ? rdfFactory.namedNode(iri) : iri);
         this.invalidationMap.set(iriId);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
-        this.statusMap[iriId] = undefined;
+        this.clearStatus(typeof iri === "string" ? rdfFactory.namedNode(iri) : iri);
 
         return true;
     }
@@ -409,8 +406,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             const subj = s ? s[0] : undefined;
 
             const currentStatus = subj && this.statusMap[id(subj)];
-            if (subj && currentStatus && currentStatus.status === 203) {
-                this.statusMap[id(subj)] = undefined;
+            if (subj && currentStatus && currentStatus.status === NON_AUTHORITATIVE_INFORMATION) {
+                this.clearStatus(subj as NamedNode);
             }
 
             if (!s || !equals(s[QuadPosition.graph], ll.meta)) {
@@ -462,7 +459,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const status = queuedDeltaStatus(1);
         for (const s of subjects) {
             if (!this.statusMap[s]) {
-                this.statusMap[s] = status;
+                this.memoizeStatus(rdfFactory.fromId(s), status);
             }
         }
     }
@@ -503,9 +500,26 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private memoizeStatus(iri: NamedNode, s: SomeRequestStatus): SomeRequestStatus {
+        this.store.getInternalStore().store.journal.transition(iri.value, this.requestStatusToJournalStatus(s));
         this.statusMap[id(iri)] = s;
 
         return s;
+    }
+
+    private clearStatus(iri: NamedNode): void {
+        this.statusMap[id(iri)] = undefined;
+    }
+
+    private requestStatusToJournalStatus(s: RequestStatus): RecordState {
+        if (s.requested && s.status === null) {
+            return RecordState.Requested;
+        } else if (s.requested) {
+            return RecordState.Present;
+        } else if (!s.requested && s.status === null) {
+            return RecordState.Absent;
+        } else {
+            throw new Error(`Unmapped status ${s}`);
+        }
     }
 
     private processExecAction(res: Response): Promise<Response> {

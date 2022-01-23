@@ -36,6 +36,16 @@ export {
     AttributeKey,
     TypedRecord,
 } from "./TypedRecord";
+export { RecordState } from "./store/RecordState";
+export { RecordStatus } from "./store/RecordStatus";
+export {
+    Id,
+    FieldValue,
+    FieldId,
+    DataRecord,
+    MultimapTerm,
+} from "./store/StructuredStore";
+export { default as RDFIndex } from "./store/RDFIndex";
 
 export {
     LinkedRenderStore,
