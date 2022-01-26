@@ -1,19 +1,15 @@
-import { Quadruple } from "@ontologies/core";
-
 import { SubscriptionRegistrationBase } from "./types";
 
 export interface ProcessBroadcastOpts {
     bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
     /** Ids of the subjects which have been changed in this batch */
-    changedSubjects: number[];
+    changedSubjects: string[];
     /**
      * Subject registrations to call
      * It is assumed to only contain subscriptions relevant to the {work}.
      */
     subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
     timeout: number;
-    /** Statements which have changed in the store */
-    work: Quadruple[] | ReadonlyArray<Quadruple>;
 }
 
 /**
@@ -21,12 +17,11 @@ export interface ProcessBroadcastOpts {
  */
 export class ProcessBroadcast {
     private readonly bulkSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
-    private readonly changedSubjects: number[];
+    private readonly changedSubjects: string[];
     private readonly hasIdleCallback: boolean;
     private readonly hasRequestAnimationFrame: boolean;
     private readonly regUpdateTime: number;
     private subjectSubscriptions: Array<SubscriptionRegistrationBase<unknown>>;
-    private readonly work: ReadonlyArray<Quadruple>;
     private resolve: () => void;
     private readonly timeout: number;
 
@@ -40,14 +35,12 @@ export class ProcessBroadcast {
         this.bulkSubscriptions = opts.bulkSubscriptions;
         this.changedSubjects = opts.changedSubjects;
         this.subjectSubscriptions = opts.subjectSubscriptions;
-        this.work = Object.freeze(opts.work);
 
         this.queue = this.queue.bind(this);
     }
 
     public done(): boolean {
-        return this.work.length === 0
-            || this.subjectSubscriptions.length === 0 && this.bulkSubscriptions.length === 0;
+        return this.subjectSubscriptions.length === 0 && this.bulkSubscriptions.length === 0;
     }
 
     public run(): Promise<void> {
@@ -70,10 +63,7 @@ export class ProcessBroadcast {
         if (reg.markedForDelete) {
             return;
         }
-        reg.callback(
-            reg.onlySubjects ? this.changedSubjects : this.work,
-            this.regUpdateTime,
-        );
+        reg.callback(this.changedSubjects, this.regUpdateTime);
     }
 
     private process(): void {

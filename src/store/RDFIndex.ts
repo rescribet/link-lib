@@ -11,10 +11,10 @@ import { id } from "../factoryHelpers";
 import { SomeNode } from "../types";
 
 import { Equatable } from "./Equatable";
-import { RDFAdapter } from "./RDFAdapter";
+import { RDFAdapter, RDFAdapterOpts } from "./RDFAdapter";
 import { DataRecord, Id } from "./StructuredStore";
 
-export interface IndexedFormulaOpts {
+export interface IndexedFormulaOpts extends RDFAdapterOpts {
     data?: Record<Id, DataRecord>;
     quads: Quadruple[];
     dataCallback: (quad: Quadruple) => void;

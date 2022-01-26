@@ -16,6 +16,7 @@ export interface RDFAdapterOpts {
   data?: Record<Id, DataRecord>;
   quads: Quadruple[];
   dataCallback: (quad: Quadruple) => void;
+  onChange: (docId: string) => void;
   rdfFactory: DataFactory;
 }
 
@@ -32,7 +33,7 @@ export class RDFAdapter {
 
   constructor(opts: Partial<RDFAdapterOpts> = {}) {
     this.dataCallbacks = [];
-    this.store = new StructuredStore("rdf:defaultGraph", opts.data);
+    this.store = new StructuredStore("rdf:defaultGraph", opts.data, opts.onChange);
     this.rdfFactory = opts.rdfFactory ?? rdfFactory;
     opts.quads?.forEach((q) => this.add(
         q[QuadPosition.subject],

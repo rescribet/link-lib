@@ -521,7 +521,7 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             store.processor.queueDelta([], [rdfFactory.id(resource)]);
 
-            expect(store.store.getInternalStore().store.journal.get(resource.value).current)
+            expect(store.store.getInternalStore().store.getStatus(resource.value).current)
                 .toEqual(RecordState.Receiving);
         });
     });

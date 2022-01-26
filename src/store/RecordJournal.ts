@@ -18,17 +18,20 @@ const absentStatus: RecordStatus = {
     previous: RecordState.Absent,
 };
 
+// tslint:disable member-ordering
 export class RecordJournal {
     private readonly data: Record<Id, RecordStatus> = {};
+    private readonly onChange: (docId: string) => void = () => undefined;
 
-    constructor(data?: Record<Id, RecordStatus> | undefined) {
+    constructor(onChange: (docId: string) => void, data?: Record<Id, RecordStatus> | undefined) {
+        this.onChange = onChange;
         if (data) {
             this.data = data;
         }
     }
 
-    public copy(): RecordJournal {
-        return new RecordJournal(JSON.parse(JSON.stringify(this.data)));
+    public copy(onChange: ((docId: string) => void) | null = null): RecordJournal {
+        return new RecordJournal(onChange ?? this.onChange, JSON.parse(JSON.stringify(this.data)));
     }
 
     public get(recordId: Id): RecordStatus {
@@ -50,6 +53,8 @@ export class RecordJournal {
         } else {
             this.data[docId].lastUpdate = Date.now();
         }
+        this.onChange(docId);
+        this.onChange(recordId);
     }
 
     public transition(recordId: Id, state: RecordState): void {
@@ -64,5 +69,7 @@ export class RecordJournal {
             lastUpdate: Date.now(),
             previous,
         };
+        this.onChange(docId);
+        this.onChange(recordId);
     }
 }

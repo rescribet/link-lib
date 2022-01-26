@@ -6,6 +6,7 @@ import { SomeNode } from "../types";
 import { normalizeType } from "../utilities";
 import { RecordJournal } from "./RecordJournal";
 import { RecordState } from "./RecordState";
+import { RecordStatus } from "./RecordStatus";
 
 export type Id = string;
 export type FieldId = string;
@@ -59,18 +60,35 @@ export class StructuredStore {
   public data: Record<Id, DataRecord>;
 
   /** @private */
-  public journal: RecordJournal = new RecordJournal();
+  public journal: RecordJournal;
 
   private aliases: Record<string, Id & FieldId> = {};
 
-  constructor(base: string = "rdf:defaultGraph", data: Record<Id, DataRecord> | undefined = {}) {
+  constructor(
+      base: string = "rdf:defaultGraph",
+      data: Record<Id, DataRecord> | undefined = {},
+      onChange: (docId: string) => void = (): void => undefined,
+  ) {
     this.base = base;
     this.data = data ?? {};
+    this.journal = new RecordJournal(onChange);
     for (const key in this.data) {
-      if (!this.data.hasOwnProperty(key)) {
+      if (this.data.hasOwnProperty(key)) {
         this.journal.transition(key, RecordState.Present);
       }
     }
+  }
+
+  public getStatus(recordId: Id): RecordStatus {
+    return this.journal.get(this.primary(recordId));
+  }
+
+  public transition(recordId: Id, state: RecordState): void {
+    this.journal.transition(this.primary(recordId), state);
+  }
+
+  public touch(recordId: Id): void {
+    this.journal.touch(this.primary(recordId));
   }
 
   public deleteRecord(recordId: Id): void {
@@ -217,10 +235,12 @@ export class StructuredStore {
 
   private initializeRecord(recordId: Id): void {
     const primary = this.primary(recordId);
-    this.journal.transition(primary, RecordState.Receiving);
-    this.data[primary] ||= {
-      _id: this.toSomeNode(primary),
-    };
+    if (this.data[primary] === undefined) {
+      this.journal.transition(primary, RecordState.Receiving);
+      this.data[primary] = {
+        _id: this.toSomeNode(primary),
+      };
+    }
   }
 
   private setRecord(recordId: Id, record: DataRecord): DataRecord | undefined {

@@ -17,7 +17,6 @@ describe("LinkedRenderStore", () => {
                 const reg = {
                     callback,
                     markedForDelete: false,
-                    onlySubjects: false,
                 };
 
                 store.lrs.subscribe(reg);
@@ -30,7 +29,6 @@ describe("LinkedRenderStore", () => {
                 const reg = {
                     callback,
                     markedForDelete: false,
-                    onlySubjects: false,
                 };
 
                 const unregister = store.lrs.subscribe(reg);
@@ -45,7 +43,6 @@ describe("LinkedRenderStore", () => {
                 const reg = {
                     callback,
                     markedForDelete: false,
-                    onlySubjects: false,
                 };
 
                 store.lrs.subscribe(reg);
@@ -63,8 +60,7 @@ describe("LinkedRenderStore", () => {
                 const reg = {
                     callback,
                     markedForDelete: false,
-                    onlySubjects: true,
-                    subjectFilter: [schemaT],
+                    subjectFilter: [schemaT.value],
                 };
 
                 store.lrs.subscribe(reg);
@@ -78,8 +74,7 @@ describe("LinkedRenderStore", () => {
                 const reg = {
                     callback,
                     markedForDelete: false,
-                    onlySubjects: true,
-                    subjectFilter: [schemaT],
+                    subjectFilter: [schemaT.value],
                 };
 
                 const unregister = store.lrs.subscribe(reg);
@@ -100,8 +95,7 @@ describe("LinkedRenderStore", () => {
                 const reg = {
                     callback,
                     markedForDelete: false,
-                    onlySubjects: true,
-                    subjectFilter: [schemaT],
+                    subjectFilter: [schemaT.value],
                 };
 
                 store.lrs.subscribe(reg);
@@ -117,12 +111,11 @@ describe("LinkedRenderStore", () => {
                 const store = getBasicStore();
                 await store.forceBroadcast();
                 const callback = jest.fn();
-                const reg = {
+                const reg: SubscriptionRegistrationBase<any> = {
                     callback,
                     markedForDelete: false,
-                    onlySubjects: true,
-                    subjectFilter: [schemaT],
-                } as SubscriptionRegistrationBase<any>;
+                    subjectFilter: [schemaT.value],
+                };
 
                 store.lrs.subscribe(reg);
                 expect(callback).not.toHaveBeenCalled();
@@ -133,7 +126,6 @@ describe("LinkedRenderStore", () => {
                 expect(callback).toHaveBeenCalledTimes(1);
                 expect(callback.mock.calls[0][0]).toEqual([
                     rdfFactory.id(schemaT),
-                    rdfFactory.id(rdfFactory.defaultGraph()),
                 ]);
                 expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
                 expect(callback.mock.calls[0][1]).toBeLessThanOrEqual(Date.now());

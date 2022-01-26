@@ -336,7 +336,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             return;
         }
 
-        this.store.getInternalStore().store.journal.transition(iri.value, RecordState.Queued);
+        this.store.getInternalStore().store.transition(iri.value, RecordState.Queued);
         this.resourceQueue.push([iri, opts]);
         this.scheduleResourceQueue();
     }
@@ -454,7 +454,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     }
 
     public getState(recordId: Id): RecordStatus {
-        return this.store.getInternalStore().store.journal.get(recordId);
+        return this.store.getInternalStore().store.getStatus(recordId);
     }
 
     /**
@@ -490,15 +490,13 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param expedite Will immediately process the delta rather than waiting for an idle moment, useful in conjunction
      *  with event handlers within the UI needing immediate feedback. Might cause jumpy interfaces.
      */
-    public processDelta(delta: Quadruple[], expedite = false): Promise<Quadruple[]> {
+    public processDelta(delta: Quadruple[], expedite = false): Promise<void> {
         const processors = this.deltaProcessors;
-        const statements: Quadruple[] = [];
         for (let i = 0; i < processors.length; i++) {
-            statements.push(...processors[i].processDelta(delta));
+            processors[i].processDelta(delta);
         }
 
-        return this.broadcastWithExpedite(expedite)
-            .then(() => statements);
+        return this.broadcastWithExpedite(expedite);
     }
 
     /**
@@ -604,7 +602,6 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param registration
      * @param registration[0] Will be called with the new statements as its argument.
      * @param registration[1] Options for the callback.
-     * @param registration[1].onlySubjects Only the subjects are passed when true.
      * @return function Unsubscription function.
      */
     public subscribe(registration: SubscriptionRegistrationBase<unknown>): () => void {
@@ -613,11 +610,10 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
 
         if (typeof subjectFilter !== "undefined") {
             for (let i = 0, len = subjectFilter.length; i < len; i++) {
-                const sId = id(subjectFilter[i]);
-                if (!this.subjectSubscriptions[sId]) {
-                    this.subjectSubscriptions[sId] = [];
+                if (!this.subjectSubscriptions[subjectFilter[i]]) {
+                    this.subjectSubscriptions[subjectFilter[i]] = [];
                 }
-                this.subjectSubscriptions[sId].push(registration);
+                this.subjectSubscriptions[subjectFilter[i]].push(registration);
             }
 
             return (): void => {
@@ -701,24 +697,18 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             return Promise.resolve();
         }
 
-        const work = this.deltaProcessors.flatMap((dp) => dp.flush());
-        const uniqueSubjects = new Set<number>();
-        const wLen = work.length;
-        let w;
-        for (let i = 0; i < wLen; i++) {
-            w = work[i];
-            uniqueSubjects.add(id(w[QuadPosition.subject]));
-            uniqueSubjects.add(id(w[QuadPosition.graph]));
-            uniqueSubjects.add(id(this.store.canon(w[QuadPosition.subject])));
-            uniqueSubjects.add(id(this.store.canon(w[QuadPosition.graph])));
+        let flushResult = new Set<string>();
+        for (const dp of this.deltaProcessors) {
+            flushResult = new Set([...flushResult, ...Array.from(dp.flush())]);
         }
-        const subjects = Array.from(uniqueSubjects);
+        const subjects = Array.from(flushResult);
+
         const subjectRegs = subjects
             .flatMap((sId) => this.subjectSubscriptions[sId])
             .filter((reg) => reg
                 && !reg.markedForDelete
                 && (reg.subjectFilter
-                    ? reg.subjectFilter.some((s) => subjects.includes(id(s)))
+                    ? reg.subjectFilter.some((s) => subjects.includes(s))
                     : true));
 
         if (this.bulkSubscriptions.length === 0 && subjectRegs.length === 0) {
@@ -730,7 +720,6 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             changedSubjects: subjects,
             subjectSubscriptions: subjectRegs,
             timeout: maxTimeout,
-            work,
         }).run()
           .then(() => {
               this.currentBroadcast = undefined;

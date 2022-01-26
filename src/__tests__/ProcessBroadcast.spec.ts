@@ -44,14 +44,13 @@ const getOpts = (
 ): ProcessBroadcastOpts => ({
     bulkSubscriptions,
     changedSubjects: work.reduce(
-        (acc, cur) => acc.includes(rdfFactory.id(cur[QuadPosition.subject]))
+        (acc, cur) => acc.includes(cur[QuadPosition.subject].value)
             ? acc
-            : acc.concat(rdfFactory.id(cur[QuadPosition.subject])),
-        [] as number[],
+            : acc.concat(cur[QuadPosition.subject].value),
+        [] as string[],
     ),
     subjectSubscriptions,
     timeout: 10,
-    work,
 });
 
 describe("ProcessBroadcast", () => {
@@ -88,24 +87,24 @@ describe("ProcessBroadcast", () => {
             const processor = new ProcessBroadcast(getOpts(
                 mixedWork,
                 [
-                    { callback: bulk1, markedForDelete: false, onlySubjects: false },
-                    { callback: bulk2, markedForDelete: false, onlySubjects: false },
+                    { callback: bulk1, markedForDelete: false },
+                    { callback: bulk2, markedForDelete: false },
                 ],
                 [
                     // schemaT
-                    { callback: st, markedForDelete: false, onlySubjects: true },
-                    { callback: stb, markedForDelete: false, onlySubjects: true },
+                    { callback: st, markedForDelete: false },
+                    { callback: stb, markedForDelete: false },
                     // resource1
-                    { callback: r1, markedForDelete: false, onlySubjects: true },
+                    { callback: r1, markedForDelete: false },
                     // resource2
-                    { callback: r2, markedForDelete: false, onlySubjects: true },
+                    { callback: r2, markedForDelete: false },
                     // resource4
-                    { callback: r4a, markedForDelete: false, onlySubjects: true },
-                    { callback: r4b, markedForDelete: false, onlySubjects: true },
+                    { callback: r4a, markedForDelete: false },
+                    { callback: r4b, markedForDelete: false },
                     // resource5
-                    { callback: r5, markedForDelete: false, onlySubjects: true },
+                    { callback: r5, markedForDelete: false },
                     // resource6
-                    { callback: r6, markedForDelete: true, onlySubjects: true },
+                    { callback: r6, markedForDelete: true },
                 ],
             ));
 

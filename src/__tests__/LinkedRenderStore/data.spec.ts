@@ -119,8 +119,7 @@ describe("LinkedRenderStore", () => {
             store.lrs.subscribe({
                 callback: sub,
                 markedForDelete: false,
-                onlySubjects: true,
-                subjectFilter: [schemaT],
+                subjectFilter: [schemaT.value],
             });
             store.store.addQuads([
                 ...thingStatements,

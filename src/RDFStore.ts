@@ -2,7 +2,8 @@ import rdfFactory, {
     DataFactory,
     NamedNode,
     QuadPosition,
-    Quadruple, SomeTerm,
+    Quadruple,
+    SomeTerm,
     Term,
 } from "@ontologies/core";
 import * as ld from "@ontologies/ld";
@@ -19,9 +20,8 @@ import { deltaProcessor } from "./store/deltaProcessor";
 import { RDFAdapter } from "./store/RDFAdapter";
 import RDFIndex from "./store/RDFIndex";
 import { DataRecord, Id } from "./store/StructuredStore";
-import { ChangeBuffer, DeltaProcessor, SomeNode, StoreProcessor } from "./types";
+import { DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { getPropBestLang, normalizeType, sortByBestLang } from "./utilities";
-import { addChangeBufferCallbacks } from "./utilities/monkeys";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quadruple> = Object.freeze([]);
 
@@ -34,22 +34,18 @@ export interface RDFStoreOpts {
 /**
  * Provides a clean consistent interface to stored (RDF) data.
  */
-export class RDFStore implements ChangeBuffer, DeltaProcessor {
-    public changeBuffer: Quadruple[] = new Array(100);
-    public changeBufferCount: number = 0;
-    /**
-     * Record of the last time a resource was flushed.
-     *
-     * @note Not to be confused with the last change in the store, which might be later than the flush time.
-     */
-    public changeTimestamps: number[] = [];
+export class RDFStore implements DeltaProcessor {
     public langPrefs: string[] = Array.from(typeof navigator !== "undefined"
         ? (navigator.languages || [navigator.language])
         : ["en"]);
+    private changedResources: Set<string> = new Set();
 
     private deltas: Quadruple[][] = [];
     private deltaProcessor: StoreProcessor;
-    private store: RDFIndex = new RDFIndex();
+
+    private store: RDFIndex = new RDFIndex({
+        onChange: this.handleChange.bind(this),
+    });
 
     public get rdfFactory(): DataFactory {
         return rdfFactory;
@@ -63,8 +59,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     constructor({ data, deltaProcessorOpts, innerStore }: RDFStoreOpts = {}) {
         this.processDelta = this.processDelta.bind(this);
 
-        const g = innerStore || new RDFIndex({ data });
-        this.store = addChangeBufferCallbacks(g, this);
+        this.store = innerStore || new RDFIndex({ data, onChange: this.handleChange.bind(this) });
 
         const defaults =  {
             addGraphIRIS: [ll.add, ld.add],
@@ -130,7 +125,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
      * Flushes the change buffer to the return value.
      * @return Statements held in memory since the last flush.
      */
-    public flush(): Quadruple[] {
+    public flush(): Set<string> {
         const deltas = this.deltas;
         this.deltas = [];
 
@@ -138,18 +133,10 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
             this.processDelta(deltas[i]);
         }
 
-        if (this.changeBufferCount === 0) {
-            return EMPTY_ST_ARR as Quadruple[];
-        }
-        const processingBuffer = this.changeBuffer;
-        this.changeBuffer = new Array(100);
-        this.changeBufferCount = 0;
-        // const changeStamp = Date.now();
-        // processingBuffer
-        //     .filter(this.funlets.flushFilter(changeStamp))
-        //     .map(this.funlets.processTypeQuad);
+        const changes = this.changedResources;
+        this.changedResources = new Set();
 
-        return processingBuffer;
+        return changes;
     }
 
     /** @private */
@@ -277,12 +264,14 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public touch(iri: SomeNode): void {
-        this.store.store.journal.touch(iri.value);
-        this.changeBuffer.push([iri, ll.nop, ll.nop, this.rdfFactory.defaultGraph()]);
-        this.changeBufferCount++;
+        this.store.store.touch(iri.value);
     }
 
     public workAvailable(): number {
-        return this.deltas.length + this.changeBufferCount;
+        return this.deltas.length + this.changedResources.size;
+    }
+
+    private handleChange(docId: string): void {
+        this.changedResources.add(docId);
     }
 }

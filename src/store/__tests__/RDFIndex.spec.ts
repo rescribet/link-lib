@@ -11,7 +11,7 @@ import RDFIndex from "../RDFIndex";
 
 describe("RDFIndex", () => {
     describe("match", () => {
-        const store = new RDFIndex();
+        const store = new RDFIndex({ onChange: (): void => undefined });
         store.add(schema.Person, rdfx.type, schema.Thing);
         store.add(schema.Person, rdfx.type, rdfs.Resource);
         store.add(schema.Person, rdfs.label, rdf.literal("Person class"));

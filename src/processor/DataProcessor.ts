@@ -242,7 +242,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         };
     }
 
-    public flush(): Quadruple[] {
+    public flush(): Set<string> {
         const deltas = this.deltas;
         this.deltas = [];
 
@@ -254,7 +254,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             }
         }
 
-        return [];
+        return new Set();
     }
 
     public getEntities(resources: ResourceQueueItem[]): Promise<Quadruple[]> {
@@ -385,7 +385,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const subject = typeof iri === "string" ? rdfFactory.namedNode(iri) : iri;
         const iriId = id(subject);
         this.invalidationMap.set(iriId);
-        this.store.getInternalStore().store.journal.transition(subject.value, RecordState.Absent);
+        this.store.getInternalStore().store.transition(subject.value, RecordState.Absent);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
         this.clearStatus(subject);
 
@@ -414,7 +414,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             if (equals(s[1], http.statusCode)) {
                 const status = parseInt(s[2].value, 10);
                 if (status >= 200 && status < 400) {
-                    this.store.getInternalStore().store.journal.transition(s[0].value, RecordState.Present);
+                    this.store.getInternalStore().store.transition(s[0].value, RecordState.Present);
                 } else if (status >= 400 && status < 500) {
                     this.store.getInternalStore().store.deleteRecord(s[0].value);
                     this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ErrorResource);
@@ -466,11 +466,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     public queueDelta(delta: Quadruple[], subjects: number[]): void {
         this.deltas.push(delta);
-        const journal = this.store.getInternalStore().store.journal;
+        const store = this.store.getInternalStore().store;
 
         for (const s of subjects) {
             if (!this.statusMap[s]) {
-                journal.transition(
+                store.transition(
                     rdfFactory.fromId(s).value,
                     RecordState.Receiving,
                 );
@@ -514,7 +514,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     private memoizeStatus(iri: NamedNode, s: SomeRequestStatus): SomeRequestStatus {
-        this.store.getInternalStore().store.journal.transition(iri.value, this.requestStatusToJournalStatus(s));
+        this.store.getInternalStore().store.transition(iri.value, this.requestStatusToJournalStatus(s));
         this.statusMap[id(iri)] = s;
 
         return s;

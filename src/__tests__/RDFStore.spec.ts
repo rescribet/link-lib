@@ -96,15 +96,13 @@ describe("RDFStore", () => {
             const store = new RDFStore();
             store.addQuadruples(thingStatements);
             const res = store.flush();
-            expect(res[0]).toEqual(thingStatements[0]);
-            expect(res[1]).toEqual(thingStatements[1]);
-            expect(res[2]).toEqual(thingStatements[2]);
+            expect(res.has(schemaT.value)).toBeTruthy();
+            expect(res.has(schema.AboutPage.value)).toBeFalsy();
         });
 
-        it("is returns a frozen empty array without work", () => {
+        it("is returns an empty set without work", () => {
             const res = new RDFStore().flush();
-            expect(res.length).toEqual(0);
-            expect(Object.isFrozen(res)).toBeTruthy();
+            expect(res.size).toEqual(0);
         });
     });
 
@@ -373,14 +371,14 @@ describe("RDFStore", () => {
         it("is more than zero work", () => {
             const store = new RDFStore();
             expect(store.workAvailable()).toEqual(0);
-            store.addQuadruples(thingStatements);
-            expect(store.workAvailable()).toEqual(3);
+            store.addQuadruples([...thingStatements, ...aboutIsThing]);
+            expect(store.workAvailable()).toEqual(2);
         });
 
         it("is reset after #flush()", () => {
             const store = new RDFStore();
-            store.addQuadruples(thingStatements);
-            expect(store.workAvailable()).toEqual(3);
+            store.addQuadruples([...thingStatements, ...aboutIsThing]);
+            expect(store.workAvailable()).toEqual(2);
             store.flush();
             expect(store.workAvailable()).toEqual(0);
         });

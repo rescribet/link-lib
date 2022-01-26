@@ -32,8 +32,7 @@ export interface SubscriptionRegistrationBase<T> {
     index?: number;
     lastUpdateAt?: number;
     markedForDelete: boolean;
-    onlySubjects: boolean;
-    subjectFilter?: SomeNode[];
+    subjectFilter?: string[];
     subscribedAt?: number;
 }
 
@@ -84,8 +83,8 @@ export interface DeltaProcessor {
      * Process all queued deltas
      * @note: Be sure to assign a new buffer array before starting processing to prevent infinite loops.
      */
-    flush: () => Quadruple[];
-    processDelta: (delta: Quadruple[]) => Quadruple[];
+    flush: () => Set<string>;
+    processDelta: (delta: Quadruple[]) => void;
 }
 
 export type StoreProcessorResult = [Quadruple[], Quadruple[], Quadruple[]];
