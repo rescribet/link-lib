@@ -545,8 +545,6 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private setStatus(iri: NamedNode, status: number | null): void {
         const url = doc(iri);
         const prevStatus = this.statusMap[id(url)];
-        this.store.touch(url);
-        this.store.touch(iri);
 
         this.memoizeStatus(
             url,

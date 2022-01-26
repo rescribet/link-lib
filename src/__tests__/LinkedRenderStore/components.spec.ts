@@ -38,7 +38,7 @@ describe("LinkedRenderStore", () => {
                 LinkedRenderStore.registerRenderer(undefined, type);
                 expect(true).toBeFalsy();
             } catch (e) {
-                expect(e.message).toEqual(defaultMsg);
+                expect((e as Error).message).toEqual(defaultMsg);
             }
         });
 
@@ -139,6 +139,14 @@ describe("LinkedRenderStore", () => {
             store.store.add(resource, rdf.type, schema.Thing);
 
             expect(store.lrs.resourcePropertyComponent(resource, property)).toEqual(nameComp);
+        });
+
+        it("returns the view for blank node resources", () => {
+            const blankResource = rdfFactory.blankNode();
+            store.lrs.registerAll(LinkedRenderStore.registerRenderer(nameComp, schema.Thing, property));
+            store.store.add(blankResource, rdf.type, schema.Thing);
+
+            expect(store.lrs.resourcePropertyComponent(blankResource, property)).toEqual(nameComp);
         });
     });
 

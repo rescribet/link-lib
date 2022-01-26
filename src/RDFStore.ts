@@ -8,7 +8,7 @@ import rdfFactory, {
 import * as ld from "@ontologies/ld";
 import * as rdf from "@ontologies/rdf";
 
-import { equals, id } from "./factoryHelpers";
+import { equals } from "./factoryHelpers";
 import ll from "./ontology/ll";
 import {
     OptionalNamedNode,
@@ -277,7 +277,7 @@ export class RDFStore implements ChangeBuffer, DeltaProcessor {
     }
 
     public touch(iri: SomeNode): void {
-        this.changeTimestamps[id(iri)] = Date.now();
+        this.store.store.journal.touch(iri.value);
         this.changeBuffer.push([iri, ll.nop, ll.nop, this.rdfFactory.defaultGraph()]);
         this.changeBufferCount++;
     }
