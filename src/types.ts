@@ -3,9 +3,7 @@ import {
   CustomPredicateCreator,
   Literal,
   NamedNode,
-  Node,
   Quadruple,
-  SomeTerm,
 } from "@ontologies/core";
 
 import { ComponentStore } from "./ComponentStore/ComponentStore";
@@ -16,8 +14,8 @@ import { RequestInitGenerator } from "./processor/RequestInitGenerator";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import RDFIndex from "./store/RDFIndex";
-import { DisjointSet } from "./utilities/DisjointSet";
 import { DataRecord, Id } from "./store/StructuredStore";
+import { DisjointSet } from "./utilities/DisjointSet";
 
 export interface ActionMap {
     [k: string]: (...args: any[]) => Promise<any>;
@@ -26,10 +24,6 @@ export interface ActionMap {
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
 export type Indexable = number | string;
-
-export interface IdTerm {
-    id?: Indexable;
-}
 
 export interface ComponentMapping<T> { [type: string]: { [obj: string]: { [topology: string]: T } }; }
 
@@ -42,16 +36,6 @@ export interface SubscriptionRegistrationBase<T> {
     subjectFilter?: SomeNode[];
     subscribedAt?: number;
 }
-
-export interface StatementSubscriptionRegistration extends SubscriptionRegistrationBase<ReadonlyArray<Quadruple>> {
-    onlySubjects: false;
-}
-
-export interface NodeSubscriptionRegistration extends SubscriptionRegistrationBase<SomeNode[]> {
-    onlySubjects: true;
-}
-
-export type SubscriptionRegistration = StatementSubscriptionRegistration | NodeSubscriptionRegistration;
 
 export interface ComponentRegistration<T> {
     component: T;
@@ -123,8 +107,6 @@ export interface NamespaceMap {
 }
 
 export type LazyNNArgument = NamedNode | NamedNode[];
-
-export type LazyIRIArgument = SomeNode | SomeNode[];
 
 export type NamedBlobTuple = [SomeNode, File];
 
@@ -219,13 +201,6 @@ export interface WorkerMessageBase {
     params: object;
 }
 
-export interface GetEntityMessage {
-    method: "GET_ENTITY";
-    params: {
-        iri: string;
-    };
-}
-
 export interface VocabularyProcessingContext<IndexType = Indexable> {
     dataStore: RDFStore;
     equivalenceSet: DisjointSet<IndexType>;
@@ -264,5 +239,3 @@ export interface DataProcessorOpts {
 }
 
 export type ResourceQueueItem = [NamedNode, FetchOpts|undefined];
-
-export type WildQuadruple = [Node | null, NamedNode | null, SomeTerm | null, Node | null];

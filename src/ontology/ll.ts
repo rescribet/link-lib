@@ -12,6 +12,10 @@ export default {
     targetResource: ll("targetResource"),
     typeRenderClass: ll("typeRenderClass"),
 
+    ErrorResource: ll("ErrorResource"),
+    ClientError: ll("ClientError"),
+    ServerError: ll("ServerError"),
+
     /** @deprecated */
     add: ll("add"),
     /** @deprecated */

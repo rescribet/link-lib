@@ -19,15 +19,14 @@ import RDFIndex from "../../store/RDFIndex";
 import { BasicComponent, ExplodedLRS, getBasicStore } from "../../testUtilities";
 import { FulfilledRequestStatus, ResponseAndFallbacks } from "../../types";
 
+import { RecordState } from "../../store/RecordState";
 import {
     MSG_INCORRECT_TARGET,
     MSG_URL_UNDEFINED,
     MSG_URL_UNRESOLVABLE,
 } from "../../utilities/constants";
 import { emptyRequest } from "../DataProcessor";
-import {
-    ProcessorError,
-} from "../ProcessorError";
+import { ProcessorError } from "../ProcessorError";
 
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();
 
@@ -518,12 +517,12 @@ describe("DataProcessor", () => {
     describe("#queueDelta", () => {
         const resource = example.ns("1");
 
-        it("sets the status", () => {
+        it("sets the state", () => {
             const store = getBasicStore();
             store.processor.queueDelta([], [rdfFactory.id(resource)]);
 
-            expect(store.processor.getStatus(resource)).toHaveProperty("status", 203);
-            expect(store.processor.getStatus(resource)).toHaveProperty("timesRequested", 1);
+            expect(store.store.getInternalStore().store.journal.get(resource.value).current)
+                .toEqual(RecordState.Receiving);
         });
     });
 

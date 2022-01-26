@@ -40,7 +40,16 @@ export class RecordJournal {
     }
 
     public touch(recordId: Id): void {
-        this.data[doc(recordId)].lastUpdate = Date.now();
+        const docId = doc(recordId);
+        if (this.data[docId] === undefined) {
+            this.data[docId] = {
+                current: RecordState.Absent,
+                lastUpdate: Date.now(),
+                previous: RecordState.Absent,
+            };
+        } else {
+            this.data[docId].lastUpdate = Date.now();
+        }
     }
 
     public transition(recordId: Id, state: RecordState): void {

@@ -1,8 +1,9 @@
 import rdfFactory, { isBlankNode, NamedNode, QuadPosition, Quadruple, TermType } from "@ontologies/core";
+import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 import * as xsd from "@ontologies/xsd";
 import { site } from "@rdfdev/iri";
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NON_AUTHORITATIVE_INFORMATION, NOT_FOUND } from "http-status-codes";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from "http-status-codes";
 import { equals, id } from "../factoryHelpers";
 
 import { APIFetchOpts, LinkedDataAPI } from "../LinkedDataAPI";
@@ -40,7 +41,6 @@ import { getContentType, getHeader, getJSON, getURL } from "../utilities/respons
 import { RecordState } from "../store/RecordState";
 import { ProcessorError } from "./ProcessorError";
 import { RequestInitGenerator } from "./RequestInitGenerator";
-import { queuedDeltaStatus } from "./requestStatus";
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
 
@@ -382,10 +382,12 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     public invalidate(iri: string | SomeNode, _err?: Error): boolean {
-        const iriId = id(typeof iri === "string" ? rdfFactory.namedNode(iri) : iri);
+        const subject = typeof iri === "string" ? rdfFactory.namedNode(iri) : iri;
+        const iriId = id(subject);
         this.invalidationMap.set(iriId);
+        this.store.getInternalStore().store.journal.transition(subject.value, RecordState.Absent);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
-        this.clearStatus(typeof iri === "string" ? rdfFactory.namedNode(iri) : iri);
+        this.clearStatus(subject);
 
         return true;
     }
@@ -405,18 +407,26 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             s = delta[i];
             const subj = s ? s[0] : undefined;
 
-            const currentStatus = subj && this.statusMap[id(subj)];
-            if (subj && currentStatus && currentStatus.status === NON_AUTHORITATIVE_INFORMATION) {
-                this.clearStatus(subj as NamedNode);
-            }
-
             if (!s || !equals(s[QuadPosition.graph], ll.meta)) {
                 continue;
             }
 
             if (equals(s[1], http.statusCode)) {
-                this.removeInvalidation(subj as NamedNode);
-                this.setStatus(subj as NamedNode, Number.parseInt(s[2].value, 10));
+                const status = parseInt(s[2].value, 10);
+                if (status >= 200 && status < 400) {
+                    this.store.getInternalStore().store.journal.transition(s[0].value, RecordState.Present);
+                } else if (status >= 400 && status < 500) {
+                    this.store.getInternalStore().store.deleteRecord(s[0].value);
+                    this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ErrorResource);
+                    this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ClientError);
+                } else if (status >= 500 && status < 600) {
+                    this.store.getInternalStore().store.deleteRecord(s[0].value);
+                    this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ErrorResource);
+                    this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ServerError);
+                } else {
+                    this.removeInvalidation(subj as NamedNode);
+                    this.setStatus(subj as NamedNode, Number.parseInt(s[2].value, 10));
+                }
             } else if (equals(s[1], httph["Exec-Action"])) {
                 this.execExecHeader(s[2].value);
             }
@@ -456,10 +466,14 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     public queueDelta(delta: Quadruple[], subjects: number[]): void {
         this.deltas.push(delta);
-        const status = queuedDeltaStatus(1);
+        const journal = this.store.getInternalStore().store.journal;
+
         for (const s of subjects) {
             if (!this.statusMap[s]) {
-                this.memoizeStatus(rdfFactory.fromId(s), status);
+                journal.transition(
+                    rdfFactory.fromId(s).value,
+                    RecordState.Receiving,
+                );
             }
         }
     }

@@ -161,10 +161,16 @@ describe("LinkedRenderStore", () => {
             store.store.flush();
 
             const data = store.lrs.tryEntity(resource);
+            const contains = (compare: Quadruple): (q: Quadruple) => boolean =>
+                (q: Quadruple): boolean => q[0] === compare[0]
+                    && q[1] === compare[1]
+                    && q[2] === compare[2]
+                    && q[3] === compare[3];
+
             expect(data).toHaveLength(3);
-            expect(data).toContain(testData[0]);
-            expect(data).toContain(testData[1]);
-            expect(data).toContain(testData[2]);
+            expect(data.some(contains(testData[0]))).toBeTruthy();
+            expect(data.some(contains(testData[1]))).toBeTruthy();
+            expect(data.some(contains(testData[2]))).toBeTruthy();
         });
     });
 });

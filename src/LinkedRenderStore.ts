@@ -461,6 +461,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * Retrieve the (network) status of the resource {iri}.
      *
      * Status 202 indicates that the resource has been queued for fetching (subject to change).
+     * @deprecated
      */
     public getStatus(iri: Node): SomeRequestStatus {
         if (iri.termType === TermType.BlankNode) {
