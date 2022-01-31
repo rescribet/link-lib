@@ -5,7 +5,7 @@ import * as schema from "@ontologies/schema";
 
 import { getBasicStore } from "../../testUtilities";
 import { RecordState } from "../RecordState";
-import { DataRecord, StructuredStore } from "../StructuredStore";
+import { DataSlice, StructuredStore } from "../StructuredStore";
 
 const example = createNS("http://example.com/");
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();
@@ -19,7 +19,7 @@ const thingStatements: Quadruple[] = [
 
 describe("StructuredStore", () => {
     it("sets the journal on start", () => {
-        const data: Record<string, DataRecord> = {
+        const data: DataSlice = {
             "/resource/4": {
                 _id: rdfFactory.namedNode("/resource/4"),
             },
@@ -64,7 +64,7 @@ describe("StructuredStore", () => {
     });
 
     describe("withAlias", () => {
-        const data: Record<string, DataRecord> = {
+        const data: DataSlice = {
             "/resource/4": {
                 _id: rdfFactory.namedNode("/resource/4"),
             },
@@ -88,6 +88,53 @@ describe("StructuredStore", () => {
 
             expect(aliased.getRecord("/resource/5")).toEqual(data["/resource/4"]);
             expect(aliased.journal.get("/resource/5").current).toEqual(RecordState.Present);
+        });
+    });
+
+    describe("deleteFieldMatching", () => {
+        const recordId = "/resource/4";
+        const createData = (): DataSlice => ({
+            [recordId]: {
+                _id: rdfFactory.namedNode("/resource/4"),
+                count: rdfFactory.literal(2),
+                name: [
+                    rdfFactory.literal("name1"),
+                    rdfFactory.literal("name2"),
+                    rdfFactory.literal("name3"),
+                ],
+            },
+        });
+
+        it("preserves different value", () => {
+            const store = new StructuredStore("rdf:defaultGraph", createData());
+
+            expect(store.getField(recordId, "count")).toEqual(rdfFactory.literal(2));
+            store.deleteFieldMatching(recordId, "count", rdfFactory.literal(1));
+            expect(store.getField(recordId, "count")).toEqual(rdfFactory.literal(2));
+        });
+
+        it("deletes matching value", () => {
+            const store = new StructuredStore("rdf:defaultGraph", createData());
+
+            expect(store.getField(recordId, "count")).toEqual(rdfFactory.literal(2));
+            store.deleteFieldMatching(recordId, "count", rdfFactory.literal(2));
+            expect(store.getField(recordId, "count")).toBeUndefined();
+        });
+
+        it("preserves different multimap value", () => {
+            const store = new StructuredStore("rdf:defaultGraph", createData());
+
+            expect(store.getField(recordId, "name")).toContainEqual(rdfFactory.literal("name2"));
+            store.deleteFieldMatching(recordId, "name", rdfFactory.literal("name3"));
+            expect(store.getField(recordId, "name")).toContainEqual(rdfFactory.literal("name2"));
+        });
+
+        it("deletes matching multimap value", () => {
+            const store = new StructuredStore("rdf:defaultGraph", createData());
+
+            expect(store.getField(recordId, "name")).toContainEqual(rdfFactory.literal("name2"));
+            store.deleteFieldMatching(recordId, "name", rdfFactory.literal("name2"));
+            expect(store.getField(recordId, "name")).not.toContainEqual(rdfFactory.literal("name2"));
         });
     });
 });

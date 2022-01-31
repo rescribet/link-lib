@@ -164,7 +164,7 @@ export class StructuredStore {
       return;
     }
 
-    if (current !== value && Array.isArray(current) ? !current.includes(value) : false) {
+    if (Array.isArray(current) ? !current.includes(value) : current !== value) {
       return;
     }
 
