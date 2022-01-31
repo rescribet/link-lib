@@ -1,5 +1,5 @@
 import "jest";
-import "../useHashFactory";
+import "../useFactory";
 
 import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";

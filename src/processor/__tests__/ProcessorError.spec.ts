@@ -1,5 +1,5 @@
 /* @globals set, generator, init */
-import "../../__tests__/useHashFactory";
+import "../../__tests__/useFactory";
 
 import "jest";
 

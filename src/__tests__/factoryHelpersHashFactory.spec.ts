@@ -1,5 +1,5 @@
 import "jest";
-import "./useHashFactory";
+import "./useFactory";
 
 import rdfFactory from "@ontologies/core";
 import * as schema from "@ontologies/schema";

@@ -1,5 +1,5 @@
 import "jest";
-import "./useHashFactory";
+import "./useFactory";
 
 import rdfFactory, { QuadPosition, Quadruple } from "@ontologies/core";
 import * as owl from "@ontologies/owl";

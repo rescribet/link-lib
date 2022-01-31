@@ -1,4 +1,4 @@
-import "./useHashFactory";
+import "./useFactory";
 
 import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";

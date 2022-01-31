@@ -1,4 +1,4 @@
-import "../../__tests__/useHashFactory";
+import "../../__tests__/useFactory";
 
 import rdf from "@ontologies/core";
 import * as owl from "@ontologies/owl";

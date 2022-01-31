@@ -48,7 +48,7 @@
     "n-quads-parser": "^2.1.1"
   },
   "devDependencies": {
-    "@ontola/memoized-hash-factory": "^2.0.1",
+    "@ontola/memoized-factory": "^2.0.1",
     "@ontologies/as": "^2.0.0",
     "@ontologies/core": "^2.0.2",
     "@ontologies/dcterms": "^2.0.0",

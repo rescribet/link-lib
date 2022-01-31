@@ -1,5 +1,5 @@
 import "jest";
-import "../../__tests__/useHashFactory";
+import "../../__tests__/useFactory";
 
 import rdfFactory from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";

@@ -1,4 +1,4 @@
-import "../../__tests__/useHashFactory";
+import "../useFactory";
 
 import rdfFactory, { QuadPosition, Quadruple } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";

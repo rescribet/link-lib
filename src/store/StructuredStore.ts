@@ -1,3 +1,5 @@
+import "../__tests__/useFactory";
+
 import rdfFactory, { SomeTerm } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";

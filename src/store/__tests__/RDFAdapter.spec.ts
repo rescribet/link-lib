@@ -1,4 +1,4 @@
-import "../../__tests__/useHashFactory";
+import "../../__tests__/useFactory";
 
 import rdf, { DataFactory, NamedNode, Quad, Quadruple, Term } from "@ontologies/core";
 import * as owl from "@ontologies/owl";
