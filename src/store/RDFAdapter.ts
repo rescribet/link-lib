@@ -133,6 +133,8 @@ export class RDFAdapter {
       } else {
         quads = EMPTY_ST_ARR as unknown as Quadruple[];
       }
+    } else if (subject) {
+      quads = this.quadsForRecord(subject.value);
     } else {
       quads = this.graphToQuads();
     }
