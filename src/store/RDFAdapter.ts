@@ -24,7 +24,6 @@ export class RDFAdapter {
   public readonly rdfFactory: DataFactory;
 
   public readonly dataCallbacks: Array<(quad: Quadruple) => void>;
-  public readonly removeCallback: ((quad: Quadruple) => void) | undefined;
 
   /** @private */
   public store: StructuredStore;
@@ -79,11 +78,6 @@ export class RDFAdapter {
     }
 
     this.store.deleteRecord(subject.value);
-    if (this.removeCallback) {
-      for (const q of quads) {
-        this.removeCallback(q);
-      }
-    }
   }
 
   /** Remove a quad from the store */
@@ -109,9 +103,6 @@ export class RDFAdapter {
       quad[QuadPosition.object],
     );
 
-    if (this.removeCallback) {
-      this.removeCallback(quad);
-    }
     return this;
   }
 
