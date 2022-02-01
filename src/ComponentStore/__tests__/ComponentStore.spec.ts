@@ -2,13 +2,13 @@ import "jest";
 import "../../__tests__/useFactory";
 
 import rdfFactory from "@ontologies/core";
+import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 
 import { RDFStore } from "../../RDFStore";
 import { Schema } from "../../Schema";
 import { getBasicStore } from "../../testUtilities";
-import { Indexable } from "../../types";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "../../utilities/constants";
 import { ComponentStore } from "../ComponentStore";
 
@@ -21,7 +21,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     undefined,
-                    [rdfFactory.id(schema.Thing)],
+                    [schema.Thing.value],
                     [RCN],
                     [DT],
                 );
@@ -32,7 +32,7 @@ describe("ComponentStore", () => {
             const comp = (): string => "a";
             const reg = ComponentStore.registerRenderer(
                 comp,
-                [rdfFactory.id(schema.Thing)],
+                [schema.Thing.value],
                 [RCN],
                 [DT],
             );
@@ -41,7 +41,7 @@ describe("ComponentStore", () => {
                 component: comp,
                 property: RCN,
                 topology: DT,
-                type: rdfFactory.id(schema.Thing),
+                type: schema.Thing.value,
             }]);
         });
 
@@ -49,7 +49,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [rdfFactory.id(schema.Thing), undefined!],
+                    [schema.Thing.value, undefined!],
                     [RCN],
                     [DT],
                 );
@@ -60,7 +60,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [rdfFactory.id(schema.Thing)],
+                    [schema.Thing.value],
                     [RCN, undefined!],
                     [DT],
                 );
@@ -71,7 +71,7 @@ describe("ComponentStore", () => {
             expect(() => {
                 ComponentStore.registerRenderer(
                     () => undefined,
-                    [rdfFactory.id(schema.Thing)],
+                    [schema.Thing.value],
                     [RCN],
                     [DT, undefined!],
                 );
@@ -83,7 +83,7 @@ describe("ComponentStore", () => {
 
             expect(store.mapping.registerRenderer(
                 () => undefined,
-                rdfFactory.id(schema.Thing),
+                schema.Thing.value,
                 undefined,
                 undefined,
             )).toBeUndefined();
@@ -92,18 +92,58 @@ describe("ComponentStore", () => {
 
     describe("getRenderComponent", () => {
         it("resolved with unregistered views", () => {
-            const store = new ComponentStore(new Schema<Indexable>(new RDFStore()));
-            const unregistered = rdfFactory.id(schema.url);
-            const registered = rdfFactory.id(schema.name);
+            const store = new ComponentStore(new Schema(new RDFStore()));
+            const unregistered = schema.url.value;
+            const registered = schema.name.value;
 
             const comp = (): string => "test";
-            store.registerRenderer(comp, rdfFactory.id(schema.BlogPosting), registered);
+            store.registerRenderer(comp, schema.BlogPosting.value, registered);
 
             const lookup = store.getRenderComponent(
-                [rdfFactory.id(schema.BlogPosting)],
+                [schema.BlogPosting.value],
                 [unregistered, registered],
-                rdfFactory.id(DEFAULT_TOPOLOGY),
-                rdfFactory.id(rdfs.Resource),
+                DEFAULT_TOPOLOGY.value,
+                rdfs.Resource.value,
+            );
+
+            expect(lookup).toEqual(comp);
+        });
+
+        it("???", () => {
+            const dataStore = new RDFStore({
+                data: {
+                    [schema.Thing.value]: {
+                        _id: schema.Thing,
+                        [rdfx.type.value]: rdfs.Class,
+                    },
+                    [schema.CreativeWork.value]: {
+                        _id: schema.CreativeWork,
+                        [rdfs.subClassOf.value]: schema.Thing,
+                    },
+                    [schema.BlogPosting.value]: {
+                        _id: schema.BlogPosting,
+                        [rdfs.subClassOf.value]: schema.CreativeWork,
+                    },
+                    [schema.Person.value]: {
+                        _id: schema.Person,
+                        [rdfs.subClassOf.value]: schema.Thing,
+                    },
+                },
+            });
+            const store = new ComponentStore(new Schema(dataStore));
+            const unregistered = schema.url.value;
+            const registered = schema.name.value;
+
+            const comp = (): string => "test";
+            store.registerRenderer(comp, schema.CreativeWorkSeason.value, registered);
+            store.registerRenderer(comp, schema.Thing.value, registered);
+            store.registerRenderer(comp, schema.Person.value, registered);
+
+            const lookup = store.getRenderComponent(
+                [schema.BlogPosting.value],
+                [unregistered],
+                DEFAULT_TOPOLOGY.value,
+                rdfs.Resource.value,
             );
 
             expect(lookup).toEqual(comp);

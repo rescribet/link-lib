@@ -2,7 +2,6 @@ import "../../__tests__/useFactory";
 
 import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
-import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 import {
     BAD_REQUEST,
@@ -432,85 +431,27 @@ describe("DataProcessor", () => {
         describe("when processing http:statusCode", () => {
             it("sets the status codes", () => {
                 const store = getBasicStore();
+                expect(store.lrs.getState(resource.value).current).toEqual(RecordState.Absent);
+
                 store.processor.processDelta([
                     [resource, http.statusCode, rdfFactory.literal(200), ll.meta],
                 ]);
 
+                expect(store.lrs.getState(resource.value).current).toEqual(RecordState.Present);
                 expect(store.processor.getStatus(resource).status).toEqual(200);
             });
 
             it("clears the invalidation", () => {
                 const store = getBasicStore();
                 store.processor.invalidate(resource);
+                expect(store.lrs.getState(resource.value).current).toEqual(RecordState.Absent);
                 store.processor.processDelta([
                     [resource, http.statusCode, rdfFactory.literal(200), ll.meta],
                 ]);
 
+                expect(store.lrs.getState(resource.value).current).toEqual(RecordState.Present);
                 expect(store.processor.isInvalid(resource)).toBeFalsy();
             });
-        });
-    });
-
-    describe("#save", () => {
-        beforeEach(() => {
-            (fetch as any).resetMocks();
-        });
-
-        it("posts a resource from the default graph", () => {
-            const fetchMock = (fetch as any);
-            fetchMock.mockResponse("/link-lib/bulk", 200);
-            const store = getBasicStore();
-            const data: Quadruple[] = [
-                [schema.Person, rdfx.type, schema.Thing, defaultGraph],
-                [schema.Person, rdfs.label, rdfFactory.literal("Person class"), defaultGraph],
-            ];
-            store.store.addQuads([
-                // [schema.Person, rdfx.type, schema.RejectAction, schema.Person, defaultGraph],
-                ...data,
-            ]);
-
-            store.processor.save(schema.Person);
-
-            expect(fetchMock.mock.calls[0]).toBeDefined();
-            expect(fetchMock.mock.calls[0][0]).toEqual("http://schema.org/Person");
-            expect(fetchMock.mock.calls[0][1].body).toEqual((store.processor as any).serialize(data));
-        });
-
-        // it("posts a graph", () => {
-        //     const fetchMock = (fetch as any);
-        //     fetchMock.mockResponse("/link-lib/bulk", 200);
-        //     const store = getBasicStore();
-        //     const blankNode = rdfFactory.blankNode();
-        //     const data = [
-        //         [schema.Person, rdfx.type, schema.Thing, schema.Person, defaultGraph],
-        //         [schema.Person, rdfs.label, rdfFactory.literal("Person class"), schema.Person, defaultGraph],
-        //         [blankNode, rdfs.label, rdfFactory.literal("included"), schema.Person, defaultGraph],
-        //     ];
-        //     store.store.addQuads([
-        //         [schema.Person, rdfx.type, schema.RejectAction, rdfFactory.defaultGraph(), defaultGraph],
-        //         ...data,
-        //     ]);
-        //
-        //     store.processor.save(schema.Person, { useDefaultGraph: false });
-        //
-        //     expect(fetchMock.mock.calls[0]).toBeDefined();
-        //     expect(fetchMock.mock.calls[0][0]).toEqual("http://schema.org/Person");
-        //     expect(fetchMock.mock.calls[0][1].body).toEqual((store.processor as any).serialize(data));
-        // });
-
-        it("throws on blank node without backing url", () => {
-            expect(() => {
-                getBasicStore().processor.save(rdfFactory.blankNode());
-            }).toThrow("Can't resolve");
-        });
-
-        it("allows blank nodes with backing url", () => {
-            expect(() => {
-                getBasicStore().processor.save(
-                    rdfFactory.blankNode(),
-                    { url: rdfFactory.namedNode("http://example.org/") },
-                );
-            }).not.toThrow("Can't resolve");
         });
     });
 

@@ -7,7 +7,6 @@ import {
     QuadPosition,
     Quadruple,
     SomeTerm,
-    Term,
     TermType,
 } from "@ontologies/core";
 import { sameAs } from "@ontologies/owl";
@@ -51,37 +50,6 @@ export function Equatable<BC extends Constructable<RDFAdapter>>(base: BC) {
             this.store = value;
         }
 
-        /** @deprecated */
-        public canon<T = Term>(term: T): T {
-            if (!isNode(term)) {
-                return term;
-            }
-
-            const primary = this.defaultGraph.primary(term.value);
-
-            if (primary.includes("/") || primary === this.defaultGraphValue) {
-                return this.rdfFactory.namedNode(primary) as unknown as T;
-            } else {
-                return this.rdfFactory.blankNode(primary) as unknown as T;
-            }
-        }
-
-        public compareTerm(u1: Node, u2: Node): number {
-            if (this.classOrder[u1.termType] < this.classOrder[u2.termType]) {
-                return -1;
-            }
-            if (this.classOrder[u1.termType] > this.classOrder[u2.termType]) {
-                return 1;
-            }
-            if (u1.value < u2.value) {
-                return -1;
-            }
-            if (u1.value > u2.value) {
-                return 1;
-            }
-            return 0;
-        }
-
         public id(x: Node): number {
             return this.rdfFactory.id(x) as number;
         }
@@ -105,17 +73,34 @@ export function Equatable<BC extends Constructable<RDFAdapter>>(base: BC) {
             justOne: boolean = false,
         ): Quadruple[] {
             return super.match(
-                subject ? this.canon(subject) : null,
-                predicate ? this.canon(predicate) as NamedNode : null,
+                subject ? this.primary(subject) : null,
+                predicate ? this.primary(predicate) as NamedNode : null,
                 object
-                    ? (isNode(object) ? this.canon(object) : object)
+                    ? (isNode(object) ? this.primary(object) : object)
                     : null,
                 justOne,
             );
         }
 
         /** @private */
-        public primary(node: Node): Node {
+        public compareTerm(u1: Node, u2: Node): number {
+            if (this.classOrder[u1.termType] < this.classOrder[u2.termType]) {
+                return -1;
+            }
+            if (this.classOrder[u1.termType] > this.classOrder[u2.termType]) {
+                return 1;
+            }
+            if (u1.value < u2.value) {
+                return -1;
+            }
+            if (u1.value > u2.value) {
+                return 1;
+            }
+            return 0;
+        }
+
+        /** @private */
+        public primary(node: SomeNode): SomeNode {
             const p = this.defaultGraph.primary(node.value);
 
             if (node.termType === TermType.NamedNode) {

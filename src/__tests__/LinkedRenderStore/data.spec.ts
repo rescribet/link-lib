@@ -17,14 +17,14 @@ describe("LinkedRenderStore", () => {
         it("add a single graph item", () => {
             const store = getBasicStore();
             store.lrs.store.addQuadruples(thingStatements);
-            expect(store.schema.isInstanceOf(rdfFactory.id(schemaT), rdfFactory.id(rdfs.Class))).toBeTruthy();
+            expect(store.schema.isInstanceOf(schemaT.value, rdfs.Class.value)).toBeTruthy();
         });
 
         it("adds multiple graph items", () => {
             const store = getBasicStore();
             store.lrs.store.addQuadruples(thingStatements.concat(creativeWorkStatements));
-            expect(store.schema.isInstanceOf(rdfFactory.id(schemaT), rdfFactory.id(rdfs.Class))).toBeTruthy();
-            expect(store.schema.isInstanceOf(rdfFactory.id(schemaCW), rdfFactory.id(rdfs.Class))).toBeTruthy();
+            expect(store.schema.isInstanceOf(schemaT.value, rdfs.Class.value)).toBeTruthy();
+            expect(store.schema.isInstanceOf(schemaCW.value, rdfs.Class.value)).toBeTruthy();
         });
     });
 

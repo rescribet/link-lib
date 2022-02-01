@@ -1,4 +1,4 @@
-import rdfFactory, { isBlankNode, NamedNode, QuadPosition, Quadruple, TermType } from "@ontologies/core";
+import rdfFactory, { NamedNode, QuadPosition, Quadruple, TermType } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 import * as xsd from "@ontologies/xsd";
@@ -24,7 +24,6 @@ import {
     ResourceQueueItem,
     ResponseAndFallbacks,
     ResponseTransformer,
-    SaveOpts,
     SomeNode,
     SomeRequestStatus,
 } from "../types";
@@ -383,8 +382,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     public invalidate(iri: string | SomeNode, _err?: Error): boolean {
         const subject = typeof iri === "string" ? rdfFactory.namedNode(iri) : iri;
-        const iriId = id(subject);
-        this.invalidationMap.set(iriId);
+        this.invalidationMap.set(id(subject));
         this.store.getInternalStore().store.transition(subject.value, RecordState.Absent);
         // TODO: Don't just remove, but rather mark it as invalidated so it's history isn't lost.
         this.clearStatus(subject);
@@ -412,20 +410,35 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             }
 
             if (equals(s[1], http.statusCode)) {
+                const subject = subj as NamedNode;
                 const status = parseInt(s[2].value, 10);
+                this.removeInvalidation(subject);
+
                 if (status >= 200 && status < 400) {
                     this.store.getInternalStore().store.transition(s[0].value, RecordState.Present);
+                    this.setStatus(subject, Number.parseInt(s[2].value, 10), false);
                 } else if (status >= 400 && status < 500) {
                     this.store.getInternalStore().store.deleteRecord(s[0].value);
                     this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ErrorResource);
                     this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ClientError);
+                    this.store.getInternalStore().store.addField(
+                        s[0].value,
+                        http.statusCode.value,
+                        rdfFactory.literal(status),
+                    );
+                    this.setStatus(subject, Number.parseInt(s[2].value, 10), false);
                 } else if (status >= 500 && status < 600) {
                     this.store.getInternalStore().store.deleteRecord(s[0].value);
                     this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ErrorResource);
                     this.store.getInternalStore().store.addField(s[0].value, rdf.type.value, ll.ServerError);
+                    this.store.getInternalStore().store.addField(
+                        s[0].value,
+                        http.statusCode.value,
+                        rdfFactory.literal(status),
+                    );
+                    this.setStatus(subject, Number.parseInt(s[2].value, 10), false);
                 } else {
-                    this.removeInvalidation(subj as NamedNode);
-                    this.setStatus(subj as NamedNode, Number.parseInt(s[2].value, 10));
+                    this.setStatus(subject, Number.parseInt(s[2].value, 10), false);
                 }
             } else if (equals(s[1], httph["Exec-Action"])) {
                 this.execExecHeader(s[2].value);
@@ -444,24 +457,6 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             pushToMap(this.mapping, type, transformer);
             this.accept.default = [this.accept.default, [type, acceptValue].join(";")].join();
         });
-    }
-
-    public save(iri: SomeNode, opts: SaveOpts = { useDefaultGraph: true }): Promise<void> {
-        if (isBlankNode(iri) && !opts?.url) {
-            throw new Error("Can't resolve");
-        }
-
-        const target = isBlankNode(iri) ? opts.url! : (opts?.url ?? iri);
-        const targetData = this.store.match(null, null, null);
-
-        const options = this.requestInitGenerator.generate(
-            opts.method || "PUT",
-            this.acceptForHost(target),
-            this.serialize(targetData),
-        );
-
-        return this.fetch(target.value, options)
-            .then(() => Promise.resolve());
     }
 
     public queueDelta(delta: Quadruple[], subjects: number[]): void {
@@ -513,8 +508,10 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         return processor(res);
     }
 
-    private memoizeStatus(iri: NamedNode, s: SomeRequestStatus): SomeRequestStatus {
-        this.store.getInternalStore().store.transition(iri.value, this.requestStatusToJournalStatus(s));
+    private memoizeStatus(iri: NamedNode, s: SomeRequestStatus, transition: boolean = true): SomeRequestStatus {
+        if (transition) {
+            this.store.getInternalStore().store.transition(iri.value, this.requestStatusToJournalStatus(s));
+        }
         this.statusMap[id(iri)] = s;
 
         return s;
@@ -556,7 +553,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         ))), "");
     }
 
-    private setStatus(iri: NamedNode, status: number | null): void {
+    private setStatus(iri: NamedNode, status: number | null, transition: boolean = true): void {
         const url = doc(iri);
         const prevStatus = this.statusMap[id(url)];
 
@@ -570,6 +567,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 subject: iri,
                 timesRequested: prevStatus ? prevStatus.timesRequested + 1 : 1,
             },
+            transition,
         );
     }
 }

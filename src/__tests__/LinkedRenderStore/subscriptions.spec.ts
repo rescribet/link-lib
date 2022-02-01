@@ -84,9 +84,9 @@ describe("LinkedRenderStore", () => {
                 expect(setTimeout).toHaveBeenCalledTimes(1);
                 expect(reg.markedForDelete).toBeTruthy();
 
-                expect((store.lrs as any).subjectSubscriptions[`<${schemaT.value}>`]).toContain(reg);
+                expect((store.lrs as any).subjectSubscriptions[schemaT.value]).toContain(reg);
                 jest.runAllTimers();
-                expect((store.lrs as any).subjectSubscriptions[`<${schemaT.value}>`]).not.toContain(reg);
+                expect((store.lrs as any).subjectSubscriptions[schemaT.value]).not.toContain(reg);
             });
 
             it("skips the subscription when irrelevant", async () => {
@@ -125,7 +125,7 @@ describe("LinkedRenderStore", () => {
 
                 expect(callback).toHaveBeenCalledTimes(1);
                 expect(callback.mock.calls[0][0]).toEqual([
-                    rdfFactory.id(schemaT),
+                    schemaT.value,
                 ]);
                 expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
                 expect(callback.mock.calls[0][1]).toBeLessThanOrEqual(Date.now());

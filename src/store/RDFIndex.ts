@@ -7,7 +7,6 @@ import {
     SomeTerm,
 } from "@ontologies/core";
 
-import { id } from "../factoryHelpers";
 import { SomeNode } from "../types";
 
 import { Equatable } from "./Equatable";
@@ -28,7 +27,7 @@ export default class RDFIndex extends Equatable(RDFAdapter) {
     /** Returns the number of quads in the store. */
     public length: number = 0;
 
-    private readonly propertyActions: PropertyActionCallback[][] = [];
+    private readonly propertyActions: Record<string, PropertyActionCallback[]> = {};
 
     /**
      * @constructor
@@ -84,19 +83,18 @@ export default class RDFIndex extends Equatable(RDFAdapter) {
         return this.match(s, p, o, true)?.[0] !== undefined;
     }
 
-    public newPropertyAction(predicate: NamedNode, action: PropertyActionCallback): void {
-        const hash = id(predicate) as number;
-        if (!this.propertyActions[hash]) {
-            this.propertyActions[hash] = [];
+    public newPropertyAction(predicate: Id, action: PropertyActionCallback): void {
+        if (!this.propertyActions[predicate]) {
+            this.propertyActions[predicate] = [];
         }
-        this.propertyActions[hash].push(action);
+        this.propertyActions[predicate].push(action);
         const data = this.store.data;
         for (const recordId in data) {
             if (!data.hasOwnProperty(recordId)) {
                 continue;
             }
             const record = this.store.getRecord(recordId);
-            if (record?.[predicate.value] !== undefined) {
+            if (record?.[predicate] !== undefined) {
                 action(record);
             }
         }

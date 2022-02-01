@@ -4,9 +4,9 @@ import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
+import { Id } from "./store/StructuredStore";
 import {
     DataProcessorOpts,
-    Indexable,
     LinkedRenderStoreOptions,
     MiddlewareActionHandler,
 } from "./types";
@@ -14,9 +14,11 @@ import {
 export type BasicComponent = () => string | undefined;
 
 export class ComponentStoreTestProxy<T> extends ComponentStore<T> {
-    public publicLookup(predicate: Indexable,
-                        obj: Indexable,
-                        topology: Indexable): T | undefined {
+    public publicLookup(
+        predicate: Id,
+        obj: Id,
+        topology: Id,
+    ): T | undefined {
         return this.lookup(predicate, obj, topology);
     }
 }

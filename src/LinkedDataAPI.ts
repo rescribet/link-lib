@@ -10,7 +10,6 @@ import {
     PendingRequestStatus,
     ResourceQueueItem,
     ResponseTransformer,
-    SaveOpts,
     SomeNode,
 } from "./types";
 
@@ -65,20 +64,6 @@ export interface LinkedDataAPI extends Dispatcher, DeltaProcessor {
     registerTransformer(processor: ResponseTransformer,
                         mediaType: string | string[],
                         acceptValue: number): void;
-
-    /**
-     * Save a {graph} to {graph} (identity) or {opts.url}.
-     *
-     * When {graph} is a blank node {opts.url} must be given as well.
-     *
-     * @param graph
-     * @param opts
-     * @param {Quad[]} opts.data - Override default data collection for this data.
-     * @param {string} opts.url - Overrides the target to save the resource to.
-     * @param {boolean} opts.useDefaultGraph - Changes data collection to search for {graph} in the default graph rather
-     *  than the named graph {graph}.
-     */
-    save(graph: SomeNode, opts: SaveOpts): Promise<void>;
 
     /**
      * Overrides the `Accept` value for when a certain host doesn't respond well to multiple values.

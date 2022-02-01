@@ -43,10 +43,12 @@ export class RDFAdapter {
     this.storeGraph = this.rdfFactory.namedNode(this.store.base);
   }
 
+  /** @deprecated */
   public get quads(): Quadruple[] {
     return this.graphToQuads();
   }
 
+  /** @deprecated */
   public add(
     subject: SomeNode,
     predicate: NamedNode,
@@ -55,9 +57,9 @@ export class RDFAdapter {
   ): Quadruple {
     const asQuadruple: Quadruple = [subject, predicate, object, _graph];
 
-    this.store.addField(subject.value, predicate.value, object);
+    const changed = this.store.addField(subject.value, predicate.value, object);
 
-    if (this.dataCallbacks) {
+    if (changed && this.dataCallbacks) {
       for (const callback of this.dataCallbacks) {
         callback(asQuadruple);
       }
@@ -80,7 +82,10 @@ export class RDFAdapter {
     this.store.deleteRecord(subject.value);
   }
 
-  /** Remove a quad from the store */
+  /**
+   * Remove a quad from the store
+   * @deprecated
+   */
   public remove(st: Quadruple): this {
     const value = this.store.getField(st[QuadPosition.subject].value, st[QuadPosition.predicate].value);
     if (value === undefined) {
@@ -95,7 +100,10 @@ export class RDFAdapter {
     return this;
   }
 
-  /** Remove a quad from the store */
+  /**
+   * Remove a quad from the store
+   * @deprecated
+   */
   public removeQuad(quad: Quadruple): this {
     this.store.deleteFieldMatching(
       quad[QuadPosition.subject].value,
@@ -106,6 +114,7 @@ export class RDFAdapter {
     return this;
   }
 
+  /** @deprecated */
   public removeQuads(quads: Quadruple[]): this {
     // Ensure we don't loop over the array we're modifying.
     const toRemove = quads.slice();
@@ -115,6 +124,7 @@ export class RDFAdapter {
     return this;
   }
 
+  /** @deprecated */
   public match(
     subject: SomeNode | null,
     predicate: NamedNode | null,
@@ -152,6 +162,7 @@ export class RDFAdapter {
     return quads.filter(filter);
   }
 
+  /** @deprecated */
   public quadsForRecord(recordId: Id): Quadruple[] {
     const factory = this.rdfFactory;
     const record = this.store.getRecord(recordId);
@@ -185,6 +196,7 @@ export class RDFAdapter {
     return quadruples;
   }
 
+  /** @deprecated */
   public graphToQuads(): Quadruple[] {
     const qdrs = [];
     const data = this.store.data;

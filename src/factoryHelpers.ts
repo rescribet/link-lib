@@ -1,4 +1,6 @@
 import rdfFactory, { DataFactory, Feature, Quad, Term } from "@ontologies/core";
+import { Id } from "./store/StructuredStore";
+import { SomeNode } from "./types";
 
 export type Comparator = (a: any, b: any) => boolean;
 
@@ -15,7 +17,22 @@ const noIdError = (obj: any): void => {
     throw new TypeError(`Factory has idStamp feature, but the property wasn't present on ${obj}`);
 };
 
+const noValueError = (obj: any): void => {
+    throw new TypeError(`Unable to lookup property 'value' on ${obj}.`);
+};
+
 /** @internal */
 export const id = rdfFactory.supports[Feature.idStamp]
     ? (obj?: Term | Quad | any): number => (obj as any)?.id || noIdError(obj)
     : (obj?: Term | Quad | any): number => rdfFactory.id(obj);
+
+/** @internal */
+export const value = (obj?: Term): string => (obj as any)?.value ?? noValueError(obj);
+
+export const idToValue = (recordId: Id): SomeNode => {
+    if (recordId.includes(":")) {
+        return rdfFactory.namedNode(recordId);
+    } else {
+        return rdfFactory.blankNode(recordId);
+    }
+};

@@ -1,5 +1,3 @@
-import "../__tests__/useFactory";
-
 import rdfFactory, { SomeTerm } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
@@ -66,6 +64,12 @@ export class StructuredStore {
 
   private aliases: Record<string, Id & FieldId> = {};
 
+  /**
+   *
+   * @param base
+   * @param data Will be modified, so don't re-use the reference elsewhere.
+   * @param onChange @internal
+   */
   constructor(
       base: string = "rdf:defaultGraph",
       data: Record<Id, DataRecord> | undefined = {},
@@ -112,19 +116,33 @@ export class StructuredStore {
     }
   }
 
-  public setField(recordId: Id, field: FieldId, value: FieldValue): void {
+  /**
+   * @returns Whether a mutation has occurred.
+   */
+  public setField(recordId: Id, field: FieldId, value: FieldValue): boolean {
     if (field === idField) {
       throw new Error("Can't set system fields");
     }
     this.initializeRecord(recordId);
+    const current = this.getRecord(recordId)!;
+
+    if (current[field] === value) {
+      return false;
+    }
+
     this.setRecord(recordId, {
-      ...this.getRecord(recordId)!,
+      ...current,
       [field]: value,
     });
+
+    return true;
   }
 
-  /** @deprecated */
-  public addField(recordId: Id, field: FieldId, value: SomeTerm): void {
+  /**
+   * @returns Whether a mutation has occurred.
+   * @deprecated
+   */
+  public addField(recordId: Id, field: FieldId, value: SomeTerm): boolean {
     if (field === idField) {
       throw new Error("Can't set system fields");
     }
@@ -132,17 +150,27 @@ export class StructuredStore {
 
     const existingRecord = this.getRecord(recordId)!;
     const existingValue = existingRecord?.[field];
+    const existingIsArray = Array.isArray(existingValue);
+    const valueAlreadyPresent = existingIsArray
+        ? existingValue.includes(value)
+        : existingValue !== undefined && existingValue === value;
 
-    const combined = Array.isArray(existingValue)
-      ? existingValue.includes(value) ? existingValue : [...existingValue, value]
-      : (existingValue !== undefined && existingValue !== value)
-          ? [existingValue, value] :
-          value;
+    if (valueAlreadyPresent) {
+      return false;
+    }
+
+    const combined = existingIsArray
+      ? [...existingValue, value]
+      : existingValue
+            ? [existingValue, value]
+            : value;
 
     this.setRecord(recordId, {
       ...existingRecord,
       [field]: combined,
     });
+
+    return true;
   }
 
   public deleteField(recordId: Id, field: FieldId): void {

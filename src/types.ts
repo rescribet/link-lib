@@ -1,9 +1,9 @@
 import {
-  BlankNode,
-  CustomPredicateCreator,
-  Literal,
-  NamedNode,
-  Quadruple,
+    BlankNode,
+    CustomPredicateCreator,
+    Literal,
+    NamedNode,
+    Quadruple, SomeTerm,
 } from "@ontologies/core";
 
 import { ComponentStore } from "./ComponentStore/ComponentStore";
@@ -25,7 +25,15 @@ export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
 export type Indexable = number | string;
 
-export interface ComponentMapping<T> { [type: string]: { [obj: string]: { [topology: string]: T } }; }
+export interface ComponentMapping<T> {
+    /** The registration type, either a field identifier or the TYPE_RENDER_CLASS identifier */
+    [type: string]: {
+        /** The type of the object */
+        [klass: string]: {
+            [topology: string]: T,
+        },
+    };
+}
 
 export interface SubscriptionRegistrationBase<T> {
     callback: SubscriptionCallback<T>;
@@ -38,9 +46,9 @@ export interface SubscriptionRegistrationBase<T> {
 
 export interface ComponentRegistration<T> {
     component: T;
-    property: Indexable;
-    topology: Indexable;
-    type: Indexable;
+    property: Id;
+    topology: Id;
+    type: Id;
 }
 
 export type ResponseTransformer = (response: ResponseAndFallbacks) => Promise<Quadruple[]>;
@@ -132,12 +140,6 @@ export interface LinkedActionResponse {
     data: Quadruple[];
 }
 
-export interface SaveOpts extends RequestInit {
-    data?: Quadruple[];
-    url?: NamedNode;
-    useDefaultGraph?: boolean;
-}
-
 export interface ExtensionResponse {
     body: string;
     headers: { [k: string]: string };
@@ -204,19 +206,24 @@ export interface VocabularyProcessingContext<IndexType = Indexable> {
     dataStore: RDFStore;
     equivalenceSet: DisjointSet<IndexType>;
     superMap: Map<IndexType, Set<IndexType>>;
-    store: Schema<any>;
+    store: Schema;
 }
 
 export interface VocabularyProcessor {
     axioms: Quadruple[];
 
-    processStatement: (item: Quadruple, ctx: VocabularyProcessingContext<any>) => Quadruple[] | null;
+    processStatement: (
+        recordId: Id,
+        field: Id,
+        value: SomeTerm,
+        ctx: VocabularyProcessingContext<any>,
+    ) => void;
 
     /**
      * Processes class instances (object to rdf:type). If an IRI is given, processors must assume the resource to be an
      * instance of rdfs:Class.
      */
-    processType: (type: NamedNode, ctx: VocabularyProcessingContext<any>) => boolean;
+    processType: (type: string, ctx: VocabularyProcessingContext<any>) => boolean;
 }
 
 export interface TransformerRegistrationRequest {

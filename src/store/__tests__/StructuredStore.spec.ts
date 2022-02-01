@@ -91,6 +91,47 @@ describe("StructuredStore", () => {
         });
     });
 
+    describe("addField", () => {
+        const recordId = "/resource/addField";
+
+        it("adds to nonexistent record", () => {
+            const store = new StructuredStore();
+
+            expect(store.getField(recordId, "name")).toBeUndefined();
+            store.addField(recordId, "name", rdfFactory.literal("Dee"));
+            expect(store.getField(recordId, "name")).toEqual(rdfFactory.literal("Dee"));
+        });
+
+        it("adds to existent record without existing field", () => {
+            const store = new StructuredStore("rdf:defaultGraph", {
+                [recordId]: {
+                    _id: rdfFactory.namedNode(recordId),
+                    count: rdfFactory.literal(0),
+                },
+            });
+
+            expect(store.getField(recordId, "name")).toBeUndefined();
+            store.addField(recordId, "name", rdfFactory.literal("Dee"));
+            expect(store.getField(recordId, "name")).toEqual(rdfFactory.literal("Dee"));
+        });
+
+        it("adds to existent record with existing field", () => {
+            const store = new StructuredStore("rdf:defaultGraph", {
+                [recordId]: {
+                    _id: rdfFactory.namedNode(recordId),
+                    name: rdfFactory.literal("Andy"),
+                },
+            });
+
+            expect(store.getField(recordId, "name")).toEqual(rdfFactory.literal("Andy"));
+            store.addField(recordId, "name", rdfFactory.literal("Dee"));
+            expect(store.getField(recordId, "name")).toEqual([
+                rdfFactory.literal("Andy"),
+                rdfFactory.literal("Dee"),
+            ]);
+        });
+    });
+
     describe("deleteFieldMatching", () => {
         const recordId = "/resource/4";
         const createData = (): DataSlice => ({

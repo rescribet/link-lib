@@ -1,13 +1,15 @@
-import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
+import { NamedNode, QuadPosition, Quadruple, SomeTerm } from "@ontologies/core";
+import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
-import { id } from "./factoryHelpers";
 
 import { OWL } from "./schema/owl";
 import { RDFS } from "./schema/rdfs";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 import { RDFStore } from "./RDFStore";
+import { Id } from "./store/StructuredStore";
 import {
+    SomeNode,
     VocabularyProcessingContext,
     VocabularyProcessor,
 } from "./types";
@@ -18,15 +20,15 @@ import {
  * Basically duplicates some functionality already present in {IndexedFormula} IIRC, but this API should be more
  * optimized so it can be used in real-time by low-power devices as well.
  */
-export class Schema<IndexType = number | string> {
+export class Schema {
     private static vocabularies: VocabularyProcessor[] = [OWL, RDFS];
 
-    private equivalenceSet: DisjointSet<IndexType> = new DisjointSet();
+    private equivalenceSet: DisjointSet<string> = new DisjointSet();
     // Typescript can't handle generic index types, so it is set to string.
-    private expansionCache: { [k: string]: IndexType[] };
+    private expansionCache: { [k: string]: string[] };
     private liveStore: RDFStore;
-    private superMap: Map<IndexType, Set<IndexType>> = new Map();
-    private processedTypes: IndexType[] = [];
+    private superMap: Map<string, Set<string>> = new Map();
+    private processedTypes: string[] = [];
 
     public constructor(liveStore: RDFStore) {
         this.liveStore = liveStore;
@@ -43,15 +45,39 @@ export class Schema<IndexType = number | string> {
         }
     }
 
-    public allEquals(resource: IndexType, grade = 1.0): IndexType[] {
+    public allEquals(recordId: Id, grade = 1.0): Id[] {
         if (grade >= 0) {
-            return this.equivalenceSet.allValues(resource);
+            return this.equivalenceSet.allValues(recordId);
         }
 
-        return [resource];
+        return [recordId];
     }
 
-    public expand(types: IndexType[]): IndexType[] {
+    /** @private */
+    public holds(recordId: SomeNode, field: NamedNode, value: SomeTerm): boolean {
+        return !!this.liveStore.getInternalStore().match(
+            recordId,
+            field,
+            value,
+            true,
+        )[0];
+    }
+
+    /** @private */
+    public isInstanceOf(recordId: Id, klass: Id): boolean {
+        const type = this.liveStore.getInternalStore().store.getField(recordId, rdfx.type.value);
+
+        if (type === undefined) {
+            return false;
+        }
+
+        const allCheckTypes = this.expand([klass]);
+        const allRecordTypes = this.expand(Array.isArray(type) ? type.map((t) => t.value) : [type.value]);
+
+        return allRecordTypes.some((t) => allCheckTypes.includes(t));
+    }
+
+    public expand(types: Id[]): Id[] {
         if (types.length === 1) {
             const existing = this.expansionCache[types[0] as unknown as string];
             this.expansionCache[types[0] as unknown as string] = existing
@@ -64,7 +90,7 @@ export class Schema<IndexType = number | string> {
         return this.sort(this.mineForTypes(types));
     }
 
-    public getProcessingCtx(): VocabularyProcessingContext<IndexType> {
+    public getProcessingCtx(): VocabularyProcessingContext<string> {
         return {
             dataStore: this.liveStore,
             equivalenceSet: this.equivalenceSet,
@@ -78,27 +104,23 @@ export class Schema<IndexType = number | string> {
      * This is done in multiple iterations until no new types are found.
      * @param lookupTypes The types to look up. Once given, these are assumed to be classes.
      */
-    public mineForTypes(lookupTypes: IndexType[]): IndexType[] {
+    public mineForTypes(lookupTypes: string[]): string[] {
         if (lookupTypes.length === 0) {
-            return [id(rdfs.Resource) as unknown as IndexType];
+            return [rdfs.Resource.value];
         }
 
-        const canonicalTypes: IndexType[] = [];
+        const canonicalTypes: string[] = [];
         const lookupTypesExpanded = [];
         for (let i = 0; i < lookupTypes.length; i++) {
             lookupTypesExpanded.push(...this.allEquals(lookupTypes[i]));
         }
         for (let i = 0; i < lookupTypesExpanded.length; i++) {
-            const canon = id(
-                this.liveStore.canon(
-                    rdfFactory.fromId(lookupTypes[i]) as NamedNode,
-                ),
-            ) as unknown as IndexType;
+            const canon = this.liveStore.getInternalStore().store.primary(lookupTypes[i]);
 
             if (!this.processedTypes.includes(canon)) {
                 for (let j = 0; j < Schema.vocabularies.length; j++) {
                     Schema.vocabularies[j].processType(
-                        rdfFactory.fromId(canon) as NamedNode,
+                        canon,
                         this.getProcessingCtx(),
                     );
                 }
@@ -132,7 +154,7 @@ export class Schema<IndexType = number | string> {
         return this.sort(allTypes);
     }
 
-    public sort(types: IndexType[]): IndexType[] {
+    public sort(types: string[]): string[] {
         return types.sort((a, b) => {
             if (this.isSubclassOf(a, b)) {
                 return -1;
@@ -156,13 +178,13 @@ export class Schema<IndexType = number | string> {
      * Returns the hierarchical depth of the type, or -1 if unknown.
      * @param type the type to check
      */
-    private superTypeDepth(type: IndexType): number {
+    private superTypeDepth(type: string): number {
         const superMap = this.superMap.get(type);
 
         return superMap ? superMap.size : -1;
     }
 
-    private isSubclassOf(resource: IndexType, superClass: IndexType): boolean {
+    private isSubclassOf(resource: string, superClass: string): boolean {
         const resourceMap = this.superMap.get(resource);
 
         if (resourceMap) {
@@ -171,14 +193,14 @@ export class Schema<IndexType = number | string> {
         return false;
     }
 
-    private process(item: Quadruple): Quadruple[] | null {
+    private process(item: Quadruple): void {
         for (let i = 0; i < Schema.vocabularies.length; i++) {
-            const res = Schema.vocabularies[i].processStatement(item, this.getProcessingCtx());
-            if (res !== null) {
-                return res;
-            }
+            Schema.vocabularies[i].processStatement(
+                item[QuadPosition.subject].value,
+                item[QuadPosition.predicate].value,
+                item[QuadPosition.object],
+                this.getProcessingCtx(),
+            );
         }
-
-        return null;
     }
 }

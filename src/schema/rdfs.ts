@@ -1,18 +1,16 @@
-import rdfFactory, {NamedNode, QuadPosition, Quadruple, TermType} from "@ontologies/core";
+import rdfFactory, { isLiteral, NamedNode, SomeTerm, TermType } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
-import { equals, id } from "../factoryHelpers";
-import { DataRecord } from "../store/StructuredStore";
-import { SomeNode, VocabularyProcessingContext, VocabularyProcessor } from "../types";
+import { DataRecord, Id } from "../store/StructuredStore";
+import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();
 
 /**
  * Implements the RDF/RDFS axioms and rules.
- * @type {VocabularyProcessor}
  */
-export const RDFS = {
+export const RDFS: VocabularyProcessor = {
     axioms: [
         [rdf.type, rdfs.domain, rdfs.Resource, defaultGraph],
         [rdfs.domain, rdfs.domain, rdf.Property, defaultGraph],
@@ -61,132 +59,48 @@ export const RDFS = {
         [rdfs.Class, rdf.type, rdfs.Class, defaultGraph],
     ],
 
-    processStatement(item: Quadruple, ctx: VocabularyProcessingContext): Quadruple[] | null {
-        const dataStore = ctx.dataStore.getInternalStore().store;
-        const result: Quadruple[] = [item];
+    processStatement(
+        recordId: Id,
+        field: Id,
+        value: SomeTerm,
+        ctx: VocabularyProcessingContext,
+    ): void {
+        switch (field) {
+            case rdf.type.value: {
+                if (rdf.type.value === recordId || isLiteral(value)) { break; }
 
-        const domainValues = dataStore.getField(item[QuadPosition.predicate].value, rdfs.domain.value);
-        if (domainValues !== undefined) {
-            if (Array.isArray(domainValues)) {
-                for (let i = 0; i < domainValues.length; i++) {
-                    result.push([
-                        item[QuadPosition.subject],
-                        rdf.type,
-                        domainValues[i],
-                        defaultGraph,
-                    ]);
-                }
-            } else {
-                result.push([
-                    item[QuadPosition.subject],
-                    rdf.type,
-                    domainValues,
-                    defaultGraph,
-                ]);
+                ctx.dataStore.add(value, rdf.type, rdfs.Class);
+                break;
             }
-        }
+            case rdfs.domain.value: {
+                if (rdf.type.value === recordId || isLiteral(value)) { break; }
 
-        const rangeValues = dataStore.getField(item[QuadPosition.predicate].value, rdfs.range.value);
-        if (rangeValues !== undefined) {                                                     // P rdfs:range C..Cn
-            if (Array.isArray(rangeValues)) {
-                for (let i = 0; i < rangeValues.length; i++) {
-                    result.push([
-                        item[QuadPosition.object] as NamedNode,
-                        rdf.type,
-                        rangeValues[i],
-                        defaultGraph,
-                    ]);
-                }
-            } else {
-                result.push([
-                    item[QuadPosition.object] as NamedNode,
-                    rdf.type,
-                    rangeValues,
-                    defaultGraph,
-                ]);
-            }
-        }
+                ctx.dataStore.add(value, rdf.type, rdfs.Class);
 
-        if (equals(rdfs.domain, item[QuadPosition.predicate])) {
-            result.push([item[QuadPosition.subject], rdf.type, rdf.Property, defaultGraph]); // P rdf:type rdf:Property
-            result.push([
-                item[QuadPosition.object] as NamedNode,
-                rdf.type,
-                rdfs.Class,
-                defaultGraph,
-            ]);    // C rdf:type rdfs:Class
-
-            const record = dataStore.getRecord(item[QuadPosition.subject].value);
-            if (record !== undefined) {
-                const entries = Object.values(record);
-                for (const field in record) {
-                    if (!record.hasOwnProperty(field)) {
-                        continue;
-                    }
-
-                    for (const value of entries) {
-                        if (Array.isArray(value)) {
-                            for (const v of value) {
-                                result.push([
-                                    item[QuadPosition.subject] as NamedNode,
-                                    rdf.type,
-                                    v,
-                                    defaultGraph,
-                                ]);
-                            }
-                        } else {
-                            result.push([
-                                item[QuadPosition.subject] as NamedNode,
-                                rdf.type,
-                                value,
-                                defaultGraph,
-                            ]);
-                        }
-                    }
-                }
-            }
-
-            if (!equals(item[QuadPosition.subject], rdf.type)) {
                 ctx.dataStore.getInternalStore().newPropertyAction(
-                    item[QuadPosition.subject] as NamedNode,
+                    recordId,
                     (updated: DataRecord) => {
-                        ctx.dataStore.add(
-                            updated._id,
-                            rdf.type,
-                            item[QuadPosition.object],
-                        );
+                        ctx.dataStore.add(updated._id, rdf.type, value);
                         return true;
                     },
                 );
+                break;
             }
-        } else if (equals(rdfs.range, item[QuadPosition.predicate])) {
-            result.push([item[QuadPosition.subject], rdf.type, rdf.Property, defaultGraph]); // P rdf:type rdf:Property
-            result.push([
-                item[QuadPosition.object] as NamedNode,
-                rdf.type,
-                rdfs.Class,
-                defaultGraph,
-            ]); // C rdf:type rdfs:Class
+            case rdfs.range.value: {
+                if (rdf.type.value === recordId) { break; }
 
-            const dereferences = ctx.dataStore.references(item[QuadPosition.subject]);
-            for (let i = 0; i < dereferences.length; i++) {
-                let s: SomeNode;
-                if (dereferences[i].includes("/")) {
-                    s = rdfFactory.namedNode(dereferences[i]);
-                } else {
-                    s = rdfFactory.blankNode(dereferences[i]);
-                }
-                result.push([s, rdf.type, item[QuadPosition.object], defaultGraph]);
-            }
+                ctx.dataStore.getInternalStore().store.addField(
+                    value.value,
+                    rdf.type.value,
+                    rdfs.Class,
+                );
 
-            if (!equals(item[QuadPosition.subject], rdf.type)) {
-                const predicate = item[QuadPosition.subject] as NamedNode;
-                const range = item[QuadPosition.object];
+                const range = value;
 
                 ctx.dataStore.getInternalStore().newPropertyAction(
-                    predicate,
+                    recordId,
                     (updated: DataRecord) => {
-                        const subject = updated[predicate.value];
+                        const subject = updated[recordId];
                         if (Array.isArray(subject)) {
                             for (const s of subject) {
                                 if (s.termType !== TermType.Literal) {
@@ -201,45 +115,43 @@ export const RDFS = {
                         return true;
                     },
                 );
+                break;
             }
-        } else if (equals(rdfs.subClassOf, item[QuadPosition.predicate])) {            // C1 rdfs:subClassOf C2
-            const objectType = item[QuadPosition.object].termType;
-            if (!(objectType === TermType.NamedNode || objectType === TermType.BlankNode)) {
-                throw new Error("Object of subClassOf statement must be a NamedNode");
-            }
-
-            const iSubject = id(item[QuadPosition.subject]);
-            const iObject = id(item[QuadPosition.object]);
-            if (!ctx.superMap.has(iObject)) {
-                ctx.superMap.set(iObject, new Set([id(rdfs.Resource)]));
-            }
-
-            let parents = ctx.superMap.get(iObject);
-            if (parents === undefined) {
-                parents = new Set();
-                ctx.superMap.set(iObject, parents);
-            }
-            parents.add(iObject);
-            const itemVal = ctx.superMap.get(iSubject) || new Set<number>([iSubject]);
-
-            parents.forEach((i) => itemVal.add(i));
-
-            ctx.superMap.set(iSubject, itemVal);
-            ctx.superMap.forEach((v, k) => {
-                if (k !== iSubject && v.has(iSubject)) {
-                    itemVal.forEach(v.add, v);
+            case rdfs.subClassOf.value: {            // C1 rdfs:subClassOf C2
+                const objectType = value.termType;
+                if (!(objectType === TermType.NamedNode || objectType === TermType.BlankNode)) {
+                    throw new Error("Object of subClassOf statement must be a NamedNode");
                 }
-            });
-        } else if (equals(rdfs.subPropertyOf, item[QuadPosition.predicate])) {
-            // TODO: Implement
-            return result;
-        }
 
-        return result.length === 1 ? null : result;
+                const iSubject = recordId;
+                const iObject = value.value;
+                if (!ctx.superMap.has(iObject)) {
+                    ctx.superMap.set(iObject, new Set([rdfs.Resource.value]));
+                }
+
+                let parents = ctx.superMap.get(iObject);
+                if (parents === undefined) {
+                    parents = new Set();
+                    ctx.superMap.set(iObject, parents);
+                }
+                parents.add(iObject);
+                const itemVal = ctx.superMap.get(iSubject) || new Set<string>([iSubject]);
+
+                parents.forEach((i) => itemVal.add(i));
+
+                ctx.superMap.set(iSubject, itemVal);
+                ctx.superMap.forEach((v, k) => {
+                    if (k !== iSubject && v.has(iSubject)) {
+                        itemVal.forEach(v.add, v);
+                    }
+                });
+                break;
+            }
+        }
     },
 
-    processType(type: NamedNode, ctx: VocabularyProcessingContext): boolean {
-        RDFS.processStatement([type, rdfs.subClassOf, rdfs.Resource, defaultGraph], ctx);
+    processType(type: Id, ctx: VocabularyProcessingContext): boolean {
+        RDFS.processStatement(type, rdfs.subClassOf.value, rdfs.Resource, ctx);
         return false;
     },
-} as VocabularyProcessor;
+};

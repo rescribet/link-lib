@@ -1277,6 +1277,13 @@
   resolved "https://registry.yarnpkg.com/@ontola/memoized-factory/-/memoized-factory-2.0.1.tgz#f490adc8c5c9218907e0fe5a9420dc695c370d4d"
   integrity sha512-BGJtBF8HyrcpH2HAdVxVD1moyfesfIekZqms/RFTgyydEG2yA/2kbBjX83KG5IFvSrHeCLiATpQ/35+m9AZsKA==
 
+"@ontola/memoized-hash-factory@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@ontola/memoized-hash-factory/-/memoized-hash-factory-2.0.1.tgz#06dcbb5253753c39fcbfd2971774769aeb86c1b4"
+  integrity sha512-q82SkmNGLh3Jpp1yP0PWtdHJaO5PIZrGKSw1/QgqIFyoUM2JZO0ITGLmrgd9JOkfFSvYkALU+XKtWYL09164qQ==
+  dependencies:
+    murmurhash-js "^1.0.0"
+
 "@ontologies/as@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@ontologies/as/-/as-2.0.0.tgz#4fdf851d09940aaf00e2b1a49ecaacf2390cf74c"
@@ -4883,6 +4890,11 @@ ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+
+murmurhash-js@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/murmurhash-js/-/murmurhash-js-1.0.0.tgz#b06278e21fc6c37fa5313732b0412bcb6ae15f51"
+  integrity sha1-sGJ44h/Gw3+lMTcysEEry2rhX1E=
 
 mute-stream@0.0.7:
   version "0.0.7"

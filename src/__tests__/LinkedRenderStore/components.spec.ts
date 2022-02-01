@@ -21,19 +21,21 @@ describe("LinkedRenderStore", () => {
         const topology = argu.ns("collection");
         const topologies = [argu.ns("collection"), argu.ns("collection")];
 
-        function checkRegistration<T>(r: ComponentRegistration<T>,
-                                      c: T,
-                                      t: SomeNode,
-                                      p: NamedNode,
-                                      top: SomeNode): void {
+        function checkRegistration<T>(
+            r: ComponentRegistration<T>,
+            c: T,
+            t: SomeNode,
+            p: NamedNode,
+            top: SomeNode,
+        ): void {
             expect(r.component).toEqual(c);
-            expect(r.type).toEqual(rdfFactory.id(t));
-            expect(r.property).toEqual(rdfFactory.id(p));
-            expect(r.topology).toEqual(rdfFactory.id(top));
+            expect(r.type).toEqual(t.value);
+            expect(r.property).toEqual(p.value);
+            expect(r.topology).toEqual(top.value);
         }
 
         it("does not register without component", () => {
-            const defaultMsg = `Undefined component was given for (${rdfFactory.id(type)}, ${RCN}, ${DT}).`;
+            const defaultMsg = `Undefined component was given for (${type.value}, ${RCN}, ${DT}).`;
             try {
                 LinkedRenderStore.registerRenderer(undefined, type);
                 expect(true).toBeFalsy();

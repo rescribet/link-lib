@@ -82,6 +82,7 @@ export class RDFStore implements DeltaProcessor {
         )(this.store);
     }
 
+    /** @deprecated */
     public add(subject: SomeNode, predicate: NamedNode, object: SomeTerm): Quadruple {
         return this.store.add(
             subject,
@@ -108,6 +109,7 @@ export class RDFStore implements DeltaProcessor {
         ));
     }
 
+    /** @deprecated */
     public addQuadruples(data: Quadruple[]): Quadruple[] {
         const statements = new Array(data.length);
         for (let i = 0, len = data.length; i < len; i++) {
@@ -117,8 +119,9 @@ export class RDFStore implements DeltaProcessor {
         return statements;
     }
 
-    public canon<T = Term>(term: T): T {
-        return this.store.canon(term);
+    /** @deprecated */
+    public primary(term: SomeNode): SomeNode {
+        return this.store.primary(term);
     }
 
     /**
@@ -171,15 +174,17 @@ export class RDFStore implements DeltaProcessor {
     }
 
     public removeResource(subject: SomeNode): void {
-        const canSubj = this.canon(subject);
+        const canSubj = this.primary(subject);
         this.touch(canSubj);
         (this.store as RDFAdapter).deleteRecord(subject);
     }
 
+    /** @deprecated */
     public removeQuads(statements: Quadruple[]): void {
         this.store.removeQuads(statements);
     }
 
+    /** @deprecated */
     public replaceMatches(statements: Quadruple[]): Quadruple[] {
         for (let i = 0; i < statements.length; i++) {
             this.removeQuads(this.match(

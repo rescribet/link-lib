@@ -13,7 +13,7 @@ import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 
 import { ComponentStore } from "./ComponentStore/ComponentStore";
-import { equals, id } from "./factoryHelpers";
+import { equals, id, value } from "./factoryHelpers";
 import { APIFetchOpts, LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
@@ -33,7 +33,6 @@ import {
     EmptyRequestStatus,
     ErrorReporter,
     FetchOpts,
-    Indexable,
     LazyNNArgument,
     LinkedActionResponse,
     LinkedRenderStoreOptions,
@@ -47,8 +46,11 @@ import {
 import { normalizeType } from "./utilities";
 import { DEFAULT_TOPOLOGY, RENDER_CLASS_NAME } from "./utilities/constants";
 
-const normalizedIds = <T>(item: T, defaultValue: Node | undefined = undefined): number[] => normalizeType(item)
-    .map((t) => id(t || defaultValue));
+const normalizedIds = <
+    T extends SomeTerm | SomeTerm[] | Array<SomeTerm | undefined> | undefined,
+    K extends (T extends undefined ? SomeTerm : SomeTerm | undefined),
+>(item: T, defaultValue?: K): string[] => normalizeType(item)
+    .map((t) => (t ?? defaultValue)!.value);
 
 /**
  * Main entrypoint into the functionality of link-lib.
@@ -94,7 +96,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
 
     public api: API;
     public mapping: ComponentStore<T>;
-    public schema: Schema<Indexable>;
+    public schema: Schema;
     public store: RDFStore;
     public settings: TypedRecord = new TypedRecord();
 
@@ -152,9 +154,9 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         return this._dispatch;
     }
 
-    public set dispatch(value: MiddlewareActionHandler) {
-        this._dispatch = value;
-        this.api.dispatch = value;
+    public set dispatch(v: MiddlewareActionHandler) {
+        this._dispatch = v;
+        this.api.dispatch = v;
     }
 
     /**
@@ -297,14 +299,14 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         if (type === undefined || (Array.isArray(type) && type.length === 0)) {
             return undefined;
         }
-        const types = normalizeType(type).map(id);
-        const predicates = normalizeType(predicate).map(id);
+        const types = normalizeType(type).map(value);
+        const predicates = normalizeType(predicate).map(value);
 
         return this.mapping.getRenderComponent(
             types,
             predicates,
-            id(topology),
-            id(this.defaultType),
+            value(topology),
+            value(this.defaultType),
         );
     }
 
@@ -740,8 +742,8 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
 
         this.cleanupTimer = window.setTimeout(() => {
             this.cleanupTimer = undefined;
-            for (const [ k, value ] of Object.entries(this.subjectSubscriptions)) {
-                this.subjectSubscriptions[k] = value.filter((p) => !p.markedForDelete);
+            for (const [ k, v ] of Object.entries(this.subjectSubscriptions)) {
+                this.subjectSubscriptions[k] = v.filter((p) => !p.markedForDelete);
             }
         }, this.cleanupTimout);
     }

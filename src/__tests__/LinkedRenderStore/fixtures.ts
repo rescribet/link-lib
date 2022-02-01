@@ -9,8 +9,8 @@ import { DEFAULT_TOPOLOGY } from "../../utilities/constants";
 
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();
 
-export const DT = rdfFactory.id(DEFAULT_TOPOLOGY);
-export const RCN = rdfFactory.id(RENDER_CLASS_NAME);
+export const DT = DEFAULT_TOPOLOGY.value;
+export const RCN = RENDER_CLASS_NAME.value;
 
 export const schemaT = schema.Thing;
 export const thingStatements: Quadruple[] = [

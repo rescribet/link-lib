@@ -1,10 +1,10 @@
 import { NamedNode } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 
-import { id } from "../factoryHelpers";
 import ll from "../ontology/ll";
 import { Schema } from "../Schema";
-import { ComponentMapping, ComponentRegistration, Indexable } from "../types";
+import { Id } from "../store/StructuredStore";
+import { ComponentMapping, ComponentRegistration } from "../types";
 import { DEFAULT_TOPOLOGY } from "../utilities/constants";
 
 import { ComponentCache } from "./ComponentCache";
@@ -14,7 +14,7 @@ const MSG_TYPE_ERR = "Non-optimized NamedNode instance given. Please memoize you
 /** Constant used to determine that a component is used to render a type rather than a property. */
 export const RENDER_CLASS_NAME: NamedNode = ll.typeRenderClass;
 
-function convertToCacheKey(types: Indexable[], props: Indexable[], topology: Indexable): string {
+function convertToCacheKey(types: Id[], props: Id[], topology: Id): string {
     return `${types.join()}[${props.join()}][${topology}]`;
 }
 
@@ -34,25 +34,25 @@ export class ComponentStore<T> {
      */
     public static registerRenderer<T>(
         component: T,
-        types: Indexable[],
-        properties: Indexable[],
-        topologies: Indexable[],
+        types: Id[],
+        fields: Id[],
+        topologies: Id[],
     ): Array<ComponentRegistration<T>> {
         if (typeof component === "undefined") {
-            throw new Error(`Undefined component was given for (${types}, ${properties}, ${topologies}).`);
+            throw new Error(`Undefined component was given for (${types}, ${fields}, ${topologies}).`);
         }
         const registrations: Array<ComponentRegistration<T>> = [];
 
         for (let t = 0; t < types.length; t++) {
             assert(types[t]);
-            for (let p = 0; p < properties.length; p++) {
-                assert(properties[p]);
+            for (let p = 0; p < fields.length; p++) {
+                assert(fields[p]);
                 for (let top = 0; top < topologies.length; top++) {
                     assert(topologies[top]);
 
                     registrations.push({
                         component,
-                        property: properties[p],
+                        property: fields[p],
                         topology: topologies[top],
                         type: types[t],
                     });
@@ -73,7 +73,7 @@ export class ComponentStore<T> {
 
     public constructor(schema: Schema) {
         this.schema = schema;
-        this.registrations[id(RENDER_CLASS_NAME)] = {};
+        this.registrations[RENDER_CLASS_NAME.value] = {};
     }
 
     /**
@@ -81,36 +81,36 @@ export class ComponentStore<T> {
      *   inheritance to associate unknown types the RDF way (using rdfs:Resource).
      */
     public getRenderComponent(
-        types: Indexable[],
-        predicates: Indexable[],
-        topology: Indexable,
-        defaultType: Indexable,
+        types: Id[],
+        fields: Id[],
+        topology: Id,
+        defaultType: Id,
     ): T | null {
         const oTypes = this.schema.expand(types);
-        const key = convertToCacheKey(oTypes, predicates, topology);
+        const key = convertToCacheKey(oTypes, fields, topology);
         const cached = this.lookupCache.get(key);
         if (cached !== undefined) {
             return cached;
         }
 
-        for (let p = 0; p < predicates.length; p++) {
+        for (let p = 0; p < fields.length; p++) {
             for (let t = 0; t < oTypes.length; t++) {
-                const exact = this.lookup(predicates[p], oTypes[t], topology);
+                const exact = this.lookup(fields[p], oTypes[t], topology);
                 if (exact !== undefined) {
                     return this.lookupCache.add(exact, key);
                 }
             }
         }
 
-        const possibleComponents = this.possibleComponents(predicates, topology);
-        if (possibleComponents.length === 0) {
-            if (topology === id(DEFAULT_TOPOLOGY)) {
+        const possibleClasses = this.registeredClasses(fields, topology);
+        if (possibleClasses.length === 0) {
+            if (topology === DEFAULT_TOPOLOGY.value) {
                 return this.lookupCache.add(null, key);
             }
             const foundComponent = this.getRenderComponent(
                 oTypes,
-                predicates,
-                id(DEFAULT_TOPOLOGY),
+                fields,
+                DEFAULT_TOPOLOGY.value,
                 defaultType,
             );
             if (!foundComponent) {
@@ -119,19 +119,19 @@ export class ComponentStore<T> {
 
             return this.lookupCache.add(foundComponent, key);
         }
-        for (let i = 0; i < predicates.length; i++) {
-            const bestComponent = this.bestComponent(possibleComponents, oTypes);
-            const component = bestComponent && this.lookup(
-                predicates[i],
-                bestComponent,
+        for (let i = 0; i < fields.length; i++) {
+            const bestClass = this.bestClass(possibleClasses, oTypes);
+            const component = bestClass && this.lookup(
+                fields[i],
+                bestClass,
                 topology,
             );
             if (component) {
                 return this.lookupCache.add(component, key);
             }
         }
-        for (let i = 0; i < predicates.length; i++) {
-            const component = this.lookup(predicates[i], defaultType, topology);
+        for (let i = 0; i < fields.length; i++) {
+            const component = this.lookup(fields[i], defaultType, topology);
             if (component) {
                 return this.lookupCache.add(component, key);
             }
@@ -144,69 +144,69 @@ export class ComponentStore<T> {
      * Register a renderer for a type/property.
      * @param component The component to return for the rendering of the object.
      * @param type The type's SomeNode of the object which the {component} can render.
-     * @param [property] The property's SomeNode if the {component} is a subject renderer.
+     * @param [field] The property's SomeNode if the {component} is a subject renderer.
      * @param [topology] An alternate topology this {component} should render.
      */
     public registerRenderer(
         component: T,
-        type: Indexable,
-        property: Indexable = id(RENDER_CLASS_NAME),
-        topology: Indexable = id(DEFAULT_TOPOLOGY),
+        type: Id,
+        field: Id = RENDER_CLASS_NAME.value,
+        topology: Id = DEFAULT_TOPOLOGY.value,
     ): void {
-        if (!property || !type) {
+        if (!field || !type) {
             return;
         }
 
-        this.store(component, property, type, topology);
+        this.store(component, field, type, topology);
         this.lookupCache.clear();
     }
 
     /**
      * Find a component from a cache.
-     * @param predicate The index of the property (or {RENDER_CLASS_NAME})
-     * @param obj The index of either the resource type or resource IRI
-     * @param topology The index of the topology
+     * @param field The property (or {RENDER_CLASS_NAME})
+     * @param klass Either the resource type or resource IRI
+     * @param topology The topology
      * @param cache The cache to look into (defaults to the mapping)
      * @returns The appropriate component if any
      */
     protected lookup(
-        predicate: Indexable,
-        obj: Indexable,
-        topology: Indexable,
+        field: Id,
+        klass: Id,
+        topology: Id,
         cache: ComponentMapping<T> = this.registrations,
     ): T | undefined {
-        const predMap = cache[predicate];
-        if (!predMap || !predMap[obj]) {
+        const predMap = cache[field];
+        if (!predMap || !predMap[klass]) {
             return undefined;
         }
 
-        return predMap[obj][topology];
+        return predMap[klass][topology];
     }
 
     /** Store a component to a cache. */
     protected store(
         component: T,
-        predicate: Indexable,
-        obj: Indexable,
-        topology: Indexable,
+        field: Id,
+        klass: Id,
+        topology: Id,
         cache: ComponentMapping<T> = this.registrations,
     ): void {
-        if (typeof cache[predicate] === "undefined") {
-            cache[predicate] = {};
+        if (typeof cache[field] === "undefined") {
+            cache[field] = {};
         }
-        if (typeof cache[predicate][obj] === "undefined") {
-            cache[predicate][obj] = {};
+        if (typeof cache[field][klass] === "undefined") {
+            cache[field][klass] = {};
         }
-        cache[predicate][obj][topology] = component;
+        cache[field][klass][topology] = component;
     }
 
     /**
-     * Expands the given types and returns the best component to render it with.
+     * Expands the given types and returns the best class to render it with.
      * @param components The set of components to choose from.
      * @param [types] The types to expand on.
      * @returns The best match for the given components and types.
      */
-    private bestComponent(components: Indexable[], types: Indexable[]): Indexable | undefined {
+    private bestClass(components: Id[], types: Id[]): Id | undefined {
         if (types.length > 0) {
             const direct = this.schema.sort(types).find((c) => components.indexOf(c) >= 0);
             if (direct) {
@@ -214,22 +214,32 @@ export class ComponentStore<T> {
             }
         }
 
-        const chain = this.schema.expand(types || []);
+        const chain = this.schema.expand(types ?? []);
 
         return components.find((c) => chain.indexOf(c) > 0);
     }
 
-    private possibleComponents(predicates: Indexable[], topology: Indexable): Indexable[] {
-        const classes = [id(rdfs.Resource)];
-        for (let i = 0; i < predicates.length; i++) {
-            const predicate = predicates[i];
-            if (typeof this.registrations[predicate] !== "undefined") {
-                const types = Object.values(this.registrations[predicate]);
-                for (let j = 0; j < types.length; j++) {
-                    const compType = this.lookup(predicate, j, topology);
-                    if (compType !== undefined) {
-                        classes.push(j);
-                    }
+    // interface ComponentMapping<T> { [type: string]: { [obj: string]: { [topology: string]: T } }; }
+
+    /**
+     * Returns a list of classes which have registrations for a combination of {fields} and {topology}.
+     * @private
+     */
+    private registeredClasses(fields: Id[], topology: Id): Id[] {
+        const classes = [rdfs.Resource.value];
+
+        for (let i = 0; i < fields.length; i++) {
+            const field = fields[i];
+
+            if (typeof this.registrations[field] === "undefined") {
+                continue;
+            }
+
+            const types = Object.keys(this.registrations[field]);
+            for (let j = 0; j < types.length; j++) {
+                const compType = this.lookup(field, types[j], topology);
+                if (compType !== undefined) {
+                    classes.push(types[j]);
                 }
             }
         }
