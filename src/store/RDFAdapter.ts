@@ -73,12 +73,6 @@ export class RDFAdapter {
   }
 
   public deleteRecord(subject: SomeNode): void {
-    const quads = this.quadsForRecord(subject.value);
-
-    if (quads.length === 0) {
-      return;
-    }
-
     this.store.deleteRecord(subject.value);
   }
 

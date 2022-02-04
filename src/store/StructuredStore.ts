@@ -99,8 +99,14 @@ export class StructuredStore {
 
   public deleteRecord(recordId: Id): void {
     const primary = this.primary(recordId);
-    this.journal.transition(primary, RecordState.Absent);
-    delete this.data[primary];
+    if (this.data[primary] === undefined) {
+      if (this.journal.get(primary).current !== RecordState.Absent) {
+        this.journal.transition(primary, RecordState.Absent);
+      }
+    } else {
+      this.journal.transition(primary, RecordState.Absent);
+      delete this.data[primary];
+    }
   }
 
   public getField(recordId: Id, field: FieldId): FieldValue | undefined {
