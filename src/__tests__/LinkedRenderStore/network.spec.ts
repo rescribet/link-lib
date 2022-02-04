@@ -69,7 +69,7 @@ describe("LinkedRenderStore", () => {
             const store = getBasicStore();
             const resource = example("test");
             const exStatus = { status: 259 };
-            (store.processor as any).statusMap[rdfFactory.id(resource)] = exStatus;
+            (store.processor as any).statusMap[resource.value] = exStatus;
             const status = store.lrs.getStatus(resource);
 
             expect(status).toHaveProperty("status", 259);

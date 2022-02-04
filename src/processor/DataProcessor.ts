@@ -1,4 +1,5 @@
 import rdfFactory, { NamedNode, QuadPosition, Quadruple, TermType } from "@ontologies/core";
+import * as ld from "@ontologies/ld";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 import * as xsd from "@ontologies/xsd";
@@ -371,7 +372,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
      */
     public getStatus(iri: NamedNode): SomeRequestStatus {
         const irl = doc(iri);
-        const existing = this.statusMap[id(irl)];
+        const existing = this.statusMap[irl.value];
 
         if (existing) {
             return existing;
@@ -459,16 +460,22 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         });
     }
 
-    public queueDelta(delta: Quadruple[], subjects: number[]): void {
+    public queueDelta(delta: Quadruple[]): void {
         this.deltas.push(delta);
         const store = this.store.getInternalStore().store;
+        const llNS = ll.ns("").value;
+        const ldNS = ld.ns("").value;
 
-        for (const s of subjects) {
-            if (!this.statusMap[s]) {
-                store.transition(
-                    rdfFactory.fromId(s).value,
-                    RecordState.Receiving,
-                );
+        for (const d of delta) {
+            if (!d) {
+                continue;
+            }
+            const g = d[QuadPosition.graph];
+            if (g.value.startsWith(llNS) || g.value.startsWith(ldNS)) {
+                const s = d[QuadPosition.subject].value;
+                if (!this.statusMap[s]) {
+                    store.transition(s, RecordState.Receiving);
+                }
             }
         }
     }
@@ -512,13 +519,13 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         if (transition) {
             this.store.getInternalStore().store.transition(iri.value, this.requestStatusToJournalStatus(s));
         }
-        this.statusMap[id(iri)] = s;
+        this.statusMap[iri.value] = s;
 
         return s;
     }
 
     private clearStatus(iri: NamedNode): void {
-        this.statusMap[id(iri)] = undefined;
+        this.statusMap[iri.value] = undefined;
     }
 
     private requestStatusToJournalStatus(s: RequestStatus): RecordState {
@@ -555,7 +562,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
     private setStatus(iri: NamedNode, status: number | null, transition: boolean = true): void {
         const url = doc(iri);
-        const prevStatus = this.statusMap[id(url)];
+        const prevStatus = this.statusMap[url.value];
 
         this.memoizeStatus(
             url,

@@ -1,6 +1,7 @@
 import "../../__tests__/useFactory";
 
 import rdfFactory, { NamedNode, Quadruple } from "@ontologies/core";
+import * as ld from "@ontologies/ld";
 import * as rdfx from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 import {
@@ -297,7 +298,7 @@ describe("DataProcessor", () => {
             const store = getBasicStore();
             // @ts-ignore
             const map = store.processor.statusMap;
-            map[rdfFactory.id(example.ns("test"))] = emptyRequest;
+            map[example.ns("test").value] = emptyRequest;
 
             expect(Object.values(map).filter(Boolean).length).toEqual(1);
             // @ts-ignore
@@ -460,7 +461,9 @@ describe("DataProcessor", () => {
 
         it("sets the state", () => {
             const store = getBasicStore();
-            store.processor.queueDelta([], [rdfFactory.id(resource)]);
+            store.processor.queueDelta([
+                [resource, ex.ns("a"), ex.ns("b"), ld.supplant],
+            ]);
 
             expect(store.store.getInternalStore().store.getStatus(resource.value).current)
                 .toEqual(RecordState.Receiving);

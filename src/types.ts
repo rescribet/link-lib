@@ -86,7 +86,7 @@ export interface LinkedRenderStoreOptions<T, API extends LinkedDataAPI = DataPro
 }
 
 export interface DeltaProcessor {
-    queueDelta: (delta: Quadruple[], subjects: number[]) => void;
+    queueDelta: (delta: Quadruple[]) => void;
     /**
      * Process all queued deltas
      * @note: Be sure to assign a new buffer array before starting processing to prevent infinite loops.

@@ -13,7 +13,7 @@ import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 
 import { ComponentStore } from "./ComponentStore/ComponentStore";
-import { equals, id, value } from "./factoryHelpers";
+import { equals, value } from "./factoryHelpers";
 import { APIFetchOpts, LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
 import { DataProcessor, emptyRequest } from "./processor/DataProcessor";
@@ -353,20 +353,9 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         const quadArr = isQuad(delta[0])
             ? (delta as Quad[]).map((s: Quad) => rdfFactory.qdrFromQuad(s))
             : delta as Quadruple[];
-        const subjects: number[] = [];
-        let sId;
-        for (let i = 0; i < quadArr.length; i++) {
-            if (!quadArr[i]) {
-                continue;
-            }
-            sId = id(quadArr[i][QuadPosition.subject]);
-            if (!subjects.includes(sId)) {
-                subjects.push(sId);
-            }
-        }
 
         for (const dp of this.deltaProcessors) {
-            dp.queueDelta(quadArr, subjects);
+            dp.queueDelta(quadArr);
         }
 
         return this.broadcastWithExpedite(expedite);

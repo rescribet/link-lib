@@ -73,10 +73,7 @@ describe("LinkedRenderStore", () => {
             await store.lrs.queueDelta(quadDelta);
 
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
-            expect(processor.queueDelta).toHaveBeenCalledWith(
-                quadDelta,
-                [rdfFactory.id(ex("1")), rdfFactory.id(ex("2"))],
-            );
+            expect(processor.queueDelta).toHaveBeenCalledWith(quadDelta);
         });
 
         it("queues a statement delta", async () => {
@@ -96,10 +93,7 @@ describe("LinkedRenderStore", () => {
             await store.lrs.queueDelta(delta);
 
             expect(processor.queueDelta).toHaveBeenCalledTimes(1);
-            expect(processor.queueDelta).toHaveBeenCalledWith(
-                quadDelta,
-                [rdfFactory.id(ex("1")), rdfFactory.id(ex("2"))],
-            );
+            expect(processor.queueDelta).toHaveBeenCalledWith(quadDelta);
         });
     });
 });
