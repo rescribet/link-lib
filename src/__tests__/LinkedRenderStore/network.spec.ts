@@ -6,6 +6,8 @@ import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 
+import http from "../../ontology/http";
+import ll from "../../ontology/ll";
 import { getBasicStore } from "../../testUtilities";
 import { ResourceQueueItem } from "../../types";
 
@@ -95,9 +97,20 @@ describe("LinkedRenderStore", () => {
             expect(store.lrs.shouldLoadResource(resource)).toBeTruthy();
         });
 
+        it("should load inferred resources", () => {
+            const store = getBasicStore();
+            store.store.add(resource, rdfs.label, rdfFactory.literal("test"));
+            store.store.flush();
+
+            expect(store.lrs.shouldLoadResource(resource)).toBeTruthy();
+        });
+
         it("should not load existent resources", () => {
             const store = getBasicStore();
             store.store.add(resource, rdfs.label, rdfFactory.literal("test"));
+            store.processor.processDelta([
+                [resource, http.statusCode, rdfFactory.literal(200), ll.meta],
+            ]);
             store.store.flush();
 
             expect(store.lrs.shouldLoadResource(resource)).toBeFalsy();
@@ -107,8 +120,10 @@ describe("LinkedRenderStore", () => {
             const store = getBasicStore();
             store.lrs.queueDelta([
                 [resource, rdf.type, schema.CreateAction, defaultGraph],
+                [resource, http.statusCode, rdfFactory.literal(200), ll.meta],
             ]);
             store.store.flush();
+            store.processor.flush();
             store.lrs.queueEntity(resource);
             const queueItem = (store.lrs as any).resourceQueue
               .find(([iri]: ResourceQueueItem) => iri === resource);

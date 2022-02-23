@@ -583,7 +583,13 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @unstable
      */
     public shouldLoadResource(subject: Node): boolean {
-        return this.getState(subject.value).current === RecordState.Absent;
+        const currentState = this.getState(subject.value).current;
+
+        return subject.termType === "NamedNode" &&
+            currentState === RecordState.Absent || (
+                currentState !== RecordState.Queued &&
+                !this.api.getStatus(subject).requested
+            );
     }
 
     /**
