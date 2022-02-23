@@ -21,6 +21,24 @@ const memberPrefix = rdf.ns("_").value;
 const namedNode = rdfFactory.namedNode.bind(rdfFactory);
 const blankNode = rdfFactory.blankNode.bind(rdfFactory);
 
+const tryParseInt = (value: string): number | string => {
+  try {
+    return parseInt(value, 10);
+  } catch (e) {
+    return value;
+  }
+};
+
+const tryParseSeqNumber = (value: string): number | string => {
+  const ordinal = value.split(memberPrefix).pop();
+
+  if (ordinal !== undefined) {
+    return tryParseInt(ordinal);
+  } else {
+    return value;
+  }
+};
+
 const merge = (a: SomeTerm | MultimapTerm | undefined, b: SomeTerm | MultimapTerm): SomeTerm | MultimapTerm => {
   if (Array.isArray(a)) {
     return Array.from(new Set([...a, ...normalizeType(b)]));
@@ -36,8 +54,8 @@ const getSortedFieldMembers = (record: DataRecord): MultimapTerm => {
   const sortedEntries = Object
       .entries(record)
       .sort(([k1], [k2]) => {
-        const a = k1.split(memberPrefix).pop() ?? k1;
-        const b = k2.split(memberPrefix).pop() ?? k2;
+        const a = tryParseSeqNumber(k1);
+        const b = tryParseSeqNumber(k2);
 
         return a < b ? -1 : (a > b ? 1 : 0);
       });

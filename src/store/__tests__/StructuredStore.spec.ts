@@ -134,6 +134,32 @@ describe("StructuredStore", () => {
         });
     });
 
+    describe("getField", () => {
+        const data: DataSlice = {
+            "/resource/4": {
+                _id: rdfFactory.namedNode("/resource/4"),
+                [rdf.ns("_2").value]: rdfFactory.literal("2"),
+                [rdf.ns("_10").value]: rdfFactory.literal("10"),
+                [rdf.ns("_0").value]: rdfFactory.literal("0"),
+                [rdf.ns("_11").value]: rdfFactory.literal("11"),
+                [rdf.ns("_1").value]: rdfFactory.literal("1"),
+            },
+        };
+
+        it("preserves natural ordering for sequences", () => {
+            const store = new StructuredStore("rdf:defaultGraph", data);
+
+            expect(store.getField("/resource/4", rdfs.member.value))
+                .toEqual([
+                    rdfFactory.literal("0"),
+                    rdfFactory.literal("1"),
+                    rdfFactory.literal("2"),
+                    rdfFactory.literal("10"),
+                    rdfFactory.literal("11"),
+                ]);
+        });
+    });
+
     describe("deleteFieldMatching", () => {
         const recordId = "/resource/4";
         const createData = (): DataSlice => ({
