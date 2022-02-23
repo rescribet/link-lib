@@ -1,8 +1,8 @@
-import rdfFactory, { isLiteral, NamedNode, SomeTerm, TermType } from "@ontologies/core";
+import rdfFactory, { NamedNode, SomeTerm, TermType } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
-import { DataRecord, Id } from "../store/StructuredStore";
+import { Id } from "../store/StructuredStore";
 import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();
@@ -66,57 +66,6 @@ export const RDFS: VocabularyProcessor = {
         ctx: VocabularyProcessingContext,
     ): void {
         switch (field) {
-            case rdf.type.value: {
-                if (rdf.type.value === recordId || isLiteral(value)) { break; }
-
-                ctx.dataStore.add(value, rdf.type, rdfs.Class);
-                break;
-            }
-            case rdfs.domain.value: {
-                if (rdf.type.value === recordId || isLiteral(value)) { break; }
-
-                ctx.dataStore.add(value, rdf.type, rdfs.Class);
-
-                ctx.dataStore.getInternalStore().newPropertyAction(
-                    recordId,
-                    (updated: DataRecord) => {
-                        ctx.dataStore.add(updated._id, rdf.type, value);
-                        return true;
-                    },
-                );
-                break;
-            }
-            case rdfs.range.value: {
-                if (rdf.type.value === recordId) { break; }
-
-                ctx.dataStore.getInternalStore().store.addField(
-                    value.value,
-                    rdf.type.value,
-                    rdfs.Class,
-                );
-
-                const range = value;
-
-                ctx.dataStore.getInternalStore().newPropertyAction(
-                    recordId,
-                    (updated: DataRecord) => {
-                        const subject = updated[recordId];
-                        if (Array.isArray(subject)) {
-                            for (const s of subject) {
-                                if (s.termType !== TermType.Literal) {
-                                    ctx.dataStore.add(s, rdf.type, range);
-                                }
-                            }
-                        } else {
-                            if (subject.termType !== TermType.Literal) {
-                                ctx.dataStore.add(subject, rdf.type, range);
-                            }
-                        }
-                        return true;
-                    },
-                );
-                break;
-            }
             case rdfs.subClassOf.value: {            // C1 rdfs:subClassOf C2
                 const objectType = value.termType;
                 if (!(objectType === TermType.NamedNode || objectType === TermType.BlankNode)) {
