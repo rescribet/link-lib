@@ -136,7 +136,7 @@ export class StructuredStore {
 
       return getSortedFieldMembers(record);
     } else {
-      return this.getRecord(recordId)?.[this.primary(field)];
+      return this.getRecord(recordId)?.[field];
     }
   }
 
