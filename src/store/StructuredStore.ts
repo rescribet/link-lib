@@ -279,6 +279,12 @@ export class StructuredStore {
     return this.data[this.primary(recordId)];
   }
 
+  public setRecord(recordId: Id, record: DataRecord): DataRecord | undefined {
+    const primary = this.primary(recordId);
+    this.journal.transition(primary, RecordState.Present);
+    return this.data[primary] = record;
+  }
+
   private copy(data: DataSlice): StructuredStore {
     const next = new StructuredStore(this.base, data);
     next.journal = this.journal.copy();
@@ -295,12 +301,6 @@ export class StructuredStore {
         _id: this.toSomeNode(primary),
       };
     }
-  }
-
-  private setRecord(recordId: Id, record: DataRecord): DataRecord | undefined {
-    const primary = this.primary(recordId);
-    this.journal.transition(primary, RecordState.Present);
-    return this.data[primary] = record;
   }
 
   private toSomeNode(id: Id): SomeNode {
