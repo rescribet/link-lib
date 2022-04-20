@@ -1,4 +1,5 @@
 import rdfFactory, {
+    isNamedNode,
     isQuad,
     NamedNode,
     Node,
@@ -585,11 +586,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public shouldLoadResource(subject: Node): boolean {
         const currentState = this.getState(subject.value).current;
 
-        return subject.termType === "NamedNode" &&
-            currentState === RecordState.Absent || (
-                currentState !== RecordState.Queued &&
-                !this.api.getStatus(subject).requested
-            );
+        return subject.termType === "NamedNode" && currentState === RecordState.Absent;
     }
 
     /**
@@ -654,7 +651,8 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @returns The object if found, or undefined.
      */
     public tryRecord(iri: Node): DataRecord | undefined {
-        return this.store.getInternalStore().store.getRecord(iri.value);
+        const id = isNamedNode(iri) ? iri.value : iri.toString();
+        return this.store.getInternalStore().store.getRecord(id);
     }
 
     /**
