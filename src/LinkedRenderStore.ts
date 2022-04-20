@@ -1,5 +1,4 @@
 import rdfFactory, {
-    isNamedNode,
     isQuad,
     NamedNode,
     Node,
@@ -647,12 +646,11 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * This won't cause any network requests even if the entity can't be found.
      *
      * @renderlibrary This should only be used by render-libraries, not by application code.
-     * @param iri The Node of the resource.
+     * @param id The id of the resource.
      * @returns The object if found, or undefined.
      */
-    public tryRecord(iri: Node): DataRecord | undefined {
-        const id = isNamedNode(iri) ? iri.value : iri.toString();
-        return this.store.getInternalStore().store.getRecord(id);
+    public tryRecord(id: Node): DataRecord | undefined {
+        return this.store.getInternalStore().store.getRecord(id.value);
     }
 
     /**
