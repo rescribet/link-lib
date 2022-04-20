@@ -22,7 +22,7 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { RecordState } from "./store/RecordState";
 import { RecordStatus } from "./store/RecordStatus";
-import { DataRecord, Id } from "./store/StructuredStore";
+import { DataRecord, DeepRecord, Id } from "./store/StructuredStore";
 import { TypedRecord } from "./TypedRecord";
 import {
     ActionMap,
@@ -651,6 +651,10 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public tryRecord(id: Node): DataRecord | undefined {
         return this.store.getInternalStore().store.getRecord(id.value);
+    }
+
+    public collectRecord(id: SomeNode): DeepRecord | undefined {
+        return this.store.getInternalStore().store.collectRecord(id.value);
     }
 
     /**

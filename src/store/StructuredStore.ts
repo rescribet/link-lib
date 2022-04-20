@@ -13,6 +13,8 @@ export type FieldId = string;
 export type MultimapTerm = SomeTerm[];
 export type FieldValue = SomeTerm | MultimapTerm;
 export type DataRecord = { _id: SomeNode } & Record<string, FieldValue>;
+export type DeepRecordFieldValue = FieldValue | DeepRecord | Array<SomeTerm | DeepRecord>;
+export type DeepRecord = { _id: SomeNode } & { [k: string]: DeepRecordFieldValue };
 export type DataSlice = Record<Id, DataRecord>;
 
 export const idField = "_id";
@@ -277,6 +279,28 @@ export class StructuredStore {
 
   public getRecord(recordId: Id): DataRecord | undefined {
     return this.data[this.primary(recordId)];
+  }
+
+  public collectRecord(recordId: Id, collected: Id[] = []): DeepRecord | undefined {
+    const record = this.getRecord(recordId);
+
+    if (!record) { return undefined; }
+
+    const unpack = (v: SomeTerm): FieldValue | DeepRecord => {
+      if (v.termType !== "BlankNode" || collected.includes(v.value)) {
+        return v;
+      }
+
+      return this.collectRecord(v.value, [v.value, ...collected]) ?? v;
+    };
+
+    return Object.entries(record).reduce(
+      (acc: DeepRecord, [k, v]) => ({
+        [k]: (Array.isArray(v) ? v.map(unpack) : unpack(v)) as DeepRecordFieldValue,
+        ...acc,
+      }),
+      { _id: record._id } as DataRecord,
+    );
   }
 
   public setRecord(recordId: Id, record: DataRecord): DataRecord | undefined {
