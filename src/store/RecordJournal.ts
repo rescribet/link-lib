@@ -35,7 +35,7 @@ export class RecordJournal {
     }
 
     public get(recordId: Id): RecordStatus {
-        if (!recordId.includes(":")) {
+        if (!recordId.includes(":") && !recordId.startsWith("_:")) {
             return blankNodeStatus;
         }
 

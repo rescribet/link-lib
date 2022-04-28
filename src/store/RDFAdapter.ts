@@ -165,7 +165,7 @@ export class RDFAdapter {
       return EMPTY_ST_ARR as unknown as Quadruple[];
     }
 
-    const subject = recordId.includes(":")
+    const subject = recordId.includes(":") && !recordId.startsWith("_:")
       ? factory.namedNode(recordId)
       : factory.blankNode(recordId);
 

@@ -30,7 +30,7 @@ export const id = rdfFactory.supports[Feature.idStamp]
 export const value = (obj?: Term): string => (obj as any)?.value ?? noValueError(obj);
 
 export const idToValue = (recordId: Id): SomeNode => {
-    if (recordId.includes(":")) {
+    if (recordId.includes(":") && !recordId.startsWith("_:")) {
         return rdfFactory.namedNode(recordId);
     } else {
         return rdfFactory.blankNode(recordId);
