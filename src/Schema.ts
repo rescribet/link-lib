@@ -1,13 +1,14 @@
-import { NamedNode, QuadPosition, Quadruple, SomeTerm } from "@ontologies/core";
+import { NamedNode, SomeTerm } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
 import { OWL } from "./schema/owl";
 import { RDFS } from "./schema/rdfs";
+import { normalizeType } from "./utilities";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 import { RDFStore } from "./RDFStore";
-import { Id } from "./store/StructuredStore";
+import { DataRecord, Id } from "./store/StructuredStore";
 import {
     SomeNode,
     VocabularyProcessingContext,
@@ -32,16 +33,23 @@ export class Schema {
 
     public constructor(liveStore: RDFStore) {
         this.liveStore = liveStore;
-        this.liveStore.getInternalStore().addDataCallback(this.process.bind(this));
+        this.liveStore.getInternalStore().addRecordCallback((recordId: Id): void => {
+            const record = this.liveStore.getInternalStore().store.getRecord(recordId);
+
+            if (record === undefined) {
+                return;
+            }
+            this.process.call(this, record);
+        });
         this.expansionCache = {};
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
             this.liveStore.addQuadruples(Schema.vocabularies[i].axioms);
         }
 
-        const preexisting = liveStore.getInternalStore().quads;
-        for (const quad of preexisting) {
-            this.process(quad);
+        const preexisting = liveStore.getInternalStore().store.allRecords();
+        for (const record of preexisting) {
+            this.process(record);
         }
     }
 
@@ -193,14 +201,18 @@ export class Schema {
         return false;
     }
 
-    private process(item: Quadruple): void {
+    private process(record: DataRecord): void {
         for (let i = 0; i < Schema.vocabularies.length; i++) {
-            Schema.vocabularies[i].processStatement(
-                item[QuadPosition.subject].value,
-                item[QuadPosition.predicate].value,
-                item[QuadPosition.object],
-                this.getProcessingCtx(),
-            );
+            for (const [field, values] of Object.entries(record)) {
+                for (const value of normalizeType(values)) {
+                    Schema.vocabularies[i].processStatement(
+                        record._id.value,
+                        field,
+                        value,
+                        this.getProcessingCtx(),
+                    );
+                }
+            }
         }
     }
 }

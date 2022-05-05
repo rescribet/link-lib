@@ -70,6 +70,8 @@ export class RecordJournal {
             previous,
         };
         this.onChange(docId);
-        this.onChange(recordId);
+        if (docId !== recordId) {
+            this.onChange(recordId);
+        }
     }
 }

@@ -277,6 +277,10 @@ export class StructuredStore {
       .reduce<StructuredStore>((acc, [incoming]) => acc.withAlias(incoming, current), next);
   }
 
+  public allRecords(): DataRecord[] {
+    return Object.values(this.data);
+  }
+
   public getRecord(recordId: Id): DataRecord | undefined {
     return this.data[this.primary(recordId)];
   }
@@ -305,8 +309,9 @@ export class StructuredStore {
 
   public setRecord(recordId: Id, record: DataRecord): DataRecord | undefined {
     const primary = this.primary(recordId);
+    this.data[primary] = record;
     this.journal.transition(primary, RecordState.Present);
-    return this.data[primary] = record;
+    return record;
   }
 
   private copy(data: DataSlice): StructuredStore {

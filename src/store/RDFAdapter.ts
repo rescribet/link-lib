@@ -23,7 +23,7 @@ export interface RDFAdapterOpts {
 export class RDFAdapter {
   public readonly rdfFactory: DataFactory;
 
-  public readonly dataCallbacks: Array<(quad: Quadruple) => void>;
+  public readonly recordCallbacks: Array<(recordId: Id) => void>;
 
   /** @private */
   public store: StructuredStore;
@@ -31,8 +31,18 @@ export class RDFAdapter {
   public storeGraph: NamedNode;
 
   constructor(opts: Partial<RDFAdapterOpts> = {}) {
-    this.dataCallbacks = [];
-    this.store = new StructuredStore("rdf:defaultGraph", opts.data, opts.onChange);
+    this.recordCallbacks = [];
+    this.store = new StructuredStore(
+      "rdf:defaultGraph",
+      opts.data,
+      (recordId: Id): void => {
+        if (opts.onChange) {
+          opts.onChange(recordId);
+        }
+
+        this.recordCallbacks.forEach((cb) => cb(recordId));
+      },
+    );
     this.rdfFactory = opts.rdfFactory ?? rdfFactory;
     opts.quads?.forEach((q) => this.add(
         q[QuadPosition.subject],
@@ -57,19 +67,13 @@ export class RDFAdapter {
   ): Quadruple {
     const asQuadruple: Quadruple = [subject, predicate, object, _graph];
 
-    const changed = this.store.addField(subject.value, predicate.value, object);
-
-    if (changed && this.dataCallbacks) {
-      for (const callback of this.dataCallbacks) {
-        callback(asQuadruple);
-      }
-    }
+    this.store.addField(subject.value, predicate.value, object);
 
     return asQuadruple;
   }
 
-  public addDataCallback(callback: (q: Quadruple) => void): void {
-    this.dataCallbacks.push(callback);
+  public addRecordCallback(callback: (recordId: Id) => void): void {
+    this.recordCallbacks.push(callback);
   }
 
   public deleteRecord(subject: SomeNode): void {

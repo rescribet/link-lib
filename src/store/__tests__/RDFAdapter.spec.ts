@@ -16,7 +16,7 @@ describe("RDFAdapter", () => {
         describe("without arguments", () => {
             const store = new RDFAdapter();
 
-            it("defaults dataCallbacks", () => expect(store.dataCallbacks).toEqual([]));
+            it("defaults dataCallbacks", () => expect(store.recordCallbacks).toEqual([]));
             it("defaults quads", () => expect(store.quads).toEqual([]));
             it("defaults rdfFactory", () => expect(store.rdfFactory).toEqual(rdf));
         });

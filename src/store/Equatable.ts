@@ -4,18 +4,16 @@ import {
     isNode,
     NamedNode,
     Node,
-    QuadPosition,
     Quadruple,
     SomeTerm,
     TermType,
 } from "@ontologies/core";
 import { sameAs } from "@ontologies/owl";
 
-import { equals } from "../factoryHelpers";
 import { SomeNode } from "../types";
 
 import { RDFAdapter } from "./RDFAdapter";
-import { StructuredStore } from "./StructuredStore";
+import { Id, StructuredStore } from "./StructuredStore";
 
 export type Constructable<T = object> = new (...args: any[]) => T;
 
@@ -34,9 +32,14 @@ export function Equatable<BC extends Constructable<RDFAdapter>>(base: BC) {
             super(...args);
             this.defaultGraphValue = this.rdfFactory.defaultGraph().value;
 
-            this.addDataCallback((quad: Quadruple) => {
-                if (equals(quad[QuadPosition.predicate], sameAs)) {
-                    this.equate(quad[QuadPosition.subject], quad[QuadPosition.object] as Node);
+            this.addRecordCallback((recordId: Id) => {
+                const record = this.store.getRecord(recordId);
+                if (record === undefined) {
+                    return;
+                }
+                const sameAsValue = record[sameAs.value];
+                if (sameAsValue) {
+                    this.equate(record._id, sameAsValue as Node);
                 }
             });
         }
