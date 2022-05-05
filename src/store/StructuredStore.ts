@@ -12,7 +12,8 @@ export type Id = string;
 export type FieldId = string;
 export type MultimapTerm = SomeTerm[];
 export type FieldValue = SomeTerm | MultimapTerm;
-export type DataRecord = { _id: SomeNode } & Record<string, FieldValue>;
+export type FieldSet = Record<string, FieldValue>;
+export type DataRecord = { _id: SomeNode } & FieldSet;
 export type DeepRecordFieldValue = FieldValue | DeepRecord | Array<SomeTerm | DeepRecord>;
 export type DeepRecord = { _id: SomeNode } & { [k: string]: DeepRecordFieldValue };
 export type DataSlice = Record<Id, DataRecord>;
@@ -307,11 +308,15 @@ export class StructuredStore {
     );
   }
 
-  public setRecord(recordId: Id, record: DataRecord): DataRecord | undefined {
+  public setRecord(recordId: Id, fields: FieldSet): DataRecord | undefined {
     const primary = this.primary(recordId);
-    this.data[primary] = record;
+    this.initializeRecord(recordId);
+    this.data[primary] = {
+      ...fields,
+      _id: this.data[primary]._id,
+    };
     this.journal.transition(primary, RecordState.Present);
-    return record;
+    return this.data[primary];
   }
 
   private copy(data: DataSlice): StructuredStore {
