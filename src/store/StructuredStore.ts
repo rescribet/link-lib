@@ -72,6 +72,14 @@ const getSortedFieldMembers = (record: DataRecord): MultimapTerm => {
 };
 
 export class StructuredStore {
+
+  private static toSomeNode(id: Id): SomeNode {
+    if (id.indexOf("_:") === 0) {
+      return blankNode(id);
+    } else {
+      return namedNode(id);
+    }
+  }
   /**
    * The base URI of the data.
    */
@@ -332,16 +340,8 @@ export class StructuredStore {
     if (this.data[primary] === undefined) {
       this.journal.transition(primary, RecordState.Receiving);
       this.data[primary] = {
-        _id: this.toSomeNode(primary),
+        _id: StructuredStore.toSomeNode(primary),
       };
-    }
-  }
-
-  private toSomeNode(id: Id): SomeNode {
-    if (id.includes("/")) {
-      return namedNode(id);
-    } else {
-      return blankNode(id);
     }
   }
 }
