@@ -89,10 +89,10 @@ describe("LinkedRenderStore", () => {
             expect(subjects).toEqual([
                 start,
                 ex("1.6"),
-                ex("2.6"),
                 ex("1.7"),
-                ex("2.7"),
                 ex("1.8"),
+                ex("2.6"),
+                ex("2.7"),
                 ex("2.8"),
             ]);
         });

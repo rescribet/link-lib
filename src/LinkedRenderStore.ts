@@ -1,4 +1,5 @@
 import rdfFactory, {
+    isNode,
     isQuad,
     NamedNode,
     Node,
@@ -213,40 +214,40 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @internal See {dig}
      * @param subject
      * @param path
-     * @param subjects - The subjects traversed.
+     * @param subject - The subject traversed.
      */
     public digDeeper(subject: Node | undefined, path: Array<NamedNode | NamedNode[]>): [Quadruple[], SomeNode[]] {
         if (path.length === 0 || typeof subject === "undefined") {
             return [[], []];
         }
 
-        const remaining = path.slice();
-        const pred = remaining.shift();
+        const last = path.length - 1;
+        let ids: Node[] = [subject];
+        const intermediates: Node[] = [subject];
+        const values: Quadruple[] = [];
+        for (let i = 0; i <= last; i++) {
+            const field = path[i];
+            const segmentIds = ids;
+            ids = [];
 
-        if (remaining.length === 0) {
-            return [this.getResourcePropertyRaw(subject, pred!), [subject]];
-        }
+            for (let j = 0; j < segmentIds.length; j++) {
+                const id = segmentIds[j];
+                const quads = this.getResourcePropertyRaw(id, field);
 
-        const props = this.getResourcePropertyRaw(subject, pred!);
-        if (props) {
-            const allData = [];
-            const allSubjects = [subject];
-
-            for (const quad of props) {
-              const term = quad[QuadPosition.object];
-              if (term.termType === TermType.NamedNode || term.termType === TermType.BlankNode) {
-                const [terms, subs] = this.digDeeper(term, remaining);
-                allSubjects.push(...subs);
-                if (terms.length > 0) {
-                    allData.push(...terms);
+                if (i === last) {
+                    values.push(...quads);
+                    continue;
                 }
-              }
-            }
 
-            return [allData, allSubjects];
+                const next = quads
+                  .map((q) => q[QuadPosition.object] as Node)
+                  .filter((v) => isNode(v));
+                intermediates.push(...next);
+                ids.push(...next);
+            }
         }
 
-        return [[], [subject]];
+        return [values, intermediates];
     }
 
     /**
