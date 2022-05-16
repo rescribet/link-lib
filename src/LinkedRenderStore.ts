@@ -642,20 +642,33 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         return this.store.quadsFor(iri);
     }
 
+    /** @deprecated Use getRecord */
+    public tryRecord(id: Node | string): DataRecord | undefined {
+        return this.getRecord(id);
+    }
+
     /**
-     * Returns an entity from the cache directly.
-     * This won't cause any network requests even if the entity can't be found.
+     * Returns a record from the store.
+     * This won't cause any network requests even if the record isn't present.
      *
-     * @renderlibrary This should only be used by render-libraries, not by application code.
      * @param id The id of the resource.
      * @returns The object if found, or undefined.
      */
-    public tryRecord(id: Node): DataRecord | undefined {
-        return this.store.getInternalStore().store.getRecord(id.value);
+    public getRecord(id: Node | string): DataRecord | undefined {
+        const recordId = typeof id === "string" ? id : id.value;
+        return this.store.getInternalStore().store.getRecord(recordId);
     }
 
-    public collectRecord(id: SomeNode): DeepRecord | undefined {
-        return this.store.getInternalStore().store.collectRecord(id.value);
+    /**
+     * Returns a record from the store, inlining all local ids.
+     * This won't cause any network requests even if the record isn't present.
+     *
+     * @param id The id of the resource.
+     * @returns The object if found, or undefined.
+     */
+    public collectRecord(id: SomeNode | string): DeepRecord | undefined {
+        const recordId = typeof id === "string" ? id : id.value;
+        return this.store.getInternalStore().store.collectRecord(recordId);
     }
 
     /**
