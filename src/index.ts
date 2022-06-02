@@ -44,6 +44,12 @@ export {
     FieldId,
     DataRecord,
     MultimapTerm,
+    FieldSet,
+    DeepRecord,
+    DataSlice,
+    DeepRecordFieldValue,
+    idField,
+    StructuredStore,
 } from "./store/StructuredStore";
 export { default as RDFIndex } from "./store/RDFIndex";
 
