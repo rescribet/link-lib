@@ -2,7 +2,6 @@ import "jest";
 import "../../__tests__/useFactory";
 
 import rdfFactory from "@ontologies/core";
-import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 
@@ -102,46 +101,6 @@ describe("ComponentStore", () => {
             const lookup = store.getRenderComponent(
                 [schema.BlogPosting.value],
                 [unregistered, registered],
-                DEFAULT_TOPOLOGY.value,
-                rdfs.Resource.value,
-            );
-
-            expect(lookup).toEqual(comp);
-        });
-
-        it("???", () => {
-            const dataStore = new RDFStore({
-                data: {
-                    [schema.Thing.value]: {
-                        _id: schema.Thing,
-                        [rdfx.type.value]: rdfs.Class,
-                    },
-                    [schema.CreativeWork.value]: {
-                        _id: schema.CreativeWork,
-                        [rdfs.subClassOf.value]: schema.Thing,
-                    },
-                    [schema.BlogPosting.value]: {
-                        _id: schema.BlogPosting,
-                        [rdfs.subClassOf.value]: schema.CreativeWork,
-                    },
-                    [schema.Person.value]: {
-                        _id: schema.Person,
-                        [rdfs.subClassOf.value]: schema.Thing,
-                    },
-                },
-            });
-            const store = new ComponentStore(new Schema(dataStore));
-            const unregistered = schema.url.value;
-            const registered = schema.name.value;
-
-            const comp = (): string => "test";
-            store.registerRenderer(comp, schema.CreativeWorkSeason.value, registered);
-            store.registerRenderer(comp, schema.Thing.value, registered);
-            store.registerRenderer(comp, schema.Person.value, registered);
-
-            const lookup = store.getRenderComponent(
-                [schema.BlogPosting.value],
-                [unregistered],
                 DEFAULT_TOPOLOGY.value,
                 rdfs.Resource.value,
             );

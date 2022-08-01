@@ -97,14 +97,6 @@ describe("LinkedRenderStore", () => {
             expect(store.lrs.shouldLoadResource(resource)).toBeTruthy();
         });
 
-        it("should load inferred resources", () => {
-            const store = getBasicStore();
-            store.store.add(resource, rdfs.label, rdfFactory.literal("test"));
-            store.store.flush();
-
-            expect(store.lrs.shouldLoadResource(resource)).toBeTruthy();
-        });
-
         it("should not load existent resources", () => {
             const store = getBasicStore();
             store.store.add(resource, rdfs.label, rdfFactory.literal("test"));
