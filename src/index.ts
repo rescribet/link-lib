@@ -6,6 +6,7 @@ export * from "./factoryHelpers";
 export { linkMiddleware } from "./linkMiddleware";
 export { DataProcessor } from "./processor/DataProcessor";
 export { RequestInitGenerator } from "./processor/RequestInitGenerator";
+export { ProcessorError } from "./processor/ProcessorError";
 export { RDFStore, RDFStoreOpts } from "./RDFStore";
 export { deltaProcessor } from "./store/deltaProcessor";
 export { Schema } from "./Schema";
