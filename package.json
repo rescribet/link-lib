@@ -4,7 +4,7 @@
   "description": "The Link library for creating information based applications",
   "repository": "https://github.com/rescribet/link-lib.git",
   "scripts": {
-    "build": "pika build",
+    "build": "./node_modules/.bin/pika build",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "prepublish": "npm run build",
     "pretest": "npm run lint",
