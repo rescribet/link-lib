@@ -26,7 +26,6 @@ import { RecordStatus } from "./store/RecordStatus";
 import { DataRecord, DeepRecord, Id } from "./store/StructuredStore";
 import { TypedRecord } from "./TypedRecord";
 import {
-    ActionMap,
     ComponentRegistration,
     DataObject,
     DeltaProcessor,
@@ -83,13 +82,13 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * actions will be dispatched, but it should be the same as if a back-end would have executed the action (via the
      * Exec-Action header).
      */
-    public actions: { [k: string]: ActionMap } = {};
+    public actions: TypedRecord = new TypedRecord();
     /** Whenever a resource has no type, assume it to be this. */
     public defaultType: NamedNode = schema.Thing;
     public deltaProcessors: DeltaProcessor[];
     public report: ErrorReporter;
     /**
-     * Can aid in parsing an creating prefix mapping strings.
+     * Can aid in parsing and creating prefix mapping strings.
      * @deprecated Please use @ontologies/<namespace> packages in your programs, canonicalizing certain
      *   prefixes will lead to brittle and hard to refactor code!
      */

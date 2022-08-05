@@ -17,10 +17,6 @@ import RDFIndex from "./store/RDFIndex";
 import { DataRecord, Id } from "./store/StructuredStore";
 import { DisjointSet } from "./utilities/DisjointSet";
 
-export interface ActionMap {
-    [k: string]: (...args: any[]) => Promise<any>;
-}
-
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
 export type Indexable = number | string;
