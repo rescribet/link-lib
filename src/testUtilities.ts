@@ -4,7 +4,7 @@ import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
-import { Id } from "./store/StructuredStore";
+import { Id } from "./store/types";
 import {
     DataProcessorOpts,
     LinkedRenderStoreOptions,

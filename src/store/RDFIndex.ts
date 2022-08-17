@@ -11,7 +11,7 @@ import { SomeNode } from "../types";
 
 import { Equatable } from "./Equatable";
 import { RDFAdapter, RDFAdapterOpts } from "./RDFAdapter";
-import { DataRecord, Id } from "./StructuredStore";
+import { DataRecord, Id } from "./types";
 
 export interface IndexedFormulaOpts extends RDFAdapterOpts {
     data?: Record<Id, DataRecord>;

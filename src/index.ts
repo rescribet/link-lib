@@ -40,19 +40,19 @@ export {
 export { RecordState } from "./store/RecordState";
 export { RecordStatus } from "./store/RecordStatus";
 export {
-    Id,
-    FieldValue,
-    FieldId,
-    DataRecord,
-    MultimapTerm,
-    FieldSet,
-    DeepRecord,
-    DataSlice,
-    DeepRecordFieldValue,
     idField,
     StructuredStore,
 } from "./store/StructuredStore";
 export { default as RDFIndex } from "./store/RDFIndex";
+export { DataSlice } from "./store/types";
+export { DeepRecord } from "./store/types";
+export { DeepRecordFieldValue } from "./store/types";
+export { DataRecord } from "./store/types";
+export { FieldSet } from "./store/types";
+export { FieldValue } from "./store/types";
+export { MultimapTerm } from "./store/types";
+export { FieldId } from "./store/types";
+export { Id } from "./store/types";
 
 export {
     LinkedRenderStore,

@@ -1,5 +1,5 @@
 import rdfFactory, { DataFactory, Feature, Quad, Term } from "@ontologies/core";
-import { Id } from "./store/StructuredStore";
+import { Id } from "./store/types";
 import { SomeNode } from "./types";
 
 export type Comparator = (a: any, b: any) => boolean;

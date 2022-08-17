@@ -8,7 +8,8 @@ import rdfFactory, {
 } from "@ontologies/core";
 
 import { SomeNode } from "../types";
-import { DataRecord, Id, idField, StructuredStore } from "./StructuredStore";
+import { idField, StructuredStore } from "./StructuredStore";
+import { DataRecord, Id } from "./types";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 

@@ -23,7 +23,7 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { RecordState } from "./store/RecordState";
 import { RecordStatus } from "./store/RecordStatus";
-import { DataRecord, DeepRecord, Id } from "./store/StructuredStore";
+import { DataRecord, DeepRecord, Id } from "./store/types";
 import { TypedRecord } from "./TypedRecord";
 import {
     ComponentRegistration,

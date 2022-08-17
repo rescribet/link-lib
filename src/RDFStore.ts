@@ -19,7 +19,7 @@ import {
 import { deltaProcessor } from "./store/deltaProcessor";
 import { RDFAdapter } from "./store/RDFAdapter";
 import RDFIndex from "./store/RDFIndex";
-import { DataRecord, Id } from "./store/StructuredStore";
+import { DataRecord, Id } from "./store/types";
 import { DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { getPropBestLang, normalizeType, sortByBestLang } from "./utilities";
 

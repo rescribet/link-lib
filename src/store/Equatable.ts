@@ -13,7 +13,8 @@ import { sameAs } from "@ontologies/owl";
 import { SomeNode } from "../types";
 
 import { RDFAdapter } from "./RDFAdapter";
-import { Id, StructuredStore } from "./StructuredStore";
+import { StructuredStore } from "./StructuredStore";
+import { Id } from "./types";
 
 export type Constructable<T = object> = new (...args: any[]) => T;
 

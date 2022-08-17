@@ -2,7 +2,7 @@ import rdfFactory, { NamedNode, SomeTerm, TermType } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
-import { Id } from "../store/StructuredStore";
+import { Id } from "../store/types";
 import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();

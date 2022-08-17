@@ -14,7 +14,7 @@ import { RequestInitGenerator } from "./processor/RequestInitGenerator";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import RDFIndex from "./store/RDFIndex";
-import { DataRecord, Id } from "./store/StructuredStore";
+import { DataRecord, Id } from "./store/types";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;

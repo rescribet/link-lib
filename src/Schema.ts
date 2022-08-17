@@ -4,11 +4,11 @@ import * as rdfs from "@ontologies/rdfs";
 
 import { OWL } from "./schema/owl";
 import { RDFS } from "./schema/rdfs";
+import { DataRecord, Id } from "./store/types";
 import { normalizeType } from "./utilities";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 import { RDFStore } from "./RDFStore";
-import { DataRecord, Id } from "./store/StructuredStore";
 import {
     SomeNode,
     VocabularyProcessingContext,

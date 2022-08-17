@@ -3,7 +3,7 @@ import * as rdfs from "@ontologies/rdfs";
 
 import ll from "../ontology/ll";
 import { Schema } from "../Schema";
-import { Id } from "../store/StructuredStore";
+import { Id } from "../store/types";
 import { ComponentMapping, ComponentRegistration } from "../types";
 import { DEFAULT_TOPOLOGY } from "../utilities/constants";
 
