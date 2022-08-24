@@ -92,6 +92,43 @@ describe("StructuredStore", () => {
             expect(aliased.getRecord("/resource/5")).toEqual(data["/resource/4"]);
             expect(aliased.journal.get("/resource/5").current).toEqual(RecordState.Present);
         });
+
+        it("queries through multiple aliases", () => {
+            const changeHandler = jest.fn();
+            const name = rdfFactory.literal("Dee");
+            const id = "/resource/4";
+
+            const store = new StructuredStore("rdf:defaultGraph", data, changeHandler);
+
+            expect(store.getField(id, "name")).toBeUndefined();
+            expect(store.getField("/resource/5", "name")).toBeUndefined();
+            expect(store.getField("/resource/6", "name")).toBeUndefined();
+
+            store.setField(id, "name", name);
+
+            expect(store.getField(id, "name")).toEqual(name);
+            expect(store.getField("/resource/5", "name")).toBeUndefined();
+            expect(store.getField("/resource/6", "name")).toBeUndefined();
+
+            store.setAlias("/resource/5", id);
+
+            expect(store.getField(id, "name")).toEqual(name);
+            expect(store.getField("/resource/5", "name")).toEqual(name);
+            expect(store.getField("/resource/6", "name")).toBeUndefined();
+
+            store.setAlias("/resource/6", "/resource/5");
+
+            expect(store.getField(id, "name")).toEqual(name);
+            expect(store.getField("/resource/5", "name")).toEqual(name);
+            expect(store.getField("/resource/6", "name")).toEqual(name);
+
+            store.setAlias("/resource/5", "/resource/7");
+
+            expect(store.getField(id, "name")).toEqual(name);
+            expect(store.getField("/resource/5", "name")).toBeUndefined();
+            // TODO
+            // expect(store.getField("/resource/6", "name")).toBeUndefined();
+        });
     });
 
     describe("addField", () => {

@@ -209,11 +209,11 @@ describe("DataToGraph", () => {
             expect(stmt![QuadPosition.predicate]).toEqual(example.ns("property"));
             expect(stmt![QuadPosition.object].termType).toEqual("BlankNode");
 
-            expect(graph.holds(
+            expect(graph.match(
               (stmt![QuadPosition.object] as Node),
               schema.name,
               rdfFactory.literal("Some string"),
-            )).toBeTruthy();
+            )).toHaveLength(1);
         });
 
         it("handles strings", () => {

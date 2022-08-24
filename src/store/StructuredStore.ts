@@ -248,12 +248,26 @@ export class StructuredStore {
   }
 
   /**
-   * Creates a new store with {previous} aliased to the topmost alias of {current}.
-   * Aliasing only applies to records.
-   * Data from {current} will be overwritten by {previous}.
+   * Sets the {previous} aliased to the topmost alias of {current}.
+   * Aliasing only applies to record ids.
    * Any previous alias will be ignored, circular aliasing will be ignored.
    * Blank nodes should not be {current}.
    */
+  public setAlias(previous: Id, current: Id): void {
+    if (previous === current
+      || this.aliases[previous] === current
+      || this.aliases[current] === previous) {
+      return;
+    }
+
+    if (this.aliases[current] !== undefined) {
+      this.setAlias(previous, this.aliases[current]);
+      return;
+    }
+
+    this.aliases[previous] = current;
+  }
+
   public withAlias(previous: Id, current: Id): StructuredStore {
     if (previous === current
       || this.aliases[previous] === current

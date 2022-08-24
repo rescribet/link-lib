@@ -1,11 +1,6 @@
 /* Taken, stripped and modified from rdflib.js */
 
-import {
-    DataFactory,
-    NamedNode,
-    Quadruple,
-    SomeTerm,
-} from "@ontologies/core";
+import { DataFactory, Quadruple } from "@ontologies/core";
 
 import { SomeNode } from "../types";
 
@@ -20,19 +15,14 @@ export interface IndexedFormulaOpts extends RDFAdapterOpts {
     rdfFactory: DataFactory;
 }
 
-export type PropertyActionCallback = (record: DataRecord) => void;
-
 /** Query and modify an array of quads. */
 export default class RDFIndex extends Equatable(RDFAdapter) {
     /** Returns the number of quads in the store. */
     public length: number = 0;
 
-    private readonly propertyActions: Record<string, PropertyActionCallback[]> = {};
-
     /**
      * @constructor
      * @param opts
-     * @param {DataFactory} [opts.dataCallback] - Callback when a new quad is added to the store
      */
     constructor(opts: Partial<IndexedFormulaOpts> = {}) {
         super(opts);
@@ -77,26 +67,5 @@ export default class RDFIndex extends Equatable(RDFAdapter) {
         }
 
         return references;
-    }
-
-    public holds(s: SomeNode, p: NamedNode, o: SomeTerm): boolean {
-        return this.match(s, p, o, true)?.[0] !== undefined;
-    }
-
-    public newPropertyAction(predicate: Id, action: PropertyActionCallback): void {
-        if (!this.propertyActions[predicate]) {
-            this.propertyActions[predicate] = [];
-        }
-        this.propertyActions[predicate].push(action);
-        const data = this.store.data;
-        for (const recordId in data) {
-            if (!data.hasOwnProperty(recordId)) {
-                continue;
-            }
-            const record = this.store.getRecord(recordId);
-            if (record?.[predicate] !== undefined) {
-                action(record);
-            }
-        }
     }
 }

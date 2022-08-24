@@ -79,14 +79,6 @@ describe("RDFStore", () => {
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
                         .toHaveLength(1);
                 });
-
-                it("equates new data", () => {
-                    const store = getBasicStore();
-                    store.store.addQuads(thingStatements);
-                    store.store.addQuads(thingIsAbout);
-                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
-                        .toHaveLength(1);
-                });
             });
         });
     });

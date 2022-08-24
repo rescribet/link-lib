@@ -67,9 +67,9 @@ describe("LinkedRenderStore", () => {
             ];
 
             store.store.addQuads(testData);
-            const entity = store.lrs.tryEntity(id);
+            const record = store.lrs.getRecord(idSecond)!;
 
-            expect(entity.map((s) => s[QuadPosition.object].value)).toContainEqual("other");
+            expect(record[schema.author.value]).toEqual(rdfFactory.namedNode("http://example.org/people/0"));
         });
     });
 

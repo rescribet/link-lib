@@ -23,16 +23,8 @@ describe("RDFIndex", () => {
         store.add(blank, schema.description, rdf.literal("The name of an object"));
 
         it ("queries through owl:sameAs", () => {
-            expect(store.match(schema.name, null, null))
-                .toHaveLength(4);
-        });
-
-        it ("holds through owl:sameAs", () => {
-            expect(store.holds(
-                schema.name,
-                schema.description,
-                rdf.literal("The name of an object"),
-            )).toBeTruthy();
+            expect(store.match(schema.name, schema.description, null))
+                .toHaveLength(1);
         });
     });
 });
