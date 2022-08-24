@@ -1,9 +1,8 @@
-import "../../__tests__/useFactory";
-
 import rdfFactory, { createNS, NamedNode, Quadruple } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
+import "../../__tests__/useFactory";
 
 import { getBasicStore } from "../../testUtilities";
 import { RecordState } from "../RecordState";
@@ -28,7 +27,7 @@ describe("StructuredStore", () => {
             },
         };
         const changeHandler = jest.fn();
-        const test = new StructuredStore("rdf:defaultGraph", data, changeHandler);
+        const test = new StructuredStore(defaultGraph.value, data, changeHandler);
 
         expect(test.journal.get("/resource/4").current).toEqual(RecordState.Present);
     });
@@ -66,7 +65,7 @@ describe("StructuredStore", () => {
             .toBeGreaterThan(before);
     });
 
-    describe("withAlias", () => {
+    describe("setAlias", () => {
         const data: DataSlice = {
             "/resource/4": {
                 _id: rdfFactory.namedNode("/resource/4"),
@@ -75,22 +74,25 @@ describe("StructuredStore", () => {
 
         it("copies the journal entries", () => {
             const changeHandler = jest.fn();
-            const test = new StructuredStore("rdf:defaultGraph", data, changeHandler);
-            test.withAlias("/resource/4", "/resource/5");
+            const test = new StructuredStore(defaultGraph.value, data, changeHandler);
+            test.setAlias("/resource/5", "/resource/4");
 
-            expect(test.journal.get("/resource/4").current).toEqual(RecordState.Present);
+            expect(test.getStatus("/resource/5").current).toEqual(RecordState.Present);
+            expect(test.getStatus("/resource/4").current).toEqual(RecordState.Present);
         });
 
         it("queries through aliases", () => {
             const changeHandler = jest.fn();
-            const test = new StructuredStore("rdf:defaultGraph", data, changeHandler);
-            const aliased = test.withAlias("/resource/4", "/resource/5");
+            const test = new StructuredStore(defaultGraph.value, data, changeHandler);
+            test.setAlias("/resource/5", "/resource/4");
 
-            expect(aliased.getRecord("/resource/4")).toEqual(data["/resource/4"]);
-            expect(aliased.journal.get("/resource/4").current).toEqual(RecordState.Present);
+            expect(data["/resource/5"]).not.toEqual(data["/resource/4"]);
 
-            expect(aliased.getRecord("/resource/5")).toEqual(data["/resource/4"]);
-            expect(aliased.journal.get("/resource/5").current).toEqual(RecordState.Present);
+            expect(test.getRecord("/resource/4")).toEqual(data["/resource/4"]);
+            expect(test.getStatus("/resource/4").current).toEqual(RecordState.Present);
+
+            expect(test.getRecord("/resource/5")).toEqual(data["/resource/4"]);
+            expect(test.getStatus("/resource/5").current).toEqual(RecordState.Present);
         });
 
         it("queries through multiple aliases", () => {
@@ -98,7 +100,7 @@ describe("StructuredStore", () => {
             const name = rdfFactory.literal("Dee");
             const id = "/resource/4";
 
-            const store = new StructuredStore("rdf:defaultGraph", data, changeHandler);
+            const store = new StructuredStore(defaultGraph.value, data, changeHandler);
 
             expect(store.getField(id, "name")).toBeUndefined();
             expect(store.getField("/resource/5", "name")).toBeUndefined();
@@ -143,7 +145,7 @@ describe("StructuredStore", () => {
         });
 
         it("adds to existent record without existing field", () => {
-            const store = new StructuredStore("rdf:defaultGraph", {
+            const store = new StructuredStore(defaultGraph.value, {
                 [recordId]: {
                     _id: rdfFactory.namedNode(recordId),
                     count: rdfFactory.literal(0),
@@ -156,7 +158,7 @@ describe("StructuredStore", () => {
         });
 
         it("adds to existent record with existing field", () => {
-            const store = new StructuredStore("rdf:defaultGraph", {
+            const store = new StructuredStore(defaultGraph.value, {
                 [recordId]: {
                     _id: rdfFactory.namedNode(recordId),
                     name: rdfFactory.literal("Andy"),
@@ -185,7 +187,7 @@ describe("StructuredStore", () => {
         };
 
         it("preserves natural ordering for sequences", () => {
-            const store = new StructuredStore("rdf:defaultGraph", data);
+            const store = new StructuredStore(defaultGraph.value, data);
 
             expect(store.getField("/resource/4", rdfs.member.value))
                 .toEqual([
@@ -196,6 +198,44 @@ describe("StructuredStore", () => {
                     rdfFactory.literal("11"),
                 ]);
         });
+
+        it("handles invalid sequence numbers", () => {
+            const store = new StructuredStore(defaultGraph.value, {
+                "/resource/4": {
+                    _id: rdfFactory.namedNode("/resource/4"),
+                    [rdf.ns("_2").value]: rdfFactory.literal("2"),
+                    [rdf.ns("_10").value]: rdfFactory.literal("10"),
+                    [rdf.ns("_afvz").value]: rdfFactory.literal("wrong"),
+                    [rdf.ns("_11").value]: rdfFactory.literal("11"),
+                    [rdf.ns("_1").value]: rdfFactory.literal("1"),
+                },
+            });
+
+            expect(store.getField("/resource/4", rdfs.member.value))
+                .toEqual([
+                    rdfFactory.literal("1"),
+                    rdfFactory.literal("2"),
+                    rdfFactory.literal("10"),
+                    rdfFactory.literal("11"),
+                    rdfFactory.literal("wrong"),
+                ]);
+        });
+    });
+
+    describe("deleteRecord", () => {
+        const recordId = "/resource/4";
+
+        it("clears the status", () => {
+            const store = new StructuredStore(defaultGraph.value, {});
+            store.journal.transition(recordId, RecordState.Present);
+
+            expect(store.getStatus(recordId).current).toEqual(RecordState.Present);
+
+            store.deleteRecord(recordId);
+
+            expect(store.getStatus(recordId).current).toEqual(RecordState.Absent);
+        });
+
     });
 
     describe("deleteFieldMatching", () => {
@@ -213,7 +253,7 @@ describe("StructuredStore", () => {
         });
 
         it("preserves different value", () => {
-            const store = new StructuredStore("rdf:defaultGraph", createData());
+            const store = new StructuredStore(defaultGraph.value, createData());
 
             expect(store.getField(recordId, "count")).toEqual(rdfFactory.literal(2));
             store.deleteFieldMatching(recordId, "count", rdfFactory.literal(1));
@@ -221,7 +261,7 @@ describe("StructuredStore", () => {
         });
 
         it("deletes matching value", () => {
-            const store = new StructuredStore("rdf:defaultGraph", createData());
+            const store = new StructuredStore(defaultGraph.value, createData());
 
             expect(store.getField(recordId, "count")).toEqual(rdfFactory.literal(2));
             store.deleteFieldMatching(recordId, "count", rdfFactory.literal(2));
@@ -229,7 +269,7 @@ describe("StructuredStore", () => {
         });
 
         it("preserves different multimap value", () => {
-            const store = new StructuredStore("rdf:defaultGraph", createData());
+            const store = new StructuredStore(defaultGraph.value, createData());
 
             expect(store.getField(recordId, "name")).toContainEqual(rdfFactory.literal("name2"));
             store.deleteFieldMatching(recordId, "name", rdfFactory.literal("name3"));
@@ -237,11 +277,106 @@ describe("StructuredStore", () => {
         });
 
         it("deletes matching multimap value", () => {
-            const store = new StructuredStore("rdf:defaultGraph", createData());
+            const store = new StructuredStore(defaultGraph.value, createData());
 
             expect(store.getField(recordId, "name")).toContainEqual(rdfFactory.literal("name2"));
             store.deleteFieldMatching(recordId, "name", rdfFactory.literal("name2"));
             expect(store.getField(recordId, "name")).not.toContainEqual(rdfFactory.literal("name2"));
+        });
+    });
+
+    describe("references", () => {
+        it("works with an empty store", () => {
+            const store = new StructuredStore(defaultGraph.value);
+
+            const references = store.references(rdfFactory.blankNode());
+
+            expect(references).toEqual([]);
+        });
+
+        it("skips without references", () => {
+            const store = new StructuredStore(defaultGraph.value, {
+                "/resource/4": {
+                    _id: rdfFactory.namedNode("/resource/4"),
+                    [rdf.type.value]: schema.Thing,
+                },
+            });
+
+            const references = store.references(rdfFactory.blankNode());
+
+            expect(references).toEqual([]);
+        });
+
+        it("works with single reference", () => {
+            const store = new StructuredStore(defaultGraph.value, {
+                "/resource/3": {
+                    _id: rdfFactory.namedNode("/resource/3"),
+                    [rdf.type.value]: schema.Thing,
+                    [schema.comment.value]: rdfFactory.namedNode("/resource/4"),
+                },
+                "/resource/4": {
+                    _id: rdfFactory.namedNode("/resource/4"),
+                    [rdf.type.value]: schema.Thing,
+                },
+            });
+
+            const references = store.references("/resource/4");
+
+            expect(references).toEqual([
+                "/resource/3",
+            ]);
+        });
+
+        it("works with array reference", () => {
+            const store = new StructuredStore(defaultGraph.value, {
+                "/resource/3": {
+                    _id: rdfFactory.namedNode("/resource/3"),
+                    [rdf.type.value]: schema.Thing,
+                    [schema.comment.value]: [
+                        rdfFactory.namedNode("/resource/2"),
+                        rdfFactory.namedNode("/resource/4"),
+                        rdfFactory.namedNode("/resource/5"),
+                    ],
+                },
+                "/resource/4": {
+                    _id: rdfFactory.namedNode("/resource/4"),
+                    [rdf.type.value]: schema.Thing,
+                },
+            });
+
+            const references = store.references("/resource/4");
+
+            expect(references).toEqual([
+                "/resource/3",
+            ]);
+        });
+    });
+
+    describe("collectRecord", () => {
+        it("works with single reference", () => {
+            const blank = rdfFactory.blankNode();
+            const store = new StructuredStore(defaultGraph.value, {
+                "/resource/3": {
+                    _id: rdfFactory.namedNode("/resource/3"),
+                    [rdf.type.value]: schema.Thing,
+                    [schema.comment.value]: blank,
+                },
+                [blank.value]: {
+                    _id: blank,
+                    [rdf.type.value]: schema.CreativeWork,
+                },
+            });
+
+            const collected = store.collectRecord("/resource/3");
+
+            expect(collected).toEqual({
+                _id: rdfFactory.namedNode("/resource/3"),
+                [rdf.type.value]: schema.Thing,
+                [schema.comment.value]: {
+                    _id: blank,
+                    [rdf.type.value]: schema.CreativeWork,
+                },
+            });
         });
     });
 });

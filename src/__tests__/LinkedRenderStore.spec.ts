@@ -1,7 +1,7 @@
 import "jest";
 import "./useFactory";
 
-import rdfFactory, { QuadPosition, Quadruple } from "@ontologies/core";
+import rdfFactory, { Quadruple } from "@ontologies/core";
 import * as owl from "@ontologies/owl";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";

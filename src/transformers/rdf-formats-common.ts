@@ -1,5 +1,5 @@
 import { Quadruple } from "@ontologies/core";
-import RDFIndex from "../store/RDFIndex";
+import { RDFAdapter } from "../store/RDFAdapter";
 import { RDFLibFetcherResponse, ResponseAndFallbacks } from "../types";
 
 import { getContentType, getURL } from "../utilities/responses";
@@ -8,7 +8,7 @@ const isRdfLibResponse = (res: any): res is RDFLibFetcherResponse =>
     typeof res.req !== "undefined" && typeof res.req.termType !== "undefined";
 
 export type RDFLibParse = (str: string,
-                           kb: RDFIndex,
+                           kb: RDFAdapter,
                            base: string,
                            contentType: string,
                            callback: () => void) => void;
@@ -31,7 +31,7 @@ export const createProcessRDF = (rdfParse: RDFLibParse): (response: ResponseAndF
         }
 
         const format = getContentType(response);
-        const g = new RDFIndex();
+        const g = new RDFAdapter();
 
         await new Promise<void>((resolve): void => {
             rdfParse(data, g, getURL(response), format, () => {

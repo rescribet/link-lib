@@ -10,7 +10,7 @@ import "jest";
 import ex from "../../ontology/ex";
 import example from "../../ontology/example";
 import ll from "../../ontology/ll";
-import RDFIndex from "../../store/RDFIndex";
+import { RDFAdapter } from "../../store/RDFAdapter";
 
 import { dataToGraphTuple, list, processObject, seq, toGraph } from "../DataToGraph";
 
@@ -51,7 +51,7 @@ describe("DataToGraph", () => {
         });
 
         it("allows a custom graph to be passed", () => {
-            const g = new RDFIndex();
+            const g = new RDFAdapter();
             const [, graph] = toGraph({}, undefined, g);
 
             expect(graph).toEqual(g);
@@ -229,19 +229,19 @@ describe("DataToGraph", () => {
 
     describe("processObject", () => {
         it("handles undefined", () => {
-            const g = new RDFIndex();
+            const g = new RDFAdapter();
             processObject(example.ns("a"), example.ns("property"), null, g);
             expect(g.quads).toHaveLength(0);
         });
 
         it("handles null", () => {
-            const g = new RDFIndex();
+            const g = new RDFAdapter();
             processObject(example.ns("a"), example.ns("property"), null, g);
             expect(g.quads).toHaveLength(0);
         });
 
         it("handles rdf literals", () => {
-            const g = new RDFIndex();
+            const g = new RDFAdapter();
             processObject(example.ns("a"), example.ns("property"), rdfFactory.literal(1), g);
             expect(g.quads).toHaveLength(1);
             expect(g.quads[0][QuadPosition.object]).toEqual(rdfFactory.literal(1));

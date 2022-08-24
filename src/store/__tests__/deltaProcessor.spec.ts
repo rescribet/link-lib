@@ -8,7 +8,7 @@ import "jest";
 
 import ex from "../../ontology/ex";
 import { deltaProcessor } from "../deltaProcessor";
-import RDFIndex from "../RDFIndex";
+import { RDFAdapter } from "../RDFAdapter";
 
 describe("deltaProcessor", () => {
     const alice = ex.ns("person/alice");
@@ -27,8 +27,8 @@ describe("deltaProcessor", () => {
         [ld.slice],
     );
 
-    const filledStore = (): RDFIndex => {
-        const store = new RDFIndex();
+    const filledStore = (): RDFAdapter => {
+        const store = new RDFAdapter();
 
         store.add(bob, rdf.type, schema.Person);
         store.add(bob, schema.name, rdfFactory.literal("bob"));

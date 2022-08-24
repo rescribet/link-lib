@@ -1,11 +1,12 @@
 import rdfFactory, {
-  DataFactory,
+  DataFactory, isNode,
   NamedNode,
   Quad,
   QuadPosition,
   Quadruple,
   SomeTerm,
 } from "@ontologies/core";
+import { sameAs } from "@ontologies/owl";
 
 import { SomeNode } from "../types";
 import { idField, StructuredStore } from "./StructuredStore";
@@ -51,12 +52,24 @@ export class RDFAdapter {
         q[QuadPosition.object],
         q[QuadPosition.graph],
     ));
+    this.addRecordCallback(this.handleAlias.bind(this));
     this.storeGraph = this.rdfFactory.namedNode(this.store.base);
   }
 
   /** @deprecated */
   public get quads(): Quadruple[] {
-    return this.graphToQuads();
+    const qdrs = [];
+    const data = this.store.data;
+
+    for (const recordId in data) {
+      if (!data.hasOwnProperty(recordId)) {
+        continue;
+      }
+
+      qdrs.push(...this.quadsForRecord(recordId));
+    }
+
+    return qdrs;
   }
 
   /** @deprecated */
@@ -99,20 +112,6 @@ export class RDFAdapter {
     return this;
   }
 
-  /**
-   * Remove a quad from the store
-   * @deprecated
-   */
-  public removeQuad(quad: Quadruple): this {
-    this.store.deleteFieldMatching(
-      quad[QuadPosition.subject].value,
-      quad[QuadPosition.predicate].value,
-      quad[QuadPosition.object],
-    );
-
-    return this;
-  }
-
   /** @deprecated */
   public removeQuads(quads: Quadruple[]): this {
     // Ensure we don't loop over the array we're modifying.
@@ -125,11 +124,17 @@ export class RDFAdapter {
 
   /** @deprecated */
   public match(
-    subject: SomeNode | null,
-    predicate: NamedNode | null,
-    object: SomeTerm | null,
+    aSubject: SomeNode | null,
+    aPredicate: NamedNode | null,
+    aObject: SomeTerm | null,
     justOne: boolean = false,
   ): Quadruple[] {
+    const subject = aSubject ? this.primary(aSubject) : null;
+    const predicate = aPredicate ? this.primary(aPredicate) as NamedNode : null;
+    const object = aObject
+      ? (isNode(aObject) ? this.primary(aObject) : aObject)
+      : null;
+
     let quads: Quadruple[];
 
     if (subject && predicate) {
@@ -145,7 +150,7 @@ export class RDFAdapter {
     } else if (subject) {
       quads = this.quadsForRecord(subject.value);
     } else {
-      quads = this.graphToQuads();
+      quads = this.quads;
     }
 
     const filter = (q: Quadruple): boolean =>
@@ -195,19 +200,28 @@ export class RDFAdapter {
     return quadruples;
   }
 
-  /** @deprecated */
-  public graphToQuads(): Quadruple[] {
-    const qdrs = [];
-    const data = this.store.data;
+  /** @private */
+  public primary(node: SomeNode): SomeNode {
+    const p = this.store.primary(node.value);
 
-    for (const recordId in data) {
-      if (!data.hasOwnProperty(recordId)) {
-        continue;
-      }
-
-      qdrs.push(...this.quadsForRecord(recordId));
+    if (p.startsWith("_:")) {
+      return this.rdfFactory.blankNode(p);
+    } else {
+      return this.rdfFactory.namedNode(p);
     }
+  }
 
-    return qdrs;
+  private handleAlias(recordId: Id): void {
+      const rawRecord = this.store.data[recordId];
+      if (rawRecord === undefined) {
+        return;
+      }
+      const sameAsValue = rawRecord[sameAs.value];
+      if (sameAsValue) {
+        this.store.setAlias(
+          rawRecord._id.value,
+          (Array.isArray(sameAsValue) ? sameAsValue[0] : sameAsValue).value,
+        );
+      }
   }
 }

@@ -18,7 +18,6 @@ import {
 } from "./rdf";
 import { deltaProcessor } from "./store/deltaProcessor";
 import { RDFAdapter } from "./store/RDFAdapter";
-import RDFIndex from "./store/RDFIndex";
 import { DataRecord, Id } from "./store/types";
 import { DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { getPropBestLang, normalizeType, sortByBestLang } from "./utilities";
@@ -28,7 +27,7 @@ const EMPTY_ST_ARR: ReadonlyArray<Quadruple> = Object.freeze([]);
 export interface RDFStoreOpts {
     data?: Record<Id, DataRecord>;
     deltaProcessorOpts?: { [k: string]: NamedNode[] };
-    innerStore?: RDFIndex;
+    innerStore?: RDFAdapter;
 }
 
 /**
@@ -43,7 +42,7 @@ export class RDFStore implements DeltaProcessor {
     private deltas: Quadruple[][] = [];
     private deltaProcessor: StoreProcessor;
 
-    private store: RDFIndex = new RDFIndex({
+    private store: RDFAdapter = new RDFAdapter({
         onChange: this.handleChange.bind(this),
     });
 
@@ -59,7 +58,7 @@ export class RDFStore implements DeltaProcessor {
     constructor({ data, deltaProcessorOpts, innerStore }: RDFStoreOpts = {}) {
         this.processDelta = this.processDelta.bind(this);
 
-        this.store = innerStore || new RDFIndex({ data, onChange: this.handleChange.bind(this) });
+        this.store = innerStore || new RDFAdapter({ data, onChange: this.handleChange.bind(this) });
 
         const defaults =  {
             addGraphIRIS: [ll.add, ld.add],
@@ -144,12 +143,12 @@ export class RDFStore implements DeltaProcessor {
     }
 
     /** @private */
-    public getInternalStore(): RDFIndex {
+    public getInternalStore(): RDFAdapter {
         return this.store;
     }
 
     public references(recordId: SomeNode): Id[] {
-        return this.store.references(recordId);
+        return this.store.store.references(recordId.value);
     }
 
     /** @deprecated */

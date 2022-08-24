@@ -7,7 +7,7 @@ import rdfFactory, {
 import * as rdf from "@ontologies/rdf";
 
 import ll from "../ontology/ll";
-import RDFIndex from "../store/RDFIndex";
+import { RDFAdapter } from "../store/RDFAdapter";
 
 import {
     DataObject,
@@ -72,7 +72,7 @@ const isFile = (value: any): value is File => typeof File !== "undefined" && val
 export function processObject(subject: Node,
                               predicate: NamedNode,
                               datum: DataObject | SerializableDataTypes | null | undefined,
-                              store: RDFIndex,
+                              store: RDFAdapter,
                               ns?: NamespaceMap): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
 
@@ -111,7 +111,7 @@ export function processObject(subject: Node,
     return blobs;
 }
 
-function processDataObject(subject: Node, data: DataObject, store: RDFIndex, ns?: NamespaceMap): NamedBlobTuple[] {
+function processDataObject(subject: Node, data: DataObject, store: RDFAdapter, ns?: NamespaceMap): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
     const keys = Object.keys(data);
     for (let i = 0; i < keys.length; i++) {
@@ -130,7 +130,7 @@ function processDataObject(subject: Node, data: DataObject, store: RDFIndex, ns?
 }
 
 export function dataToGraphTuple(data: DataObject, ns?: NamespaceMap): DataTuple {
-    const store = new RDFIndex();
+    const store = new RDFAdapter();
     const blobs = processDataObject(MAIN_NODE_DEFAULT_IRI, data, store, ns);
 
     return [store, blobs];
@@ -146,7 +146,7 @@ export function dataToGraphTuple(data: DataObject, ns?: NamespaceMap): DataTuple
 export function toGraph(
     iriOrData: SomeNode | DataObject,
     data?: DataObject,
-    store?: RDFIndex,
+    store?: RDFAdapter,
     ns?: NamespaceMap,
 ): ParsedObject {
 
@@ -166,7 +166,7 @@ export function toGraph(
     }
     const dataObj = passedIRI ? data! : (iriOrData as DataObject);
 
-    const s = store || new RDFIndex();
+    const s = store || new RDFAdapter();
 
     const blobs = processDataObject(iri, dataObj, s, ns);
 

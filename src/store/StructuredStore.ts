@@ -1,4 +1,4 @@
-import rdfFactory, { SomeTerm } from "@ontologies/core";
+import rdfFactory, { SomeTerm, TermType } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
@@ -9,7 +9,6 @@ import { RecordState } from "./RecordState";
 import { RecordStatus } from "./RecordStatus";
 import {
   DataRecord,
-  DataSlice,
   DeepRecord,
   DeepRecordFieldValue,
   FieldId,
@@ -27,7 +26,8 @@ const blankNode = rdfFactory.blankNode.bind(rdfFactory);
 
 const tryParseInt = (value: string): number | string => {
   try {
-    return parseInt(value, 10);
+    const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? value : parsed;
   } catch (e) {
     return value;
   }
@@ -43,16 +43,6 @@ const tryParseSeqNumber = (value: string): number | string => {
   }
 };
 
-const merge = (a: SomeTerm | MultimapTerm | undefined, b: SomeTerm | MultimapTerm): SomeTerm | MultimapTerm => {
-  if (Array.isArray(a)) {
-    return Array.from(new Set([...a, ...normalizeType(b)]));
-  } else if (a) {
-    return Array.from(new Set([a, ...normalizeType(b)]));
-  } else {
-    return b;
-  }
-};
-
 const getSortedFieldMembers = (record: DataRecord): MultimapTerm => {
   const values: FieldValue = [];
   const sortedEntries = Object
@@ -60,6 +50,14 @@ const getSortedFieldMembers = (record: DataRecord): MultimapTerm => {
       .sort(([k1], [k2]) => {
         const a = tryParseSeqNumber(k1);
         const b = tryParseSeqNumber(k2);
+
+        if (typeof a !== "string" && typeof b !== "string") {
+          return a - b;
+        }
+
+        if (typeof a !== "string") {
+          return -1;
+        }
 
         return a < b ? -1 : (a > b ? 1 : 0);
       });
@@ -113,6 +111,10 @@ export class StructuredStore {
         this.journal.transition(key, RecordState.Present);
       }
     }
+  }
+
+  public get recordCount(): number {
+    return Object.keys(this.data).length;
   }
 
   public getStatus(recordId: Id): RecordStatus {
@@ -221,7 +223,6 @@ export class StructuredStore {
     this.setRecord(recordId, next);
   }
 
-  /** @deprecated */
   public deleteFieldMatching(recordId: Id, field: FieldId, value: SomeTerm): void {
     const current = this.getField(recordId, field);
     if (current === undefined) {
@@ -240,11 +241,47 @@ export class StructuredStore {
   }
 
   /**
-   * Returns the Id which is used to store the data under.
+   * Returns the [Id] which is used to store the data under.
    * @internal
    */
   public primary<T extends Id | FieldId>(id: T): T {
     return (this.aliases[id] ?? id) as T;
+  }
+
+  /**
+   * Find all records which reference this given [recordId]
+   */
+  public references(recordId: Id): Id[] {
+    const references = [];
+    const data = this.data;
+
+    for (const rId in data) {
+      if (!data.hasOwnProperty(rId)) {
+        continue;
+      }
+
+      const record = data[rId];
+      for (const field in record) {
+        if (!record.hasOwnProperty(field) || field === idField) {
+          continue;
+        }
+
+        const values = record[field];
+        if (Array.isArray(values)) {
+          for (const value of values) {
+            if (value.termType !== TermType.Literal && value.value === recordId) {
+              references.push(rId);
+            }
+          }
+        } else {
+          if (values.termType !== TermType.Literal && values.value === recordId) {
+            references.push(rId);
+          }
+        }
+      }
+    }
+
+    return references;
   }
 
   /**
@@ -266,39 +303,6 @@ export class StructuredStore {
     }
 
     this.aliases[previous] = current;
-  }
-
-  public withAlias(previous: Id, current: Id): StructuredStore {
-    if (previous === current
-      || this.aliases[previous] === current
-      || this.aliases[current] === previous) {
-      return this;
-    }
-
-    if (this.aliases[current] !== undefined) {
-      return this.withAlias(previous, this.aliases[current]);
-    }
-
-    const nextData = {
-      ...this.data,
-      [current]: Object
-        .entries(this.data[previous] ?? {})
-        .reduce((acc, [k, v]) => ({
-          ...acc,
-          [k]: k === idField
-              ? v
-              : merge(acc[k], v),
-        }), this.data[current] ?? {}),
-    };
-    const next = this.copy(nextData);
-    next.aliases[previous] = current;
-    delete next.data[previous];
-
-    // Process incoming aliases
-    return Object
-      .entries(this.aliases)
-      .filter(([_, v]) => v === previous)
-      .reduce<StructuredStore>((acc, [incoming]) => acc.withAlias(incoming, current), next);
   }
 
   public allRecords(): DataRecord[] {
@@ -340,14 +344,6 @@ export class StructuredStore {
     };
     this.journal.transition(primary, RecordState.Present);
     return this.data[primary];
-  }
-
-  private copy(data: DataSlice): StructuredStore {
-    const next = new StructuredStore(this.base, data);
-    next.journal = this.journal.copy();
-    next.aliases = JSON.parse(JSON.stringify(this.aliases));
-
-    return next;
   }
 
   private initializeRecord(recordId: Id): void {

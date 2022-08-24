@@ -15,7 +15,7 @@ import ex from "../../ontology/ex";
 import example from "../../ontology/example";
 import http from "../../ontology/http";
 import ll from "../../ontology/ll";
-import RDFIndex from "../../store/RDFIndex";
+import { RDFAdapter } from "../../store/RDFAdapter";
 import { BasicComponent, ExplodedLRS, getBasicStore } from "../../testUtilities";
 import { FulfilledRequestStatus, ResponseAndFallbacks } from "../../types";
 
@@ -47,7 +47,7 @@ describe("DataProcessor", () => {
         const object1: Quadruple = [subject, schema.object, example.ns("objects/1"), defaultGraph];
         const target5: Quadruple = [subject, schema.target, example.ns("targets/5"), defaultGraph];
         const exec = (store: ExplodedLRS<BasicComponent>): Promise<any> =>
-            store.processor.execActionByIRI(subject, [new RDFIndex(), []]);
+            store.processor.execActionByIRI(subject, [new RDFAdapter(), []]);
 
         it("throws an error when the action doesn't exists", async () => {
             const store = getBasicStore();
@@ -137,7 +137,7 @@ describe("DataProcessor", () => {
             const fetch = jest.fn((res) => Promise.resolve(res));
             // @ts-ignore
             store.processor.fetch = fetch;
-            const data = new RDFIndex();
+            const data = new RDFAdapter();
             data.add(ll.targetResource, schema.name, rdfFactory.literal("body"));
 
             await store.processor.execActionByIRI(subject, [data, []]);
@@ -197,35 +197,6 @@ describe("DataProcessor", () => {
             expect(processor).toHaveBeenCalledWith(res);
         });
     });
-
-    // The reason why this shouldn't throw is lost, since about:x can't be fetched.
-    // describe("#getEntity", () => {
-    //     it("non-fetchable url with CORS", async () => {
-    //         const store = getBasicStore({
-    //             apiOpts: {
-    //                 fetch: (_, __): Promise<Response> => {
-    //                     throw new Error("Test triggered error");
-    //                 },
-    //                 requestInitGenerator: new RequestInitGenerator({
-    //                     credentials: "include",
-    //                     csrfFieldName: "",
-    //                     mode: "cors",
-    //                     xRequestedWith: "XMLHttpRequest",
-    //                 }),
-    //             },
-    //         });
-    //
-    //         try {
-    //             const res = await store
-    //                 .processor
-    //                 .getEntity(rdfFactory.namedNode("about:bookmarks"));
-    //
-    //             expect(res).toBeInstanceOf(Array);
-    //         } catch (e) {
-    //             expect(e).toBeFalsy();
-    //         }
-    //     });
-    // });
 
     describe("#getEntities", () => {
         beforeEach(() => {

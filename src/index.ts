@@ -32,6 +32,11 @@ export {
     DEFAULT_TOPOLOGY,
     RENDER_CLASS_NAME,
 } from "./utilities/constants";
+export {
+    isGlobalId,
+    isLocalId,
+    mergeTerms,
+} from "./utilities/slices";
 export * from "./LinkedDataAPI";
 export {
     AttributeKey,
@@ -43,7 +48,6 @@ export {
     idField,
     StructuredStore,
 } from "./store/StructuredStore";
-export { default as RDFIndex } from "./store/RDFIndex";
 export { DataSlice } from "./store/types";
 export { DeepRecord } from "./store/types";
 export { DeepRecordFieldValue } from "./store/types";

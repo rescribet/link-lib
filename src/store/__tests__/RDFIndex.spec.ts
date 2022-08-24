@@ -7,11 +7,11 @@ import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
 import "jest";
 
-import RDFIndex from "../RDFIndex";
+import { RDFAdapter } from "../RDFAdapter";
 
-describe("RDFIndex", () => {
+describe("RDFAdapter", () => {
     describe("match", () => {
-        const store = new RDFIndex({ onChange: (): void => undefined });
+        const store = new RDFAdapter({ onChange: (): void => undefined });
         store.add(schema.Person, rdfx.type, schema.Thing);
         store.add(schema.Person, rdfx.type, rdfs.Resource);
         store.add(schema.Person, rdfs.label, rdf.literal("Person class"));

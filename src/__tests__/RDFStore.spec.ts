@@ -10,7 +10,7 @@ import * as xsd from "@ontologies/xsd";
 
 import ll from "../ontology/ll";
 import { RDFStore } from "../RDFStore";
-import RDFIndex from "../store/RDFIndex";
+import { RDFAdapter } from "../store/RDFAdapter";
 import { getBasicStore } from "../testUtilities";
 
 const example = createNS("http://example.com/");
@@ -100,7 +100,7 @@ describe("RDFStore", () => {
 
     describe("#getInternalStore", () => {
         it("returns the store", () => {
-            expect(new RDFStore().getInternalStore()).toBeInstanceOf(RDFIndex);
+            expect(new RDFStore().getInternalStore()).toBeInstanceOf(RDFAdapter);
         });
     });
 

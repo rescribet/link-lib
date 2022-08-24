@@ -13,7 +13,7 @@ import { DataProcessor } from "./processor/DataProcessor";
 import { RequestInitGenerator } from "./processor/RequestInitGenerator";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
-import RDFIndex from "./store/RDFIndex";
+import { RDFAdapter } from "./store/RDFAdapter";
 import { DataRecord, Id } from "./store/types";
 import { DisjointSet } from "./utilities/DisjointSet";
 
@@ -122,8 +122,8 @@ export interface DataObject {
     [k: string]: SerializableDataTypes;
 }
 
-export type DataTuple = [RDFIndex, NamedBlobTuple[]];
-export type ParsedObject = [SomeNode, RDFIndex, NamedBlobTuple[]];
+export type DataTuple = [RDFAdapter, NamedBlobTuple[]];
+export type ParsedObject = [SomeNode, RDFAdapter, NamedBlobTuple[]];
 
 export interface ChangeBuffer {
     changeBuffer: Quadruple[];

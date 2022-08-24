@@ -204,7 +204,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
             opts.headers["Request-Referrer"] = subject.value;
         }
 
-        if (!SAFE_METHODS.includes(method) && graph && graph !== null && graph.length > 0) {
+        if (!SAFE_METHODS.includes(method) && graph && graph.store.recordCount > 0) {
             if (opts.headers instanceof Headers) {
                 opts.headers.delete("Content-Type");
             } else if (opts.headers && !Array.isArray(opts.headers)) {

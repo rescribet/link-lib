@@ -1,3 +1,4 @@
+import { isLocalId } from "../utilities/slices";
 import { RecordState } from "./RecordState";
 import { RecordStatus } from "./RecordStatus";
 import { Id } from "./types";
@@ -34,8 +35,12 @@ export class RecordJournal {
         return new RecordJournal(onChange ?? this.onChange, JSON.parse(JSON.stringify(this.data)));
     }
 
+    /**
+     * Get the [RecordStatus] for the [recordId].
+     * Will return an invalid status when passing a local id.
+     */
     public get(recordId: Id): RecordStatus {
-        if (!recordId.includes(":") && !recordId.startsWith("_:")) {
+        if (isLocalId(recordId)) {
             return blankNodeStatus;
         }
 

@@ -64,6 +64,13 @@ describe("Schema", () => {
             schemaNS.Thing.value,
             rdfs.Resource.value,
         ]);
+        expect(schema.expand([schemaNS.BlogPosting.value, schemaNS.Person.value])).toEqual([
+            schemaNS.BlogPosting.value,
+            schemaNS.Person.value,
+            schemaNS.CreativeWork.value,
+            schemaNS.Thing.value,
+            rdfs.Resource.value,
+        ]);
     });
 
     describe("when empty", () => {

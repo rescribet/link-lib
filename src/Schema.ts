@@ -1,4 +1,3 @@
-import { NamedNode, SomeTerm } from "@ontologies/core";
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
@@ -10,7 +9,6 @@ import { DisjointSet } from "./utilities/DisjointSet";
 
 import { RDFStore } from "./RDFStore";
 import {
-    SomeNode,
     VocabularyProcessingContext,
     VocabularyProcessor,
 } from "./types";
@@ -59,16 +57,6 @@ export class Schema {
         }
 
         return [recordId];
-    }
-
-    /** @private */
-    public holds(recordId: SomeNode, field: NamedNode, value: SomeTerm): boolean {
-        return !!this.liveStore.getInternalStore().match(
-            recordId,
-            field,
-            value,
-            true,
-        )[0];
     }
 
     /** @private */
