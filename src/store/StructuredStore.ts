@@ -175,8 +175,8 @@ export class StructuredStore {
   }
 
   /**
+   * Adds a value to a field.
    * @returns Whether a mutation has occurred.
-   * @deprecated
    */
   public addField(recordId: Id, field: FieldId, value: SomeTerm): boolean {
     if (field === idField) {

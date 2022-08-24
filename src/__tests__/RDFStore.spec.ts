@@ -32,18 +32,18 @@ const thingIsAbout: Quadruple[] = [
 ];
 
 describe("RDFStore", () => {
-    describe("#addQuadruples", () => {
+    describe("#addQuads", () => {
         it("requires an array", () => {
             const store = new RDFStore();
 
             expect(() => {
-                store.addQuadruples("test" as any);
+                store.addQuads("test" as any);
             }).toThrowError(TypeError);
         });
 
         it("works", () => {
             const store = new RDFStore();
-            store.addQuadruples(thingStatements);
+            store.addQuads(thingStatements);
 
             const libStatements = store.getInternalStore().quads;
             expect(libStatements).toHaveLength(3);
@@ -56,16 +56,16 @@ describe("RDFStore", () => {
             describe("big small", () => {
                 it("equates existing data", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(aboutIsThing);
-                    store.store.addQuadruples(thingStatements);
+                    store.store.addQuads(aboutIsThing);
+                    store.store.addQuads(thingStatements);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
                         .toHaveLength(1);
                 });
 
                 it("equates new data", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(thingStatements);
-                    store.store.addQuadruples(aboutIsThing);
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(aboutIsThing);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
                         .toHaveLength(1);
                 });
@@ -74,16 +74,16 @@ describe("RDFStore", () => {
             describe("small big", () => {
                 it("equates existing data", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(thingIsAbout);
-                    store.store.addQuadruples(thingStatements);
+                    store.store.addQuads(thingIsAbout);
+                    store.store.addQuads(thingStatements);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
                         .toHaveLength(1);
                 });
 
                 it("equates new data", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(thingStatements);
-                    store.store.addQuadruples(thingIsAbout);
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(thingIsAbout);
                     expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
                         .toHaveLength(1);
                 });
@@ -94,7 +94,7 @@ describe("RDFStore", () => {
     describe("#flush", () => {
         it("is returns the work available", () => {
             const store = new RDFStore();
-            store.addQuadruples(thingStatements);
+            store.addQuads(thingStatements);
             const res = store.flush();
             expect(res.has(schemaT.value)).toBeTruthy();
             expect(res.has(schema.AboutPage.value)).toBeFalsy();
@@ -115,7 +115,7 @@ describe("RDFStore", () => {
     describe("#replaceMatches", () => {
         it("replaces a statement", () => {
             const store = new RDFStore();
-            store.addQuadruples(thingStatements);
+            store.addQuads(thingStatements);
 
             const quads: Quadruple[] = [
                 [schemaT, rdfs.label, rdfFactory.literal("Thing!"), ll.ns("replace")],
@@ -151,7 +151,7 @@ describe("RDFStore", () => {
         describe("ll:remove", () => {
             it("removes one", () => {
                 const store = new RDFStore();
-                store.addQuadruples(thingStatements);
+                store.addQuads(thingStatements);
 
                 expect(store.match(null, null, null)).toHaveLength(thingStatements.length);
 
@@ -167,7 +167,7 @@ describe("RDFStore", () => {
 
             it("removes many", () => {
                 const store = new RDFStore();
-                store.addQuadruples(thingStatements);
+                store.addQuads(thingStatements);
                 store.add(schemaT, rdfs.label, rdfFactory.literal("Thing gb", "en-gb"));
 
                 expect(store.match(null, null, null)).toHaveLength(thingStatements.length + 1);
@@ -186,7 +186,7 @@ describe("RDFStore", () => {
 
     describe("#getResourcePropertyRaw", () => {
         const store = new RDFStore();
-        store.addQuadruples([
+        store.addQuads([
             [ex("a"), ex("p"), ex("x"), defaultGraph],
             [ex("a"), ex("r"), ex("y"), defaultGraph],
 
@@ -237,7 +237,7 @@ describe("RDFStore", () => {
 
         it("returns the type for type statements", () => {
             const store = new RDFStore();
-            store.addQuadruples([
+            store.addQuads([
                 [ex("2"), rdf.type, ex("SomeClass"), rdfFactory.namedNode("rdf:defaultGraph")],
             ]);
 
@@ -253,7 +253,7 @@ describe("RDFStore", () => {
 
         it("returns the object for other statements", () => {
             const store = new RDFStore();
-            store.addQuadruples([
+            store.addQuads([
                 [ex("2"), ex("prop"), rdfFactory.literal("some prop"), defaultGraph],
             ]);
 
@@ -263,7 +263,7 @@ describe("RDFStore", () => {
 
         it("picks the preferred language", () => {
             const store = new RDFStore();
-            store.addQuadruples([
+            store.addQuads([
                 [ex("2"), ex("prop"), rdfFactory.literal("some prop", "de"), defaultGraph],
                 [ex("2"), ex("prop"), rdfFactory.literal("some prop", "nl"), defaultGraph],
                 [ex("2"), ex("prop"), rdfFactory.literal("some prop", "en"), defaultGraph],
@@ -292,7 +292,7 @@ describe("RDFStore", () => {
         it("removes the resource data", () => {
             const store = getBasicStore();
             const resource = example("test");
-            store.store.addQuadruples([
+            store.store.addQuads([
                 [resource, rdf.type, schema.Person, defaultGraph],
                 [resource, schema.name, rdfFactory.literal("Name"), defaultGraph],
                 [resource, schema.author, ex("3"), defaultGraph],
@@ -308,8 +308,8 @@ describe("RDFStore", () => {
             describe("big small", () => {
                 it("equal before", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(aboutIsThing);
-                    store.store.addQuadruples(thingStatements);
+                    store.store.addQuads(aboutIsThing);
+                    store.store.addQuads(thingStatements);
 
                     store.store.removeResource(schema.AboutPage);
 
@@ -321,8 +321,8 @@ describe("RDFStore", () => {
 
                 it("equal after", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(thingStatements);
-                    store.store.addQuadruples(aboutIsThing);
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(aboutIsThing);
 
                     store.store.removeResource(schemaT);
 
@@ -336,8 +336,8 @@ describe("RDFStore", () => {
             describe("small big", () => {
                 it("equal before", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(thingIsAbout);
-                    store.store.addQuadruples(thingStatements);
+                    store.store.addQuads(thingIsAbout);
+                    store.store.addQuads(thingStatements);
 
                     store.store.removeResource(schema.AboutPage);
 
@@ -349,8 +349,8 @@ describe("RDFStore", () => {
 
                 it("equal after", () => {
                     const store = getBasicStore();
-                    store.store.addQuadruples(thingStatements);
-                    store.store.addQuadruples(thingIsAbout);
+                    store.store.addQuads(thingStatements);
+                    store.store.addQuads(thingIsAbout);
 
                     store.store.removeResource(schemaT);
 
@@ -371,13 +371,13 @@ describe("RDFStore", () => {
         it("is more than zero work", () => {
             const store = new RDFStore();
             expect(store.workAvailable()).toEqual(0);
-            store.addQuadruples([...thingStatements, ...aboutIsThing]);
+            store.addQuads([...thingStatements, ...aboutIsThing]);
             expect(store.workAvailable()).toEqual(2);
         });
 
         it("is reset after #flush()", () => {
             const store = new RDFStore();
-            store.addQuadruples([...thingStatements, ...aboutIsThing]);
+            store.addQuads([...thingStatements, ...aboutIsThing]);
             expect(store.workAvailable()).toEqual(2);
             store.flush();
             expect(store.workAvailable()).toEqual(0);

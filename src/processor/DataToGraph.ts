@@ -84,25 +84,25 @@ export function processObject(subject: Node,
         || typeof datum === "number"
         || typeof datum === "boolean"
         || datum instanceof Date) {
-        store.add(subject, predicate, rdfFactory.literal(datum));
+        store.store.addField(subject.value, predicate.value, rdfFactory.literal(datum));
     } else if (isFile(datum)) {
         const f = uploadIRI();
         blobs.push([f, datum as File]);
-        store.add(subject, predicate, f);
+        store.store.addField(subject.value, predicate.value, f);
     } else if (isPlainObject(datum)) {
         const id = datum["@id"] as SomeNode | undefined || rdfFactory.blankNode();
         blobs = blobs.concat(processDataObject(id, datum, store, ns));
-        store.add(subject, predicate, id);
+        store.store.addField(subject.value, predicate.value, id);
     } else if (datum && datum.termType === TermType.NamedNode) {
-        store.add(subject, predicate, rdfFactory.namedNode(datum.value));
+        store.store.addField(subject.value, predicate.value, rdfFactory.namedNode(datum.value));
     } else if (datum && datum.termType === TermType.Literal) {
-        store.add(
-            subject,
-            predicate,
-            rdfFactory.literal(
-                datum.value,
-                (datum as Literal).language || rdfFactory.namedNode((datum as Literal).datatype.value),
-            ),
+        store.store.addField(
+          subject.value,
+          predicate.value,
+          rdfFactory.literal(
+            datum.value,
+            (datum as Literal).language || rdfFactory.namedNode((datum as Literal).datatype.value),
+          ),
         );
     } else if (datum !== null && datum !== undefined) {
         store.add(subject, predicate, rdfFactory.literal(datum));

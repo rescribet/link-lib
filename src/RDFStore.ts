@@ -96,17 +96,18 @@ export class RDFStore implements DeltaProcessor {
      * @param data Data to parse and add to the store.
      * @deprecated
      */
-    public addQuads(data: Quadruple[]): Quadruple[] {
+    public addQuads(data: Quadruple[]): void {
         if (!Array.isArray(data)) {
             throw new TypeError("An array of quads must be passed to addQuads");
         }
 
-        return data.map((q) => this.store.add(
-            q[QuadPosition.subject],
-            q[QuadPosition.predicate],
-            q[QuadPosition.object],
-            q[QuadPosition.graph],
-        ));
+        for (const q of data) {
+            this.store.store.addField(
+              q[QuadPosition.subject].value,
+              q[QuadPosition.predicate].value,
+              q[QuadPosition.object],
+            );
+        }
     }
 
     /** @deprecated */

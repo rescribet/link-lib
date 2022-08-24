@@ -7,7 +7,8 @@ import * as schema from "@ontologies/schema";
 
 import { getBasicStore } from "../../testUtilities";
 import { RecordState } from "../RecordState";
-import { DataSlice, StructuredStore } from "../StructuredStore";
+import { StructuredStore } from "../StructuredStore";
+import { DataSlice } from "../types";
 
 const example = createNS("http://example.com/");
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();
@@ -34,7 +35,7 @@ describe("StructuredStore", () => {
 
     it("bumps the journal entry", async () => {
         const store = getBasicStore();
-        store.store.addQuadruples([
+        store.store.addQuads([
             thingStatements[0],
         ]);
         store.store.flush();
@@ -42,7 +43,7 @@ describe("StructuredStore", () => {
 
         await new Promise((resolve): void => { window.setTimeout(resolve, 100); });
 
-        store.store.addQuadruples([
+        store.store.addQuads([
             thingStatements[1],
             thingStatements[2],
         ]);

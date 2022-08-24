@@ -67,60 +67,6 @@ describe("Schema", () => {
     });
 
     describe("when empty", () => {
-        describe("initializes with the correct statements", () => {
-            // const [_, schema] = blankSchema();
-            //
-            // TODO: Implement core rdf logic
-            // it("holds rdfs:Class to be an instance of rdfs:Class", () => {
-            //     expect(schema.isInstanceOf(rdfs.Class, rdfs.Class))
-            //         .toBeTruthy();
-            // });
-            //
-            // it("has rdfs:Resource as rdfs:Class", () => {
-            //     expect(schema.mineForTypes([rdfs.Resource.value]))
-            //         .toEqual([
-            //             rdfs.Resource.value,
-            //             rdfs.Class.value,
-            //         ]);
-            // });
-        });
-
-        describe("#addStatements", () => {
-            it("adds an empty array", () => {
-                expect(blankSchema()[0].addQuadruples([])).toHaveLength(0);
-            });
-
-            // it("adds ontology statements", () => {
-            //     const [store, schema] = blankSchema();
-            //
-            //     expect(schema.expand([schemaNS.Person.value])).toEqual([
-            //         schemaNS.Person.value,
-            //         rdfs.Resource.value,
-            //     ]);
-            //
-            //     store.add(schemaNS.Person, rdf.type, rdfs.Class);
-            //
-            //     expect(schema.expand([schemaNS.Person.value])).toEqual([
-            //         schemaNS.Person.value,
-            //         rdfs.Resource.value,
-            //         rdfs.Class.value,
-            //     ]);
-            // });
-
-            // it("doesn't add generic statements", () => {
-            //     const [store, schema] = blankSchema();
-            //     const s = resource1[1];
-            //
-            //     store.addQuadruples([s]);
-            //
-            //     expect(schema.holds(
-            //         s[QuadPosition.subject],
-            //         s[QuadPosition.predicate],
-            //         s[QuadPosition.object],
-            //     )).toBeFalsy();
-            // });
-        });
-
         describe("#mineForTypes", () => {
             it("returns the default ", () => {
                 const [, s] = blankSchema();
@@ -148,7 +94,7 @@ describe("Schema", () => {
                     rdfs.Resource.value,
                 ];
 
-                store.addQuadruples([
+                store.addQuads([
                     [schemaNS.CreativeWork, rdfs.subClassOf, schemaNS.Thing, defaultGraph],
                     [schemaNS.BlogPosting, rdfs.subClassOf, schemaNS.CreativeWork, defaultGraph],
                 ]);
@@ -162,7 +108,7 @@ describe("Schema", () => {
 
     describe("when filled", () => {
         const [store, schema] = blankSchema();
-        store.addQuadruples([
+        store.addQuads([
             [ex.ns("A"), rdfs.subClassOf, rdfs.Class, defaultGraph],
 
             [ex.ns("B"), rdfs.subClassOf, ex.ns("A"), defaultGraph],

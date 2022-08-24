@@ -44,7 +44,7 @@ export class Schema {
         this.expansionCache = {};
 
         for (let i = 0; i < Schema.vocabularies.length; i++) {
-            this.liveStore.addQuadruples(Schema.vocabularies[i].axioms);
+            this.liveStore.addQuads(Schema.vocabularies[i].axioms);
         }
 
         const preexisting = liveStore.getInternalStore().store.allRecords();
