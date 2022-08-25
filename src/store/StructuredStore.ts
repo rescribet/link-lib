@@ -122,22 +122,21 @@ export class StructuredStore {
   }
 
   public transition(recordId: Id, state: RecordState): void {
-    this.journal.transition(this.primary(recordId), state);
+    this.journal.transition(recordId, state);
   }
 
   public touch(recordId: Id): void {
-    this.journal.touch(this.primary(recordId));
+    this.journal.touch(recordId);
   }
 
   public deleteRecord(recordId: Id): void {
-    const primary = this.primary(recordId);
-    if (this.data[primary] === undefined) {
-      if (this.journal.get(primary).current !== RecordState.Absent) {
-        this.journal.transition(primary, RecordState.Absent);
+    if (this.data[recordId] === undefined) {
+      if (this.journal.get(recordId).current !== RecordState.Absent) {
+        this.journal.transition(recordId, RecordState.Absent);
       }
     } else {
-      this.journal.transition(primary, RecordState.Absent);
-      delete this.data[primary];
+      this.journal.transition(recordId, RecordState.Absent);
+      delete this.data[recordId];
     }
   }
 
@@ -336,22 +335,20 @@ export class StructuredStore {
   }
 
   public setRecord(recordId: Id, fields: FieldSet): DataRecord | undefined {
-    const primary = this.primary(recordId);
     this.initializeRecord(recordId);
-    this.data[primary] = {
+    this.data[recordId] = {
       ...fields,
-      _id: this.data[primary]._id,
+      _id: this.data[recordId]._id,
     };
-    this.journal.transition(primary, RecordState.Present);
-    return this.data[primary];
+    this.journal.transition(recordId, RecordState.Present);
+    return this.data[recordId];
   }
 
   private initializeRecord(recordId: Id): void {
-    const primary = this.primary(recordId);
-    if (this.data[primary] === undefined) {
-      this.journal.transition(primary, RecordState.Receiving);
-      this.data[primary] = {
-        _id: StructuredStore.toSomeNode(primary),
+    if (this.data[recordId] === undefined) {
+      this.journal.transition(recordId, RecordState.Receiving);
+      this.data[recordId] = {
+        _id: StructuredStore.toSomeNode(recordId),
       };
     }
   }

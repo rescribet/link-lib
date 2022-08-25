@@ -174,9 +174,8 @@ export class RDFStore implements DeltaProcessor {
     }
 
     public removeResource(subject: SomeNode): void {
-        const canSubj = this.primary(subject);
-        this.touch(canSubj);
-        (this.store as RDFAdapter).deleteRecord(subject);
+        this.touch(subject);
+        this.store.deleteRecord(subject);
     }
 
     /** @deprecated */

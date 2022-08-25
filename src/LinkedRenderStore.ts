@@ -600,7 +600,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public subscribe(registration: SubscriptionRegistrationBase<unknown>): () => void {
         registration.subscribedAt = Date.now();
         const subjectFilter = registration.subjectFilter
-          ?.map((s) => this.store.getInternalStore().store.primary(s));
+          ?.flatMap((s) => [s, this.store.getInternalStore().store.primary(s)]);
 
         if (typeof subjectFilter !== "undefined") {
             for (let i = 0, len = subjectFilter.length; i < len; i++) {
