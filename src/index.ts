@@ -18,6 +18,35 @@ export {
 } from "./processor/DataToGraph";
 export { transformers } from "./transformers/index";
 
+export {
+    Messages,
+    IdMessage,
+    FieldMessage,
+    FieldSetMessage,
+    ValueMessage,
+    Message,
+    SetRecordMessage,
+    SetFieldMessage,
+    AddFieldMessage,
+    DeleteFieldMessage,
+    DeleteFieldMatchingMessage,
+    DeleteAllFieldsMatchingMessage,
+    InvalidateRecordMessage,
+    InvalidateAllWithPropertyMessage,
+    setRecord,
+    addField,
+    setField,
+    deleteAllFieldsMatching,
+    deleteFieldMatching,
+    deleteField,
+    invalidateRecord,
+    invalidateAllWithProperty,
+} from "./messages/message";
+export {
+    MessageProcessor,
+    createMessageProcessor,
+} from "./messages/messageProcessor";
+
 export * from "./types";
 export {
     allRDFPropertyStatements,
@@ -57,6 +86,7 @@ export { FieldValue } from "./store/types";
 export { MultimapTerm } from "./store/types";
 export { FieldId } from "./store/types";
 export { Id } from "./store/types";
+export { RDFAdapter } from "./store/RDFAdapter";
 
 export {
     LinkedRenderStore,

@@ -18,4 +18,4 @@ export const mergeTerms = (
 
 export const isLocalId = (id: Id): boolean => id.startsWith("_:");
 
-export const isGlobalId = (id: Id): boolean => id.includes(":") && !id.startsWith("_:");
+export const isGlobalId = (id: Id): boolean => id.startsWith("/") || (id.includes(":") && !id.startsWith("_:"));

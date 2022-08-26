@@ -1,5 +1,6 @@
 import rdfFactory, {
-  DataFactory, isNode,
+  DataFactory,
+  isNode,
   NamedNode,
   Quad,
   QuadPosition,
@@ -9,6 +10,7 @@ import rdfFactory, {
 import { sameAs } from "@ontologies/owl";
 
 import { SomeNode } from "../types";
+import { isGlobalId, isLocalId } from "../utilities/slices";
 import { idField, StructuredStore } from "./StructuredStore";
 import { DataRecord, Id } from "./types";
 
@@ -175,7 +177,7 @@ export class RDFAdapter {
       return EMPTY_ST_ARR as unknown as Quadruple[];
     }
 
-    const subject = recordId.includes(":") && !recordId.startsWith("_:")
+    const subject = isGlobalId(recordId)
       ? factory.namedNode(recordId)
       : factory.blankNode(recordId);
 
@@ -204,7 +206,7 @@ export class RDFAdapter {
   public primary(node: SomeNode): SomeNode {
     const p = this.store.primary(node.value);
 
-    if (p.startsWith("_:")) {
+    if (isLocalId(p)) {
       return this.rdfFactory.blankNode(p);
     } else {
       return this.rdfFactory.namedNode(p);

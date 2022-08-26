@@ -174,6 +174,18 @@ describe("StructuredStore", () => {
         });
     });
 
+    describe("setField", () => {
+        const recordId = "/resource/addField";
+
+        it("normalises single element list values", () => {
+            const store = new StructuredStore();
+
+            expect(store.getField(recordId, "name")).toBeUndefined();
+            store.setField(recordId, "name", [rdfFactory.literal("Dee")]);
+            expect(store.getField(recordId, "name")).toEqual(rdfFactory.literal("Dee"));
+        });
+    });
+
     describe("getField", () => {
         const data: DataSlice = {
             "/resource/4": {

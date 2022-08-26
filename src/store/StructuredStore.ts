@@ -169,7 +169,9 @@ export class StructuredStore {
 
     this.setRecord(recordId, {
       ...current,
-      [field]: value,
+      [field]: (Array.isArray(value) && value.length === 1)
+        ? value[0]
+        : value,
     });
 
     return true;
@@ -232,8 +234,10 @@ export class StructuredStore {
       return;
     }
 
-    if (Array.isArray(current) && current.filter((s) => s !== value).length > 0) {
-      this.setField(recordId, field, current.filter((s) => s !== value));
+    const rest = Array.isArray(current) ? current.filter((s) => s !== value) : undefined;
+
+    if (rest !== undefined && rest.length > 0) {
+      this.setField(recordId, field, rest);
     } else {
       this.deleteField(recordId, field);
     }
