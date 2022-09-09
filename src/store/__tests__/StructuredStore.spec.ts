@@ -25,11 +25,18 @@ describe("StructuredStore", () => {
             "/resource/4": {
                 _id: rdfFactory.namedNode("/resource/4"),
             },
+            "_:b1": {
+                _id: rdfFactory.blankNode("_:b1"),
+            },
         };
         const changeHandler = jest.fn();
         const test = new StructuredStore(defaultGraph.value, data, changeHandler);
 
         expect(test.journal.get("/resource/4").current).toEqual(RecordState.Present);
+        expect(test.journal.get("_:b1").current).toEqual(RecordState.Present);
+
+        expect(test.journal.get("/resource/5").current).toEqual(RecordState.Absent);
+        expect(test.journal.get("_:b2").current).toEqual(RecordState.Absent);
     });
 
     it("bumps the journal entry", async () => {
@@ -183,6 +190,35 @@ describe("StructuredStore", () => {
             expect(store.getField(recordId, "name")).toBeUndefined();
             store.setField(recordId, "name", [rdfFactory.literal("Dee")]);
             expect(store.getField(recordId, "name")).toEqual(rdfFactory.literal("Dee"));
+        });
+
+        it("updates the journal", () => {
+            const store = new StructuredStore();
+
+            expect(store.getField(recordId, "name")).toBeUndefined();
+            expect(store.journal.get(recordId)).toEqual({
+                current: RecordState.Absent,
+                lastUpdate: -1,
+                previous: RecordState.Absent,
+            });
+
+            store.setField(recordId, "name", [rdfFactory.literal("Dee")]);
+
+            expect(store.journal.get(recordId).current).toEqual(RecordState.Present);
+            expect(store.journal.get(recordId).previous).toEqual(RecordState.Receiving);
+            expect(store.journal.get(recordId).lastUpdate).not.toEqual(-1);
+
+            expect(store.journal.get("_:b3")).toEqual({
+                current: RecordState.Absent,
+                lastUpdate: -1,
+                previous: RecordState.Absent,
+            });
+
+            store.setField("_:b3", "name", [rdfFactory.literal("Dee")]);
+
+            expect(store.journal.get("_:b3").current).toEqual(RecordState.Present);
+            expect(store.journal.get("_:b3").previous).toEqual(RecordState.Receiving);
+            expect(store.journal.get("_:b3").lastUpdate).not.toEqual(-1);
         });
     });
 

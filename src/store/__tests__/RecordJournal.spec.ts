@@ -1,7 +1,5 @@
 import "../../__tests__/useFactory";
 
-import rdfFactory from "@ontologies/core";
-
 import { RecordJournal } from "../RecordJournal";
 import { RecordState } from "../RecordState";
 import { RecordStatus } from "../RecordStatus";
@@ -20,14 +18,20 @@ describe("RecordJournal", () => {
         expect((journal as any).data).toBe(initial);
     });
 
-    it("does not journal local ids", () => {
+    it("updates local ids", () => {
         const journal = new RecordJournal(jest.fn());
 
-        expect(journal.get(rdfFactory.blankNode().value)).toEqual({
-            current: RecordState.Present,
+        expect(journal.get("_:b0")).toEqual({
+            current: RecordState.Absent,
             lastUpdate: -1,
-            previous: RecordState.Present,
+            previous: RecordState.Absent,
         });
+
+        journal.transition("_:b0", RecordState.Present);
+
+        expect(journal.get("_:b0").current).toEqual(RecordState.Present);
+        expect(journal.get("_:b0").previous).toEqual(RecordState.Absent);
+        expect(journal.get("_:b0").lastUpdate).not.toEqual(-1);
     });
 
     it("copy accepts a new callback", () => {

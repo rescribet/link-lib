@@ -1,16 +1,9 @@
-import { isLocalId } from "../utilities/slices";
 import { RecordState } from "./RecordState";
 import { RecordStatus } from "./RecordStatus";
 import { Id } from "./types";
 
 const doc = (recordId: Id): Id => {
     return recordId.split("#")[0];
-};
-
-const blankNodeStatus: RecordStatus = {
-    current: RecordState.Present,
-    lastUpdate: -1,
-    previous: RecordState.Present,
 };
 
 const absentStatus: RecordStatus = {
@@ -40,10 +33,6 @@ export class RecordJournal {
      * Will return an invalid status when passing a local id.
      */
     public get(recordId: Id): RecordStatus {
-        if (isLocalId(recordId)) {
-            return blankNodeStatus;
-        }
-
         return this.data[doc(recordId)] ?? absentStatus;
     }
 
