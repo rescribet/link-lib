@@ -19,6 +19,13 @@ export {
 export { transformers } from "./transformers/index";
 
 export {
+    SliceCreator,
+    RecordBuilder,
+    buildSlice,
+    SliceBuilder,
+} from "./datastrucures/DataSliceDSL";
+
+export {
     Messages,
     IdMessage,
     FieldMessage,
