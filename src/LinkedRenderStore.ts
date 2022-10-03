@@ -715,22 +715,31 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         }
         const subjects = Array.from(flushResult);
 
-        const subjectRegs = subjects
-            .flatMap((sId) => this.subjectSubscriptions[sId])
-            .filter((reg) => reg
-                && !reg.markedForDelete
-                && (reg.subjectFilter
-                    ? reg.subjectFilter.some((s) => subjects.includes(s))
-                    : true));
+        const subscriptions = subjects.flatMap((sId) => this.subjectSubscriptions[sId]);
+        const subjectRegs = new Set<SubscriptionRegistrationBase<unknown>>();
 
-        if (this.bulkSubscriptions.length === 0 && subjectRegs.length === 0) {
+        for (const reg of subscriptions) {
+            if (!reg || reg.markedForDelete) {
+                continue;
+            }
+
+            const allowed = reg.subjectFilter
+              ? reg.subjectFilter.some((s) => subjects.includes(s))
+              : true;
+
+            if (allowed) {
+                subjectRegs.add(reg);
+            }
+        }
+
+        if (this.bulkSubscriptions.length === 0 && subjectRegs.size === 0) {
             return Promise.resolve();
         }
 
         return this.currentBroadcast = new ProcessBroadcast({
             bulkSubscriptions: this.bulkSubscriptions.slice(),
             changedSubjects: subjects,
-            subjectSubscriptions: subjectRegs,
+            subjectSubscriptions: Array.from(subjectRegs),
             timeout: maxTimeout,
         }).run()
           .then(() => {

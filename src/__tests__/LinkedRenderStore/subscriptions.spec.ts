@@ -4,7 +4,7 @@ import * as schema from "@ontologies/schema";
 import { getBasicStore } from "../../testUtilities";
 import { SubscriptionRegistrationBase } from "../../types";
 
-import { schemaT } from "./fixtures";
+import { schemaCW, schemaT } from "./fixtures";
 
 jest.useFakeTimers("legacy");
 
@@ -126,6 +126,34 @@ describe("LinkedRenderStore", () => {
                 expect(callback).toHaveBeenCalledTimes(1);
                 expect(callback.mock.calls[0][0]).toEqual([
                     schemaT.value,
+                ]);
+                expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
+                expect(callback.mock.calls[0][1]).toBeLessThanOrEqual(Date.now());
+            });
+
+            it("calls the subscription once at most for multiple matches", async () => {
+                jest.useRealTimers();
+
+                const store = getBasicStore();
+                await store.forceBroadcast();
+                const callback = jest.fn();
+                const reg: SubscriptionRegistrationBase<any> = {
+                    callback,
+                    markedForDelete: false,
+                    subjectFilter: [schemaT.value],
+                };
+
+                store.lrs.subscribe(reg);
+                expect(callback).not.toHaveBeenCalled();
+
+                store.store.add(schemaT, schema.name, rdfFactory.literal("Thing"));
+                store.store.add(schemaCW, schema.name, rdfFactory.literal("CreativeWork"));
+                await store.forceBroadcast();
+
+                expect(callback).toHaveBeenCalledTimes(1);
+                expect(callback.mock.calls[0][0]).toEqual([
+                    schemaT.value,
+                    schemaCW.value,
                 ]);
                 expect(callback.mock.calls[0][1]).toBeGreaterThanOrEqual(reg.subscribedAt!);
                 expect(callback.mock.calls[0][1]).toBeLessThanOrEqual(Date.now());
