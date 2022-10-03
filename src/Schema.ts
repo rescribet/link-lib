@@ -41,8 +41,8 @@ export class Schema {
         });
         this.expansionCache = {};
 
-        for (let i = 0; i < Schema.vocabularies.length; i++) {
-            this.liveStore.addQuads(Schema.vocabularies[i].axioms);
+        for (const vocab of Schema.vocabularies) {
+            this.liveStore.addQuads(vocab.axioms);
         }
 
         const preexisting = liveStore.getInternalStore().store.allRecords();
@@ -107,15 +107,15 @@ export class Schema {
 
         const canonicalTypes: string[] = [];
         const lookupTypesExpanded = [];
-        for (let i = 0; i < lookupTypes.length; i++) {
-            lookupTypesExpanded.push(...this.allEquals(lookupTypes[i]));
+        for (const lookupType of lookupTypes) {
+            lookupTypesExpanded.push(...this.allEquals(lookupType));
         }
-        for (let i = 0; i < lookupTypesExpanded.length; i++) {
-            const canon = this.liveStore.getInternalStore().store.primary(lookupTypes[i]);
+        for (const lookupType of lookupTypesExpanded) {
+            const canon = this.liveStore.getInternalStore().store.primary(lookupType);
 
             if (!this.processedTypes.includes(canon)) {
-                for (let j = 0; j < Schema.vocabularies.length; j++) {
-                    Schema.vocabularies[j].processType(
+                for (const vocab of Schema.vocabularies) {
+                    vocab.processType(
                         canon,
                         this.getProcessingCtx(),
                     );
@@ -190,10 +190,10 @@ export class Schema {
     }
 
     private process(record: DataRecord): void {
-        for (let i = 0; i < Schema.vocabularies.length; i++) {
+        for (const vocab of Schema.vocabularies) {
             for (const [field, values] of Object.entries(record)) {
                 for (const value of normalizeType(values)) {
-                    Schema.vocabularies[i].processStatement(
+                    vocab.processStatement(
                         record._id.value,
                         field,
                         value,

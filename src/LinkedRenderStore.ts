@@ -230,8 +230,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             const segmentIds = ids;
             ids = [];
 
-            for (let j = 0; j < segmentIds.length; j++) {
-                const id = segmentIds[j];
+            for (const id of segmentIds) {
                 const quads = this.getResourcePropertyRaw(id, field);
 
                 if (i === last) {
@@ -484,8 +483,8 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public processDelta(delta: Quadruple[], expedite = false): Promise<void> {
         const processors = this.deltaProcessors;
-        for (let i = 0; i < processors.length; i++) {
-            processors[i].processDelta(delta);
+        for (const processor of processors) {
+            processor.processDelta(delta);
         }
 
         return this.broadcastWithExpedite(expedite);
@@ -505,11 +504,11 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             );
         };
 
-        for (let i = 0; i < components.length; i++) {
-            const innerRegs = normalizeType(components[i]);
+        for (const component of components) {
+            const innerRegs = normalizeType(component);
 
-            for (let j = 0; j < innerRegs.length; j++) {
-                registerItem(innerRegs[j]);
+            for (const registration of innerRegs) {
+                registerItem(registration);
             }
         }
     }

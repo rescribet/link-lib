@@ -217,8 +217,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
                 new Blob([rdfSerialization],
                     { type: F_NTRIPLES }),
             );
-            for (let i = 0; i < blobs.length; i++) {
-                data.append(blobs[i][0].toString(), blobs[i][1]);
+            for (const blob of blobs) {
+                data.append(blob[0].toString(), blob[1]);
             }
             opts.body = data;
         }
@@ -246,9 +246,9 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         const deltas = this.deltas;
         this.deltas = [];
 
-        for (let i = 0; i < deltas.length; i++) {
+        for (const delta of deltas) {
             try {
-                this.processDelta(deltas[i]);
+                this.processDelta(delta);
             } catch (e) {
                 this.report(e);
             }
@@ -401,9 +401,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     }
 
     public processDelta(delta: Array<Quadruple|void>): Quadruple[] {
-        let s: Quadruple|void;
-        for (let i = 0, len = delta.length; i < len; i++) {
-            s = delta[i];
+        for (const s of delta) {
             const subj = s ? s[0] : undefined;
 
             if (!s || !equals(s[QuadPosition.graph], ll.meta)) {
@@ -492,8 +490,8 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
     private execExecHeader(actionsHeader: string | null | undefined, args?: any): void {
         if (actionsHeader) {
             const actions = actionsHeader.split(", ");
-            for (let i = 0; i < actions.length; i++) {
-                this.dispatch(rdfFactory.namedNode(actions[i]), args);
+            for (const action of actions) {
+                this.dispatch(rdfFactory.namedNode(action), args);
             }
         }
     }

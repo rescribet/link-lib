@@ -132,8 +132,8 @@ export class RDFStore implements DeltaProcessor {
         const deltas = this.deltas;
         this.deltas = [];
 
-        for (let i = 0; i < deltas.length; i++) {
-            this.processDelta(deltas[i]);
+        for (const delta of deltas) {
+            this.processDelta(delta);
         }
 
         const changes = this.changedResources;
@@ -185,10 +185,10 @@ export class RDFStore implements DeltaProcessor {
 
     /** @deprecated */
     public replaceMatches(statements: Quadruple[]): Quadruple[] {
-        for (let i = 0; i < statements.length; i++) {
+        for (const quad of statements) {
             this.removeQuads(this.match(
-                statements[i][0],
-                statements[i][1],
+                quad[0],
+                quad[1],
                 null,
             ));
         }

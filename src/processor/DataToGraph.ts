@@ -114,13 +114,13 @@ export function processObject(subject: Node,
 function processDataObject(subject: Node, data: DataObject, store: RDFAdapter, ns?: NamespaceMap): NamedBlobTuple[] {
     let blobs: NamedBlobTuple[] = [];
     const keys = Object.keys(data);
-    for (let i = 0; i < keys.length; i++) {
-        if (keys[i] === "@id") { continue; }
-        const predicate = expandProperty(keys[i], ns || {});
-        const datum = data[keys[i]];
+    for (const key of keys) {
+        if (key === "@id") { continue; }
+        const predicate = expandProperty(key, ns || {});
+        const datum = data[key];
 
         if (predicate === undefined) {
-            throw new Error(`Unknown predicate ${keys[i]} given (for subject '${subject}').`);
+            throw new Error(`Unknown predicate ${key} given (for subject '${subject}').`);
         }
 
         blobs = blobs.concat(processObject(subject, predicate, datum, store, ns));

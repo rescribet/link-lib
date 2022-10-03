@@ -110,8 +110,8 @@ export function getTermBestLang(rawTerm: Term | Term[], langPrefs: string[]): Te
     if (rawTerm.length === 1) {
         return rawTerm[0];
     }
-    for (let i = 0; i < langPrefs.length; i++) {
-        const pIndex = rawTerm.findIndex((p) => "language" in p && (p as Literal).language === langPrefs[i]);
+    for (const langPref of langPrefs) {
+        const pIndex = rawTerm.findIndex((p) => "language" in p && (p as Literal).language === langPref);
         if (pIndex >= 0) {
             return rawTerm[pIndex];
         }

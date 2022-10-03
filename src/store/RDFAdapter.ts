@@ -119,8 +119,8 @@ export class RDFAdapter {
   public removeQuads(quads: Quadruple[]): this {
     // Ensure we don't loop over the array we're modifying.
     const toRemove = quads.slice();
-    for (let i = 0; i < toRemove.length; i++) {
-      this.remove(toRemove[i]);
+    for (const quad of toRemove) {
+      this.remove(quad);
     }
     return this;
   }

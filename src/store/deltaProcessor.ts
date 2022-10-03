@@ -52,10 +52,7 @@ export const deltaProcessor = (
         const replaceable: Quadruple[] = [];
         const removable: Quadruple[] = [];
 
-        let quad: Quadruple;
-        for (let i = 0, len = delta.length; i < len; i++) {
-            quad = delta[i];
-
+        for (const quad of delta) {
             if (!quad) {
                 continue;
             }

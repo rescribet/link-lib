@@ -43,18 +43,18 @@ export class ComponentStore<T> {
         }
         const registrations: Array<ComponentRegistration<T>> = [];
 
-        for (let t = 0; t < types.length; t++) {
-            assert(types[t]);
-            for (let p = 0; p < fields.length; p++) {
-                assert(fields[p]);
-                for (let top = 0; top < topologies.length; top++) {
-                    assert(topologies[top]);
+        for (const type of types) {
+            assert(type);
+            for (const field of fields) {
+                assert(field);
+                for (const topology of topologies) {
+                    assert(topology);
 
                     registrations.push({
                         component,
-                        property: fields[p],
-                        topology: topologies[top],
-                        type: types[t],
+                        property: field,
+                        topology,
+                        type,
                     });
                 }
             }
@@ -178,10 +178,10 @@ export class ComponentStore<T> {
     }
 
     private classMatch(possibleClasses: Id[], types: Id[], fields: Id[], topology: Id): T | undefined {
-        for (let i = 0; i < fields.length; i++) {
+        for (const field of fields) {
             const bestClass = this.bestClass(possibleClasses, types);
             const component = bestClass && this.lookup(
-              fields[i],
+              field,
               bestClass,
               topology,
             );
@@ -195,8 +195,8 @@ export class ComponentStore<T> {
     }
 
     private defaultMatch(fields: Id[], topology: Id, defaultType: Id): T | undefined {
-        for (let i = 0; i < fields.length; i++) {
-            const component = this.lookup(fields[i], defaultType, topology);
+        for (const field of fields) {
+            const component = this.lookup(field, defaultType, topology);
             if (component) {
                 return component;
             }
@@ -206,9 +206,9 @@ export class ComponentStore<T> {
     }
 
     private exactMatch(types: Id[], fields: Id[], topology: Id): T | undefined {
-        for (let p = 0; p < fields.length; p++) {
-            for (let t = 0; t < types.length; t++) {
-                const exact = this.lookup(fields[p], types[t], topology);
+        for (const field of fields) {
+            for (const type of types) {
+                const exact = this.lookup(field, type, topology);
                 if (exact !== undefined) {
                     return exact;
                 }
@@ -269,18 +269,16 @@ export class ComponentStore<T> {
     private registeredClasses(fields: Id[], topology: Id): Id[] {
         const classes = [rdfs.Resource.value];
 
-        for (let i = 0; i < fields.length; i++) {
-            const field = fields[i];
-
+        for (const field of fields) {
             if (typeof this.registrations[field] === "undefined") {
                 continue;
             }
 
             const types = Object.keys(this.registrations[field]);
-            for (let j = 0; j < types.length; j++) {
-                const compType = this.lookup(field, types[j], topology);
+            for (const type of types) {
+                const compType = this.lookup(field, type, topology);
                 if (compType !== undefined) {
-                    classes.push(types[j]);
+                    classes.push(type);
                 }
             }
         }
