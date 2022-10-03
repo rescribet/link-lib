@@ -1,8 +1,8 @@
-import rdfFactory, { SomeTerm, TermType } from "@ontologies/core";
+import rdfFactory, { SomeTerm } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
-import { DataRecord, FieldSet, Id } from "../datastrucures/DataSlice";
+import { DataRecord, DataSlice, FieldSet, Id } from "../datastrucures/DataSlice";
 import { DeepRecord, DeepRecordFieldValue } from "../datastrucures/DeepSlice";
 import { FieldId, FieldValue, MultimapTerm } from "../datastrucures/Fields";
 import { SomeNode } from "../types";
@@ -11,6 +11,7 @@ import { normalizeType } from "../utilities";
 import { RecordJournal } from "./RecordJournal";
 import { RecordState } from "./RecordState";
 import { RecordStatus } from "./RecordStatus";
+import { findAllReferencingIds } from "./StructuredStore/references";
 
 export const idField = "_id";
 const member = rdfs.member.value;
@@ -79,7 +80,7 @@ export class StructuredStore {
   public base: string;
 
   /** @private */
-  public data: Record<Id, DataRecord>;
+  public data: DataSlice;
 
   /** @private */
   public journal: RecordJournal;
@@ -94,7 +95,7 @@ export class StructuredStore {
    */
   constructor(
       base: string = "rdf:defaultGraph",
-      data: Record<Id, DataRecord> | undefined = {},
+      data: DataSlice | undefined = {},
       onChange: (docId: string) => void = (): void => undefined,
   ) {
     this.base = base;
@@ -249,36 +250,7 @@ export class StructuredStore {
    * Find all records which reference this given [recordId]
    */
   public references(recordId: Id): Id[] {
-    const references = [];
-    const data = this.data;
-
-    for (const rId in data) {
-      if (!data.hasOwnProperty(rId)) {
-        continue;
-      }
-
-      const record = data[rId];
-      for (const field in record) {
-        if (!record.hasOwnProperty(field) || field === idField) {
-          continue;
-        }
-
-        const values = record[field];
-        if (Array.isArray(values)) {
-          for (const value of values) {
-            if (value.termType !== TermType.Literal && value.value === recordId) {
-              references.push(rId);
-            }
-          }
-        } else {
-          if (values.termType !== TermType.Literal && values.value === recordId) {
-            references.push(rId);
-          }
-        }
-      }
-    }
-
-    return references;
+    return findAllReferencingIds(this.data, recordId);
   }
 
   /**

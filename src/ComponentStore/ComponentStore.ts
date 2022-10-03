@@ -93,51 +93,9 @@ export class ComponentStore<T> {
             return cached;
         }
 
-        for (let p = 0; p < fields.length; p++) {
-            for (let t = 0; t < oTypes.length; t++) {
-                const exact = this.lookup(fields[p], oTypes[t], topology);
-                if (exact !== undefined) {
-                    return this.lookupCache.add(exact, key);
-                }
-            }
-        }
+        const match = this.findMatch(oTypes, fields, topology, defaultType);
 
-        const possibleClasses = this.registeredClasses(fields, topology);
-        if (possibleClasses.length === 0) {
-            if (topology === DEFAULT_TOPOLOGY.value) {
-                return this.lookupCache.add(null, key);
-            }
-            const foundComponent = this.getRenderComponent(
-                oTypes,
-                fields,
-                DEFAULT_TOPOLOGY.value,
-                defaultType,
-            );
-            if (!foundComponent) {
-                return this.lookupCache.add(null, key);
-            }
-
-            return this.lookupCache.add(foundComponent, key);
-        }
-        for (let i = 0; i < fields.length; i++) {
-            const bestClass = this.bestClass(possibleClasses, oTypes);
-            const component = bestClass && this.lookup(
-                fields[i],
-                bestClass,
-                topology,
-            );
-            if (component) {
-                return this.lookupCache.add(component, key);
-            }
-        }
-        for (let i = 0; i < fields.length; i++) {
-            const component = this.lookup(fields[i], defaultType, topology);
-            if (component) {
-                return this.lookupCache.add(component, key);
-            }
-        }
-
-        return this.lookupCache.add(null, key);
+        return this.lookupCache.add(match, key);
     }
 
     /**
@@ -219,7 +177,90 @@ export class ComponentStore<T> {
         return components.find((c) => chain.indexOf(c) > 0);
     }
 
-    // interface ComponentMapping<T> { [type: string]: { [obj: string]: { [topology: string]: T } }; }
+    private classMatch(possibleClasses: Id[], types: Id[], fields: Id[], topology: Id): T | undefined {
+        for (let i = 0; i < fields.length; i++) {
+            const bestClass = this.bestClass(possibleClasses, types);
+            const component = bestClass && this.lookup(
+              fields[i],
+              bestClass,
+              topology,
+            );
+
+            if (component) {
+                return component;
+            }
+        }
+
+        return undefined;
+    }
+
+    private defaultMatch(fields: Id[], topology: Id, defaultType: Id): T | undefined {
+        for (let i = 0; i < fields.length; i++) {
+            const component = this.lookup(fields[i], defaultType, topology);
+            if (component) {
+                return component;
+            }
+        }
+
+        return undefined;
+    }
+
+    private exactMatch(types: Id[], fields: Id[], topology: Id): T | undefined {
+        for (let p = 0; p < fields.length; p++) {
+            for (let t = 0; t < types.length; t++) {
+                const exact = this.lookup(fields[p], types[t], topology);
+                if (exact !== undefined) {
+                    return exact;
+                }
+            }
+        }
+
+        return undefined;
+    }
+
+    private findMatch(types: Id[], fields: Id[], topology: Id, defaultType: Id): T | null {
+        let match: T | null | undefined = this.exactMatch(types, fields, topology);
+        if (match !== undefined) {
+            return match;
+        }
+
+        const possibleClasses = this.registeredClasses(fields, topology);
+
+        if (possibleClasses.length === 0) {
+            return this.noClassesMatch(types, fields, topology, defaultType);
+        }
+
+        match = this.classMatch(possibleClasses, types, fields, topology);
+        if (match !== undefined) {
+            return match;
+        }
+
+        match = this.defaultMatch(fields, topology, defaultType);
+        if (match !== undefined) {
+            return match;
+        }
+
+        return null;
+    }
+
+    private noClassesMatch(types: Id[], fields: Id[], topology: Id, defaultType: Id): T | null {
+        if (topology === DEFAULT_TOPOLOGY.value) {
+            return null;
+        }
+
+        const foundComponent = this.getRenderComponent(
+          types,
+          fields,
+          DEFAULT_TOPOLOGY.value,
+          defaultType,
+        );
+
+        if (foundComponent) {
+            return foundComponent;
+        }
+
+        return null;
+    }
 
     /**
      * Returns a list of classes which have registrations for a combination of {fields} and {topology}.

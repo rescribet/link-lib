@@ -19,6 +19,7 @@ export {
 export { transformers } from "./transformers/index";
 
 export {
+    OptionalIdOrNode,
     SliceCreator,
     RecordBuilder,
     buildSlice,
@@ -80,6 +81,11 @@ export {
 } from "./TypedRecord";
 export { RecordState } from "./store/RecordState";
 export { RecordStatus } from "./store/RecordStatus";
+export {
+    hasReferenceTo,
+    fieldReferences,
+    findAllReferencingIds,
+} from "./store/StructuredStore/references";
 export {
     idField,
     StructuredStore,

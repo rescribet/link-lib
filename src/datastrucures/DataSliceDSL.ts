@@ -1,8 +1,11 @@
 import rdfFactory, { SomeTerm } from "@ontologies/core";
+import { idToValue } from "../factoryHelpers";
 
 import { SomeNode } from "../types";
 
 import { DataRecord, DataSlice } from "./DataSlice";
+
+export type OptionalIdOrNode = string | SomeNode | undefined;
 
 export interface RecordBuilder {
   /** Sets the {value} of {field} on the current record */
@@ -12,10 +15,18 @@ export interface RecordBuilder {
 }
 
 export interface SliceBuilder {
-  record(id?: string | SomeNode | undefined): RecordBuilder;
+  record(id?: OptionalIdOrNode): RecordBuilder;
 }
 
 export type SliceCreator = (slice: SliceBuilder) => void;
+
+const stringIdOrNewLocal = (id: OptionalIdOrNode): string => {
+  if (id === undefined) {
+    return rdfFactory.blankNode().value;
+  }
+
+  return typeof id === "string" ? id : id.value;
+};
 
 export const buildSlice = (creator: SliceCreator): DataSlice => {
   if (creator === undefined) {
@@ -25,14 +36,9 @@ export const buildSlice = (creator: SliceCreator): DataSlice => {
   const slice: DataSlice = {};
 
   const builder: SliceBuilder = {
-    record(id: string | SomeNode | undefined): RecordBuilder {
-      const stringId = id === undefined
-        ? rdfFactory.blankNode().value
-        : (typeof id === "string" ? id : id.value);
-
-      const termId = stringId.startsWith("_:")
-        ? rdfFactory.blankNode(stringId)
-        : rdfFactory.namedNode(stringId);
+    record(id: OptionalIdOrNode): RecordBuilder {
+      const stringId = stringIdOrNewLocal(id);
+      const termId = idToValue(stringId);
 
       const record: DataRecord = {
         _id: termId,
