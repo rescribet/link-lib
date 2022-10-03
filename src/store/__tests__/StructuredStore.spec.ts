@@ -2,12 +2,12 @@ import rdfFactory, { createNS, NamedNode, Quadruple } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 import * as schema from "@ontologies/schema";
-import "../../__tests__/useFactory";
 
+import "../../__tests__/useFactory";
+import { DataSlice } from "../../datastrucures/DataSlice";
 import { getBasicStore } from "../../testUtilities";
 import { RecordState } from "../RecordState";
 import { StructuredStore } from "../StructuredStore";
-import { DataSlice } from "../types";
 
 const example = createNS("http://example.com/");
 const defaultGraph: NamedNode = rdfFactory.defaultGraph();

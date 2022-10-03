@@ -7,6 +7,7 @@ import {
 } from "@ontologies/core";
 
 import { ComponentStore } from "./ComponentStore/ComponentStore";
+import { DataRecord, Id } from "./datastrucures/DataSlice";
 import { LinkedDataAPI } from "./LinkedDataAPI";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
@@ -14,7 +15,6 @@ import { RequestInitGenerator } from "./processor/RequestInitGenerator";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { RDFAdapter } from "./store/RDFAdapter";
-import { DataRecord, Id } from "./store/types";
 import { DisjointSet } from "./utilities/DisjointSet";
 
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;

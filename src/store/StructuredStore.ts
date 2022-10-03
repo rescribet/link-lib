@@ -2,21 +2,15 @@ import rdfFactory, { SomeTerm, TermType } from "@ontologies/core";
 import * as rdf from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
+import { DataRecord, FieldSet, Id } from "../datastrucures/DataSlice";
+import { DeepRecord, DeepRecordFieldValue } from "../datastrucures/DeepSlice";
+import { FieldId, FieldValue, MultimapTerm } from "../datastrucures/Fields";
 import { SomeNode } from "../types";
 import { normalizeType } from "../utilities";
+
 import { RecordJournal } from "./RecordJournal";
 import { RecordState } from "./RecordState";
 import { RecordStatus } from "./RecordStatus";
-import {
-  DataRecord,
-  DeepRecord,
-  DeepRecordFieldValue,
-  FieldId,
-  FieldSet,
-  FieldValue,
-  Id,
-  MultimapTerm,
-} from "./types";
 
 export const idField = "_id";
 const member = rdfs.member.value;

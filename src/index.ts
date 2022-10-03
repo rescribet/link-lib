@@ -84,15 +84,6 @@ export {
     idField,
     StructuredStore,
 } from "./store/StructuredStore";
-export { DataSlice } from "./store/types";
-export { DeepRecord } from "./store/types";
-export { DeepRecordFieldValue } from "./store/types";
-export { DataRecord } from "./store/types";
-export { FieldSet } from "./store/types";
-export { FieldValue } from "./store/types";
-export { MultimapTerm } from "./store/types";
-export { FieldId } from "./store/types";
-export { Id } from "./store/types";
 export { RDFAdapter } from "./store/RDFAdapter";
 
 export {
@@ -100,3 +91,12 @@ export {
 };
 
 export default LinkedRenderStore; // tslint:disable-line no-default-export
+export { FieldValue } from "./datastrucures/Fields";
+export { DataSlice } from "./datastrucures/DataSlice";
+export { DataRecord } from "./datastrucures/DataSlice";
+export { FieldSet } from "./datastrucures/DataSlice";
+export { Id } from "./datastrucures/DataSlice";
+export { DeepRecord } from "./datastrucures/DeepSlice";
+export { DeepRecordFieldValue } from "./datastrucures/DeepSlice";
+export { MultimapTerm } from "./datastrucures/Fields";
+export { FieldId } from "./datastrucures/Fields";

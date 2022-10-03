@@ -1,6 +1,8 @@
 import rdfFactory, { SomeTerm } from "@ontologies/core";
+
 import { SomeNode } from "../types";
-import { DataRecord, DataSlice } from "../store/types";
+
+import { DataRecord, DataSlice } from "./DataSlice";
 
 export interface RecordBuilder {
   /** Sets the {value} of {field} on the current record */

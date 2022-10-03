@@ -3,8 +3,8 @@ import "../../__tests__/useFactory";
 import rdfFactory, { TermType } from "@ontologies/core";
 import * as schema from "@ontologies/schema";
 
+import { DataSlice } from "../DataSlice";
 import { buildSlice } from "../DataSliceDSL";
-import { DataSlice } from "../../store/types";
 
 describe("DataSliceDSL", () => {
   describe("id", () => {

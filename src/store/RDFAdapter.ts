@@ -9,10 +9,11 @@ import rdfFactory, {
 } from "@ontologies/core";
 import { sameAs } from "@ontologies/owl";
 
+import { DataRecord, Id } from "../datastrucures/DataSlice";
 import { SomeNode } from "../types";
 import { isGlobalId, isLocalId } from "../utilities/slices";
+
 import { idField, StructuredStore } from "./StructuredStore";
-import { DataRecord, Id } from "./types";
 
 const EMPTY_ST_ARR: ReadonlyArray<Quad> = Object.freeze([]);
 

@@ -1,6 +1,8 @@
 import { SomeTerm } from "@ontologies/core";
 
-import { Id, MultimapTerm } from "../store/types";
+import { Id } from "../datastrucures/DataSlice";
+import { MultimapTerm } from "../datastrucures/Fields";
+
 import { normalizeType } from "../utilities";
 
 export const mergeTerms = (

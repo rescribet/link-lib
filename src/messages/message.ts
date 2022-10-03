@@ -1,5 +1,5 @@
 import { SomeTerm } from "@ontologies/core";
-import { FieldSet } from "../store/types";
+import { FieldSet } from "../datastrucures/DataSlice";
 
 export type Messages = SetRecordMessage
   | SetFieldMessage

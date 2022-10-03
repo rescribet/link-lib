@@ -1,10 +1,10 @@
 import { ComponentStore } from "./ComponentStore/ComponentStore";
 import { createStore } from "./createStore";
+import { Id } from "./datastrucures/DataSlice";
 import { LinkedRenderStore } from "./LinkedRenderStore";
 import { DataProcessor } from "./processor/DataProcessor";
 import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
-import { Id } from "./store/types";
 import {
     DataProcessorOpts,
     LinkedRenderStoreOptions,

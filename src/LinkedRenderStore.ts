@@ -14,6 +14,8 @@ import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
 
 import { ComponentStore } from "./ComponentStore/ComponentStore";
+import { DataRecord, Id } from "./datastrucures/DataSlice";
+import { DeepRecord } from "./datastrucures/DeepSlice";
 import { equals, value } from "./factoryHelpers";
 import { APIFetchOpts, LinkedDataAPI } from "./LinkedDataAPI";
 import { ProcessBroadcast } from "./ProcessBroadcast";
@@ -23,7 +25,6 @@ import { RDFStore } from "./RDFStore";
 import { Schema } from "./Schema";
 import { RecordState } from "./store/RecordState";
 import { RecordStatus } from "./store/RecordStatus";
-import { DataRecord, DeepRecord, Id } from "./store/types";
 import { TypedRecord } from "./TypedRecord";
 import {
     ComponentRegistration,

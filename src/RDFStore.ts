@@ -9,6 +9,7 @@ import rdfFactory, {
 import * as ld from "@ontologies/ld";
 import * as rdf from "@ontologies/rdf";
 
+import { DataRecord, Id } from "./datastrucures/DataSlice";
 import { equals } from "./factoryHelpers";
 import ll from "./ontology/ll";
 import {
@@ -18,7 +19,6 @@ import {
 } from "./rdf";
 import { deltaProcessor } from "./store/deltaProcessor";
 import { RDFAdapter } from "./store/RDFAdapter";
-import { DataRecord, Id } from "./store/types";
 import { DeltaProcessor, SomeNode, StoreProcessor } from "./types";
 import { getPropBestLang, normalizeType, sortByBestLang } from "./utilities";
 

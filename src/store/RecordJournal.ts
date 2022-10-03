@@ -1,6 +1,7 @@
+import { Id } from "../datastrucures/DataSlice";
+
 import { RecordState } from "./RecordState";
 import { RecordStatus } from "./RecordStatus";
-import { Id } from "./types";
 
 const doc = (recordId: Id): Id => {
     return recordId.split("#")[0];

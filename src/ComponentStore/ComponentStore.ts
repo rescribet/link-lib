@@ -1,9 +1,9 @@
 import { NamedNode } from "@ontologies/core";
 import * as rdfs from "@ontologies/rdfs";
 
+import { Id } from "../datastrucures/DataSlice";
 import ll from "../ontology/ll";
 import { Schema } from "../Schema";
-import { Id } from "../store/types";
 import { ComponentMapping, ComponentRegistration } from "../types";
 import { DEFAULT_TOPOLOGY } from "../utilities/constants";
 

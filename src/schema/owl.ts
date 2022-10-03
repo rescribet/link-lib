@@ -1,7 +1,7 @@
 import { SomeTerm } from "@ontologies/core";
 import { sameAs } from "@ontologies/owl";
 
-import { Id } from "../store/types";
+import { Id } from "../datastrucures/DataSlice";
 import { VocabularyProcessingContext, VocabularyProcessor } from "../types";
 
 const nsOWLsameAs = sameAs.value;

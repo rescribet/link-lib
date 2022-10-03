@@ -1,9 +1,9 @@
 import * as rdfx from "@ontologies/rdf";
 import * as rdfs from "@ontologies/rdfs";
 
+import { DataRecord, Id } from "./datastrucures/DataSlice";
 import { OWL } from "./schema/owl";
 import { RDFS } from "./schema/rdfs";
-import { DataRecord, Id } from "./store/types";
 import { normalizeType } from "./utilities";
 import { DisjointSet } from "./utilities/DisjointSet";
 
