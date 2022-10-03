@@ -70,16 +70,6 @@ describe("RDFStore", () => {
                         .toHaveLength(1);
                 });
             });
-
-            describe("small big", () => {
-                it("equates existing data", () => {
-                    const store = getBasicStore();
-                    store.store.addQuads(thingIsAbout);
-                    store.store.addQuads(thingStatements);
-                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
-                        .toHaveLength(1);
-                });
-            });
         });
     });
 
@@ -298,19 +288,6 @@ describe("RDFStore", () => {
 
         describe("owl:sameAs", () => {
             describe("big small", () => {
-                it("equal before", () => {
-                    const store = getBasicStore();
-                    store.store.addQuads(aboutIsThing);
-                    store.store.addQuads(thingStatements);
-
-                    store.store.removeResource(schema.AboutPage);
-
-                    expect(store.store.match(schema.AboutPage, rdfs.label, rdfFactory.literal("Thing.")))
-                        .toHaveLength(0);
-                    expect(store.store.match(schemaT, rdfs.label, rdfFactory.literal("Thing.")))
-                        .toHaveLength(0);
-                });
-
                 it("equal after", () => {
                     const store = getBasicStore();
                     store.store.addQuads(thingStatements);
