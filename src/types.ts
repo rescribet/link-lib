@@ -74,7 +74,6 @@ export interface LinkedRenderStoreOptions<T, API extends LinkedDataAPI = DataPro
     defaultType?: NamedNode | undefined;
     dispatch?: MiddlewareActionHandler;
     mapping?: ComponentStore<T> | undefined;
-    namespaces?: NamespaceMap | undefined;
     rehydration?: {} | undefined;
     report?: ErrorReporter;
     schema?: Schema | undefined;

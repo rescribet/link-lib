@@ -38,7 +38,6 @@ import {
     LinkedActionResponse,
     LinkedRenderStoreOptions,
     MiddlewareActionHandler,
-    NamespaceMap,
     ResourceQueueItem,
     SomeNode,
     SomeRequestStatus,
@@ -88,12 +87,6 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public defaultType: NamedNode = schema.Thing;
     public deltaProcessors: DeltaProcessor[];
     public report: ErrorReporter;
-    /**
-     * Can aid in parsing and creating prefix mapping strings.
-     * @deprecated Please use @ontologies/<namespace> packages in your programs, canonicalizing certain
-     *   prefixes will lead to brittle and hard to refactor code!
-     */
-    public namespaces: NamespaceMap = {};
 
     public api: API;
     public mapping: ComponentStore<T>;
@@ -138,7 +131,6 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
             this.dispatch = opts.dispatch;
         }
         this.defaultType = opts.defaultType || schema.Thing;
-        this.namespaces = opts.namespaces || {};
         this.schema = opts.schema || new Schema(this.store);
         this.mapping = opts.mapping || new ComponentStore(this.schema);
         this.resourceQueue = [];
@@ -175,7 +167,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param data An object to send in the body when a non-safe method is used.
      */
     public execActionByIRI(subject: SomeNode, data?: DataObject): Promise<LinkedActionResponse> {
-        const preparedData = dataToGraphTuple(data || {}, this.namespaces);
+        const preparedData = dataToGraphTuple(data || {});
         return this
             .api
             .execActionByIRI(subject, preparedData)
