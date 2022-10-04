@@ -1,4 +1,4 @@
-import rdfFactory, { NamedNode, QuadPosition, Quadruple, TermType } from "@ontologies/core";
+import rdfFactory, { isNode, NamedNode, QuadPosition, Quadruple, TermType } from "@ontologies/core";
 import * as ld from "@ontologies/ld";
 import * as rdf from "@ontologies/rdf";
 import * as schema from "@ontologies/schema";
@@ -182,11 +182,11 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
 
         const target = this.store.getResourceProperty(subject, schema.target);
 
-        if (!target || target.termType === "Collection" || target.termType === TermType.Literal) {
+        if (!isNode(target)) {
             throw new ProcessorError(MSG_INCORRECT_TARGET);
         }
 
-        const urls = this.store.getResourceProperty(target as SomeNode, schema.url);
+        const urls = this.store.getResourceProperty(target, schema.url);
         const url = Array.isArray(urls) ? urls[0] : urls;
         if (!url) {
             throw new ProcessorError(MSG_URL_UNDEFINED);
@@ -194,7 +194,7 @@ export class DataProcessor implements LinkedDataAPI, DeltaProcessor {
         if (url.termType !== TermType.NamedNode) {
             throw new ProcessorError(MSG_URL_UNRESOLVABLE);
         }
-        const targetMethod = this.store.getResourceProperty(target as SomeNode, schema.httpMethod);
+        const targetMethod = this.store.getResourceProperty(target, schema.httpMethod);
         const method = typeof targetMethod !== "undefined" ? targetMethod.value : "GET";
         const opts = this.requestInitGenerator.generate(method, this.acceptForHost(url));
 

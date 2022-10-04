@@ -24,7 +24,7 @@ const noValueError = (obj: any): void => {
 
 /** @internal */
 export const id = rdfFactory.supports[Feature.idStamp]
-    ? (obj?: Term | Quad | any): number => (obj as any)?.id || noIdError(obj)
+    ? (obj?: Term | Quad | any): number => obj?.id || noIdError(obj)
     : (obj?: Term | Quad | any): number => rdfFactory.id(obj);
 
 /** @internal */

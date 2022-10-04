@@ -255,7 +255,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
 
         const remaining = path.slice();
         const pred = remaining.shift();
-        const props = this.getResourceProperties(subject, pred!);
+        const props = this.getResourceProperties(subject, pred);
 
         if (props.length === 0) {
             return [];
@@ -448,7 +448,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public getStatus(iri: Node): SomeRequestStatus {
         if (iri.termType === TermType.BlankNode) {
-            return emptyRequest as EmptyRequestStatus;
+            return emptyRequest;
         }
 
         if (this.resourceQueue.find(([resource]) => equals(resource, iri))) {
@@ -543,7 +543,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         topology?: NamedNode,
     ): T | null | undefined {
         return this.getComponentForProperty(
-            this.store.getResourceProperties(subject, rdf.type) as NamedNode[],
+            this.store.getResourceProperties(subject, rdf.type),
             predicate,
             topology || DEFAULT_TOPOLOGY,
         );
@@ -562,7 +562,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         topology?: NamedNode,
     ): T | null | undefined {
         return this.getComponentForProperty(
-            this.store.getResourceProperties(subject, rdf.type) as NamedNode[],
+            this.store.getResourceProperties(subject, rdf.type),
             RENDER_CLASS_NAME,
             topology || DEFAULT_TOPOLOGY,
         );
