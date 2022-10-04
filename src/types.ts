@@ -17,6 +17,10 @@ import { Schema } from "./Schema";
 import { RDFAdapter } from "./store/RDFAdapter";
 import { DisjointSet } from "./utilities/DisjointSet";
 
+export type Optional<T> = T | null | undefined;
+
+export type OneOrMoreOrNothing<T> = T | T[] | undefined;
+
 export type SubscriptionCallback<T> = (v: T, lastUpdateAt?: number) => void;
 
 export type Indexable = number | string;

@@ -31,13 +31,14 @@ import {
     DataObject,
     DeltaProcessor,
     Dispatcher,
-    EmptyRequestStatus,
     ErrorReporter,
     FetchOpts,
     LazyNNArgument,
     LinkedActionResponse,
     LinkedRenderStoreOptions,
     MiddlewareActionHandler,
+    OneOrMoreOrNothing,
+    Optional,
     ResourceQueueItem,
     SomeNode,
     SomeRequestStatus,
@@ -287,7 +288,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public getComponentForProperty(type: NamedNode | NamedNode[] | undefined = this.defaultType,
                                    predicate: NamedNode | NamedNode[],
-                                   topology: NamedNode = DEFAULT_TOPOLOGY): T | null | undefined {
+                                   topology: NamedNode = DEFAULT_TOPOLOGY): Optional<T> {
         if (type === undefined || (Array.isArray(type) && type.length === 0)) {
             return undefined;
         }
@@ -314,7 +315,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public getComponentForType(
         type: NamedNode | NamedNode[],
         topology: NamedNode = DEFAULT_TOPOLOGY,
-    ): T | null | undefined {
+    ): Optional<T> {
         return this.getComponentForProperty(type, RENDER_CLASS_NAME, topology);
     }
 
@@ -385,7 +386,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      * @param {Node | Node[]} property
      * @return {Statement[]} All the statements of {property} on {subject}, or an empty array when none are present.
      */
-    public getResourcePropertyRaw(subject: Node | undefined, property: Node | Node[] | undefined): Quadruple[] {
+    public getResourcePropertyRaw(subject: Node | undefined, property: OneOrMoreOrNothing<Node>): Quadruple[] {
         if (typeof subject === "undefined" || typeof property === "undefined") {
             return [];
         }
@@ -404,7 +405,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public getResourceProperties<TT extends Term = SomeTerm>(
       subject: Node | undefined,
-      property: Node | Node[] | undefined,
+      property: OneOrMoreOrNothing<Node>,
     ): TT[] {
         if (typeof subject === "undefined" || typeof property === "undefined") {
            return [];
@@ -427,7 +428,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
      */
     public getResourceProperty<TT extends Term = SomeTerm>(
       subject: Node | undefined,
-      property: Node | Node[] | undefined,
+      property: OneOrMoreOrNothing<Node>,
     ): TT | undefined {
         if (typeof subject === "undefined" || typeof property === "undefined") {
             return undefined;
@@ -541,7 +542,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
         subject: Node,
         predicate: NamedNode | NamedNode[],
         topology?: NamedNode,
-    ): T | null | undefined {
+    ): Optional<T> {
         return this.getComponentForProperty(
             this.store.getResourceProperties(subject, rdf.type),
             predicate,
@@ -560,7 +561,7 @@ export class LinkedRenderStore<T, API extends LinkedDataAPI = DataProcessor> imp
     public resourceComponent(
         subject: Node,
         topology?: NamedNode,
-    ): T | null | undefined {
+    ): Optional<T> {
         return this.getComponentForProperty(
             this.store.getResourceProperties(subject, rdf.type),
             RENDER_CLASS_NAME,
